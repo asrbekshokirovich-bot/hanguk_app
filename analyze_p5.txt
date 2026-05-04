@@ -1,0 +1,7 @@
+Analyzing hanguk_app...                                         
+
+   info - Unnecessary use of multiple underscores - lib\features\applications\presentation\widgets\application_card.dart:43:41 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\applications\presentation\widgets\application_card.dart:43:45 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\application_card.dart:122:28 - deprecated_member_use
+
+3 issues found. (ran in 11.1s)

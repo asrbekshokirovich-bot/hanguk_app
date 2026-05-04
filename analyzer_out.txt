@@ -1,0 +1,286 @@
+Analyzing hanguk_app...
+
+  error - test\updater_test.dart:23:37 - The getter 'versionString' isn't defined for the type 'AppVersionInfo'. Try importing the library that defines 'versionString', correcting the name to the name of an existing getter, or defining a getter or field named 'versionString'. - undefined_getter
+  error - test_bucket_limit.dart:7:85 - A value of type 'int' can't be assigned to a parameter of type 'String?' in a const constructor. Try using a subtype, or removing the keyword 'const'. - const_constructor_param_type_mismatch
+  error - test_bucket_limit.dart:7:100 - The argument type 'int' can't be assigned to the parameter type 'String?'.  - argument_type_not_assignable
+warning - check_schema.dart:7:11 - The value of the local variable 'res' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - db_schema.dart:7:11 - The value of the local variable 'msg' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - db_schema.dart:14:11 - The value of the local variable 'msg' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - db_schema.dart:21:11 - The value of the local variable 'msg' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib\features\applications\data\applications_repository.dart:6:8 - Unused import: '../../map/data/map_repository.dart'. Try removing the import directive. - unused_import
+warning - lib\features\applications\presentation\applications_tab.dart:8:8 - Unused import: '../../../../design_system/theme/app_colors.dart'. Try removing the import directive. - unused_import
+warning - lib\features\applications\presentation\widgets\university_room_modal.dart:3:8 - Unused import: 'package:flutter_riverpod/flutter_riverpod.dart'. Try removing the import directive. - unused_import
+warning - lib\features\applications\presentation\widgets\university_selection_view.dart:45:11 - The value of the local variable 'uniNames' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib\features\auth\presentation\login_screen.dart:101:16 - The declaration '_handlePhoneLogin' isn't referenced. Try removing the declaration of '_handlePhoneLogin'. - unused_element
+warning - lib\features\auth\presentation\login_screen.dart:148:16 - The declaration '_handleSignUp' isn't referenced. Try removing the declaration of '_handleSignUp'. - unused_element
+warning - lib\features\auth\presentation\login_screen.dart:449:7 - The declaration '_LoadingView' isn't referenced. Try removing the declaration of '_LoadingView'. - unused_element
+warning - lib\features\auth\presentation\login_screen.dart:483:10 - A value for optional parameter 'obscureText' isn't ever given. Try removing the unused parameter. - unused_element_parameter
+warning - lib\features\chat\presentation\widgets\chat_message_bubble.dart:4:8 - Unused import: '../../../../design_system/adaptive/hanguk_card.dart'. Try removing the import directive. - unused_import
+warning - lib\features\documents\presentation\widgets\document_slot.dart:4:8 - Unused import: '../../../../design_system/adaptive/hanguk_card.dart'. Try removing the import directive. - unused_import
+warning - lib\features\map\presentation\widgets\map_view\map_web.dart:3:8 - Unused import: 'dart:convert'. Try removing the import directive. - unused_import
+warning - lib\features\map\presentation\widgets\university_detail_sheet.dart:356:33 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
+warning - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:129:11 - The value of the local variable 'lastChar' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib\features\training\presentation\widgets\interview_analytics_view.dart:3:8 - Unused import: '../../../../design_system/theme/app_colors.dart'. Try removing the import directive. - unused_import
+warning - lib\features\training\presentation\widgets\study_plan_chat_fab.dart:4:8 - Unused import: '../../data/study_plan_repository.dart'. Try removing the import directive. - unused_import
+warning - lib\features\updater\presentation\update_dialog.dart:17:10 - The value of the field '_progress' isn't used. Try removing the field, or using it. - unused_field
+warning - setup_bucket.dart:1:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - test_check_v.dart:1:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - test_email_valid.dart:1:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - test_phone_auth.dart:1:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - test_rls.dart:1:8 - Unused import: 'dart:convert'. Try removing the import directive. - unused_import
+warning - test_rls.dart:2:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - test_rls.dart:26:13 - The value of the local variable 'apps' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - test_rls.dart:30:13 - The value of the local variable 'allAppsForMe' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - test_rls2.dart:25:15 - The stack trace variable 'st' isn't used and can be removed. Try removing the stack trace variable, or using it. - unused_catch_stack
+warning - test_schema.dart:1:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - test_updater2.dart:1:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+warning - test_updater_logic.dart:1:8 - Unused import: 'dart:io'. Try removing the import directive. - unused_import
+   info - auto_deploy.dart:4:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - auto_deploy.dart:6:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - auto_deploy.dart:19:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - auto_deploy.dart:23:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - auto_deploy.dart:36:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - auto_deploy.dart:40:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - check_db.dart:1:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - check_db.dart:11:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - check_db.dart:13:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - check_schema.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - check_schema.dart:9:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - check_schema.dart:11:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - check_schema.dart:16:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - check_schema.dart:18:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - check_schema.dart:23:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - check_schema.dart:25:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - db_schema.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - db_schema.dart:8:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - db_schema.dart:10:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - db_schema.dart:15:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - db_schema.dart:17:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - db_schema.dart:22:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - db_schema.dart:24:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - deploy_update.dart:5:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:16:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:17:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:25:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:32:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:34:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:38:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:40:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:42:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:49:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:51:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:55:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - deploy_update.dart:56:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - find_fk.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - find_fk.dart:14:25 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - find_fk.dart:15:19 - Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause. - empty_catches
+   info - find_fk.dart:19:25 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - find_fk.dart:20:19 - Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause. - empty_catches
+   info - find_fk.dart:23:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib\design_system\adaptive\hanguk_card.dart:29:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\design_system\theme\app_theme.dart:55:43 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\design_system\theme\app_theme.dart:89:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\data\applications_repository.dart:72:5 - Use 'rethrow' to rethrow a caught exception. Try replacing the 'throw' with a 'rethrow'. - use_rethrow_when_possible
+   info - lib\features\applications\data\applications_repository.dart:143:5 - Use 'rethrow' to rethrow a caught exception. Try replacing the 'throw' with a 'rethrow'. - use_rethrow_when_possible
+   info - lib\features\applications\presentation\widgets\application_card.dart:63:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\application_card.dart:85:48 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\application_card.dart:87:67 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\application_card.dart:138:38 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\process_tracker.dart:64:35 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\process_tracker.dart:98:43 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:1:8 - The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart'. Try removing the import directive. - unnecessary_import
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:75:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:105:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:124:27 - The local variable '_getEventsForDay' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:153:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:165:62 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:246:139 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:261:80 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:273:61 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:319:85 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:343:60 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:391:92 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:405:61 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_room_modal.dart:412:74 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_selection_view.dart:114:58 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_selection_view.dart:164:60 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\applications\presentation\widgets\university_selection_view.dart:213:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\auth\data\auth_repository.dart:50:31 - Use interpolation to compose strings and values. Try using string interpolation to build the composite string. - prefer_interpolation_to_compose_strings
+   info - lib\features\auth\data\auth_repository.dart:139:31 - Use interpolation to compose strings and values. Try using string interpolation to build the composite string. - prefer_interpolation_to_compose_strings
+   info - lib\features\auth\presentation\login_screen.dart:259:45 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\auth\presentation\login_screen.dart:433:27 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+   info - lib\features\auth\presentation\login_screen.dart:433:31 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+   info - lib\features\chat\presentation\chat_tab.dart:116:55 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\chat\presentation\chat_tab.dart:141:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\chat\presentation\widgets\chat_message_bubble.dart:44:46 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\chat\presentation\widgets\chat_message_bubble.dart:68:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\documents\presentation\documents_tab.dart:101:50 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\documents\presentation\documents_tab.dart:103:69 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\home\presentation\welcome_screen.dart:95:56 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\home\presentation\welcome_screen.dart:100:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\home\presentation\welcome_screen.dart:130:45 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:107:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:238:33 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:259:61 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:287:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:288:30 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:292:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:293:32 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:328:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:329:30 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:333:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\map_tab.dart:334:32 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\map_view\map_mobile.dart:22:9 - Parameter 'key' could be a super parameter. Trying converting 'key' to a super parameter. - use_super_parameters
+   info - lib\features\map\presentation\widgets\map_view\map_web.dart:1:1 - 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\map_view\map_web.dart:1:1 - Don't use web-only libraries outside Flutter web plugins. Try finding a different library for your needs. - avoid_web_libraries_in_flutter
+   info - lib\features\map\presentation\widgets\map_view\map_web.dart:23:9 - Parameter 'key' could be a super parameter. Trying converting 'key' to a super parameter. - use_super_parameters
+   info - lib\features\map\presentation\widgets\university_card.dart:72:29 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+   info - lib\features\map\presentation\widgets\university_card.dart:72:33 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+   info - lib\features\map\presentation\widgets\university_card.dart:84:38 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_card.dart:86:57 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_card.dart:99:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_card.dart:100:28 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_card.dart:104:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_card.dart:105:30 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_card.dart:123:38 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:34:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:90:70 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:93:72 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:213:62 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:241:29 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:241:33 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:253:38 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:255:57 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:290:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:291:38 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:295:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_detail_sheet.dart:296:40 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_map_view.dart:47:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_map_view.dart:50:48 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_roadview_screen.dart:63:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\map\presentation\widgets\university_roadview_screen.dart:83:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\data\study_plan_repository.dart:292:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib\features\training\data\study_plan_repository.dart:336:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib\features\training\presentation\study_plan_screen.dart:234:41 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\study_plan_screen.dart:386:29 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\study_plan_screen.dart:388:55 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\study_plan_screen.dart:481:24 - The local variable '_uniTemplates' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
+   info - lib\features\training\presentation\study_plan_screen.dart:536:24 - The local variable '_embassyTemplates' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
+   info - lib\features\training\presentation\study_plan_screen.dart:568:11 - The local variable '_templates' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
+   info - lib\features\training\presentation\study_plan_screen.dart:579:29 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\study_plan_screen.dart:581:55 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\study_plan_screen.dart:589:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:101:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:103:43 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:106:28 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:120:27 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:121:27 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:127:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:130:34 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:156:43 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:167:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\training_tab.dart:170:73 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:211:35 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:213:54 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\ai_highlighting_text_controller.dart:15:3 - Parameter 'text' could be a super parameter. Trying converting 'text' to a super parameter. - use_super_parameters
+   info - lib\features\training\presentation\widgets\interview_active_view.dart:32:23 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib\features\training\presentation\widgets\interview_active_view.dart:143:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_active_view.dart:149:58 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_active_view.dart:174:37 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_feedback_view.dart:36:38 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_setup_view.dart:64:35 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_setup_view.dart:118:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_setup_view.dart:131:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_setup_view.dart:133:61 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_setup_view.dart:150:19 - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_setup_view.dart:199:51 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\interview_setup_view.dart:199:83 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\live_metrics_bar.dart:23:29 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\study_plan_analysis_view.dart:40:49 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\study_plan_analysis_view.dart:42:68 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\study_plan_chat_fab.dart:34:57 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\training\presentation\widgets\study_plan_chat_fab.dart:37:33 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib\features\updater\presentation\update_dialog.dart:16:8 - The private field _isDownloading could be 'final'. Try making the field 'final'. - prefer_final_fields
+   info - lib\features\updater\presentation\update_dialog.dart:17:10 - The private field _progress could be 'final'. Try making the field 'final'. - prefer_final_fields
+   info - print_db.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - print_db.dart:8:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - print_db.dart:10:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - setup_bucket.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - setup_bucket.dart:7:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - setup_bucket.dart:9:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - setup_bucket.dart:12:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - setup_bucket.dart:15:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test\updater_test.dart:23:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_apps.dart:1:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_apps.dart:11:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_apps.dart:13:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_apps2.dart:3:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_apps2.dart:16:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_bucket_limit.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_bucket_limit.dart:8:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_bucket_limit.dart:10:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_buckets.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_buckets.dart:8:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_buckets.dart:10:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_check_v.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_check_v.dart:15:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_check_v.dart:17:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_curl.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_curl.dart:9:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_curl.dart:12:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_curl.dart:15:8 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_curl.dart:18:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_email_valid.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_email_valid.dart:11:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_email_valid.dart:16:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_email_valid.dart:18:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_identity.dart:3:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_identity.dart:25:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_identity.dart:27:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_list.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_list.dart:8:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_list.dart:10:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_list.dart:13:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_phone_auth.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_phone_auth.dart:11:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_phone_auth.dart:16:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_phone_auth.dart:18:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_profiles.dart:3:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_profiles.dart:16:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls.dart:3:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_rls.dart:14:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls.dart:27:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls.dart:31:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls.dart:33:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls.dart:36:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls2.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_rls2.dart:18:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls2.dart:18:13 - Use interpolation to compose strings and values. Try using string interpolation to build the composite string. - prefer_interpolation_to_compose_strings
+   info - test_rls2.dart:21:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls2.dart:21:13 - Use interpolation to compose strings and values. Try using string interpolation to build the composite string. - prefer_interpolation_to_compose_strings
+   info - test_rls2.dart:23:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls2.dart:23:13 - Use interpolation to compose strings and values. Try using string interpolation to build the composite string. - prefer_interpolation_to_compose_strings
+   info - test_rls2.dart:26:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_rls2.dart:26:11 - Use interpolation to compose strings and values. Try using string interpolation to build the composite string. - prefer_interpolation_to_compose_strings
+   info - test_schema.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_schema.dart:12:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_schema.dart:14:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_schema.dart:18:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_tables.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_tables.dart:8:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_tables.dart:9:14 - Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause. - empty_catches
+   info - test_update_db.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_update_db.dart:7:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_updater.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_updater.dart:6:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_updater.dart:12:3 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_updater2.dart:2:8 - The imported package 'supabase' isn't a dependency of the importing package. Try adding a dependency for 'supabase' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - test_updater2.dart:16:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_updater2.dart:18:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_updater_logic.dart:13:12 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_updater_logic.dart:14:12 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_updater_logic.dart:16:14 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - test_updater_logic.dart:20:15 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+
+282 issues found.

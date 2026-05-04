@@ -1,0 +1,7 @@
+Analyzing hanguk_app...                                         
+
+  error - Missing concrete implementations of '_$StudentApplication.toJson', 'getter _$StudentApplication.createdAt', 'getter _$StudentApplication.id', 'getter _$StudentApplication.program', and 3 more - lib\features\applications\domain\application.dart:7:7 - non_abstract_class_inherits_abstract_member
+  error - Missing concrete implementations of '_$University.toJson', 'getter _$University.id', 'getter _$University.isAdmitted', 'getter _$University.location', and 1 more - lib\features\map\domain\university.dart:7:7 - non_abstract_class_inherits_abstract_member
+warning - Unused import: 'package:flutter_riverpod/flutter_riverpod.dart' - test\widget_test.dart:3:8 - unused_import
+
+3 issues found. (ran in 13.6s)

@@ -1,0 +1,12 @@
+Analyzing test.dart...                                          
+
+warning - The value of the local variable 'map' isn't used - test.dart:3:12 - unused_local_variable
+  error - The method 'setCenter' isn't defined for the type 'KakaoMapController' - test.dart:5:7 - undefined_method
+  error - The method 'setLevel' isn't defined for the type 'KakaoMapController' - test.dart:6:7 - undefined_method
+  error - The method 'getLevel' isn't defined for the type 'KakaoMapController' - test.dart:7:7 - undefined_method
+  error - The named parameter 'onCameraIdle' isn't defined - test.dart:8:6 - undefined_named_parameter
+warning - The value of the local variable 'x' isn't used - test.dart:9:10 - unused_local_variable
+  error - The named parameter 'minLevel' isn't defined - test.dart:10:6 - undefined_named_parameter
+  error - The named parameter 'maxLevel' isn't defined - test.dart:10:19 - undefined_named_parameter
+  error - The named parameter 'onCameraChange' isn't defined - test.dart:10:33 - undefined_named_parameter
+

@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../design_system/theme/app_colors.dart';
+import '../../data/study_plan_repository.dart';
+
+class StudyPlanAnalysisView extends ConsumerWidget {
+  final String documentType;
+  const StudyPlanAnalysisView({super.key, required this.documentType});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(documentSessionProvider(documentType));
+
+    if (state.isLoading) {
+       return const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime));
+    }
+
+    final analysis = state.analyses.isNotEmpty ? state.analyses.first : null;
+
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Analysis & Feedback',
+            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          if (analysis == null) ...[
+             const Spacer(),
+             const Center(
+                child: Text('No analysis generated yet.', style: TextStyle(color: Colors.white54)),
+             ),
+             const Spacer(),
+          ] else ...[
+             Expanded(
+               child: Container(
+                 padding: const EdgeInsets.all(16),
+                 decoration: BoxDecoration(
+                   color: AppColors.royalBlue.withOpacity(0.05),
+                   borderRadius: BorderRadius.circular(16),
+                   border: Border.all(color: Colors.white10),
+                 ),
+                 child: SingleChildScrollView(
+                   child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                         if (_detectTrackMismatch(state.draftContent, state.currentSession?.selectedTrack))
+                           _buildTrackWarning(),
+                         if (analysis.aiResponse != null && analysis.aiResponse!.isNotEmpty)
+                           Text(
+                             analysis.aiResponse!,
+                             style: const TextStyle(color: Colors.white70, height: 1.5, fontSize: 14),
+                           )
+                         else
+                           const Text('AI successfully reviewed your draft.', style: TextStyle(color: Colors.white)),
+                      ]
+                   )
+                 ),
+               ),
+             ),
+          ],
+          const SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            onPressed: () => ref.read(studyPlanSessionProvider.notifier).updateSessionStep(documentType, 3),
+            child: const Text('Return to Drafting', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _detectTrackMismatch(String content, String? track) {
+    if (track == null || content.isEmpty) return false;
+    
+    final koreanReg = RegExp(r'[가-힣]');
+    final latinReg = RegExp(r'[a-zA-Z]');
+    
+    final hasKorean = koreanReg.hasMatch(content);
+    final hasLatin = latinReg.hasMatch(content);
+    
+    if (track == 'english' && hasKorean && !hasLatin) return true;
+    if (track == 'korean' && hasLatin && !hasKorean) return true;
+    
+    return false;
+  }
+
+  Widget _buildTrackWarning() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.redAccent.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 20),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Sening tracking boshqa edi! Draftini tanlangan tilda yozganingga ishonch hosil qil.',
+              style: TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

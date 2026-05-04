@@ -1,0 +1,849 @@
+Analyzing hanguk_app...                                         
+
+   info - The imported package 'supabase' isn't a dependency of the importing package - deploy_update.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - deploy_update.dart:5:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:16:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:17:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:25:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:32:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:34:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:37:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:39:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:41:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:48:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:50:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:54:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:55:3 - avoid_print
+  error - A value of type 'HomeScreen' can't be returned from the method 'build' because it has a return type of 'Widget' - lib\core\router\app_router.dart:44:62 - return_of_invalid_type
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\adaptive\hanguk_card.dart:29:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\theme\app_theme.dart:55:43 - deprecated_member_use
+  error - The argument type 'TabBarTheme' can't be assigned to the parameter type 'TabBarThemeData?'.  - lib\design_system\theme\app_theme.dart:78:20 - argument_type_not_assignable
+  error - The argument type 'CardTheme' can't be assigned to the parameter type 'CardThemeData?'.  - lib\design_system\theme\app_theme.dart:88:18 - argument_type_not_assignable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\theme\app_theme.dart:89:39 - deprecated_member_use
+  error - The returned type 'ApplicationCard' isn't returnable from a 'Widget?' function, as required by the closure's context - lib\features\applications\presentation\applications_tab.dart:45:26 - return_of_invalid_type_from_closure
+  error - Target of URI doesn't exist: '../../../design_system/adaptive/hanguk_card.dart' - lib\features\applications\presentation\widgets\application_card.dart:2:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../../design_system/theme/app_colors.dart' - lib\features\applications\presentation\widgets\application_card.dart:3:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\features\applications\presentation\widgets\application_card.dart:7:31 - extends_non_class
+  error - Undefined class 'VoidCallback' - lib\features\applications\presentation\widgets\application_card.dart:9:9 - undefined_class
+  error - No associated named super constructor parameter - lib\features\applications\presentation\widgets\application_card.dart:12:11 - super_formal_parameter_without_associated_named
+  error - Undefined class 'Widget' - lib\features\applications\presentation\widgets\application_card.dart:18:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\applications\presentation\widgets\application_card.dart:18:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\applications\presentation\widgets\application_card.dart:18:16 - undefined_class
+  error - The method 'HangukCard' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:21:12 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\applications\presentation\widgets\application_card.dart:22:21 - undefined_identifier
+  error - The method 'Column' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:23:14 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\applications\presentation\widgets\application_card.dart:24:29 - undefined_identifier
+  error - The method 'Row' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:27:13 - undefined_method
+  error - The method 'ClipRRect' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:30:19 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\applications\presentation\widgets\application_card.dart:31:35 - undefined_identifier
+  error - Undefined name 'Image' - lib\features\applications\presentation\widgets\application_card.dart:32:28 - undefined_identifier
+  error - Undefined name 'BoxFit' - lib\features\applications\presentation\widgets\application_card.dart:36:28 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:42:23 - creation_with_non_type
+  error - The method 'Expanded' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:43:17 - undefined_method
+  error - The method 'Column' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:44:26 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\applications\presentation\widgets\application_card.dart:45:41 - undefined_identifier
+  error - The method 'Text' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:47:23 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:49:38 - creation_with_non_type
+  error - Undefined name 'FontWeight' - lib\features\applications\presentation\widgets\application_card.dart:49:60 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\applications\presentation\widgets\application_card.dart:49:98 - undefined_identifier
+  error - The method 'Text' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:51:23 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:53:38 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\applications\presentation\widgets\application_card.dart:53:55 - undefined_identifier
+  error - The method 'Container' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:59:19 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\applications\presentation\widgets\application_card.dart:60:36 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:61:33 - undefined_method
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\application_card.dart:62:30 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\applications\presentation\widgets\application_card.dart:63:37 - undefined_identifier
+  error - The name 'Text' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:65:34 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:67:30 - undefined_method
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\application_card.dart:69:32 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\applications\presentation\widgets\application_card.dart:70:37 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:77:19 - creation_with_non_type
+  error - The name 'SizedBox' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:82:19 - creation_with_non_type
+  error - The name 'Divider' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:83:19 - creation_with_non_type
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\application_card.dart:83:34 - undefined_identifier
+  error - The method 'Row' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:86:13 - undefined_method
+  error - The method 'Expanded' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:88:17 - undefined_method
+  error - Undefined name 'OutlinedButton' - lib\features\applications\presentation\widgets\application_card.dart:89:26 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:91:33 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\applications\presentation\widgets\application_card.dart:91:38 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\application_card.dart:91:77 - undefined_identifier
+  error - The name 'Text' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:92:34 - creation_with_non_type
+  error - The name 'SizedBox' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:95:23 - creation_with_non_type
+  error - The method 'Expanded' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:96:17 - undefined_method
+  error - Undefined name 'OutlinedButton' - lib\features\applications\presentation\widgets\application_card.dart:97:26 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:99:33 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\applications\presentation\widgets\application_card.dart:99:38 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\application_card.dart:99:82 - undefined_identifier
+  error - The name 'Text' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:100:34 - creation_with_non_type
+  error - Expected to find ';' - lib\features\applications\presentation\widgets\application_card.dart:107:7 - expected_token
+warning - Dead code - lib\features\applications\presentation\widgets\application_card.dart:107:8 - dead_code
+  error - Expected an identifier - lib\features\applications\presentation\widgets\application_card.dart:107:8 - missing_identifier
+  error - Expected to find ';' - lib\features\applications\presentation\widgets\application_card.dart:107:8 - expected_token
+  error - Unexpected text ';' - lib\features\applications\presentation\widgets\application_card.dart:107:8 - unexpected_token
+  error - Expected an identifier - lib\features\applications\presentation\widgets\application_card.dart:108:5 - missing_identifier
+  error - Unexpected text ';' - lib\features\applications\presentation\widgets\application_card.dart:108:5 - unexpected_token
+   info - Unnecessary empty statement - lib\features\applications\presentation\widgets\application_card.dart:108:6 - empty_statements
+  error - Undefined class 'Widget' - lib\features\applications\presentation\widgets\application_card.dart:111:3 - undefined_class
+  error - The method 'Container' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:112:12 - undefined_method
+  error - The method 'BoxDecoration' isn't defined for the type 'ApplicationCard' - lib\features\applications\presentation\widgets\application_card.dart:115:19 - undefined_method
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\application_card.dart:116:16 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\applications\presentation\widgets\application_card.dart:117:23 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\applications\presentation\widgets\application_card.dart:119:20 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\applications\presentation\widgets\application_card.dart:119:25 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\application_card.dart:119:55 - undefined_identifier
+  error - Target of URI doesn't exist: '../../../design_system/theme/app_colors.dart' - lib\features\applications\presentation\widgets\university_room_modal.dart:4:8 - uri_does_not_exist
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:52:39 - deprecated_member_use
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\university_room_modal.dart:64:40 - undefined_identifier
+  error - Invalid constant value - lib\features\applications\presentation\widgets\university_room_modal.dart:68:55 - invalid_constant
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\university_room_modal.dart:68:55 - undefined_identifier
+  error - Invalid constant value - lib\features\applications\presentation\widgets\university_room_modal.dart:114:45 - invalid_constant
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\university_room_modal.dart:114:45 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:144:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:153:80 - deprecated_member_use
+  error - Invalid constant value - lib\features\applications\presentation\widgets\university_room_modal.dart:161:71 - invalid_constant
+  error - The getter 'white34' isn't defined for the type 'Colors' - lib\features\applications\presentation\widgets\university_room_modal.dart:161:78 - undefined_getter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:163:61 - deprecated_member_use
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\university_room_modal.dart:175:50 - undefined_identifier
+  error - Invalid constant value - lib\features\applications\presentation\widgets\university_room_modal.dart:179:79 - invalid_constant
+  error - Undefined name 'AppColors' - lib\features\applications\presentation\widgets\university_room_modal.dart:179:79 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:195:85 - deprecated_member_use
+  error - Invalid constant value - lib\features\applications\presentation\widgets\university_room_modal.dart:197:88 - invalid_constant
+  error - The getter 'white34' isn't defined for the type 'Colors' - lib\features\applications\presentation\widgets\university_room_modal.dart:197:95 - undefined_getter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:207:92 - deprecated_member_use
+  error - Invalid constant value - lib\features\applications\presentation\widgets\university_room_modal.dart:209:86 - invalid_constant
+  error - The getter 'white34' isn't defined for the type 'Colors' - lib\features\applications\presentation\widgets\university_room_modal.dart:209:93 - undefined_getter
+  error - Classes can only mix in mixins and classes - lib\features\auth\presentation\login_screen.dart:28:10 - mixin_of_non_class
+  error - Undefined class 'TabController' - lib\features\auth\presentation\login_screen.dart:29:14 - undefined_class
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:32:22 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:33:25 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:34:21 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:38:27 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:39:28 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:40:31 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:41:30 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:44:25 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:45:30 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:46:30 - undefined_method
+  error - The method 'TextEditingController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:47:32 - undefined_method
+  error - The method 'TabController' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:57:22 - undefined_method
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:224:3 - undefined_class
+  error - Undefined class 'BuildContext' - lib\features\auth\presentation\login_screen.dart:224:16 - undefined_class
+  error - Undefined name 'Theme' - lib\features\auth\presentation\login_screen.dart:226:20 - undefined_identifier
+  error - The returned type '_LoadingView' isn't returnable from a 'Widget' function, as required by the closure's context - lib\features\auth\presentation\login_screen.dart:230:24 - return_of_invalid_type_from_closure
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:231:20 - unnecessary_underscores
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:241:3 - undefined_class
+  error - Undefined class 'BuildContext' - lib\features\auth\presentation\login_screen.dart:242:5 - undefined_class
+  error - Undefined class 'ColorScheme' - lib\features\auth\presentation\login_screen.dart:244:14 - undefined_class
+  error - The method 'SafeArea' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:246:12 - undefined_method
+  error - The method 'SingleChildScrollView' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:247:14 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\auth\presentation\login_screen.dart:248:24 - undefined_identifier
+  error - The method 'Column' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:249:16 - undefined_method
+  error - The method 'Row' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:252:13 - undefined_method
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:255:23 - creation_with_non_type
+  error - The name 'Text' isn't a class - lib\features\auth\presentation\login_screen.dart:256:23 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:258:26 - undefined_method
+  error - Undefined name 'FontWeight' - lib\features\auth\presentation\login_screen.dart:260:33 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:267:19 - creation_with_non_type
+  error - Undefined name 'EdgeInsets' - lib\features\auth\presentation\login_screen.dart:271:30 - undefined_identifier
+  error - The method 'Column' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:272:22 - undefined_method
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:275:25 - creation_with_non_type
+  error - The name 'Text' isn't a class - lib\features\auth\presentation\login_screen.dart:276:25 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:278:28 - undefined_method
+  error - Undefined name 'FontWeight' - lib\features\auth\presentation\login_screen.dart:280:35 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:284:25 - creation_with_non_type
+  error - The method 'Text' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:285:19 - undefined_method
+  error - The method 'TextStyle' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:289:28 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:291:30 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:294:25 - creation_with_non_type
+  error - The method 'Container' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:298:21 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\auth\presentation\login_screen.dart:300:38 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:301:35 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:302:32 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:303:39 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\auth\presentation\login_screen.dart:304:33 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:304:51 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:306:30 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\auth\presentation\login_screen.dart:308:38 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:308:55 - undefined_identifier
+  error - Undefined name 'TextAlign' - lib\features\auth\presentation\login_screen.dart:309:36 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:312:27 - creation_with_non_type
+  error - The method 'Container' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:315:21 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\auth\presentation\login_screen.dart:317:38 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:318:35 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:319:32 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:320:39 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\auth\presentation\login_screen.dart:321:33 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:321:51 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:323:30 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\auth\presentation\login_screen.dart:325:38 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:325:55 - undefined_identifier
+  error - Undefined name 'TextAlign' - lib\features\auth\presentation\login_screen.dart:326:36 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:329:27 - creation_with_non_type
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:355:3 - undefined_class
+  error - Undefined class 'ColorScheme' - lib\features\auth\presentation\login_screen.dart:355:32 - undefined_class
+  error - The method 'Column' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:356:12 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\auth\presentation\login_screen.dart:357:27 - undefined_identifier
+  error - The method 'Container' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:359:9 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\auth\presentation\login_screen.dart:360:26 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:361:23 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:363:27 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\auth\presentation\login_screen.dart:364:21 - undefined_identifier
+  error - The name 'Text' isn't a class - lib\features\auth\presentation\login_screen.dart:366:24 - creation_with_non_type
+  error - Undefined name 'TextAlign' - lib\features\auth\presentation\login_screen.dart:368:24 - undefined_identifier
+  error - The method 'TextStyle' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:369:20 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:369:37 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:372:15 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:376:17 - undefined_identifier
+  error - Undefined name 'TextCapitalization' - lib\features\auth\presentation\login_screen.dart:377:31 - undefined_identifier
+  error - Undefined name 'FilteringTextInputFormatter' - lib\features\auth\presentation\login_screen.dart:379:13 - undefined_identifier
+  error - The method 'LengthLimitingTextInputFormatter' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:380:13 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\auth\presentation\login_screen.dart:382:24 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:386:20 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:389:15 - creation_with_non_type
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:395:15 - creation_with_non_type
+  error - The method 'TextButton' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:396:9 - undefined_method
+  error - The name 'Text' isn't a class - lib\features\auth\presentation\login_screen.dart:401:24 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:403:20 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:403:37 - undefined_identifier
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:410:3 - undefined_class
+  error - Undefined class 'ColorScheme' - lib\features\auth\presentation\login_screen.dart:410:33 - undefined_class
+  error - The method 'Column' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:411:12 - undefined_method
+  error - The method 'Container' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:414:9 - undefined_method
+  error - The method 'BoxDecoration' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:415:23 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:416:20 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:417:27 - undefined_identifier
+  error - The method 'TabBar' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:419:18 - undefined_method
+  error - The method 'BoxDecoration' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:421:24 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:423:29 - undefined_identifier
+  error - Undefined name 'TabBarIndicatorSize' - lib\features\auth\presentation\login_screen.dart:425:28 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:426:27 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:427:25 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:428:35 - undefined_identifier
+  error - The method 'Tab' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:430:15 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\auth\presentation\login_screen.dart:430:15 - non_constant_list_element
+  error - The method 'Row' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:431:24 - undefined_method
+  error - Undefined name 'MainAxisAlignment' - lib\features\auth\presentation\login_screen.dart:432:38 - undefined_identifier
+  error - The method 'Icon' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:434:21 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\auth\presentation\login_screen.dart:434:21 - non_constant_list_element
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:434:26 - undefined_identifier
+  error - The method 'SizedBox' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:435:21 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\auth\presentation\login_screen.dart:435:21 - non_constant_list_element
+  error - The method 'Text' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:436:21 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\auth\presentation\login_screen.dart:436:21 - non_constant_list_element
+  error - The method 'TextStyle' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:436:44 - undefined_method
+  error - Undefined name 'FontWeight' - lib\features\auth\presentation\login_screen.dart:436:66 - undefined_identifier
+  error - The method 'Tab' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:440:15 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\auth\presentation\login_screen.dart:440:15 - non_constant_list_element
+  error - The method 'Row' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:441:24 - undefined_method
+  error - Undefined name 'MainAxisAlignment' - lib\features\auth\presentation\login_screen.dart:442:38 - undefined_identifier
+  error - The method 'Icon' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:444:21 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\auth\presentation\login_screen.dart:444:21 - non_constant_list_element
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:444:26 - undefined_identifier
+  error - The method 'SizedBox' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:445:21 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\auth\presentation\login_screen.dart:445:21 - non_constant_list_element
+  error - The method 'Text' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:446:21 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\auth\presentation\login_screen.dart:446:21 - non_constant_list_element
+  error - The method 'TextStyle' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:446:44 - undefined_method
+  error - Undefined name 'FontWeight' - lib\features\auth\presentation\login_screen.dart:446:66 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:454:15 - creation_with_non_type
+  error - The method 'AnimatedSize' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:456:9 - undefined_method
+  error - The method 'SizedBox' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:458:18 - undefined_method
+  error - The method 'TabBarView' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:460:20 - undefined_method
+  error - The method 'SingleChildScrollView' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:464:17 - undefined_method
+  error - The name 'NeverScrollableScrollPhysics' isn't a class - lib\features\auth\presentation\login_screen.dart:465:34 - creation_with_non_type
+  error - The method 'Column' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:466:26 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\auth\presentation\login_screen.dart:467:41 - undefined_identifier
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:472:31 - undefined_identifier
+  error - Undefined name 'FilteringTextInputFormatter' - lib\features\auth\presentation\login_screen.dart:474:27 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:477:29 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:481:31 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:484:29 - creation_with_non_type
+  error - The method 'SingleChildScrollView' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:495:17 - undefined_method
+  error - The name 'NeverScrollableScrollPhysics' isn't a class - lib\features\auth\presentation\login_screen.dart:496:34 - creation_with_non_type
+  error - The method 'Column' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:497:26 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\auth\presentation\login_screen.dart:498:41 - undefined_identifier
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:503:31 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:505:29 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:509:31 - undefined_identifier
+  error - Undefined name 'FilteringTextInputFormatter' - lib\features\auth\presentation\login_screen.dart:511:27 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:514:29 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:518:31 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:521:29 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:525:31 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:528:29 - creation_with_non_type
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:545:3 - undefined_class
+  error - The method 'ClipRRect' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:546:12 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:547:21 - undefined_identifier
+  error - Undefined name 'Image' - lib\features\auth\presentation\login_screen.dart:548:14 - undefined_identifier
+  error - Undefined name 'BoxFit' - lib\features\auth\presentation\login_screen.dart:552:14 - undefined_identifier
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:553:27 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:553:31 - unnecessary_underscores
+  error - The method 'Container' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:553:39 - undefined_method
+  error - The method 'BoxDecoration' isn't defined for the type '_LoginScreenState' - lib\features\auth\presentation\login_screen.dart:556:23 - undefined_method
+  error - Undefined name 'Theme' - lib\features\auth\presentation\login_screen.dart:557:20 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:558:27 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\auth\presentation\login_screen.dart:560:24 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:560:29 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:560:50 - undefined_identifier
+  error - Classes can only extend other classes - lib\features\auth\presentation\login_screen.dart:569:28 - extends_non_class
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:573:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\auth\presentation\login_screen.dart:573:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\auth\presentation\login_screen.dart:573:16 - undefined_class
+  error - The method 'Center' isn't defined for the type '_LoadingView' - lib\features\auth\presentation\login_screen.dart:574:12 - undefined_method
+  error - The method 'Column' isn't defined for the type '_LoadingView' - lib\features\auth\presentation\login_screen.dart:575:14 - undefined_method
+  error - Undefined name 'MainAxisSize' - lib\features\auth\presentation\login_screen.dart:576:23 - undefined_identifier
+  error - The method 'CircularProgressIndicator' isn't defined for the type '_LoadingView' - lib\features\auth\presentation\login_screen.dart:578:11 - undefined_method
+  error - Undefined name 'Theme' - lib\features\auth\presentation\login_screen.dart:578:44 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:579:17 - creation_with_non_type
+  error - The name 'Text' isn't a class - lib\features\auth\presentation\login_screen.dart:580:17 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type '_LoadingView' - lib\features\auth\presentation\login_screen.dart:580:43 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:580:60 - undefined_identifier
+  error - Classes can only extend other classes - lib\features\auth\presentation\login_screen.dart:589:31 - extends_non_class
+  error - Undefined class 'TextEditingController' - lib\features\auth\presentation\login_screen.dart:590:9 - undefined_class
+  error - Undefined class 'TextEditingController' - lib\features\auth\presentation\login_screen.dart:591:9 - undefined_class
+  error - Undefined class 'TextEditingController' - lib\features\auth\presentation\login_screen.dart:592:9 - undefined_class
+  error - Undefined class 'TextEditingController' - lib\features\auth\presentation\login_screen.dart:593:9 - undefined_class
+  error - Undefined class 'VoidCallback' - lib\features\auth\presentation\login_screen.dart:595:9 - undefined_class
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:607:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\auth\presentation\login_screen.dart:607:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\auth\presentation\login_screen.dart:607:16 - undefined_class
+  error - The method 'Column' isn't defined for the type '_OwnerSetupForm' - lib\features\auth\presentation\login_screen.dart:608:12 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\auth\presentation\login_screen.dart:609:27 - undefined_identifier
+  error - The method 'Container' isn't defined for the type '_OwnerSetupForm' - lib\features\auth\presentation\login_screen.dart:611:9 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\auth\presentation\login_screen.dart:612:26 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_OwnerSetupForm' - lib\features\auth\presentation\login_screen.dart:613:23 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:614:20 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:615:27 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\auth\presentation\login_screen.dart:616:21 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:616:39 - undefined_identifier
+  error - The name 'Row' isn't a class - lib\features\auth\presentation\login_screen.dart:618:24 - creation_with_non_type
+  error - The method 'Icon' isn't defined for the type '_OwnerSetupForm' - lib\features\auth\presentation\login_screen.dart:620:15 - undefined_method
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:620:20 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:620:52 - undefined_identifier
+  error - The method 'SizedBox' isn't defined for the type '_OwnerSetupForm' - lib\features\auth\presentation\login_screen.dart:621:15 - undefined_method
+  error - The method 'Expanded' isn't defined for the type '_OwnerSetupForm' - lib\features\auth\presentation\login_screen.dart:622:15 - undefined_method
+  error - The method 'Text' isn't defined for the type '_OwnerSetupForm' - lib\features\auth\presentation\login_screen.dart:623:24 - undefined_method
+  error - The method 'TextStyle' isn't defined for the type '_OwnerSetupForm' - lib\features\auth\presentation\login_screen.dart:626:26 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:626:43 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:632:15 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:633:77 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:634:15 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:635:76 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:636:15 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:640:17 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:643:15 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\auth\presentation\login_screen.dart:647:17 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:650:15 - creation_with_non_type
+  error - Classes can only extend other classes - lib\features\auth\presentation\login_screen.dart:659:32 - extends_non_class
+  error - Undefined class 'TextEditingController' - lib\features\auth\presentation\login_screen.dart:660:9 - undefined_class
+  error - Undefined class 'IconData' - lib\features\auth\presentation\login_screen.dart:662:9 - undefined_class
+  error - Undefined class 'TextCapitalization' - lib\features\auth\presentation\login_screen.dart:664:9 - undefined_class
+  error - The name 'TextInputFormatter' isn't a type, so it can't be used as a type argument - lib\features\auth\presentation\login_screen.dart:665:14 - non_type_as_type_argument
+  error - Undefined class 'TextStyle' - lib\features\auth\presentation\login_screen.dart:666:9 - undefined_class
+  error - Undefined name 'TextCapitalization' - lib\features\auth\presentation\login_screen.dart:673:31 - undefined_identifier
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:679:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\auth\presentation\login_screen.dart:679:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\auth\presentation\login_screen.dart:679:16 - undefined_class
+  error - The method 'TextField' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:680:12 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\auth\presentation\login_screen.dart:685:29 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:685:46 - undefined_identifier
+  error - The method 'InputDecoration' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:686:19 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\auth\presentation\login_screen.dart:688:26 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:688:43 - undefined_identifier
+  error - The method 'Icon' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:689:21 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:689:39 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:691:20 - undefined_identifier
+  error - The method 'OutlineInputBorder' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:692:17 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:693:25 - undefined_identifier
+  error - The method 'BorderSide' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:694:23 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:694:41 - undefined_identifier
+  error - The method 'OutlineInputBorder' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:696:24 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:697:25 - undefined_identifier
+  error - The method 'BorderSide' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:698:23 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:698:41 - undefined_identifier
+  error - The method 'OutlineInputBorder' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:700:24 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:701:25 - undefined_identifier
+  error - The method 'BorderSide' isn't defined for the type '_HangukTextField' - lib\features\auth\presentation\login_screen.dart:702:23 - undefined_method
+  error - Undefined name 'Theme' - lib\features\auth\presentation\login_screen.dart:702:41 - undefined_identifier
+  error - Classes can only extend other classes - lib\features\auth\presentation\login_screen.dart:709:29 - extends_non_class
+  error - Undefined class 'VoidCallback' - lib\features\auth\presentation\login_screen.dart:712:9 - undefined_class
+  error - Undefined class 'Widget' - lib\features\auth\presentation\login_screen.dart:721:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\auth\presentation\login_screen.dart:721:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\auth\presentation\login_screen.dart:721:16 - undefined_class
+  error - The method 'SizedBox' isn't defined for the type '_HangukButton' - lib\features\auth\presentation\login_screen.dart:722:12 - undefined_method
+  error - The method 'ElevatedButton' isn't defined for the type '_HangukButton' - lib\features\auth\presentation\login_screen.dart:724:14 - undefined_method
+  error - Undefined name 'ElevatedButton' - lib\features\auth\presentation\login_screen.dart:726:16 - undefined_identifier
+  error - Undefined name 'Theme' - lib\features\auth\presentation\login_screen.dart:727:28 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:728:28 - undefined_identifier
+  error - The method 'RoundedRectangleBorder' isn't defined for the type '_HangukButton' - lib\features\auth\presentation\login_screen.dart:729:18 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\auth\presentation\login_screen.dart:729:55 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\auth\presentation\login_screen.dart:733:21 - creation_with_non_type
+  error - The method 'CircularProgressIndicator' isn't defined for the type '_HangukButton' - lib\features\auth\presentation\login_screen.dart:736:24 - undefined_method
+  error - Undefined name 'Colors' - lib\features\auth\presentation\login_screen.dart:738:26 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_HangukButton' - lib\features\auth\presentation\login_screen.dart:741:15 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\auth\presentation\login_screen.dart:741:40 - creation_with_non_type
+  error - Undefined name 'FontWeight' - lib\features\auth\presentation\login_screen.dart:741:62 - undefined_identifier
+  error - Classes can only extend other classes - lib\features\chat\presentation\chat_tab.dart:5:23 - extends_non_class
+  error - No associated named super constructor parameter - lib\features\chat\presentation\chat_tab.dart:6:24 - super_formal_parameter_without_associated_named
+  error - Undefined class 'ConsumerState' - lib\features\chat\presentation\chat_tab.dart:9:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\chat\presentation\chat_tab.dart:9:26 - override_on_non_overriding_member
+  error - Classes can only extend other classes - lib\features\chat\presentation\chat_tab.dart:12:29 - extends_non_class
+  error - Undefined class 'TextEditingController' - lib\features\chat\presentation\chat_tab.dart:13:9 - undefined_class
+  error - The method 'TextEditingController' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:13:49 - undefined_method
+  error - Undefined class 'ScrollController' - lib\features\chat\presentation\chat_tab.dart:14:9 - undefined_class
+  error - The method 'ScrollController' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:14:46 - undefined_method
+  error - Undefined name 'Curves' - lib\features\chat\presentation\chat_tab.dart:21:16 - undefined_identifier
+  error - Undefined name 'FocusScope' - lib\features\chat\presentation\chat_tab.dart:31:5 - undefined_identifier
+  error - Undefined name 'context' - lib\features\chat\presentation\chat_tab.dart:31:19 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\chat\presentation\chat_tab.dart:33:5 - undefined_identifier
+warning - The method doesn't override an inherited method - lib\features\chat\presentation\chat_tab.dart:37:8 - override_on_non_overriding_member
+  error - The method 'dispose' isn't defined in a superclass of '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:40:11 - undefined_super_member
+  error - Undefined class 'Widget' - lib\features\chat\presentation\chat_tab.dart:44:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\chat\presentation\chat_tab.dart:44:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\chat\presentation\chat_tab.dart:44:16 - undefined_class
+  error - Undefined name 'ref' - lib\features\chat\presentation\chat_tab.dart:45:23 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\chat\presentation\chat_tab.dart:47:5 - undefined_identifier
+  error - The method 'Scaffold' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:53:12 - undefined_method
+  error - Undefined name 'Colors' - lib\features\chat\presentation\chat_tab.dart:54:24 - undefined_identifier
+  error - The method 'AppBar' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:55:15 - undefined_method
+  error - The name 'Text' isn't a class - lib\features\chat\presentation\chat_tab.dart:56:22 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\chat\presentation\chat_tab.dart:57:26 - undefined_identifier
+  error - The method 'IconButton' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:59:11 - undefined_method
+  error - The name 'Icon' isn't a class - lib\features\chat\presentation\chat_tab.dart:60:25 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\chat\presentation\chat_tab.dart:60:30 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\chat\presentation\chat_tab.dart:62:15 - undefined_identifier
+  error - The method 'Column' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:67:13 - undefined_method
+  error - The method 'Expanded' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:69:11 - undefined_method
+  error - Undefined name 'ListView' - lib\features\chat\presentation\chat_tab.dart:70:20 - undefined_identifier
+  error - Undefined name 'EdgeInsets' - lib\features\chat\presentation\chat_tab.dart:72:30 - undefined_identifier
+  error - The name 'Padding' isn't a class - lib\features\chat\presentation\chat_tab.dart:76:32 - creation_with_non_type
+  error - Undefined name 'EdgeInsets' - lib\features\chat\presentation\chat_tab.dart:77:30 - undefined_identifier
+  error - The method 'Row' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:78:28 - undefined_method
+  error - Undefined name 'MainAxisAlignment' - lib\features\chat\presentation\chat_tab.dart:79:42 - undefined_identifier
+  error - The method 'SizedBox' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:81:25 - undefined_method
+  error - The method 'SizedBox' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:82:25 - undefined_method
+  error - The method 'CircularProgressIndicator' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:85:34 - undefined_method
+  error - The method 'Container' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:97:13 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\chat\presentation\chat_tab.dart:98:30 - undefined_identifier
+  error - Undefined name 'Theme' - lib\features\chat\presentation\chat_tab.dart:99:22 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:101:22 - undefined_method
+  error - The method 'TextStyle' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:103:24 - undefined_method
+  error - Undefined name 'Theme' - lib\features\chat\presentation\chat_tab.dart:103:41 - undefined_identifier
+  error - Undefined name 'TextAlign' - lib\features\chat\presentation\chat_tab.dart:104:28 - undefined_identifier
+  error - The method 'SafeArea' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:108:11 - undefined_method
+  error - The method 'Container' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:109:20 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\chat\presentation\chat_tab.dart:110:30 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:111:27 - undefined_method
+  error - The name 'Color' isn't a class - lib\features\chat\presentation\chat_tab.dart:112:30 - creation_with_non_type
+  error - The method 'Border' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:113:25 - undefined_method
+  error - The method 'BorderSide' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:114:24 - undefined_method
+  error - Undefined name 'Colors' - lib\features\chat\presentation\chat_tab.dart:114:42 - undefined_identifier
+  error - The method 'Row' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:117:22 - undefined_method
+  error - The method 'Expanded' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:119:19 - undefined_method
+  error - The method 'TextField' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:120:28 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\chat\presentation\chat_tab.dart:122:36 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\chat\presentation\chat_tab.dart:122:53 - undefined_identifier
+  error - The method 'InputDecoration' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:123:35 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\chat\presentation\chat_tab.dart:125:42 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\chat\presentation\chat_tab.dart:125:59 - undefined_identifier
+  error - The method 'OutlineInputBorder' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:126:33 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\chat\presentation\chat_tab.dart:127:41 - undefined_identifier
+  error - Undefined name 'BorderSide' - lib\features\chat\presentation\chat_tab.dart:128:39 - undefined_identifier
+  error - The method 'OutlineInputBorder' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:130:40 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\chat\presentation\chat_tab.dart:131:41 - undefined_identifier
+  error - Undefined name 'BorderSide' - lib\features\chat\presentation\chat_tab.dart:132:39 - undefined_identifier
+  error - The method 'OutlineInputBorder' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:134:40 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\chat\presentation\chat_tab.dart:135:41 - undefined_identifier
+  error - Undefined name 'BorderSide' - lib\features\chat\presentation\chat_tab.dart:136:39 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\chat\presentation\chat_tab.dart:139:36 - undefined_identifier
+  error - Undefined name 'EdgeInsets' - lib\features\chat\presentation\chat_tab.dart:140:47 - undefined_identifier
+  error - Undefined name 'TextInputAction' - lib\features\chat\presentation\chat_tab.dart:142:40 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\chat\presentation\chat_tab.dart:146:25 - creation_with_non_type
+  error - The method 'CircleAvatar' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:147:19 - undefined_method
+  error - The method 'IconButton' isn't defined for the type '_ChatTabState' - lib\features\chat\presentation\chat_tab.dart:150:28 - undefined_method
+  error - The name 'Icon' isn't a class - lib\features\chat\presentation\chat_tab.dart:151:35 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\chat\presentation\chat_tab.dart:151:40 - undefined_identifier
+  error - Target of URI doesn't exist: '../../../design_system/theme/app_colors.dart' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:2:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../../design_system/adaptive/hanguk_card.dart' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:3:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\features\chat\presentation\widgets\chat_message_bubble.dart:5:33 - extends_non_class
+  error - No associated named super constructor parameter - lib\features\chat\presentation\widgets\chat_message_bubble.dart:8:34 - super_formal_parameter_without_associated_named
+  error - Undefined class 'Widget' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:11:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\chat\presentation\widgets\chat_message_bubble.dart:11:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:11:16 - undefined_class
+  error - The method 'Padding' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:14:12 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:15:22 - undefined_identifier
+  error - The method 'Row' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:16:14 - undefined_method
+  error - Undefined name 'MainAxisAlignment' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:17:37 - undefined_identifier
+  error - Undefined name 'MainAxisAlignment' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:17:61 - undefined_identifier
+  error - Undefined name 'CrossAxisAlignment' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:18:29 - undefined_identifier
+  error - The method 'Container' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:21:13 - undefined_method
+  error - The name 'BoxDecoration' isn't a class - lib\features\chat\presentation\widgets\chat_message_bubble.dart:24:33 - creation_with_non_type
+  error - Undefined name 'AppColors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:25:24 - undefined_identifier
+  error - Undefined name 'BoxShape' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:26:24 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\chat\presentation\widgets\chat_message_bubble.dart:28:28 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:29:17 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:31:24 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\chat\presentation\widgets\chat_message_bubble.dart:34:19 - creation_with_non_type
+  error - The method 'Flexible' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:37:11 - undefined_method
+  error - The method 'Container' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:38:20 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:39:30 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:40:27 - undefined_method
+  error - Undefined name 'AppColors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:42:23 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:43:23 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:44:31 - undefined_identifier
+  error - Undefined name 'Radius' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:45:47 - undefined_identifier
+  error - Undefined name 'Radius' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:45:74 - undefined_identifier
+  error - Undefined name 'Radius' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:46:46 - undefined_identifier
+  error - Undefined name 'Radius' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:46:74 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:48:41 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:48:59 - undefined_identifier
+  error - The method 'Text' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:50:22 - undefined_method
+  error - The method 'TextStyle' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:52:24 - undefined_method
+  error - Undefined name 'AppColors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:54:35 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:54:57 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\chat\presentation\widgets\chat_message_bubble.dart:62:19 - creation_with_non_type
+  error - The method 'Container' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:63:13 - undefined_method
+  error - The method 'BoxDecoration' isn't defined for the type 'ChatMessageBubble' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:66:27 - undefined_method
+  error - Undefined name 'Colors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:67:24 - undefined_identifier
+  error - Undefined name 'BoxShape' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:68:24 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\chat\presentation\widgets\chat_message_bubble.dart:70:28 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:71:17 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:73:24 - undefined_identifier
+  error - Classes can only extend other classes - lib\features\documents\presentation\documents_tab.dart:7:28 - extends_non_class
+  error - No associated named super constructor parameter - lib\features\documents\presentation\documents_tab.dart:8:29 - super_formal_parameter_without_associated_named
+  error - Undefined class 'ConsumerState' - lib\features\documents\presentation\documents_tab.dart:11:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\documents\presentation\documents_tab.dart:11:31 - override_on_non_overriding_member
+  error - Classes can only extend other classes - lib\features\documents\presentation\documents_tab.dart:14:34 - extends_non_class
+  error - Undefined class 'FilePickerResult' - lib\features\documents\presentation\documents_tab.dart:19:7 - undefined_class
+  error - Undefined name 'FilePicker' - lib\features\documents\presentation\documents_tab.dart:19:40 - undefined_identifier
+  error - Undefined name 'FileType' - lib\features\documents\presentation\documents_tab.dart:20:15 - undefined_identifier
+  error - The method 'setState' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:25:9 - undefined_method
+  error - Undefined class 'File' - lib\features\documents\presentation\documents_tab.dart:27:9 - undefined_class
+  error - The method 'File' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:27:21 - undefined_method
+  error - Undefined name 'ref' - lib\features\documents\presentation\documents_tab.dart:28:22 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\documents\presentation\documents_tab.dart:33:9 - undefined_identifier
+  error - Undefined name 'mounted' - lib\features\documents\presentation\documents_tab.dart:36:11 - undefined_identifier
+  error - Undefined name 'ScaffoldMessenger' - lib\features\documents\presentation\documents_tab.dart:37:9 - undefined_identifier
+  error - Undefined name 'context' - lib\features\documents\presentation\documents_tab.dart:37:30 - undefined_identifier
+  error - The method 'SnackBar' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:38:11 - undefined_method
+  error - The method 'Text' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:38:29 - undefined_method
+  error - Undefined name 'mounted' - lib\features\documents\presentation\documents_tab.dart:42:11 - undefined_identifier
+  error - The method 'setState' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:43:9 - undefined_method
+  error - Undefined name 'Supabase' - lib\features\documents\presentation\documents_tab.dart:50:31 - undefined_identifier
+  error - The method 'canLaunchUrl' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:55:17 - undefined_method
+  error - The method 'launchUrl' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:56:15 - undefined_method
+  error - Undefined name 'LaunchMode' - lib\features\documents\presentation\documents_tab.dart:56:36 - undefined_identifier
+  error - Undefined name 'mounted' - lib\features\documents\presentation\documents_tab.dart:58:13 - undefined_identifier
+  error - Undefined name 'ScaffoldMessenger' - lib\features\documents\presentation\documents_tab.dart:59:11 - undefined_identifier
+  error - Undefined name 'context' - lib\features\documents\presentation\documents_tab.dart:59:32 - undefined_identifier
+  error - The name 'SnackBar' isn't a class - lib\features\documents\presentation\documents_tab.dart:60:19 - creation_with_non_type
+  error - The method 'Text' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:60:37 - undefined_method
+  error - Undefined name 'mounted' - lib\features\documents\presentation\documents_tab.dart:65:11 - undefined_identifier
+  error - Undefined name 'ScaffoldMessenger' - lib\features\documents\presentation\documents_tab.dart:66:9 - undefined_identifier
+  error - Undefined name 'context' - lib\features\documents\presentation\documents_tab.dart:66:30 - undefined_identifier
+  error - The method 'SnackBar' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:67:11 - undefined_method
+  error - The method 'Text' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:67:29 - undefined_method
+  error - Undefined class 'Widget' - lib\features\documents\presentation\documents_tab.dart:74:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\documents\presentation\documents_tab.dart:74:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\documents\presentation\documents_tab.dart:74:16 - undefined_class
+  error - Undefined name 'ref' - lib\features\documents\presentation\documents_tab.dart:75:23 - undefined_identifier
+  error - The method 'CustomScrollView' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:77:12 - undefined_method
+  error - The name 'SliverAppBar' isn't a class - lib\features\documents\presentation\documents_tab.dart:79:15 - creation_with_non_type
+  error - The method 'Text' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:80:18 - undefined_method
+  error - Undefined name 'Colors' - lib\features\documents\presentation\documents_tab.dart:81:28 - undefined_identifier
+  error - The method 'SliverToBoxAdapter' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:86:9 - undefined_method
+  error - The method 'Padding' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:87:18 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\documents\presentation\documents_tab.dart:88:28 - undefined_identifier
+  error - The method 'Column' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:89:20 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\documents\presentation\documents_tab.dart:90:35 - undefined_identifier
+  error - The method 'Container' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:92:17 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\documents\presentation\documents_tab.dart:93:34 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:94:31 - undefined_method
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\documents_tab.dart:95:50 - deprecated_member_use
+  error - Undefined name 'BorderRadius' - lib\features\documents\presentation\documents_tab.dart:96:35 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\documents\presentation\documents_tab.dart:97:29 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\documents_tab.dart:97:69 - deprecated_member_use
+  error - The name 'Row' isn't a class - lib\features\documents\presentation\documents_tab.dart:99:32 - creation_with_non_type
+  error - The method 'Icon' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:101:23 - undefined_method
+  error - Undefined name 'Icons' - lib\features\documents\presentation\documents_tab.dart:101:28 - undefined_identifier
+  error - The method 'SizedBox' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:102:23 - undefined_method
+  error - The method 'Expanded' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:103:23 - undefined_method
+  error - The method 'Text' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:104:32 - undefined_method
+  error - The method 'TextStyle' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:106:34 - undefined_method
+  error - Undefined name 'Colors' - lib\features\documents\presentation\documents_tab.dart:106:65 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\documents\presentation\documents_tab.dart:112:23 - creation_with_non_type
+  error - The name 'Text' isn't a class - lib\features\documents\presentation\documents_tab.dart:113:23 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:115:26 - undefined_method
+  error - Undefined name 'FontWeight' - lib\features\documents\presentation\documents_tab.dart:115:62 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\documents\presentation\documents_tab.dart:115:86 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\documents\presentation\documents_tab.dart:117:23 - creation_with_non_type
+  error - The method 'SliverPadding' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:125:20 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\documents\presentation\documents_tab.dart:126:30 - undefined_identifier
+  error - The method 'SliverList' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:127:23 - undefined_method
+  error - The method 'SliverChildBuilderDelegate' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:128:27 - undefined_method
+  error - The method 'setState' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:152:28 - undefined_method
+  error - Undefined name 'ref' - lib\features\documents\presentation\documents_tab.dart:153:34 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\documents\presentation\documents_tab.dart:154:28 - undefined_identifier
+  error - The method 'setState' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:155:28 - undefined_method
+  error - The name 'SliverFillRemaining' isn't a class - lib\features\documents\presentation\documents_tab.dart:165:32 - creation_with_non_type
+  error - The method 'Center' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:166:20 - undefined_method
+  error - Undefined name 'CircularProgressIndicator' - lib\features\documents\presentation\documents_tab.dart:166:34 - undefined_identifier
+  error - The method 'SliverFillRemaining' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:168:34 - undefined_method
+  error - The method 'Center' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:169:20 - undefined_method
+  error - The method 'Text' isn't defined for the type '_DocumentsTabState' - lib\features\documents\presentation\documents_tab.dart:169:34 - undefined_method
+  error - The name 'SliverPadding' isn't a class - lib\features\documents\presentation\documents_tab.dart:173:15 - creation_with_non_type
+  error - Undefined name 'EdgeInsets' - lib\features\documents\presentation\documents_tab.dart:173:38 - undefined_identifier
+  error - Target of URI doesn't exist: '../../../design_system/adaptive/hanguk_card.dart' - lib\features\documents\presentation\widgets\document_slot.dart:3:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../../design_system/theme/app_colors.dart' - lib\features\documents\presentation\widgets\document_slot.dart:4:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\features\documents\presentation\widgets\document_slot.dart:6:28 - extends_non_class
+  error - Undefined class 'VoidCallback' - lib\features\documents\presentation\widgets\document_slot.dart:11:9 - undefined_class
+  error - Undefined class 'VoidCallback' - lib\features\documents\presentation\widgets\document_slot.dart:12:9 - undefined_class
+  error - Undefined class 'VoidCallback' - lib\features\documents\presentation\widgets\document_slot.dart:13:9 - undefined_class
+  error - No associated named super constructor parameter - lib\features\documents\presentation\widgets\document_slot.dart:16:11 - super_formal_parameter_without_associated_named
+  error - Undefined class 'Widget' - lib\features\documents\presentation\widgets\document_slot.dart:27:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\documents\presentation\widgets\document_slot.dart:27:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\documents\presentation\widgets\document_slot.dart:27:16 - undefined_class
+  error - Undefined class 'Color' - lib\features\documents\presentation\widgets\document_slot.dart:31:11 - undefined_class
+  error - Undefined name 'Colors' - lib\features\documents\presentation\widgets\document_slot.dart:32:11 - undefined_identifier
+  error - Undefined name 'Theme' - lib\features\documents\presentation\widgets\document_slot.dart:34:15 - undefined_identifier
+  error - Undefined name 'Theme' - lib\features\documents\presentation\widgets\document_slot.dart:35:15 - undefined_identifier
+  error - Undefined class 'Color' - lib\features\documents\presentation\widgets\document_slot.dart:37:11 - undefined_class
+  error - Undefined name 'Colors' - lib\features\documents\presentation\widgets\document_slot.dart:38:11 - undefined_identifier
+  error - Undefined name 'Theme' - lib\features\documents\presentation\widgets\document_slot.dart:40:15 - undefined_identifier
+  error - Undefined name 'Theme' - lib\features\documents\presentation\widgets\document_slot.dart:41:15 - undefined_identifier
+  error - The method 'Container' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:43:12 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\documents\presentation\widgets\document_slot.dart:44:21 - undefined_identifier
+  error - Undefined name 'EdgeInsets' - lib\features\documents\presentation\widgets\document_slot.dart:45:22 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:46:19 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\documents\presentation\widgets\document_slot.dart:48:23 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\documents\presentation\widgets\document_slot.dart:49:17 - undefined_identifier
+  error - The method 'Row' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:51:14 - undefined_method
+  error - Undefined name 'width' - lib\features\documents\presentation\widgets\document_slot.dart:54:7 - undefined_identifier
+  error - Expected to find ')' - lib\features\documents\presentation\widgets\document_slot.dart:54:12 - expected_token
+  error - Expected to find ']' - lib\features\documents\presentation\widgets\document_slot.dart:54:12 - expected_token
+  error - The name 'SizedBox' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:73:17 - creation_with_non_type
+  error - The method 'Expanded' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:76:11 - undefined_method
+  error - The method 'Column' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:77:20 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\documents\presentation\widgets\document_slot.dart:78:35 - undefined_identifier
+  error - The method 'Text' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:80:19 - undefined_method
+  error - The method 'TextStyle' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:82:28 - undefined_method
+  error - Undefined name 'FontWeight' - lib\features\documents\presentation\widgets\document_slot.dart:84:35 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\documents\presentation\widgets\document_slot.dart:85:43 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\documents\presentation\widgets\document_slot.dart:85:58 - undefined_identifier
+  error - The method 'Text' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:89:19 - undefined_method
+  error - The method 'TextStyle' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:91:28 - undefined_method
+  error - Undefined name 'Theme' - lib\features\documents\presentation\widgets\document_slot.dart:93:30 - undefined_identifier
+  error - The name 'Text' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:97:25 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:99:28 - undefined_method
+  error - Undefined name 'Colors' - lib\features\documents\presentation\widgets\document_slot.dart:99:59 - undefined_identifier
+  error - The method 'Row' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:106:11 - undefined_method
+  error - Undefined name 'MainAxisSize' - lib\features\documents\presentation\widgets\document_slot.dart:107:27 - undefined_identifier
+  error - The method 'IconButton' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:110:17 - undefined_method
+  error - The name 'Icon' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:111:31 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\documents\presentation\widgets\document_slot.dart:111:36 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\features\documents\presentation\widgets\document_slot.dart:112:26 - undefined_identifier
+  error - The method 'IconButton' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:116:19 - undefined_method
+  error - The name 'Icon' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:117:33 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\documents\presentation\widgets\document_slot.dart:117:38 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\documents\presentation\widgets\document_slot.dart:118:28 - undefined_identifier
+  error - Undefined name 'ElevatedButton' - lib\features\documents\presentation\widgets\document_slot.dart:122:17 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:125:31 - creation_with_non_type
+  error - The method 'CircularProgressIndicator' isn't defined for the type 'DocumentSlot' - lib\features\documents\presentation\widgets\document_slot.dart:128:34 - undefined_method
+  error - Undefined name 'AppColors' - lib\features\documents\presentation\widgets\document_slot.dart:128:83 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:129:31 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\documents\presentation\widgets\document_slot.dart:129:36 - undefined_identifier
+  error - The name 'Text' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:130:32 - creation_with_non_type
+  error - Undefined name 'ElevatedButton' - lib\features\documents\presentation\widgets\document_slot.dart:131:26 - undefined_identifier
+  error - Undefined name 'EdgeInsets' - lib\features\documents\presentation\widgets\document_slot.dart:132:36 - undefined_identifier
+  error - The name 'TextStyle' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:133:38 - creation_with_non_type
+  error - The name 'Size' isn't a class - lib\features\documents\presentation\widgets\document_slot.dart:134:40 - creation_with_non_type
+  error - Expected an identifier - lib\features\documents\presentation\widgets\document_slot.dart:139:9 - missing_identifier
+  error - Expected to find ')' - lib\features\documents\presentation\widgets\document_slot.dart:139:9 - expected_token
+  error - Expected to find ';' - lib\features\documents\presentation\widgets\document_slot.dart:140:7 - expected_token
+warning - Dead code - lib\features\documents\presentation\widgets\document_slot.dart:140:8 - dead_code
+  error - Expected an identifier - lib\features\documents\presentation\widgets\document_slot.dart:140:8 - missing_identifier
+  error - Expected to find ';' - lib\features\documents\presentation\widgets\document_slot.dart:140:8 - expected_token
+  error - Unexpected text ';' - lib\features\documents\presentation\widgets\document_slot.dart:140:8 - unexpected_token
+  error - Expected an identifier - lib\features\documents\presentation\widgets\document_slot.dart:141:5 - missing_identifier
+  error - Unexpected text ';' - lib\features\documents\presentation\widgets\document_slot.dart:141:5 - unexpected_token
+   info - Unnecessary empty statement - lib\features\documents\presentation\widgets\document_slot.dart:141:6 - empty_statements
+  error - Classes can only extend other classes - lib\features\home\presentation\home_screen.dart:7:26 - extends_non_class
+  error - No associated named super constructor parameter - lib\features\home\presentation\home_screen.dart:8:27 - super_formal_parameter_without_associated_named
+  error - Undefined class 'ConsumerState' - lib\features\home\presentation\home_screen.dart:11:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\home\presentation\home_screen.dart:11:29 - override_on_non_overriding_member
+  error - Classes can only extend other classes - lib\features\home\presentation\home_screen.dart:14:32 - extends_non_class
+  error - The name 'Widget' isn't a type, so it can't be used as a type argument - lib\features\home\presentation\home_screen.dart:17:14 - non_type_as_type_argument
+  error - Undefined class 'Widget' - lib\features\home\presentation\home_screen.dart:25:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\home\presentation\home_screen.dart:25:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\home\presentation\home_screen.dart:25:16 - undefined_class
+  error - The method 'IndexedStack' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:27:13 - undefined_method
+  error - The method 'BottomNavigationBar' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:31:28 - undefined_method
+  error - The method 'setState' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:34:11 - undefined_method
+  error - The method 'BottomNavigationBarItem' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:39:11 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\home\presentation\home_screen.dart:39:11 - non_constant_list_element
+  error - The method 'Icon' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:39:56 - undefined_method
+  error - Undefined name 'Icons' - lib\features\home\presentation\home_screen.dart:39:61 - undefined_identifier
+  error - The method 'BottomNavigationBarItem' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:40:11 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\home\presentation\home_screen.dart:40:11 - non_constant_list_element
+  error - The method 'Icon' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:40:55 - undefined_method
+  error - Undefined name 'Icons' - lib\features\home\presentation\home_screen.dart:40:60 - undefined_identifier
+  error - The method 'BottomNavigationBarItem' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:41:11 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\home\presentation\home_screen.dart:41:11 - non_constant_list_element
+  error - The method 'Icon' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:41:56 - undefined_method
+  error - Undefined name 'Icons' - lib\features\home\presentation\home_screen.dart:41:61 - undefined_identifier
+  error - The method 'BottomNavigationBarItem' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:42:11 - undefined_method
+  error - The values in a const list literal must be constants - lib\features\home\presentation\home_screen.dart:42:11 - non_constant_list_element
+  error - The method 'Icon' isn't defined for the type '_HomeScreenState' - lib\features\home\presentation\home_screen.dart:42:59 - undefined_method
+  error - Undefined name 'Icons' - lib\features\home\presentation\home_screen.dart:42:64 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:74:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:79:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:109:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:107:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:238:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:259:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:287:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:288:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:292:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:293:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:328:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:329:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:333:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:334:32 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_card.dart:72:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_card.dart:72:33 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:84:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:86:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:99:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:100:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:104:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:105:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:123:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:33:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:89:70 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:92:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:182:62 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_detail_sheet.dart:210:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_detail_sheet.dart:210:33 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:222:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:224:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:259:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:260:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:264:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:265:40 - deprecated_member_use
+warning - The '!' will have no effect because the receiver can't be null - lib\features\map\presentation\widgets\university_detail_sheet.dart:325:33 - unnecessary_non_null_assertion
+warning - The value of the field '_mapController' isn't used - lib\features\map\presentation\widgets\university_map_view.dart:17:23 - unused_field
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_map_view.dart:93:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_map_view.dart:96:48 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\updater\data\updater_repository.dart:45:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\updater\data\updater_repository.dart:80:5 - avoid_print
+  error - Classes can only extend other classes - lib\features\updater\presentation\update_wrapper.dart:7:29 - extends_non_class
+  error - Undefined class 'Widget' - lib\features\updater\presentation\update_wrapper.dart:8:9 - undefined_class
+  error - No associated named super constructor parameter - lib\features\updater\presentation\update_wrapper.dart:9:30 - super_formal_parameter_without_associated_named
+  error - Undefined class 'Widget' - lib\features\updater\presentation\update_wrapper.dart:12:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\updater\presentation\update_wrapper.dart:12:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\updater\presentation\update_wrapper.dart:12:16 - undefined_class
+  error - Undefined class 'WidgetRef' - lib\features\updater\presentation\update_wrapper.dart:12:38 - undefined_class
+   info - Unnecessary use of multiple underscores - lib\features\updater\presentation\update_wrapper.dart:25:18 - unnecessary_underscores
+  error - Classes can only extend other classes - lib\features\updater\presentation\update_wrapper.dart:30:29 - extends_non_class
+  error - Undefined class 'Widget' - lib\features\updater\presentation\update_wrapper.dart:32:9 - undefined_class
+  error - Undefined class 'State' - lib\features\updater\presentation\update_wrapper.dart:37:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\updater\presentation\update_wrapper.dart:37:24 - override_on_non_overriding_member
+  error - Classes can only extend other classes - lib\features\updater\presentation\update_wrapper.dart:40:34 - extends_non_class
+  error - The method 'setState' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:47:5 - undefined_method
+  error - Undefined name 'widget' - lib\features\updater\presentation\update_wrapper.dart:55:9 - undefined_identifier
+  error - The method 'setState' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:57:11 - undefined_method
+  error - The method 'setState' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:64:7 - undefined_method
+  error - Undefined name 'mounted' - lib\features\updater\presentation\update_wrapper.dart:72:45 - undefined_identifier
+  error - Undefined name 'mounted' - lib\features\updater\presentation\update_wrapper.dart:77:11 - undefined_identifier
+  error - The method 'setState' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:78:9 - undefined_method
+  error - Undefined name 'widget' - lib\features\updater\presentation\update_wrapper.dart:87:27 - undefined_identifier
+  error - The method 'canLaunchUrl' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:88:15 - undefined_method
+  error - The method 'launchUrl' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:89:13 - undefined_method
+  error - Undefined name 'LaunchMode' - lib\features\updater\presentation\update_wrapper.dart:89:34 - undefined_identifier
+  error - Undefined class 'Widget' - lib\features\updater\presentation\update_wrapper.dart:94:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\updater\presentation\update_wrapper.dart:94:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\updater\presentation\update_wrapper.dart:94:16 - undefined_class
+  error - Undefined name 'widget' - lib\features\updater\presentation\update_wrapper.dart:95:28 - undefined_identifier
+  error - The method 'Stack' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:97:12 - undefined_method
+  error - Undefined name 'widget' - lib\features\updater\presentation\update_wrapper.dart:99:9 - undefined_identifier
+  error - Undefined name 'Positioned' - lib\features\updater\presentation\update_wrapper.dart:101:9 - undefined_identifier
+  error - The method 'Material' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:102:18 - undefined_method
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:103:20 - undefined_identifier
+  error - The method 'SafeArea' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:104:20 - undefined_method
+  error - The method 'Center' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:105:22 - undefined_method
+  error - The method 'Container' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:106:24 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\updater\presentation\update_wrapper.dart:107:33 - undefined_identifier
+  error - Undefined name 'EdgeInsets' - lib\features\updater\presentation\update_wrapper.dart:108:34 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:109:31 - undefined_method
+  error - The name 'Color' isn't a class - lib\features\updater\presentation\update_wrapper.dart:110:34 - creation_with_non_type
+  error - Undefined name 'BorderRadius' - lib\features\updater\presentation\update_wrapper.dart:111:35 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\updater\presentation\update_wrapper.dart:112:29 - undefined_identifier
+  error - The method 'BoxShadow' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:114:23 - undefined_method
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\updater\presentation\update_wrapper.dart:115:52 - deprecated_member_use
+  error - The method 'Column' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:121:26 - undefined_method
+  error - Undefined name 'MainAxisSize' - lib\features\updater\presentation\update_wrapper.dart:122:35 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\updater\presentation\update_wrapper.dart:124:29 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\updater\presentation\update_wrapper.dart:124:34 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\updater\presentation\update_wrapper.dart:125:29 - creation_with_non_type
+  error - The method 'Text' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:126:23 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\updater\presentation\update_wrapper.dart:128:38 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:129:34 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\updater\presentation\update_wrapper.dart:131:39 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\updater\presentation\update_wrapper.dart:134:29 - creation_with_non_type
+  error - The method 'Text' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:136:25 - undefined_method
+  error - Undefined name 'TextAlign' - lib\features\updater\presentation\update_wrapper.dart:138:38 - undefined_identifier
+  error - The name 'TextStyle' isn't a class - lib\features\updater\presentation\update_wrapper.dart:139:40 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:140:36 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\updater\presentation\update_wrapper.dart:145:31 - creation_with_non_type
+  error - The method 'Container' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:146:25 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\updater\presentation\update_wrapper.dart:147:42 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:148:39 - undefined_method
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:149:36 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\updater\presentation\update_wrapper.dart:150:43 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\updater\presentation\update_wrapper.dart:151:37 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:151:55 - undefined_identifier
+  error - The method 'Column' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:153:34 - undefined_method
+  error - Undefined name 'widget' - lib\features\updater\presentation\update_wrapper.dart:155:78 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:155:111 - undefined_identifier
+  error - The name 'Padding' isn't a class - lib\features\updater\presentation\update_wrapper.dart:156:37 - creation_with_non_type
+  error - Undefined name 'EdgeInsets' - lib\features\updater\presentation\update_wrapper.dart:157:42 - undefined_identifier
+  error - The method 'Divider' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:158:40 - undefined_method
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:158:66 - undefined_identifier
+  error - Undefined name 'widget' - lib\features\updater\presentation\update_wrapper.dart:160:77 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\updater\presentation\update_wrapper.dart:164:31 - creation_with_non_type
+  error - The method 'SizedBox' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:165:25 - undefined_method
+  error - The method 'ElevatedButton' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:168:34 - undefined_method
+  error - The name 'Text' isn't a class - lib\features\updater\presentation\update_wrapper.dart:170:42 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:170:76 - undefined_method
+  error - Undefined name 'widget' - lib\features\updater\presentation\update_wrapper.dart:173:30 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\updater\presentation\update_wrapper.dart:174:33 - creation_with_non_type
+  error - The method 'TextButton' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:175:27 - undefined_method
+  error - The method 'setState' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:176:46 - undefined_method
+  error - The name 'Text' isn't a class - lib\features\updater\presentation\update_wrapper.dart:177:42 - creation_with_non_type
+  error - The method 'TextStyle' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:177:63 - undefined_method
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:177:80 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\updater\presentation\update_wrapper.dart:181:31 - creation_with_non_type
+  error - The method 'ClipRRect' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:182:25 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\updater\presentation\update_wrapper.dart:183:41 - undefined_identifier
+  error - The method 'LinearProgressIndicator' isn't defined for the type '_UpdateScreenState' - lib\features\updater\presentation\update_wrapper.dart:184:34 - undefined_method
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:187:46 - undefined_identifier
+  error - The name 'AlwaysStoppedAnimation' isn't a class - lib\features\updater\presentation\update_wrapper.dart:188:47 - creation_with_non_type
+  error - The name 'Color' isn't a type, so it can't be used as a type argument - lib\features\updater\presentation\update_wrapper.dart:188:70 - non_type_as_type_argument
+  error - The name 'SizedBox' isn't a class - lib\features\updater\presentation\update_wrapper.dart:191:31 - creation_with_non_type
+  error - Classes can only extend other classes - lib\features\updater\presentation\update_wrapper.dart:205:27 - extends_non_class
+  error - Undefined class 'Color' - lib\features\updater\presentation\update_wrapper.dart:208:9 - undefined_class
+  error - Undefined class 'Widget' - lib\features\updater\presentation\update_wrapper.dart:213:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\updater\presentation\update_wrapper.dart:213:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\updater\presentation\update_wrapper.dart:213:16 - undefined_class
+  error - The method 'Row' isn't defined for the type '_VersionRow' - lib\features\updater\presentation\update_wrapper.dart:214:12 - undefined_method
+  error - Undefined name 'MainAxisAlignment' - lib\features\updater\presentation\update_wrapper.dart:215:26 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_VersionRow' - lib\features\updater\presentation\update_wrapper.dart:217:9 - undefined_method
+  error - The name 'TextStyle' isn't a class - lib\features\updater\presentation\update_wrapper.dart:217:34 - creation_with_non_type
+  error - Undefined name 'Colors' - lib\features\updater\presentation\update_wrapper.dart:217:51 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_VersionRow' - lib\features\updater\presentation\update_wrapper.dart:218:9 - undefined_method
+  error - The method 'TextStyle' isn't defined for the type '_VersionRow' - lib\features\updater\presentation\update_wrapper.dart:218:30 - undefined_method
+  error - Undefined name 'FontWeight' - lib\features\updater\presentation\update_wrapper.dart:218:66 - undefined_identifier
+  error - The returned type 'UpdateWrapper' isn't returnable from a 'Widget' function, as required by the closure's context - lib\main.dart:81:16 - return_of_invalid_type_from_closure
+
+845 issues found. (ran in 8.6s)

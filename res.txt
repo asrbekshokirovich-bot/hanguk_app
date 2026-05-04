@@ -1,0 +1,108 @@
+Analyzing hanguk_app...                                         
+
+   info - The imported package 'supabase' isn't a dependency of the importing package - deploy_update.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - deploy_update.dart:5:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:16:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:17:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:25:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:32:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:34:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:37:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:39:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:41:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:48:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:50:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:54:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:55:3 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\adaptive\hanguk_card.dart:29:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\theme\app_theme.dart:55:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\theme\app_theme.dart:89:39 - deprecated_member_use
+  error - The function 'debugPrint' isn't defined - lib\features\applications\data\applications_repository.dart:31:5 - undefined_function
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\application_card.dart:63:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\application_card.dart:116:38 - deprecated_member_use
+   info - The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\features\applications\presentation\widgets\university_room_modal.dart:1:8 - unnecessary_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:52:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:64:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:144:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:153:80 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:163:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:195:85 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:207:92 - deprecated_member_use
+  error - Target of URI doesn't exist: '../../map/domain/university.dart' - lib\features\applications\presentation\widgets\university_selection_view.dart:3:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../data/applications_repository.dart' - lib\features\applications\presentation\widgets\university_selection_view.dart:6:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../chat/presentation/chat_tab.dart' - lib\features\applications\presentation\widgets\university_selection_view.dart:7:8 - uri_does_not_exist
+  error - The name 'University' isn't a type, so it can't be used as a type argument - lib\features\applications\presentation\widgets\university_selection_view.dart:10:14 - non_type_as_type_argument
+warning - The value of the local variable 'uniNames' isn't used - lib\features\applications\presentation\widgets\university_selection_view.dart:45:11 - unused_local_variable
+  error - The property 'name' can't be unconditionally accessed because the receiver can be 'null' - lib\features\applications\presentation\widgets\university_selection_view.dart:45:54 - unchecked_use_of_nullable_value
+  error - The name 'ChatTab' isn't a class - lib\features\applications\presentation\widgets\university_selection_view.dart:59:24 - creation_with_non_type
+  error - The method 'submitSelectedUniversities' isn't defined for the type '_UniversitySelectionViewState' - lib\features\applications\presentation\widgets\university_selection_view.dart:69:13 - undefined_method
+  error - Undefined name 'applicationsProvider' - lib\features\applications\presentation\widgets\university_selection_view.dart:71:22 - undefined_identifier
+   info - Don't use 'BuildContext's across async gaps - lib\features\applications\presentation\widgets\university_selection_view.dart:74:28 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_selection_view.dart:111:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_selection_view.dart:160:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_selection_view.dart:210:39 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:233:20 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\login_screen.dart:293:43 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:555:27 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:555:31 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\chat\presentation\chat_tab.dart:116:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\chat\presentation\chat_tab.dart:141:49 - deprecated_member_use
+warning - Unused import: '../../../../design_system/adaptive/hanguk_card.dart' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\chat\presentation\widgets\chat_message_bubble.dart:44:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\chat\presentation\widgets\chat_message_bubble.dart:68:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\documents_tab.dart:101:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\documents_tab.dart:103:69 - deprecated_member_use
+warning - Unused import: '../../../../design_system/adaptive/hanguk_card.dart' - lib\features\documents\presentation\widgets\document_slot.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:74:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:79:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:109:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:107:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:238:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:259:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:287:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:288:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:292:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:293:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:328:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:329:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:333:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:334:32 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_card.dart:72:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_card.dart:72:33 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:84:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:86:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:99:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:100:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:104:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:105:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:123:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:33:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:89:70 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:92:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:182:62 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_detail_sheet.dart:210:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_detail_sheet.dart:210:33 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:222:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:224:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:259:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:260:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:264:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:265:40 - deprecated_member_use
+warning - The '!' will have no effect because the receiver can't be null - lib\features\map\presentation\widgets\university_detail_sheet.dart:325:33 - unnecessary_non_null_assertion
+warning - The value of the field '_mapController' isn't used - lib\features\map\presentation\widgets\university_map_view.dart:17:23 - unused_field
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_map_view.dart:93:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_map_view.dart:96:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:84:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:86:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:94:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:123:57 - deprecated_member_use
+warning - The value of the local variable 'map' isn't used - test.dart:3:12 - unused_local_variable
+  error - The method 'setCenter' isn't defined for the type 'KakaoMapController' - test.dart:5:7 - undefined_method
+  error - The method 'setLevel' isn't defined for the type 'KakaoMapController' - test.dart:6:7 - undefined_method
+  error - The method 'getLevel' isn't defined for the type 'KakaoMapController' - test.dart:7:7 - undefined_method
+  error - The named parameter 'onCameraIdle' isn't defined - test.dart:8:6 - undefined_named_parameter
+warning - The value of the local variable 'x' isn't used - test.dart:9:10 - unused_local_variable
+  error - The named parameter 'minLevel' isn't defined - test.dart:10:6 - undefined_named_parameter
+  error - The named parameter 'maxLevel' isn't defined - test.dart:10:19 - undefined_named_parameter
+  error - The named parameter 'onCameraChange' isn't defined - test.dart:10:33 - undefined_named_parameter
+

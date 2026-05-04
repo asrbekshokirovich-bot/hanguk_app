@@ -1,0 +1,136 @@
+import 'package:flutter/material.dart';
+import '../../../../design_system/adaptive/hanguk_card.dart';
+import '../../../../design_system/theme/app_colors.dart';
+import '../../domain/university.dart';
+
+class UniversityCard extends StatelessWidget {
+  final University university;
+  final VoidCallback? onTap;
+
+  const UniversityCard({
+    super.key,
+    required this.university,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return HangukCard(
+      onTap: onTap,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          _buildLogo(),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  university.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  university.location,
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _buildRankBadge(),
+          if (university.isPartner) ...[
+            const SizedBox(width: 6),
+            _buildPartnerChip(),
+          ],
+          const SizedBox(width: 4),
+          const Icon(Icons.chevron_right_rounded, color: Colors.white24, size: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogo() {
+    if (university.logoUrl != null && university.logoUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          university.logoUrl!,
+          width: 48,
+          height: 48,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => _fallbackIcon(),
+        ),
+      );
+    }
+    return _fallbackIcon();
+  }
+
+  Widget _fallbackIcon() {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: AppColors.vibrantLime.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.vibrantLime.withOpacity(0.15)),
+      ),
+      child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime, size: 24),
+    );
+  }
+
+  Widget _buildRankBadge() {
+    if (university.ranking == null) return const SizedBox.shrink();
+    final isTop100 = university.ranking! <= 100;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: isTop100
+            ? AppColors.vibrantLime.withOpacity(0.15)
+            : Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isTop100
+              ? AppColors.vibrantLime.withOpacity(0.4)
+              : Colors.white.withOpacity(0.08),
+        ),
+      ),
+      child: Text(
+        '#${university.ranking}',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: isTop100 ? AppColors.vibrantLime : Colors.white38,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPartnerChip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.vibrantLime.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Text(
+        'Partner',
+        style: TextStyle(
+          fontSize: 10,
+          color: AppColors.vibrantLime,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}

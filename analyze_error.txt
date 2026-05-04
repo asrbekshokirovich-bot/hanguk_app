@@ -1,0 +1,50 @@
+Analyzing hanguk_app...                                         
+
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:231:20 - unnecessary_underscores
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:554:6 - expected_token
+warning - Dead code - lib\features\auth\presentation\login_screen.dart:555:17 - dead_code
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:555:17 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:555:17 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:555:17 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:555:18 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:555:18 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:555:18 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:556:15 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:556:15 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:556:15 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:556:16 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:556:16 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:556:16 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:557:13 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:557:13 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:557:13 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:557:14 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:557:14 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:557:14 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:558:11 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:558:11 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:558:11 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:558:12 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:558:12 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:558:12 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:559:9 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:559:9 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:559:9 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:559:10 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:559:10 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:559:10 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:560:7 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:560:7 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:560:7 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:560:8 - missing_identifier
+  error - Expected to find ';' - lib\features\auth\presentation\login_screen.dart:560:8 - expected_token
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:560:8 - unexpected_token
+  error - Expected an identifier - lib\features\auth\presentation\login_screen.dart:561:5 - missing_identifier
+  error - Unexpected text ';' - lib\features\auth\presentation\login_screen.dart:561:5 - unexpected_token
+   info - Unnecessary empty statement - lib\features\auth\presentation\login_screen.dart:561:6 - empty_statements
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:572:27 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:572:31 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:74:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:79:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:109:45 - deprecated_member_use
+

@@ -1,0 +1,19 @@
+Analyzing hanguk_app...                                         
+
+  error - Classes can only extend other classes - lib\features\chat\data\chat_repository.dart:28:28 - extends_non_class
+  error - Too many positional arguments: 0 expected, but 1 found - lib\features\chat\data\chat_repository.dart:29:26 - extra_positional_arguments
+  error - Undefined name 'state' - lib\features\chat\data\chat_repository.dart:40:29 - undefined_identifier
+  error - Undefined name 'state' - lib\features\chat\data\chat_repository.dart:41:5 - undefined_identifier
+  error - Undefined name 'state' - lib\features\chat\data\chat_repository.dart:41:13 - undefined_identifier
+  error - Undefined name 'state' - lib\features\chat\data\chat_repository.dart:55:7 - undefined_identifier
+  error - Undefined name 'state' - lib\features\chat\data\chat_repository.dart:55:15 - undefined_identifier
+  error - Undefined name 'state' - lib\features\chat\data\chat_repository.dart:60:7 - undefined_identifier
+  error - Undefined name 'state' - lib\features\chat\data\chat_repository.dart:60:15 - undefined_identifier
+  error - Undefined name 'state' - lib\features\chat\data\chat_repository.dart:68:5 - undefined_identifier
+  error - The function 'StateNotifierProvider' isn't defined - lib\features\chat\data\chat_repository.dart:77:22 - undefined_function
+  error - The getter 'messages' isn't defined for the type 'Object' - lib\features\chat\presentation\chat_tab.dart:50:22 - undefined_getter
+  error - The property 'messages' can't be unconditionally accessed because the receiver can be 'null' - lib\features\chat\presentation\chat_tab.dart:50:46 - unchecked_use_of_nullable_value
+  error - The getter 'isLoading' isn't defined for the type 'Object' - lib\features\chat\presentation\chat_tab.dart:50:76 - undefined_getter
+  error - The property 'isLoading' can't be unconditionally accessed because the receiver can be 'null' - lib\features\chat\presentation\chat_tab.dart:50:102 - unchecked_use_of_nullable_value
+
+15 issues found. (ran in 6.6s)

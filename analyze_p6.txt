@@ -1,0 +1,8 @@
+Analyzing hanguk_app...                                         
+
+  error - Target of URI doesn't exist: '../domain/document_type.dart' - lib\features\documents\presentation\widgets\document_slot.dart:3:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../domain/document.dart' - lib\features\documents\presentation\widgets\document_slot.dart:4:8 - uri_does_not_exist
+  error - Undefined class 'DocumentType' - lib\features\documents\presentation\widgets\document_slot.dart:8:9 - undefined_class
+  error - Undefined class 'AppDocument' - lib\features\documents\presentation\widgets\document_slot.dart:9:9 - undefined_class
+
+4 issues found. (ran in 8.4s)

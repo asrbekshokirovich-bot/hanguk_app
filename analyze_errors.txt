@@ -1,0 +1,374 @@
+Analyzing hanguk_app...                                         
+
+   info - Don't invoke 'print' in production code - auto_deploy.dart:4:3 - avoid_print
+   info - Don't invoke 'print' in production code - auto_deploy.dart:6:3 - avoid_print
+   info - Don't invoke 'print' in production code - auto_deploy.dart:19:5 - avoid_print
+   info - Don't invoke 'print' in production code - auto_deploy.dart:23:3 - avoid_print
+   info - Don't invoke 'print' in production code - auto_deploy.dart:36:5 - avoid_print
+   info - Don't invoke 'print' in production code - auto_deploy.dart:40:3 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - check_db.dart:1:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - check_db.dart:11:5 - avoid_print
+   info - Don't invoke 'print' in production code - check_db.dart:13:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - check_schema.dart:2:8 - depend_on_referenced_packages
+warning - The value of the local variable 'res' isn't used - check_schema.dart:7:11 - unused_local_variable
+   info - Don't invoke 'print' in production code - check_schema.dart:9:5 - avoid_print
+   info - Don't invoke 'print' in production code - check_schema.dart:11:5 - avoid_print
+   info - Don't invoke 'print' in production code - check_schema.dart:16:5 - avoid_print
+   info - Don't invoke 'print' in production code - check_schema.dart:18:5 - avoid_print
+   info - Don't invoke 'print' in production code - check_schema.dart:23:5 - avoid_print
+   info - Don't invoke 'print' in production code - check_schema.dart:25:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - db_schema.dart:2:8 - depend_on_referenced_packages
+warning - The value of the local variable 'msg' isn't used - db_schema.dart:7:11 - unused_local_variable
+   info - Don't invoke 'print' in production code - db_schema.dart:8:5 - avoid_print
+   info - Don't invoke 'print' in production code - db_schema.dart:10:5 - avoid_print
+warning - The value of the local variable 'msg' isn't used - db_schema.dart:14:11 - unused_local_variable
+   info - Don't invoke 'print' in production code - db_schema.dart:15:5 - avoid_print
+   info - Don't invoke 'print' in production code - db_schema.dart:17:5 - avoid_print
+warning - The value of the local variable 'msg' isn't used - db_schema.dart:21:11 - unused_local_variable
+   info - Don't invoke 'print' in production code - db_schema.dart:22:5 - avoid_print
+   info - Don't invoke 'print' in production code - db_schema.dart:24:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - deploy_update.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - deploy_update.dart:5:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:16:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:17:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:25:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:32:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:34:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:38:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:40:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:42:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:49:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:51:5 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:55:3 - avoid_print
+   info - Don't invoke 'print' in production code - deploy_update.dart:56:3 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - find_fk.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - find_fk.dart:14:25 - avoid_print
+   info - Empty catch block - find_fk.dart:15:19 - empty_catches
+   info - Don't invoke 'print' in production code - find_fk.dart:19:25 - avoid_print
+   info - Empty catch block - find_fk.dart:20:19 - empty_catches
+   info - Don't invoke 'print' in production code - find_fk.dart:23:5 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\adaptive\hanguk_card.dart:29:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\theme\app_theme.dart:55:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\design_system\theme\app_theme.dart:89:39 - deprecated_member_use
+warning - Unused import: '../../map/data/map_repository.dart' - lib\features\applications\data\applications_repository.dart:6:8 - unused_import
+   info - Use 'rethrow' to rethrow a caught exception - lib\features\applications\data\applications_repository.dart:72:5 - use_rethrow_when_possible
+   info - Use 'rethrow' to rethrow a caught exception - lib\features\applications\data\applications_repository.dart:143:5 - use_rethrow_when_possible
+warning - Unused import: '../../../../design_system/theme/app_colors.dart' - lib\features\applications\presentation\applications_tab.dart:8:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\application_card.dart:63:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\application_card.dart:85:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\application_card.dart:87:67 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\application_card.dart:138:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\process_tracker.dart:64:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\process_tracker.dart:98:43 - deprecated_member_use
+   info - The import of 'package:flutter/cupertino.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\features\applications\presentation\widgets\university_room_modal.dart:1:8 - unnecessary_import
+warning - Unused import: 'package:flutter_riverpod/flutter_riverpod.dart' - lib\features\applications\presentation\widgets\university_room_modal.dart:3:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:75:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:105:41 - deprecated_member_use
+   info - The local variable '_getEventsForDay' starts with an underscore - lib\features\applications\presentation\widgets\university_room_modal.dart:124:27 - no_leading_underscores_for_local_identifiers
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:153:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:165:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:246:139 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:261:80 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:273:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:319:85 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:343:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:391:92 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:405:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_room_modal.dart:412:74 - deprecated_member_use
+warning - The value of the local variable 'uniNames' isn't used - lib\features\applications\presentation\widgets\university_selection_view.dart:45:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_selection_view.dart:114:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_selection_view.dart:164:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\widgets\university_selection_view.dart:213:39 - deprecated_member_use
+   info - Use interpolation to compose strings and values - lib\features\auth\data\auth_repository.dart:50:31 - prefer_interpolation_to_compose_strings
+   info - Use interpolation to compose strings and values - lib\features\auth\data\auth_repository.dart:139:31 - prefer_interpolation_to_compose_strings
+warning - The declaration '_handlePhoneLogin' isn't referenced - lib\features\auth\presentation\login_screen.dart:101:16 - unused_element
+warning - The declaration '_handleSignUp' isn't referenced - lib\features\auth\presentation\login_screen.dart:148:16 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\login_screen.dart:259:45 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:433:27 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\auth\presentation\login_screen.dart:433:31 - unnecessary_underscores
+warning - The declaration '_LoadingView' isn't referenced - lib\features\auth\presentation\login_screen.dart:449:7 - unused_element
+warning - A value for optional parameter 'obscureText' isn't ever given - lib\features\auth\presentation\login_screen.dart:483:10 - unused_element_parameter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\chat\presentation\chat_tab.dart:116:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\chat\presentation\chat_tab.dart:141:49 - deprecated_member_use
+warning - Unused import: '../../../../design_system/adaptive/hanguk_card.dart' - lib\features\chat\presentation\widgets\chat_message_bubble.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\chat\presentation\widgets\chat_message_bubble.dart:44:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\chat\presentation\widgets\chat_message_bubble.dart:68:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\documents_tab.dart:101:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\documents_tab.dart:103:69 - deprecated_member_use
+warning - Unused import: '../../../../design_system/adaptive/hanguk_card.dart' - lib\features\documents\presentation\widgets\document_slot.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:95:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:100:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\welcome_screen.dart:130:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:107:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:238:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:259:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:287:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:288:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:292:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:293:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:328:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:329:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:333:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\map_tab.dart:334:32 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\map\presentation\widgets\map_view\map_mobile.dart:22:9 - use_super_parameters
+   info - 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead - lib\features\map\presentation\widgets\map_view\map_web.dart:1:1 - deprecated_member_use
+   info - Don't use web-only libraries outside Flutter web plugins - lib\features\map\presentation\widgets\map_view\map_web.dart:1:1 - avoid_web_libraries_in_flutter
+warning - Unused import: 'dart:convert' - lib\features\map\presentation\widgets\map_view\map_web.dart:3:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\features\map\presentation\widgets\map_view\map_web.dart:23:9 - use_super_parameters
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_card.dart:72:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_card.dart:72:33 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:84:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:86:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:99:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:100:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:104:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:105:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_card.dart:123:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:34:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:90:70 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:93:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:213:62 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_detail_sheet.dart:241:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\map\presentation\widgets\university_detail_sheet.dart:241:33 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:253:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:255:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:290:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:291:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:295:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_detail_sheet.dart:296:40 - deprecated_member_use
+warning - The '!' will have no effect because the receiver can't be null - lib\features\map\presentation\widgets\university_detail_sheet.dart:356:33 - unnecessary_non_null_assertion
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_map_view.dart:47:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_map_view.dart:50:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_roadview_screen.dart:63:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\map\presentation\widgets\university_roadview_screen.dart:83:37 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\training\data\study_plan_repository.dart:292:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\training\data\study_plan_repository.dart:336:7 - avoid_print
+  error - The method '_buildSessionWizard' isn't defined for the type '_StudyPlanScreenState' - lib\features\training\presentation\study_plan_screen.dart:67:19 - undefined_method
+warning - Dead code - lib\features\training\presentation\study_plan_screen.dart:130:3 - dead_code
+   info - The local variable '_buildSessionWizard' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:130:10 - no_leading_underscores_for_local_identifiers
+warning - The declaration '_buildSessionWizard' isn't referenced - lib\features\training\presentation\study_plan_screen.dart:130:10 - unused_element
+  error - Local variable '_buildStepper' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:135:12 - referenced_before_declaration
+  error - Local variable '_buildCurrentStep' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:137:22 - referenced_before_declaration
+   info - The local variable '_buildStepper' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:143:10 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_buildStepIcon' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:149:11 - referenced_before_declaration
+  error - Local variable '_buildConnector' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:150:11 - referenced_before_declaration
+  error - Local variable '_buildStepIcon' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:151:11 - referenced_before_declaration
+  error - Local variable '_buildConnector' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:152:11 - referenced_before_declaration
+  error - Local variable '_buildStepIcon' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:153:11 - referenced_before_declaration
+  error - Local variable '_buildConnector' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:154:11 - referenced_before_declaration
+  error - Local variable '_buildStepIcon' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:155:11 - referenced_before_declaration
+   info - The local variable '_buildStepIcon' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:161:10 - no_leading_underscores_for_local_identifiers
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\study_plan_screen.dart:178:41 - deprecated_member_use
+   info - The local variable '_buildConnector' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:197:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_buildCurrentStep' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:208:10 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_buildInstructionsStep' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:214:24 - referenced_before_declaration
+  error - Local variable '_buildExampleStep' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:215:24 - referenced_before_declaration
+  error - Local variable '_buildDraftingStep' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:216:24 - referenced_before_declaration
+   info - The local variable '_buildInstructionsStep' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:222:10 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_buildGuideItem' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:238:13 - referenced_before_declaration
+  error - Local variable '_buildGuideItem' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:244:13 - referenced_before_declaration
+  error - Local variable '_buildGuideItem' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:250:13 - referenced_before_declaration
+   info - The local variable '_buildGuideItem' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:326:10 - no_leading_underscores_for_local_identifiers
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\study_plan_screen.dart:330:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\study_plan_screen.dart:332:55 - deprecated_member_use
+   info - The local variable '_buildExampleStep' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:354:10 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_buildExampleContent' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:367:15 - referenced_before_declaration
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\study_plan_screen.dart:395:56 - deprecated_member_use
+  error - Local variable '_buildExampleContent' can't be referenced before it is declared - lib\features\training\presentation\study_plan_screen.dart:409:13 - referenced_before_declaration
+   info - The local variable '_buildExampleContent' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:416:10 - no_leading_underscores_for_local_identifiers
+  error - The method '_AiExampleCard' isn't defined for the type '_StudyPlanScreenState' - lib\features\training\presentation\study_plan_screen.dart:420:9 - undefined_method
+  error - The method '_AiExampleCard' isn't defined for the type '_StudyPlanScreenState' - lib\features\training\presentation\study_plan_screen.dart:427:9 - undefined_method
+   info - The local variable '_buildDraftingStep' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:448:10 - no_leading_underscores_for_local_identifiers
+  error - Classes can't be declared inside other classes - lib\features\training\presentation\study_plan_screen.dart:459:1 - class_in_class
+  error - Expected a class member - lib\features\training\presentation\study_plan_screen.dart:459:22 - expected_class_member
+   info - Missing type annotation - lib\features\training\presentation\study_plan_screen.dart:459:30 - strict_top_level_inference
+   info - The variable name 'StatefulWidget' isn't a lowerCamelCase identifier - lib\features\training\presentation\study_plan_screen.dart:459:30 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\features\training\presentation\study_plan_screen.dart:459:30 - missing_method_parameters
+warning - The value of the local variable 'universityName' isn't used - lib\features\training\presentation\study_plan_screen.dart:460:16 - unused_local_variable
+warning - The value of the local variable 'index' isn't used - lib\features\training\presentation\study_plan_screen.dart:461:13 - unused_local_variable
+warning - The value of the local variable 'isEmbassy' isn't used - lib\features\training\presentation\study_plan_screen.dart:462:14 - unused_local_variable
+  error - The name '_AiExampleCard' isn't a class - lib\features\training\presentation\study_plan_screen.dart:463:9 - creation_with_non_type
+  error - The getter 'key' isn't defined in a superclass of '_StudyPlanScreenState' - lib\features\training\presentation\study_plan_screen.dart:463:31 - undefined_super_member
+   info - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\features\training\presentation\study_plan_screen.dart:463:36 - deprecated_member_use
+  error - Expected to find ',' - lib\features\training\presentation\study_plan_screen.dart:463:45 - expected_token
+  error - The getter 'universityName' isn't defined for the type '_StudyPlanScreenState' - lib\features\training\presentation\study_plan_screen.dart:463:50 - undefined_getter
+   info - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\features\training\presentation\study_plan_screen.dart:463:66 - deprecated_member_use
+  error - Expected to find ',' - lib\features\training\presentation\study_plan_screen.dart:463:75 - expected_token
+  error - The getter 'index' isn't defined for the type '_StudyPlanScreenState' - lib\features\training\presentation\study_plan_screen.dart:463:80 - undefined_getter
+  error - The setter 'isEmbassy' isn't defined for the type '_StudyPlanScreenState' - lib\features\training\presentation\study_plan_screen.dart:463:92 - undefined_setter
+  error - State isn't a type - lib\features\training\presentation\study_plan_screen.dart:466:3 - not_a_type
+  error - The name '_AiExampleCard' isn't a type, so it can't be used as a type argument - lib\features\training\presentation\study_plan_screen.dart:466:9 - non_type_as_type_argument
+warning - The declaration 'createState' isn't referenced - lib\features\training\presentation\study_plan_screen.dart:466:25 - unused_element
+  error - The method '_AiExampleCardState' isn't defined for the type '_StudyPlanScreenState' - lib\features\training\presentation\study_plan_screen.dart:466:42 - undefined_method
+  error - Classes can't be declared inside other classes - lib\features\training\presentation\study_plan_screen.dart:469:1 - class_in_class
+  error - Expected a class member - lib\features\training\presentation\study_plan_screen.dart:469:27 - expected_class_member
+   info - Missing type annotation - lib\features\training\presentation\study_plan_screen.dart:469:35 - strict_top_level_inference
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\features\training\presentation\study_plan_screen.dart:469:35 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\features\training\presentation\study_plan_screen.dart:469:35 - missing_method_parameters
+   info - The local variable '_aiFuture' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:470:23 - no_leading_underscores_for_local_identifiers
+warning - The declaration 'initState' isn't referenced - lib\features\training\presentation\study_plan_screen.dart:473:8 - unused_element
+   info - The local variable '_uniTemplates' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:478:24 - no_leading_underscores_for_local_identifiers
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:480:48 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:483:118 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:486:256 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:489:49 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:494:256 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:496:149 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:499:60 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:502:132 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:505:200 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:508:29 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:510:219 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:513:232 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:516:60 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:519:137 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:522:269 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:525:40 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:530:236 - undefined_getter
+   info - The local variable '_embassyTemplates' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:533:24 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_templates' starts with an underscore - lib\features\training\presentation\study_plan_screen.dart:565:11 - no_leading_underscores_for_local_identifiers
+  error - The getter 'isEmbassy' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:565:31 - undefined_getter
+  error - The argument type 'double' can't be assigned to the parameter type 'int'.  - lib\features\training\presentation\study_plan_screen.dart:569:55 - argument_type_not_assignable
+  error - The getter 'index' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:569:70 - undefined_getter
+warning - The declaration 'build' isn't referenced - lib\features\training\presentation\study_plan_screen.dart:573:10 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\study_plan_screen.dart:576:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\study_plan_screen.dart:578:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\study_plan_screen.dart:586:42 - deprecated_member_use
+  error - The getter 'isEmbassy' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:591:29 - undefined_getter
+  error - The getter 'isEmbassy' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:595:28 - undefined_getter
+  error - The getter 'universityName' isn't defined for the type 'StudyPlanScreen' - lib\features\training\presentation\study_plan_screen.dart:595:77 - undefined_getter
+  error - Expected to find '}' - lib\features\training\presentation\study_plan_screen.dart:670:1 - expected_token
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:101:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:103:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:106:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:120:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:121:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:127:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:130:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:156:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:167:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\training_tab.dart:170:73 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:250:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:298:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:300:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:319:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:342:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\advanced_drafting_workspace.dart:344:54 - deprecated_member_use
+   info - Parameter 'text' could be a super parameter - lib\features\training\presentation\widgets\ai_highlighting_text_controller.dart:16:3 - use_super_parameters
+   info - Don't invoke 'print' in production code - lib\features\training\presentation\widgets\interview_active_view.dart:32:23 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_active_view.dart:143:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_active_view.dart:149:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_active_view.dart:174:37 - deprecated_member_use
+warning - Unused import: '../../../../design_system/theme/app_colors.dart' - lib\features\training\presentation\widgets\interview_analytics_view.dart:3:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_feedback_view.dart:36:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_setup_view.dart:64:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_setup_view.dart:118:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_setup_view.dart:131:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_setup_view.dart:133:61 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\training\presentation\widgets\interview_setup_view.dart:150:19 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_setup_view.dart:199:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\interview_setup_view.dart:199:83 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\live_metrics_bar.dart:23:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\study_plan_analysis_view.dart:40:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\study_plan_analysis_view.dart:42:68 - deprecated_member_use
+warning - Unused import: '../../data/study_plan_repository.dart' - lib\features\training\presentation\widgets\study_plan_chat_fab.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\study_plan_chat_fab.dart:34:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\training\presentation\widgets\study_plan_chat_fab.dart:37:33 - deprecated_member_use
+   info - The private field _isDownloading could be 'final' - lib\features\updater\presentation\update_dialog.dart:16:8 - prefer_final_fields
+   info - The private field _progress could be 'final' - lib\features\updater\presentation\update_dialog.dart:17:10 - prefer_final_fields
+warning - The value of the field '_progress' isn't used - lib\features\updater\presentation\update_dialog.dart:17:10 - unused_field
+   info - The imported package 'supabase' isn't a dependency of the importing package - print_db.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - print_db.dart:8:5 - avoid_print
+   info - Don't invoke 'print' in production code - print_db.dart:10:5 - avoid_print
+warning - Unused import: 'dart:io' - setup_bucket.dart:1:8 - unused_import
+   info - The imported package 'supabase' isn't a dependency of the importing package - setup_bucket.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - setup_bucket.dart:7:5 - avoid_print
+   info - Don't invoke 'print' in production code - setup_bucket.dart:9:5 - avoid_print
+   info - Don't invoke 'print' in production code - setup_bucket.dart:12:7 - avoid_print
+   info - Don't invoke 'print' in production code - setup_bucket.dart:15:7 - avoid_print
+   info - Don't invoke 'print' in production code - test\updater_test.dart:23:5 - avoid_print
+  error - The getter 'versionString' isn't defined for the type 'AppVersionInfo' - test\updater_test.dart:23:37 - undefined_getter
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_apps.dart:1:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_apps.dart:11:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_apps.dart:13:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_apps2.dart:3:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_apps2.dart:16:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_bucket_limit.dart:2:8 - depend_on_referenced_packages
+  error - A value of type 'int' can't be assigned to a parameter of type 'String?' in a const constructor - test_bucket_limit.dart:7:85 - const_constructor_param_type_mismatch
+  error - The argument type 'int' can't be assigned to the parameter type 'String?'.  - test_bucket_limit.dart:7:100 - argument_type_not_assignable
+   info - Don't invoke 'print' in production code - test_bucket_limit.dart:8:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_bucket_limit.dart:10:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_buckets.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_buckets.dart:8:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_buckets.dart:10:5 - avoid_print
+warning - Unused import: 'dart:io' - test_check_v.dart:1:8 - unused_import
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_check_v.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_check_v.dart:15:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_check_v.dart:17:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_curl.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_curl.dart:9:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_curl.dart:12:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_curl.dart:15:8 - avoid_print
+   info - Don't invoke 'print' in production code - test_curl.dart:18:5 - avoid_print
+warning - Unused import: 'dart:io' - test_email_valid.dart:1:8 - unused_import
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_email_valid.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_email_valid.dart:11:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_email_valid.dart:16:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_email_valid.dart:18:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_identity.dart:3:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_identity.dart:25:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_identity.dart:27:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_list.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_list.dart:8:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_list.dart:10:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_list.dart:13:5 - avoid_print
+warning - Unused import: 'dart:io' - test_phone_auth.dart:1:8 - unused_import
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_phone_auth.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_phone_auth.dart:11:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_phone_auth.dart:16:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_phone_auth.dart:18:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_profiles.dart:3:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_profiles.dart:16:5 - avoid_print
+warning - Unused import: 'dart:convert' - test_rls.dart:1:8 - unused_import
+warning - Unused import: 'dart:io' - test_rls.dart:2:8 - unused_import
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_rls.dart:3:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_rls.dart:14:3 - avoid_print
+warning - The value of the local variable 'apps' isn't used - test_rls.dart:26:13 - unused_local_variable
+   info - Don't invoke 'print' in production code - test_rls.dart:27:7 - avoid_print
+warning - The value of the local variable 'allAppsForMe' isn't used - test_rls.dart:30:13 - unused_local_variable
+   info - Don't invoke 'print' in production code - test_rls.dart:31:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_rls.dart:33:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_rls.dart:36:5 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_rls2.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_rls2.dart:18:7 - avoid_print
+   info - Use interpolation to compose strings and values - test_rls2.dart:18:13 - prefer_interpolation_to_compose_strings
+   info - Don't invoke 'print' in production code - test_rls2.dart:21:7 - avoid_print
+   info - Use interpolation to compose strings and values - test_rls2.dart:21:13 - prefer_interpolation_to_compose_strings
+   info - Don't invoke 'print' in production code - test_rls2.dart:23:7 - avoid_print
+   info - Use interpolation to compose strings and values - test_rls2.dart:23:13 - prefer_interpolation_to_compose_strings
+warning - The stack trace variable 'st' isn't used and can be removed - test_rls2.dart:25:15 - unused_catch_stack
+   info - Don't invoke 'print' in production code - test_rls2.dart:26:5 - avoid_print
+   info - Use interpolation to compose strings and values - test_rls2.dart:26:11 - prefer_interpolation_to_compose_strings
+warning - Unused import: 'dart:io' - test_schema.dart:1:8 - unused_import
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_schema.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_schema.dart:12:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_schema.dart:14:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_schema.dart:18:9 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_tables.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_tables.dart:8:5 - avoid_print
+   info - Empty catch block - test_tables.dart:9:14 - empty_catches
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_update_db.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_update_db.dart:7:3 - avoid_print
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_updater.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_updater.dart:6:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_updater.dart:12:3 - avoid_print
+warning - Unused import: 'dart:io' - test_updater2.dart:1:8 - unused_import
+   info - The imported package 'supabase' isn't a dependency of the importing package - test_updater2.dart:2:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - test_updater2.dart:16:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_updater2.dart:18:5 - avoid_print
+warning - Unused import: 'dart:io' - test_updater_logic.dart:1:8 - unused_import
+   info - Don't invoke 'print' in production code - test_updater_logic.dart:13:12 - avoid_print
+   info - Don't invoke 'print' in production code - test_updater_logic.dart:14:12 - avoid_print
+   info - Don't invoke 'print' in production code - test_updater_logic.dart:16:14 - avoid_print
+   info - Don't invoke 'print' in production code - test_updater_logic.dart:20:15 - avoid_print
+

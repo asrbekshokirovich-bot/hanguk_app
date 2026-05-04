@@ -1,0 +1,6 @@
+Analyzing study_plan_repository.dart...                         
+
+   info - Don't invoke 'print' in production code - lib\features\training\data\study_plan_repository.dart:297:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\training\data\study_plan_repository.dart:341:7 - avoid_print
+  error - The argument type 'StudyPlanSessionNotifier Function(String, dynamic)' can't be assigned to the parameter type 'StudyPlanSessionNotifier Function(String)'.  - lib\features\training\data\study_plan_repository.dart:394:115 - argument_type_not_assignable
+
