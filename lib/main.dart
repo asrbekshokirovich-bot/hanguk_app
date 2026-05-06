@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'design_system/theme/app_theme.dart';
+import 'features/updater/presentation/update_gate.dart';
 import 'package:device_preview/device_preview.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,7 +84,12 @@ class HangukApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.materialTheme,
       routerConfig: goRouter,
-      builder: DevicePreview.appBuilder,
+      builder: (context, child) {
+        // Auto-update gate runs on launch + every foreground transition,
+        // so updates aren't gated behind the login screen anymore.
+        final wrapped = UpdateGate(child: child ?? const SizedBox.shrink());
+        return DevicePreview.appBuilder(context, wrapped);
+      },
       locale: DevicePreview.locale(context),
     );
   }
