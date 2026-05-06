@@ -7,8 +7,14 @@ import 'package:audioplayers/audioplayers.dart';
 class InterviewAnalyticsView extends ConsumerStatefulWidget {
   final VoidCallback? onBackPressed;
   final String? overrideSessionId; // Helpful for History View explicitly requesting a session
+  final String? overrideVapiCallId; // Vapi call id for audio playback when viewing a past session
 
-  const InterviewAnalyticsView({super.key, this.onBackPressed, this.overrideSessionId});
+  const InterviewAnalyticsView({
+    super.key,
+    this.onBackPressed,
+    this.overrideSessionId,
+    this.overrideVapiCallId,
+  });
 
   @override
   ConsumerState<InterviewAnalyticsView> createState() => _InterviewAnalyticsViewState();
@@ -75,7 +81,10 @@ class _InterviewAnalyticsViewState extends ConsumerState<InterviewAnalyticsView>
                               textAlign: TextAlign.center,
                             ),
                           )
-                        : _buildFeedbackContent(state.feedback!, state.vapiCallId),
+                        : _buildFeedbackContent(
+                            state.feedback!,
+                            widget.overrideVapiCallId ?? state.vapiCallId,
+                          ),
               ),
             ],
           ),

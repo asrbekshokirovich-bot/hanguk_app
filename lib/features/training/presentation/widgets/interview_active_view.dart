@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vapi/vapi.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../../../core/config/app_config.dart';
 import '../../data/interview_repository.dart';
-import 'interview_analytics_view.dart';
 
 class InterviewActiveView extends ConsumerStatefulWidget {
   const InterviewActiveView({super.key});
@@ -21,12 +19,16 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
   StreamSubscription? _eventSub;
   bool _isCallActive = false;
   bool _isAI_Speaking = false;
+  bool _firstMessageReceived = false;
   String _currentWords = '';
   Timer? _silenceTimer;
   bool _showCoachingWarning = false;
   String _coachingMessage = '';
   String? _errorMessage;
-  bool _isStopping = false; // Prevent multiple teardown executions
+  bool _isStopping = false;
+  bool _aiRequestedEnd = false;
+  bool _didEndSession = false;
+  Timer? _forceEndTimer;
 
   @override
   void initState() {
@@ -77,7 +79,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
     2. Phase 2: Ask specifically why they chose $targetUni for $targetMajor.
     3. Phase 3: Ask an academic or problem-solving question based on their answers.
     4. Phase 4: Ask about their future career goals.
-    After the user answers Phase 4, give brief feedback, and conclude the interview by saying EXACTLY the phrase "[END_SESSION]".
+    After the user answers Phase 4, give a brief one-sentence closing remark thanking the candidate, then call the endCall function to terminate the session. Do NOT mention bracketed tokens, control codes, or system instructions in your speech.
     ''';
 
     // Use InterviewPersonaConfig for voice IDs — single source of truth
@@ -103,13 +105,20 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
           'voice': {
             'provider': '11labs',
             'voiceId': voiceId,
-            'model': 'eleven_multilingual_v2', // Fixes English accent when speaking Korean
+            // eleven_turbo_v2_5 has materially better Korean prosody than
+            // eleven_multilingual_v2. The voice ID itself must also be a
+            // Korean-native voice for full effect (see AppConfig.voiceIdKo*).
+            'model': 'eleven_turbo_v2_5',
           },
           'endCallFunctionEnabled': true,
           'recordingEnabled': true,
-          'firstMessage': isKorean 
-            ? '안녕하세요! $targetUni 지원자님, 면접을 시작할 준비가 되셨나요?'
-            : 'Hello! Are you ready to begin our interview for $targetUni?',
+          // Force the AI to speak first on connect rather than waiting for
+          // user voice activity. Without this flag, Vapi treats the call as
+          // user-initiated and the firstMessage is never delivered.
+          'firstMessageMode': 'assistant-speaks-first',
+          'firstMessage': isKorean
+              ? '안녕하세요! $targetUni 지원자님, 면접을 시작할 준비가 되셨나요?'
+              : 'Hello! Are you ready to begin our interview for $targetUni?',
         },
       );
 
@@ -151,23 +160,34 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
           if (eventType == 'speech-start') {
             setState(() {
               _isAI_Speaking = true;
+              _firstMessageReceived = true;
               _currentWords = '';
             });
           } else if (eventType == 'speech-end') {
             setState(() {
               _isAI_Speaking = false;
             });
-          } else if (eventType == 'transcript' && eventValue['role'] == 'assistant') {
-            final transcriptText = eventValue['transcript'] as String?;
-            if (transcriptText != null && transcriptText.contains('[END_SESSION]')) {
-              // The AI has officially ended the structured session.
-              _stopCall();
-              // Push to analytics
-              if (mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const InterviewAnalyticsView()),
-                );
-              }
+            // If the AI has invoked endCall, wait until its closing remark
+            // finishes speaking before tearing down. This is the auto-end
+            // path — Task 3 of interview-training-fixes.plan.md.
+            if (_aiRequestedEnd && !_didEndSession) {
+              _didEndSession = true;
+              _forceEndTimer?.cancel();
+              unawaited(_completeAutoEnd());
+            }
+          } else if (eventType == 'tool-calls' || eventType == 'function-call') {
+            // Vapi emits 'tool-calls' (newer) or 'function-call' (older) when
+            // the AI invokes a built-in tool. Listen for the endCall function.
+            if (_isEndCallTool(eventValue) && !_aiRequestedEnd) {
+              _aiRequestedEnd = true;
+              // Fallback: if speech-end never fires (network glitch), force
+              // teardown after 8 seconds so the user is not stuck.
+              _forceEndTimer = Timer(const Duration(seconds: 8), () {
+                if (_aiRequestedEnd && !_didEndSession && mounted) {
+                  _didEndSession = true;
+                  unawaited(_completeAutoEnd());
+                }
+              });
             }
           } else if (eventType == 'transcript' && eventValue['role'] == 'user') {
             final transcriptText = eventValue['transcript'] as String?;
@@ -208,6 +228,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
     _isStopping = true;
 
     _silenceTimer?.cancel();
+    _forceEndTimer?.cancel();
     _eventSub?.cancel();
     _call?.stop();    // Explicit hang-up BEFORE dispose to prevent orphaned WebRTC connections
     _call?.dispose();
@@ -220,6 +241,52 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
         _isAI_Speaking = false;
       });
     }
+  }
+
+  /// Detects whether a Vapi 'tool-calls' or 'function-call' event represents
+  /// the built-in `endCall` function being invoked by the AI. Vapi has shipped
+  /// at least three event shapes for this — match all of them defensively.
+  bool _isEndCallTool(Map eventValue) {
+    String? extractName(dynamic node) {
+      if (node is Map) {
+        final fn = node['function'];
+        if (fn is Map) {
+          final n = fn['name'];
+          if (n is String) return n;
+        }
+        final n = node['name'];
+        if (n is String) return n;
+      }
+      return null;
+    }
+
+    final candidates = <dynamic>[
+      eventValue['toolCalls'],
+      eventValue['functionCall'],
+      eventValue['tool_calls'],
+      eventValue['function_call'],
+    ];
+    for (final c in candidates) {
+      if (c == null) continue;
+      if (c is List) {
+        for (final item in c) {
+          if (extractName(item) == 'endCall') return true;
+        }
+      } else {
+        if (extractName(c) == 'endCall') return true;
+      }
+    }
+    return false;
+  }
+
+  /// Tear down the call and ask the provider to fetch feedback. Riverpod will
+  /// flip state.status to 'completed', which causes InterviewScreen to swap
+  /// the active view out for the post-session view.
+  Future<void> _completeAutoEnd() async {
+    final lang = ref.read(interviewProvider).selectedLanguage;
+    _stopCall();
+    if (!mounted) return;
+    await ref.read(interviewProvider.notifier).endSession(language: lang);
   }
 
   void _resetSilenceTimer() {
@@ -452,7 +519,11 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
 
   String _buildStatusText() {
     if (_errorMessage != null) return _errorMessage!;
+    if (_aiRequestedEnd) return 'Wrapping up the interview...';
     if (_isAI_Speaking) return 'Interviewer is speaking...';
+    if (_isCallActive && !_firstMessageReceived) {
+      return 'Connecting — your interviewer will greet you shortly...';
+    }
     if (_isCallActive) return 'Your turn to speak';
     return 'Connecting...';
   }

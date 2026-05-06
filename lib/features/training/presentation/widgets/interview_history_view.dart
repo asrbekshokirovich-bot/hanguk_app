@@ -106,6 +106,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
             MaterialPageRoute(
               builder: (_) => InterviewAnalyticsView(
                 overrideSessionId: session['id'],
+                overrideVapiCallId: session['vapi_call_id'] as String?,
                 onBackPressed: () => Navigator.pop(context),
               ),
             ),

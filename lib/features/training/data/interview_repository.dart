@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -12,13 +13,13 @@ import '../../../core/config/app_config.dart';
 // ---------------------------------------------------------------------------
 class InterviewPersonaConfig {
   static String getVoiceId(String persona, String language) {
+    final isKo = language == 'ko';
     if (persona == 'strict') {
-      return language == 'ko' ? 'TX3Omw2n4tG93wHn3C2j' : 'pNInz6obbfdqIjc9VDzA';
+      return isKo ? AppConfig.voiceIdKoStrict : AppConfig.voiceIdEnStrict;
     } else if (persona == 'impatient') {
-      return language == 'ko' ? 'ErXwobaYiN019PkySvjV' : 'MF3mGyEYCl7XYWbV9V6O';
+      return isKo ? AppConfig.voiceIdKoImpatient : AppConfig.voiceIdEnImpatient;
     }
-    // Default: friendly
-    return language == 'ko' ? 'cgSgspJ2msm6clMCkdW9' : 'nPczCjzI2devNBz1zQrb';
+    return isKo ? AppConfig.voiceIdKoFriendly : AppConfig.voiceIdEnFriendly;
   }
 }
 
@@ -191,6 +192,22 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
   void setVapiCallId(String callId) {
     state = state.copyWith(vapiCallId: callId);
+    // Persist the call id so history/analytics can replay the recording later.
+    final sessionId = state.sessionId;
+    if (sessionId != null) {
+      unawaited(_persistVapiCallId(sessionId, callId));
+    }
+  }
+
+  Future<void> _persistVapiCallId(String sessionId, String callId) async {
+    try {
+      await Supabase.instance.client
+          .from('interview_sessions')
+          .update({'vapi_call_id': callId})
+          .eq('id', sessionId);
+    } catch (e) {
+      debugPrint('Failed to persist vapi_call_id: $e');
+    }
   }
 
   // ── Text-only interview: full AI round-trip ──────────────────────────────

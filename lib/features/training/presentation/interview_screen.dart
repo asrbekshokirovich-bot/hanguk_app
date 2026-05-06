@@ -6,7 +6,6 @@ import '../data/interview_repository.dart';
 
 import 'widgets/interview_setup_view.dart';
 import 'widgets/interview_active_view.dart';
-import 'widgets/interview_feedback_view.dart';
 import 'widgets/interview_analytics_view.dart';
 import 'widgets/interview_history_view.dart';
 
@@ -110,7 +109,11 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
         },
       );
     } else if (state.status == 'completed') {
-      return const InterviewFeedbackView();
+      // Analytics is the richer post-session view — overall + per-metric
+      // scores, strengths/improvements, and the audio player for replaying
+      // the recorded session. The simpler InterviewFeedbackView is reachable
+      // separately if needed.
+      return const InterviewAnalyticsView();
     } else {
       return const InterviewActiveView();
     }
