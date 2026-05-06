@@ -51,6 +51,10 @@ dependencies:
   device_preview: ^1.3.1
   permission_handler: ^11.4.0
   audioplayers: ^6.6.0
+  # Auto-updater
+  install_plugin: ^2.1.0      # one-tap APK install on Android via PackageInstaller.Session
+  crypto: ^3.0.6              # SHA-256 verification of downloaded APK
+  device_info_plus: ^11.5.0   # OS / model info for telemetry pings
 
 dev_dependencies:
   flutter_test:

@@ -47,3 +47,13 @@ app.*.map.json
 # Node
 node_modules/
 .env
+
+# Release signing — NEVER commit the real keystore or key.properties.
+# Use android/key.properties.template as a guide; see docs/RELEASE.md.
+android/key.properties
+**/*.jks
+**/*.keystore
+
+# Claude Code — local-only settings (per-machine permissions/cache).
+.claude/settings.local.json
+.claude/worktrees/
