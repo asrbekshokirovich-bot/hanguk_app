@@ -5,8 +5,6 @@ import '../../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../data/auth_repository.dart';
-import '../../updater/data/updater_repository.dart';
-import '../../updater/presentation/update_dialog.dart';
 
 // ─── Login Screen ──────────────────────────────────────────────────────────────
 
@@ -54,21 +52,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         _setSuccess(null);
       }
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkForUpdates();
-    });
-  }
-
-  Future<void> _checkForUpdates() async {
-    final repo = ref.read(updaterRepositoryProvider);
-    final versionInfo = await repo.checkForUpdate();
-    if (versionInfo != null && mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: !versionInfo.forceUpdate,
-        builder: (context) => UpdateDialog(updateInfo: versionInfo),
-      );
-    }
+    // Update checks moved to `UpdateGate` (wraps MaterialApp.builder), so
+    // they fire on every app launch + foreground transition, not just from
+    // this screen.
   }
 
   @override
@@ -324,7 +310,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             border: Border.all(color: scheme.primary.withValues(alpha: 0.3)),
           ),
           child: const Text(
-            'Enter the 8-digit access code provided by your consultant or university representative.',
+            'Enter the 8-character access code (letters and numbers) provided by your consultant or university representative.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white60, fontSize: 13),
           ),
