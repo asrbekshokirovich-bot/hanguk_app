@@ -63,6 +63,8 @@ services/uni_db/.venv/
 services/uni_db/.cache/
 services/uni_db/.env
 services/uni_db/.staging-secrets.txt
+services/uni_db/.prod-db-url.txt
+services/uni_db/.prod-baseline-tmp.sql
 services/uni_db/.pytest_cache/
 services/uni_db/.mypy_cache/
 services/uni_db/.ruff_cache/

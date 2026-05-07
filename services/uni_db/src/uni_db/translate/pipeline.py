@@ -8,8 +8,21 @@ Plan §P.3 provider routing:
     ko → ru   : DeepL
     ko → id   : Papago
 
-Phase 0: every adapter returns mocks; the pipeline composition is real
+Phase 0/1: every adapter returns mocks; the pipeline composition is real
 so we can verify the routing logic and the back-translation QC plumbing.
+
+Phase 2 (per ADR-004 + ADR-007):
+    Default-on languages — `ko` (canonical, no translation) and `en`
+    (required for the in-office reviewer + counselor UX).
+    Default-off languages — `uz`, `vi`, `mn`, `ru`, `id` are gated
+    behind `settings.live_apis` AND `settings.translation_languages_enabled`
+    contains the target language. Calling translate() with a disabled
+    target lang raises `LanguageNotEnabledError`.
+
+    ADR-004: Uzbek explicitly stays Phase 3 — even though it's the
+    primary user cohort's language (ADR-007), shipping broken pivoted
+    Uzbek without a native reviewer would destroy trust. The "View
+    original (한국어)" toggle is the Phase 2 safety valve.
 """
 
 from __future__ import annotations
@@ -17,6 +30,7 @@ from __future__ import annotations
 import logging
 from typing import Callable, Final
 
+from ..config import settings
 from . import claude as claude_adapter
 from . import deepl as deepl_adapter
 from . import papago as papago_adapter
@@ -37,6 +51,34 @@ log = logging.getLogger(__name__)
 PIVOT_VIA_EN: Final[frozenset[TargetLang]] = frozenset({"uz", "mn"})
 
 
+# Phase 2 default — only English is enabled. Override at runtime via
+# the `UNI_DB_TRANSLATION_LANGUAGES` env var (comma-separated, e.g.
+# "en,uz" once Phase 3 ships). Korean is canonical and isn't a
+# "translation target" per se.
+DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en"})
+
+
+class LanguageNotEnabledError(RuntimeError):
+    """Raised when a translation is requested for a language that is
+    explicitly disabled in this phase. ADR-004 is the canonical
+    explanation for why Uzbek raises this in Phase 2."""
+
+
+def enabled_languages() -> frozenset[TargetLang]:
+    """Resolve the active enabled-languages set.
+
+    Phase 2 default = {"en"}. Operator can override via env:
+        UNI_DB_TRANSLATION_LANGUAGES=en,uz
+    """
+    raw = getattr(settings, "translation_languages_enabled", None)
+    if not raw:
+        return DEFAULT_ENABLED_LANGUAGES
+    if isinstance(raw, str):
+        parsed = {item.strip() for item in raw.split(",") if item.strip()}
+        return frozenset(parsed)  # type: ignore[arg-type]
+    return frozenset(raw)
+
+
 def translate(
     *,
     source_text_ko: str,
@@ -52,7 +94,21 @@ def translate(
                   prefer DeepL (cheaper) over Claude when supported.
         back_translate_fn: optional injected back-translator for QC. If
                            None, back-translation distance is left null.
+
+    Raises:
+        LanguageNotEnabledError: if `target_lang` is not in the active
+            enabled-languages set. Phase 2 ships only `en`. ADR-004
+            covers why `uz` is deferred to Phase 3.
     """
+    if target_lang not in enabled_languages():
+        raise LanguageNotEnabledError(
+            f"target_lang={target_lang!r} is not enabled in this phase. "
+            f"Active set: {sorted(enabled_languages())}. "
+            "ADR-004: Uzbek ships in Phase 3 with native reviewer; "
+            "until then, Uzbek-speaking users see the Korean original "
+            "and English translation per plan §P.4 'View original' toggle."
+        )
+
     primed_text, hits = apply_glossary_pre_translate(
         source_text_ko, cache=glossary, target_lang=target_lang
     )

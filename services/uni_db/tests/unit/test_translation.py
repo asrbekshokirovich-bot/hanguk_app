@@ -5,10 +5,18 @@ Plan §P.3 provider strategy:
     uz  → pivot via en (Claude both hops); confidence -= 0.15
     vi  → Papago primary
     ru  → DeepL
+
+Phase 2 (ADR-004): only `en` is enabled by default. Tests that exercise
+non-en targets opt in by widening `settings.translation_languages_enabled`
+via monkeypatch so the routing logic stays exercised even with the
+ADR-004 default-off gate in place.
 """
 
+import pytest
+
+from uni_db.translate import pipeline
 from uni_db.translate.glossary import GlossaryHit
-from uni_db.translate.pipeline import translate
+from uni_db.translate.pipeline import LanguageNotEnabledError, translate
 
 
 def _glossary() -> dict:
@@ -54,7 +62,12 @@ class TestPipelineRouting:
         assert "Foreign Applicant Track" in out.text_value
         assert out.provider == "claude"
 
-    def test_uzbek_pivots_via_english(self) -> None:
+    def test_uzbek_pivots_via_english(self, monkeypatch) -> None:
+        # ADR-004: uz is default-off in Phase 2; widen to test routing.
+        monkeypatch.setattr(
+            pipeline.settings, "translation_languages_enabled", "en,uz",
+            raising=False,
+        )
         out = translate(
             source_text_ko="외국인전형 모집요강",
             target_lang="uz",
@@ -64,7 +77,11 @@ class TestPipelineRouting:
         assert out.confidence < 0.85       # pivot tax applied
         assert out.provider == "claude"
 
-    def test_vietnamese_uses_papago(self) -> None:
+    def test_vietnamese_uses_papago(self, monkeypatch) -> None:
+        monkeypatch.setattr(
+            pipeline.settings, "translation_languages_enabled", "en,vi",
+            raising=False,
+        )
         out = translate(
             source_text_ko="모집요강",
             target_lang="vi",
@@ -72,13 +89,45 @@ class TestPipelineRouting:
         )
         assert out.provider == "papago"
 
-    def test_russian_uses_deepl(self) -> None:
+    def test_russian_uses_deepl(self, monkeypatch) -> None:
+        monkeypatch.setattr(
+            pipeline.settings, "translation_languages_enabled", "en,ru",
+            raising=False,
+        )
         out = translate(
             source_text_ko="모집요강",
             target_lang="ru",
             glossary={},
         )
         assert out.provider == "deepl"
+
+
+class TestPhase2DefaultLanguageGate:
+    """ADR-004: Phase 2 default-on is `en` only. Other languages raise."""
+
+    def test_uz_raises_with_adr_pointer(self) -> None:
+        with pytest.raises(LanguageNotEnabledError, match="ADR-004"):
+            translate(
+                source_text_ko="외국인전형",
+                target_lang="uz",
+                glossary={},
+            )
+
+    def test_vi_raises_by_default(self) -> None:
+        with pytest.raises(LanguageNotEnabledError):
+            translate(
+                source_text_ko="외국인전형",
+                target_lang="vi",
+                glossary={},
+            )
+
+    def test_en_works_by_default(self) -> None:
+        out = translate(
+            source_text_ko="외국인전형",
+            target_lang="en",
+            glossary={},
+        )
+        assert out.provider == "claude"
 
 
 class TestBackTranslationHook:

@@ -62,7 +62,12 @@ dev = [
 # baseline + dev set so test runs stay reproducible across machines.
 heavy = [
   "camelot-py[cv]>=0.11",
-  "playwright>=1.47",              # required for JS-heavy ac.kr sites in Phase 1+
+  "playwright>=1.47",              # JS-heavy ac.kr sites in Phase 1+
+  # ADR-002: EasyOCR for image-only Korean PDFs. Pulls torch as a
+  # transitive dep (~2 GB) — that's why it's in the heavy extras.
+  # The model files (ko + en) auto-download to ~/.EasyOCR/ on first
+  # use (~80 MB).
+  "easyocr>=1.7",
 ]
 
 [project.scripts]

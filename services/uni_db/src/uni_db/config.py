@@ -22,6 +22,24 @@ class Settings(BaseSettings):
     live_crawl: bool = Field(default=False, alias="UNI_DB_LIVE_CRAWL")
     env: str = Field(default="development", alias="UNI_DB_ENV")
 
+    # OCR provider — ADR-002 default is `easyocr` (open-source).
+    # Flip to `naver_clova` if the in-office reviewer reports >6 hrs/wk
+    # of OCR cleanup load sustained for 4 weeks (ADR-002 reversal trigger).
+    ocr_provider: str = Field(default="easyocr", alias="UNI_DB_OCR_PROVIDER")
+
+    # PDF blob storage backend — ADR-009 default is `supabase_storage`.
+    # `r2` kept as a fallback config knob but R2 is no longer the primary.
+    blob_storage_backend: str = Field(
+        default="supabase_storage", alias="UNI_DB_BLOB_STORAGE"
+    )
+
+    # Translation default-on languages — ADR-004 keeps Uzbek at Phase 3.
+    # Phase 2 default is just "en"; override via env when Phase 3 ships:
+    #   UNI_DB_TRANSLATION_LANGUAGES=en,uz
+    translation_languages_enabled: str = Field(
+        default="en", alias="UNI_DB_TRANSLATION_LANGUAGES"
+    )
+
     # Supabase
     supabase_url: str = Field(default="", alias="SUPABASE_URL")
     supabase_anon_key: str = Field(default="", alias="SUPABASE_ANON_KEY")
