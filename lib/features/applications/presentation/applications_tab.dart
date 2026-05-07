@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../uni_db/presentation/widgets/home_recent_changes_banner.dart';
+import '../../uni_db/presentation/widgets/verified_deadlines_overlay.dart';
 import 'widgets/application_card.dart';
 import 'widgets/university_selection_view.dart';
 import 'widgets/university_room_modal.dart';
@@ -32,7 +34,13 @@ class ApplicationsTab extends ConsumerWidget {
               ),
             ],
           ),
-          
+
+          // University DB overlay (gated by --dart-define=UNI_DB_ENABLED=true).
+          // Renders nothing when the flag is off or the user has no
+          // tracked institutions, so production builds are unaffected.
+          const HomeRecentChangesBannerSliver(),
+          const VerifiedDeadlinesOverlaySliver(),
+
           tabStateAsync.when(
             data: (state) {
               if (state.isEmpty) {

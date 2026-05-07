@@ -149,10 +149,56 @@ DOCUMENTS_REQUIRED_SCHEMA: dict[str, Any] = {
     "required": ["rows"],
 }
 
+RECRUITMENT_UNITS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "rows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["faculty_ko", "department_ko", "source_text_ko"],
+                "properties": {
+                    "external_code":  {"type": ["string", "null"]},
+                    "faculty_ko":     {"type": "string"},
+                    "division_ko":    {"type": ["string", "null"]},
+                    "department_ko":  {"type": "string"},
+                    "major_track_ko": {"type": ["string", "null"]},
+                    "faculty_group":  {
+                        "type": ["string", "null"],
+                        "enum": [
+                            None,
+                            "humanities", "social", "natural_science", "engineering",
+                            "arts_pe", "medicine", "dentistry", "veterinary",
+                            "pharmacy", "theology", "interdisciplinary",
+                        ],
+                    },
+                    "campus":               {"type": ["string", "null"]},
+                    "quota":                {"type": ["integer", "string", "null"]},
+                    "is_in_quota":          {"type": ["boolean", "null"]},
+                    "applicant_category":   {"type": ["string", "null"]},
+                    "is_correction_notice": {"type": "boolean"},
+                    "correction_text_ko":   {"type": ["string", "null"]},
+                    "notes_ko":             {"type": ["string", "null"]},
+                    "source_text_ko":       {"type": "string"},
+                    "extractor_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                },
+            },
+        },
+    },
+    "required": ["rows"],
+}
+
 FIELD_GROUP_SCHEMAS: dict[str, dict[str, Any]] = {
     "calendar":           CALENDAR_SCHEMA,
     "tuition":            TUITION_SCHEMA,
     "requirements":       REQUIREMENTS_SCHEMA,
     "scholarships":       SCHOLARSHIPS_SCHEMA,
     "documents_required": DOCUMENTS_REQUIRED_SCHEMA,
+    "recruitment_units":  RECRUITMENT_UNITS_SCHEMA,
+    # Phase 1 alias: 'basic_requirements' is the user-facing label,
+    # 'requirements' is the table name. Same shape.
+    "basic_requirements": REQUIREMENTS_SCHEMA,
+    "document_checklist": DOCUMENTS_REQUIRED_SCHEMA,
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../uni_db/presentation/widgets/university_specific_cta.dart';
 import '../../data/interview_repository.dart';
 
 class InterviewSetupView extends ConsumerStatefulWidget {
@@ -84,6 +85,19 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
               ),
             ),
           ),
+
+          // University-specific addon (gated behind UNI_DB_ENABLED).
+          // Reads v_recruitment_for_interview when the session type is
+          // university_specific, otherwise renders nothing. Empty-state
+          // CTA falls back to general interview if no recruitment data
+          // is verified yet for the selected institution.
+          if (_sessionType == 'university_specific')
+            UniversitySpecificSetupAddon(
+              institutionId: state.targetUniversityId,
+              onFallbackToGeneral: () =>
+                  setState(() => _sessionType = 'general'),
+            ),
+
           const SizedBox(height: 24),
 
           _buildLabel('Language'),

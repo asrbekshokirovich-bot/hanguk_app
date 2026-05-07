@@ -62,35 +62,95 @@ def main(argv: list[str] | None = None) -> int:
 
 
 async def _review_digest(*, limit: int) -> int:
-    """Phase 0 print-only digest: requires SUPABASE_DB_URL.
+    """Phase 1 markdown digest: queue + overdue + per-archetype accuracy.
 
-    Without a live DB this just prints a header explaining how to enable it.
+    Requires SUPABASE_DB_URL when invoked against a live database. Without
+    one, prints a friendly stub explaining how to enable it.
     """
+    from .hitl.digest import (
+        ArchetypeAccuracy,
+        OverdueRow,
+        QueueRow,
+        render_digest,
+    )
+
     if not settings.supabase_db_url:
-        print("# HITL review queue\n")
-        print("> SUPABASE_DB_URL not set. Phase 0 keeps this offline by default.")
-        print("> Set the env in `services/uni_db/.env` and re-run.")
+        empty = render_digest(queue=[], accuracy=[], overdue=[])
+        print(empty)
+        print(
+            "> SUPABASE_DB_URL not set. The digest above is the empty-state "
+            "shape; set the env in `services/uni_db/.env` to render against "
+            "the live DB."
+        )
         return 0
 
     from .db import acquire
 
     async with acquire() as conn:
-        rows = await conn.fetch(
+        queue_rows = await conn.fetch(
             """
             select id, priority, reason, entity_type, entity_id,
-                   name_ko, name_en, source_url_ko
+                   name_ko, name_en, source_url_ko, created_at
               from public.v_review_queue_dashboard
-             order by priority asc
+             order by priority asc, created_at asc
              limit $1
             """,
             limit,
         )
-    print("# HITL review queue\n")
-    for r in rows:
-        print(f"- **P{r['priority']}** {r['reason']} — {r['name_ko'] or r['name_en']}")
-        print(f"  - entity: `{r['entity_type']}#{r['entity_id']}`")
-        if r["source_url_ko"]:
-            print(f"  - source: {r['source_url_ko']}")
+        overdue_rows = await conn.fetch(
+            """
+            select id, priority, name_ko, name_en,
+                   extract(epoch from age) / 3600.0 as age_hours
+              from public.v_review_queue_overdue
+             limit 50
+            """
+        )
+        accuracy_rows = await conn.fetch(
+            "select archetype, total_decided, approved_as_is, "
+            "approved_with_edits, rejected, approved_as_is_pct "
+            "from public.v_extraction_accuracy_by_archetype"
+        )
+
+    queue = [
+        QueueRow(
+            id=str(r["id"]),
+            priority=r["priority"],
+            reason=r["reason"],
+            entity_type=r["entity_type"],
+            entity_id=str(r["entity_id"]),
+            name_ko=r["name_ko"],
+            name_en=r["name_en"],
+            source_url_ko=r["source_url_ko"],
+            created_at=r["created_at"],
+        )
+        for r in queue_rows
+    ]
+    overdue = [
+        OverdueRow(
+            id=str(r["id"]),
+            priority=r["priority"],
+            age_hours=float(r["age_hours"]),
+            name_ko=r["name_ko"],
+            name_en=r["name_en"],
+        )
+        for r in overdue_rows
+    ]
+    accuracy = [
+        ArchetypeAccuracy(
+            archetype=r["archetype"] or "—",
+            total_decided=r["total_decided"],
+            approved_as_is=r["approved_as_is"],
+            approved_with_edits=r["approved_with_edits"],
+            rejected=r["rejected"],
+            approved_as_is_pct=(
+                float(r["approved_as_is_pct"])
+                if r["approved_as_is_pct"] is not None
+                else None
+            ),
+        )
+        for r in accuracy_rows
+    ]
+    print(render_digest(queue=queue, accuracy=accuracy, overdue=overdue))
     return 0
 
 
