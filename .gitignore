@@ -62,10 +62,14 @@ android/key.properties
 services/uni_db/.venv/
 services/uni_db/.cache/
 services/uni_db/.env
+services/uni_db/.staging-secrets.txt
 services/uni_db/.pytest_cache/
 services/uni_db/.mypy_cache/
 services/uni_db/.ruff_cache/
 services/uni_db/**/__pycache__/
 services/uni_db/*.egg-info/
+
+# Supabase CLI — local link metadata (project ref + db creds cache).
+supabase/.temp/
 services/uni_db/build/
 services/uni_db/dist/

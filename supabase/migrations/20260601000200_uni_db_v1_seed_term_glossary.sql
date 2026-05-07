@@ -99,9 +99,9 @@ insert into public.term_glossary (term_ko, term_lang, term_value, category, auth
   ('모집요강',           'uz', 'Qabul qoidalari',                         'official_term',    true),
   ('외국인전형',         'uz', 'Xorijliklar uchun qabul',                 'official_term',    true),
   ('재외국민특별전형',   'uz', 'Xorijdagi koreyaliklar uchun maxsus qabul','official_term',    true),
-  ('정정공고',           'uz', "Tuzatish e'loni",                         'official_term',    true),
-  ('합격자발표',         'uz', "Qabul natijalari e'loni",                 'official_term',    true),
-  ('등록금',             'uz', "O'qish to'lovi",                          'official_term',    true),
+  ('정정공고',           'uz', 'Tuzatish e''loni',                        'official_term',    true),
+  ('합격자발표',         'uz', 'Qabul natijalari e''loni',                'official_term',    true),
+  ('등록금',             'uz', 'O''qish to''lovi',                        'official_term',    true),
   ('장학금',             'uz', 'Stipendiya',                              'official_term',    true)
 on conflict (term_ko, term_lang, category) do update
   set term_value = excluded.term_value,
