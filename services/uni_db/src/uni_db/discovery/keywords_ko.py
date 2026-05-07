@@ -41,15 +41,14 @@ PRIMARY_KEYWORDS_KO: tuple[str, ...] = (
 # ---------------------------------------------------------------------------
 # Critical correction-notice tokens — detected separately because a title
 # diff acquiring any of these forces priority=1 in review_queue
-# (audit §6.5, plan §F.6).
+# (audit §6.5, plan §F.6). Tightened to only the canonical markers — bare
+# 정정/변경/수정 are too broad ("수정판" = revised edition is a regular
+# update, not a correction notice).
 # ---------------------------------------------------------------------------
 CORRECTION_KEYWORDS_KO: tuple[str, ...] = (
     "정정공고",
-    "정정",
     "변경공고",
-    "변경",
     "일정변경",
-    "수정",
 )
 
 # ---------------------------------------------------------------------------
@@ -93,24 +92,43 @@ ENGLISH_PATH_SEGMENTS: tuple[str, ...] = ("/eng/", "/en/", "/english/")
 
 
 def matches_admission_signal(title: str, attachments_filenames: list[str]) -> bool:
-    """Audit §6.6 hard rule:
-        title contains any-of(PRIMARY_KEYWORDS_KO)
-        AND
-        at least one attachment filename ends with a guideline extension
-            OR contains any-of(PRIMARY_KEYWORDS_KO).
+    """Audit §6.6 hard rules. Returns True when ANY of:
+
+      (a) at least one attachment filename ends with a guideline extension
+          AND the title carries at least one PRIMARY_KEYWORDS_KO/EN anchor,
+      (b) at least one attachment filename CONTAINS a PRIMARY_KEYWORDS_KO
+          token (e.g. `2026 모집요강.hwp`), regardless of title,
+      (c) attachment metadata is unavailable (empty list — typical for
+          board-listing rows or search-result hits) AND the title carries
+          ≥ 2 PRIMARY_KEYWORDS_KO/EN anchors OR a correction-notice
+          keyword. Layer 3 (embedding similarity) + Layer 4 (LLM
+          tiebreaker) downstream still apply.
     """
     title_l = title.lower()
-    title_hit = any(kw in title for kw in PRIMARY_KEYWORDS_KO) or any(
-        kw in title_l for kw in PRIMARY_KEYWORDS_EN
-    )
-    if not title_hit:
-        return False
+    ko_hits = sum(1 for kw in PRIMARY_KEYWORDS_KO if kw in title)
+    en_hits = sum(1 for kw in PRIMARY_KEYWORDS_EN if kw in title_l)
+    title_anchor_count = ko_hits + en_hits
+    has_correction_marker = is_correction_notice(title)
+
+    # (b) attachment-filename keyword wins regardless of title.
     for fname in attachments_filenames:
-        fname_lower = fname.lower()
-        if any(fname_lower.endswith(ext) for ext in GUIDELINE_FILE_EXTENSIONS):
-            return True
         if any(kw in fname for kw in PRIMARY_KEYWORDS_KO):
             return True
+
+    # (a) attachment + title anchor.
+    if title_anchor_count >= 1:
+        for fname in attachments_filenames:
+            fname_lower = fname.lower()
+            if any(fname_lower.endswith(ext) for ext in GUIDELINE_FILE_EXTENSIONS):
+                return True
+
+    # (c) title-only — only when we have NO attachment metadata at all.
+    if not attachments_filenames:
+        if has_correction_marker:
+            return True
+        if title_anchor_count >= 2:
+            return True
+
     return False
 
 
@@ -120,9 +138,17 @@ def is_correction_notice(title: str) -> bool:
 
 
 def is_disallowed_url(url: str) -> bool:
-    """Reject Naver/Daum mirrors and English mirror paths (§P-1)."""
+    """Reject Naver/Daum mirrors, English subdomains, and English mirror
+    paths (§P-1)."""
     url_l = url.lower()
     if any(seg in url_l for seg in ENGLISH_PATH_SEGMENTS):
         return True
     host = url_l.split("/")[2] if "//" in url_l else url_l
-    return not any(host.endswith(suffix) for suffix in ALLOWED_DOMAIN_SUFFIXES)
+    if not any(host.endswith(suffix) for suffix in ALLOWED_DOMAIN_SUFFIXES):
+        return True
+    # Subdomain check — `en.snu.ac.kr` and `english.skku.ac.kr` are the
+    # bilingual mirrors that audit §P-1 explicitly excludes.
+    leftmost = host.split(".", 1)[0]
+    if leftmost in {"en", "english"}:
+        return True
+    return False

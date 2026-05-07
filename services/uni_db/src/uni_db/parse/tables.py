@@ -75,8 +75,8 @@ def transpose_if_rotated(rows: Sequence[Sequence[str]]) -> list[list[str]]:
     """Detect a rotated layout and transpose.
 
     Heuristic: a typical Korean admissions table has its header in row 0
-    (e.g. ['단과대학', '학과', '모집인원']). When the header is in column 0
-    instead (column 0 reads like header tokens), transpose.
+    (e.g. ['단과대학', '학과', '모집인원']). When column 0 carries MORE
+    header tokens than row 0, the table is rotated and we transpose.
 
     `_HEADER_TOKENS` is a small list of common header strings — adding
     more is cheap and improves recall.
@@ -86,11 +86,10 @@ def transpose_if_rotated(rows: Sequence[Sequence[str]]) -> list[list[str]]:
     width = max(len(r) for r in rows)
     norm = [list(r) + [""] * (width - len(r)) for r in rows]
 
-    if _looks_like_header(norm[0]):
-        return norm
+    row0_score = _header_score(norm[0])
+    col0_score = _header_score([r[0] for r in norm])
 
-    col0 = [r[0] for r in norm]
-    if _looks_like_header(col0):
+    if col0_score > row0_score:
         return [list(c) for c in zip(*norm, strict=False)]
     return norm
 
@@ -106,8 +105,11 @@ _HEADER_TOKENS: frozenset[str] = frozenset(
 
 
 def _looks_like_header(values: Sequence[str]) -> bool:
-    seen = sum(1 for v in values if (v or "").strip() in _HEADER_TOKENS)
-    return seen >= 1
+    return _header_score(values) >= 1
+
+
+def _header_score(values: Sequence[str]) -> int:
+    return sum(1 for v in values if (v or "").strip() in _HEADER_TOKENS)
 
 
 def looks_continuable(table_a: Sequence[Sequence[str]], table_b: Sequence[Sequence[str]]) -> bool:

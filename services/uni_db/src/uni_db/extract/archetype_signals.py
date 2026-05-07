@@ -196,10 +196,19 @@ def detect_bilingual_layout(text_first_pages: str) -> bool:
     """Detect ko/en side-by-side. Crude but works for archetype A/B PDFs:
     look for both Korean characters AND >50 ASCII letters within the same
     400-char window.
+
+    Falls back to scanning the whole text in one pass when shorter than
+    a single window — otherwise short bilingual fixtures slip through.
     """
     window_size = 400
-    for i in range(0, max(0, len(text_first_pages) - window_size), 200):
-        chunk = text_first_pages[i : i + window_size]
+    if len(text_first_pages) <= window_size:
+        chunks: list[str] = [text_first_pages]
+    else:
+        chunks = [
+            text_first_pages[i : i + window_size]
+            for i in range(0, len(text_first_pages) - window_size + 1, 200)
+        ]
+    for chunk in chunks:
         has_korean = any("가" <= ch <= "힣" for ch in chunk)
         ascii_letters = sum(1 for ch in chunk if "a" <= ch.lower() <= "z")
         if has_korean and ascii_letters > 50:

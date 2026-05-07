@@ -45,8 +45,11 @@ async def test_full_loop_classifies_and_diffs(snu_list_fixture: Path) -> None:
     )
 
     # First crawl — no priors, every relevant row is "new_post".
+    # Override `since` so all 4 fixture rows fall in-window regardless of
+    # when the test happens to run (default is now-1day).
+    backstop = datetime(2026, 1, 1, tzinfo=timezone.utc)
     run = await run_one_source(
-        source=source, adapter=adapter, prior_snapshots={}
+        source=source, adapter=adapter, prior_snapshots={}, since=backstop,
     )
     assert run.summary.status == "succeeded"
     assert run.summary.records_seen == 4
@@ -64,6 +67,6 @@ async def test_full_loop_classifies_and_diffs(snu_list_fixture: Path) -> None:
         for ann, _ in run.findings
     }
     run2 = await run_one_source(
-        source=source, adapter=adapter, prior_snapshots=priors
+        source=source, adapter=adapter, prior_snapshots=priors, since=backstop,
     )
     assert run2.summary.records_new == 0
