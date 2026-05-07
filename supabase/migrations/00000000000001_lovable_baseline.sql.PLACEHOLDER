@@ -1,0 +1,33 @@
+-- ============================================================================
+--  PLACEHOLDER: Lovable production schema baseline
+-- ============================================================================
+--
+-- Plan §I-Phase-0 step 1 says:
+--   "supabase db dump --schema-only > 00000000000001_lovable_baseline.sql"
+--
+-- This pass deliberately does NOT run that dump because it requires
+-- production Supabase credentials and owner approval, which were not
+-- available when Phase 0 was scaffolded. Until the dump is captured,
+-- we cannot accurately commit the floor.
+--
+-- TO COMPLETE before any Phase 1 work:
+--   1. From a host with read access to the production Supabase project:
+--        supabase db dump \
+--          --db-url "$SUPABASE_DB_URL" \
+--          --schema public \
+--          --schema-only \
+--          > 00000000000001_lovable_baseline.sql
+--   2. Sanitize: strip ALTER OWNER, COMMENT ON ROLE, and any session-only
+--      GUC pinning that the local CLI doesn't reproduce cleanly.
+--   3. Diff against this worktree to confirm none of the new uni_db tables
+--      collide with existing names.
+--   4. Move the worktree migrations under
+--        supabase/migrations/.lovable_archive/
+--      per plan §0.4.2.
+--   5. Replace this PLACEHOLDER file with the real .sql (delete the
+--      .PLACEHOLDER suffix).
+--
+-- Until step 5 happens, every migration in this directory after
+-- 20260601000000_* assumes the existing Lovable-scaffolded schema is
+-- present (see plan §0.4.3 for the inferred shape). Re-running these
+-- migrations against a fresh database will fail until the baseline lands.

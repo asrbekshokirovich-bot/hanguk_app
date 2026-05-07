@@ -1,0 +1,158 @@
+"""JSON schemas matching the §C tables.
+
+Used by the LLM extraction layer in strict-JSON mode. Audit §5.3 /
+plan §F.3. Each schema covers ONE field group (calendar, tuition,
+requirements, scholarships, documents_required) so the LLM call is
+narrow and the validator can pinpoint the failing field.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+CALENDAR_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "events": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["event_type", "starts_at", "source_text_ko"],
+                "properties": {
+                    "event_type": {
+                        "type": "string",
+                        "enum": [
+                            "apply_open", "apply_close", "document_submission_deadline",
+                            "first_stage_results", "interview", "practical_exam",
+                            "final_results", "additional_admit",
+                            "registration_open", "registration_close",
+                            "registration_withdrawal_open",
+                            "registration_withdrawal_close",
+                            "orientation", "semester_start",
+                        ],
+                    },
+                    "starts_at":     {"type": "string", "format": "date-time"},
+                    "ends_at":       {"type": ["string", "null"], "format": "date-time"},
+                    "is_tentative":  {"type": "boolean"},
+                    "notes_ko":      {"type": ["string", "null"]},
+                    "source_text_ko":{"type": "string"},
+                    "extractor_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                },
+            },
+        },
+    },
+    "required": ["events"],
+}
+
+TUITION_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "rows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["faculty_group", "academic_year",
+                             "semester_number", "amount_krw", "source_text_ko"],
+                "properties": {
+                    "faculty_group":      {"type": "string"},
+                    "academic_year":      {"type": "integer"},
+                    "semester_number":    {"type": "integer", "minimum": 1, "maximum": 12},
+                    "amount_krw":         {"type": "integer", "minimum": 0},
+                    "admission_fee_krw":  {"type": ["integer", "null"], "minimum": 0},
+                    "is_first_semester":  {"type": "boolean"},
+                    "source_text_ko":     {"type": "string"},
+                    "extractor_confidence":{"type": "number", "minimum": 0, "maximum": 1},
+                },
+            },
+        },
+    },
+    "required": ["rows"],
+}
+
+REQUIREMENTS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "applicant_category":      {"type": "string"},
+        "topik_min_level":         {"type": ["integer", "null"], "minimum": 1, "maximum": 6},
+        "topik_deferred":          {"type": "boolean"},
+        "english_test":            {"type": ["object", "null"]},
+        "gpa_floor_pct":           {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "interview_required":      {"type": "boolean"},
+        "practical_exam_required": {"type": "boolean"},
+        "prose_ko":                {"type": ["string", "null"]},
+        "source_text_ko":          {"type": "string"},
+        "extractor_confidence":    {"type": "number", "minimum": 0, "maximum": 1},
+    },
+    "required": ["applicant_category", "source_text_ko"],
+}
+
+SCHOLARSHIPS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "rows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["scope", "name_ko", "award_type", "source_text_ko"],
+                "properties": {
+                    "scope":      {"type": "string",
+                                   "enum": ["national", "university", "department",
+                                            "foundation", "regional"]},
+                    "name_ko":    {"type": "string"},
+                    "name_en":    {"type": ["string", "null"]},
+                    "award_type": {"type": "string",
+                                   "enum": ["tuition_waiver_pct", "tuition_waiver_krw",
+                                            "stipend_monthly", "airfare", "other"]},
+                    "award_value":{"type": ["number", "null"]},
+                    "applicant_categories":  {"type": ["array", "null"], "items": {"type": "string"}},
+                    "topik_tier_table":      {"type": ["object", "null"]},
+                    "eligibility_predicate": {"type": ["object", "null"]},
+                    "prose_ko":              {"type": ["string", "null"]},
+                    "source_text_ko":        {"type": "string"},
+                    "extractor_confidence":  {"type": "number", "minimum": 0, "maximum": 1},
+                },
+            },
+        },
+    },
+    "required": ["rows"],
+}
+
+DOCUMENTS_REQUIRED_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "rows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["applicant_category", "document_type", "source_text_ko"],
+                "properties": {
+                    "applicant_category":     {"type": "string"},
+                    "document_type":          {"type": "string"},
+                    "is_required":            {"type": "boolean"},
+                    "is_apostille_required":  {"type": "boolean"},
+                    "country_specific":       {"type": ["object", "null"]},
+                    "notes_ko":               {"type": ["string", "null"]},
+                    "source_text_ko":         {"type": "string"},
+                },
+            },
+        },
+    },
+    "required": ["rows"],
+}
+
+FIELD_GROUP_SCHEMAS: dict[str, dict[str, Any]] = {
+    "calendar":           CALENDAR_SCHEMA,
+    "tuition":            TUITION_SCHEMA,
+    "requirements":       REQUIREMENTS_SCHEMA,
+    "scholarships":       SCHOLARSHIPS_SCHEMA,
+    "documents_required": DOCUMENTS_REQUIRED_SCHEMA,
+}
