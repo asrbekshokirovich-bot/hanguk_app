@@ -22,7 +22,7 @@ class HomeRecentChangesBannerSliver extends ConsumerWidget {
     final asyncRows = ref.watch(recentChangesProvider);
     return asyncRows.when(
       loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-      error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      error: (_, _) => const SliverToBoxAdapter(child: SizedBox.shrink()),
       data: (rows) {
         if (rows.isEmpty) {
           return const SliverToBoxAdapter(child: SizedBox.shrink());

@@ -7,7 +7,6 @@ import 'widgets/application_card.dart';
 import 'widgets/university_selection_view.dart';
 import 'widgets/university_room_modal.dart';
 import 'applications_view_model.dart';
-import '../../../../design_system/theme/app_colors.dart';
 
 class ApplicationsTab extends ConsumerWidget {
   const ApplicationsTab({super.key});

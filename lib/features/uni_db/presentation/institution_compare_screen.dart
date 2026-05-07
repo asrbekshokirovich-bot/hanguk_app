@@ -28,7 +28,7 @@ class InstitutionCompareScreen extends ConsumerWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: rows.length,
-            separatorBuilder: (_, __) => const Divider(),
+            separatorBuilder: (_, _) => const Divider(),
             itemBuilder: (_, i) => ListTile(
               title: Text(rows[i].nameKo),
               subtitle: Text(rows[i].nameEn ?? ''),
