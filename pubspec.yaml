@@ -128,3 +128,8 @@ dependency_overrides:
   freezed_annotation: ^3.1.0
   vapi:
     path: ./packages/vapi
+  # QA fix 2026-05-06: dart_jsonwebtoken 3.4.0 (transitive via gotrue/supabase_flutter)
+  # references pointycastle 3.x APIs (ECPrivateKey, ASN1Parser, etc.) that were
+  # removed in pointycastle 4.0.0. Pin pointycastle to the last 3.x line so the
+  # Dart compiler can resolve those symbols.
+  pointycastle: ^3.9.1
