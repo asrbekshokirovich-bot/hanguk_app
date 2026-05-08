@@ -564,16 +564,79 @@ Direct disk evidence:
 
 ---
 
+## 12. Update — 2026-05-08 — Phase 2 landed, Phase 3 planning written
+
+### Facts since the 2026-05-07 audit
+
+Three commits landed on `claude/vigorous-haibt-f28e2d` after `83cc097`:
+
+| SHA | Subject | Date |
+|---|---|---|
+| `15c52b1` | `chore: housekeeping — pubspec parity, design docs onto branch, baseline TODO` | 2026-05-07 |
+| `6b545f6` | `feat(uni_db): Phase 2 — EasyOCR + Supabase Storage + RLS tightening + HITL discovery` | 2026-05-07 |
+| `b6e28b7` | `test(uni_db): extend staging smoke-test with 9 Phase 2 checks` | 2026-05-07 |
+
+Phase 2 details are in
+[`services/uni_db/PHASE_2_NOTES.md`](services/uni_db/PHASE_2_NOTES.md).
+Highlights: EasyOCR replaces Naver Clova (ADR-002), Supabase Storage
+replaces R2 (ADR-009), RLS tightened to `fn_is_app_user()` on 12
+recruitment-data tables (ADR-007), 8 archetype calibrations expanded
+with worked examples, scholarships + document-checklist prompts
+extended, `proposed_sources` HITL discovery added, top-30 seed
+expansion, 4 Phase 2 migrations applied to staging cleanly. Tests at
+210/210 on Python 3.12.10.
+
+### Today's work — planning documents only (no code, no DB changes)
+
+Three docs added (option (b) from the prior handoff):
+
+1. [`docs/runbooks/reviewer-onboarding.md`](docs/runbooks/reviewer-onboarding.md)
+   — first-week guide for the in-office reviewer who'll be hired per
+   [ADR-005](docs/decisions/005-hitl-reviewer.md). Covers Supabase
+   Studio access, the SQL helpers (`fn_review_accept` / `_edit_accept`
+   / `_reject`), SLA targets, common Korean-source failure modes
+   (cycle confusion, applicant-category drift, TOPIK tier tables,
+   정정공고, country-of-origin document routing, mixed numerals),
+   weekly cadence, escalation path, cross-training trajectory.
+2. [`services/uni_db/PHASE_3_DESIGN.md`](services/uni_db/PHASE_3_DESIGN.md)
+   — forward-looking design sketch for the six Phase 3 build items
+   (English translation worker, signed-URL Edge Function, Hetzner VPS
+   provisioning, `notify-tracked-changes` Edge Function with FCM /
+   APNs / Web Push fan-out, `/admin/review` Flutter route, compare
+   screen). Includes named-but-unapplied migration drafts, planned
+   file paths, systemd unit template, ~45 new tests sketched, entry
+   criteria checklist.
+3. This update section.
+
+No SQL was applied. No live API calls. No new dependencies. No code
+edits.
+
+### Inference
+
+The Phase 3 entry gates from `PHASE_2_NOTES.md` are unchanged — the
+real prod schema baseline is still the long pole, the in-office
+reviewer is still unhired, the Anthropic API key is still unset, the
+first live crawl is still ungranted. Today's deliverables are paper
+preparation; they unblock nothing on their own but reduce future
+uncertainty about how Phase 3 fits together.
+
+---
+
 **Reading back into this on next session:**
 
 ```
-Worktree branch:   claude/vigorous-haibt-f28e2d @ 83cc097
+Worktree branch:   claude/vigorous-haibt-f28e2d @ HEAD (today's commit
+                   adds planning docs; Phase 2 landed at b6e28b7)
 Worktree path:     C:\Users\User\Desktop\Hanguk\.claude\worktrees\vigorous-haibt-f28e2d
-Main branch:       main @ c6c8d47 (working tree dirty: design docs +
-                   pointycastle override + samples + INTERVIEW_QA_REPORT.md)
+Main branch:       main @ c6c8d47 (unchanged since the 2026-05-07 audit)
 Staging Supabase:  hanguk-staging (nhjzbjzhmugcmzchzxlv, ap-northeast-2)
-Phase 0+1 schema:  applied to staging via supabase db push (commit 9a8830c)
-§O answers:        ADR 001–010 in docs/decisions/ (worktree)
+Phase 0+1 schema:  applied to staging
+Phase 2 schema:    applied to staging (4 v2 migrations)
+Production:        no migrations applied; gated on real prod baseline
+§O answers:        ADR 001–010 in docs/decisions/
+Phase 2 status:    feature-complete in code, applied to staging, 210/210 tests
+Phase 3 design:    sketched in services/uni_db/PHASE_3_DESIGN.md (NOT IMPLEMENTED)
+Reviewer guide:    docs/runbooks/reviewer-onboarding.md (NOT YET ASSIGNED to a person)
 Live integrations: still mocked behind UNI_DB_LIVE_APIS=false
 Feature flag:      kUniDbEnabled=false default; --dart-define=UNI_DB_ENABLED=true to test
 ```
