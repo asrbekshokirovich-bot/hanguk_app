@@ -6,6 +6,7 @@ import '../../features/home/presentation/welcome_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../feature_flags/uni_db_flag.dart';
+import '../../features/uni_db/presentation/admin_review_screen.dart';
 import '../../features/uni_db/presentation/application_tracker_screen.dart';
 import '../../features/uni_db/presentation/institution_compare_screen.dart';
 import '../../features/uni_db/presentation/institution_detail_screen.dart';
@@ -42,6 +43,10 @@ List<RouteBase> _uniDbRoutes() => [
       GoRoute(
         path: '/notifications/settings',
         builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/review',
+        builder: (context, state) => const AdminReviewScreen(),
       ),
     ];
 
