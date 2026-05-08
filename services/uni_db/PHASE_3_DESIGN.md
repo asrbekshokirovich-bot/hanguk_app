@@ -1,8 +1,14 @@
-# Phase 3 — design sketch (planning only, not implemented)
+# Phase 3 — design sketch (NOW IMPLEMENTED in code; deployment pending)
 
-> Forward-looking design doc. Phase 3 has not started. This file
-> exists so future agents (and the user) can pick up Phase 3 with
-> the major shape already worked out.
+> **Status update 2026-05-08 (later):** the implementation referenced
+> below is committed in the worktree. See
+> [`CURRENT_STATUS.md` §13](../../CURRENT_STATUS.md#13-update--2026-05-08-later--phase-3-implementation-landed)
+> for the file inventory and test counts. Deployment is delegated to
+> [`docs/runbooks/gemini-deploy-prompt.md`](../../docs/runbooks/gemini-deploy-prompt.md).
+>
+> The remainder of this document is the original design sketch, kept
+> for posterity and as a reference for future Phase 4+ work that
+> extends these subsystems.
 >
 > Companions:
 > - [`PHASE_2_NOTES.md`](PHASE_2_NOTES.md) — current state of the world

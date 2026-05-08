@@ -622,21 +622,175 @@ uncertainty about how Phase 3 fits together.
 
 ---
 
+## 13. Update — 2026-05-08 (later) — Phase 3 implementation landed
+
+After the §12 update, the user authorised the Anthropic API gate
+(billing alerts at $200/$400/$1000 thresholds per ADR-001) and asked
+to "completely complete phase 1 phase 2 phase 3 all of them." Plan:
+delegate Supabase/secret-handling work to a Gemini 3.1 Pro deploy
+prompt (one self-contained artefact), implement everything else in
+the local worktree.
+
+### Commits added today (eight new on top of §12)
+
+| SHA | Subject |
+|---|---|
+| `b2aa9a8` | feat(uni_db): wire live Anthropic extraction call |
+| `7d66a54` | docs(uni_db): self-contained Gemini 3.1 Pro deploy prompt |
+| `fd3e82b` | feat(uni_db): Phase 3 SQL migrations |
+| `756d87d` | feat(uni_db): live ko->en/uz/vi/ru translation providers |
+| `a0cdecf` | feat(uni_db): three Phase 3 Edge Functions (Deno/TypeScript) |
+| `dc0fd0e` | feat(uni_db): infra/ — Hetzner CX22 worker host source files |
+| `8bd2ca9` | feat(uni_db): Flutter Phase 3 surfaces — /admin/review, compare grid, PDF + push glue |
+| (this) | docs(uni_db): update CURRENT_STATUS for Phase 3 implementation |
+
+### What landed in code
+
+**Backend / Python** (`services/uni_db/`):
+
+- `extract/llm_anthropic.py` — live `_call_anthropic` via the
+  Anthropic SDK with prompt caching on the system message and
+  per-call cost computation including cache-read at 0.1× and
+  cache-write at 1.25× input rate. 13 unit tests.
+- `translate/claude.py`, `papago.py`, `deepl.py` — three live
+  provider implementations replacing the Phase 0/1 NotImplementedError
+  stubs. Each gated by `settings.live_apis`, with tenacity exponential
+  backoff over the provider-specific retriable exception types. 19
+  unit tests in `test_translate_providers_live.py`.
+
+**Database** (`supabase/migrations/`):
+
+- `20260701000000_uni_db_v3_pdf_access_log.sql` — audit table
+- `20260701000100_uni_db_v3_user_push_tokens.sql` — token registration
+- `20260701000200_uni_db_v3_change_event_outbox.sql` — outbox + trigger
+- `20260701000300_uni_db_v3_notification_event_enum.sql` — enum extension
+
+**Edge Functions** (`supabase/functions/`, Deno/TypeScript):
+
+- `get-pdf-url/` — JWT verification + fn_is_app_user RPC + signed URL
+  (15-min TTL) + audit row insert
+- `register-push-token/` — JWT verification + upsert into
+  user_push_tokens with conflict on (platform, token)
+- `notify-tracked-changes/` — cron drain of change_event_outbox with
+  stuck-worker recovery, exponential retry backoff (2,4,8,16,32,60 min;
+  dead at 8 attempts), FCM (HTTP v1 OAuth-from-service-account-JWT)
+  + APNs (HTTP/2 with ES256 bearer JWT) + web-push skeleton
+
+**Flutter** (`lib/features/uni_db/`):
+
+- `domain/review_queue_item.dart` + 11 unit tests
+- `data/admin_review_providers.dart` — 3 Riverpod providers + actions service
+- `presentation/admin_review_screen.dart` — two-column /admin/review
+  with Accept / Edit & accept / Reject (six reason codes from the
+  reviewer onboarding guide); forbidden scaffold for non-reviewer roles
+- `presentation/institution_compare_screen.dart` — filled out the
+  Phase 1 stub with real side-by-side compare grid
+- `data/pdf_url_service.dart` — calls get-pdf-url Edge Function
+- `data/push_token_registrar.dart` — calls register-push-token Edge
+  Function with platform auto-detection
+
+**Infrastructure** (`infra/`, file-only — no provisioning):
+
+- `bootstrap.sh` (idempotent first-boot hardening)
+- `deploy.sh` (rsync + venv + systemd reload)
+- `env.example`
+- `systemd/uni-db-{discovery-poll,extract,translate,ocr}.service` +
+  `discovery-poll.timer` (4 services + 1 timer, hardened with
+  ProtectSystem/ProtectHome/PrivateTmp/CPUQuota/MemoryMax)
+
+### What gets delegated to the Gemini deploy prompt
+
+`docs/runbooks/gemini-deploy-prompt.md` — paste-and-run for Gemini
+3.1 Pro. Takes the codebase from "on disk" to "running in prod" via
+five phases:
+
+1. **Phase A** — replace staging-shim baseline with real prod
+   pg_dump, sanitize, reset staging, smoke-test
+2. **Phase B** — apply migrations to staging then prod with dry-run
+   gating
+3. **Phase C** — deploy three Edge Functions, set per-platform
+   secrets, smoke-test on staging
+4. **Phase D** — provision Hetzner CX22, run bootstrap, deploy code,
+   start systemd units
+5. **Phase E** — final verification (pytest, flutter analyze,
+   migration count, smoke-test)
+
+### Tests (Python)
+
+```
+Phase 0+1+2 baseline:           210 tests
++ test_llm_anthropic            13
++ test_translate_providers_live 19
+                              ----
+Phase 3 total                  242 tests
+```
+
+All 242 passing on Python 3.12.10. Ruff clean on Phase 3 files. The
+two `UP035` warnings remaining (`from typing import Mapping` /
+`Callable` in `translate/glossary.py` and `translate/pipeline.py`)
+are Phase 0/1 legacy, not introduced by Phase 3 work.
+
+### Tests (Flutter)
+
+`flutter test test/features/uni_db` — 11/11 passing on Phase 3
+review-queue-item domain tests.
+
+`flutter analyze lib/features/uni_db lib/core/router lib/core/feature_flags test/features/uni_db`
+— No issues found! (4 items).
+
+### What's still gating Phase 3 going LIVE
+
+These items are unchanged by today's code work — they remain human
+decisions or paid-account creation steps that no agent (Gemini or
+Claude) can fully automate:
+
+1. **Real prod schema baseline** — Gemini Phase A handles this when
+   the user provides the prod DB URL via secure paste.
+2. **In-office reviewer hired** — human action by Hanguk admin, then
+   Gemini sets `profiles.role='uni_db_reviewer'`.
+3. **First live ac.kr crawl approved** — owner decision; flips
+   `UNI_DB_LIVE_CRAWL=true` once granted.
+4. **Hetzner billing account created** — user action; Gemini Phase D
+   provisions once the account exists.
+5. **FCM service account / APNs .p8 key / VAPID keypair generated** —
+   user/Hanguk admin action (Apple Developer + Firebase account
+   ownership). Gemini Phase C sets the secrets once provided.
+6. **Naver Papago / DeepL API account** — same shape as #5.
+7. **Native Uzbek reviewer recruited** — gates Uzbek translation per
+   ADR-004. Until then `UNI_DB_TRANSLATION_LANGUAGES=en` stays.
+
+The translation pipeline, push outbox, signed-URL function, /admin/review
+screen, compare screen, and Hetzner systemd units are all
+implementation-complete; they activate when the corresponding human
+action lands.
+
+### Live-call invariants still hold
+
+All live API call sites remain gated by `UNI_DB_LIVE_APIS=true`
+(default false). Tests run entirely offline (mocked SDK clients,
+respx-mocked httpx for Papago, monkeypatched factory functions for
+Anthropic and DeepL). No paid call has fired from this session.
+
+---
+
 **Reading back into this on next session:**
 
 ```
-Worktree branch:   claude/vigorous-haibt-f28e2d @ HEAD (today's commit
-                   adds planning docs; Phase 2 landed at b6e28b7)
+Worktree branch:   claude/vigorous-haibt-f28e2d @ HEAD (Phase 3 implementation)
 Worktree path:     C:\Users\User\Desktop\Hanguk\.claude\worktrees\vigorous-haibt-f28e2d
 Main branch:       main @ c6c8d47 (unchanged since the 2026-05-07 audit)
 Staging Supabase:  hanguk-staging (nhjzbjzhmugcmzchzxlv, ap-northeast-2)
 Phase 0+1 schema:  applied to staging
 Phase 2 schema:    applied to staging (4 v2 migrations)
-Production:        no migrations applied; gated on real prod baseline
+Phase 3 schema:    file-only (4 v3 migrations); apply via Gemini Phase B
+Production:        no migrations applied; gated on real prod baseline (Gemini Phase A)
 §O answers:        ADR 001–010 in docs/decisions/
-Phase 2 status:    feature-complete in code, applied to staging, 210/210 tests
-Phase 3 design:    sketched in services/uni_db/PHASE_3_DESIGN.md (NOT IMPLEMENTED)
-Reviewer guide:    docs/runbooks/reviewer-onboarding.md (NOT YET ASSIGNED to a person)
+Phase 2 status:    feature-complete in code, applied to staging
+Phase 3 status:    code-complete in worktree (translation, signed URL,
+                   push outbox, /admin/review, compare, Hetzner infra);
+                   deployment delegated to docs/runbooks/gemini-deploy-prompt.md
+Tests:             242 Python (pytest) + 11 Flutter passing offline
+Reviewer guide:    docs/runbooks/reviewer-onboarding.md (NOT YET ASSIGNED)
 Live integrations: still mocked behind UNI_DB_LIVE_APIS=false
 Feature flag:      kUniDbEnabled=false default; --dart-define=UNI_DB_ENABLED=true to test
 ```
