@@ -75,3 +75,18 @@ services/uni_db/*.egg-info/
 supabase/.temp/
 services/uni_db/build/
 services/uni_db/dist/
+
+# Push-notification credentials — never commit. APNs key is a one-time
+# download from Apple Developer; Firebase service account JSON contains
+# a private key. Both feed `supabase secrets set` only.
+*.p8
+AuthKey_*.p8
+firebase-adminsdk*.json
+*-firebase-adminsdk-*.json
+service-account*.json
+google-services.json
+GoogleService-Info.plist
+.vapid-keys
+vapid-keys.json
+implementation_plan.md
+pg.zip
