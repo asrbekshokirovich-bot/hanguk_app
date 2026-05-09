@@ -51,11 +51,13 @@ log = logging.getLogger(__name__)
 PIVOT_VIA_EN: Final[frozenset[TargetLang]] = frozenset({"uz", "mn"})
 
 
-# Phase 2 default — only English is enabled. Override at runtime via
-# the `UNI_DB_TRANSLATION_LANGUAGES` env var (comma-separated, e.g.
-# "en,uz" once Phase 3 ships). Korean is canonical and isn't a
+# Default-on translation targets.
+# ADR-004-amend (2026-05-08): Uzbek added by owner override despite the
+# absence of a native reviewer. Outputs go through the same HITL queue
+# the in-office reviewer (ADR-005) works; flagged-low-confidence Uzbek
+# rows surface there for correction. Korean is canonical and isn't a
 # "translation target" per se.
-DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en"})
+DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en", "uz"})
 
 
 class LanguageNotEnabledError(RuntimeError):

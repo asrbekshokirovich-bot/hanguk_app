@@ -33,11 +33,13 @@ class Settings(BaseSettings):
         default="supabase_storage", alias="UNI_DB_BLOB_STORAGE"
     )
 
-    # Translation default-on languages — ADR-004 keeps Uzbek at Phase 3.
-    # Phase 2 default is just "en"; override via env when Phase 3 ships:
-    #   UNI_DB_TRANSLATION_LANGUAGES=en,uz
+    # Translation default-on languages.
+    # ADR-004-amend (2026-05-08): owner accepted the two-hop ko->en->uz
+    # quality risk and authorised Uzbek translation without a native
+    # reviewer in the queue. Default flipped to "en,uz". The reviewer can
+    # still be added later — same env var, no further code change needed.
     translation_languages_enabled: str = Field(
-        default="en", alias="UNI_DB_TRANSLATION_LANGUAGES"
+        default="en,uz", alias="UNI_DB_TRANSLATION_LANGUAGES"
     )
 
     # Supabase

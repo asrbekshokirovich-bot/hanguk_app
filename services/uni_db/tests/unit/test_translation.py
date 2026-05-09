@@ -102,16 +102,22 @@ class TestPipelineRouting:
         assert out.provider == "deepl"
 
 
-class TestPhase2DefaultLanguageGate:
-    """ADR-004: Phase 2 default-on is `en` only. Other languages raise."""
+class TestDefaultLanguageGate:
+    """Default-on languages: `en` and `uz` (per ADR-004-amend 2026-05-08).
 
-    def test_uz_raises_with_adr_pointer(self) -> None:
-        with pytest.raises(LanguageNotEnabledError, match="ADR-004"):
-            translate(
-                source_text_ko="외국인전형",
-                target_lang="uz",
-                glossary={},
-            )
+    Other languages still raise LanguageNotEnabledError until explicitly
+    enabled via UNI_DB_TRANSLATION_LANGUAGES.
+    """
+
+    def test_uz_works_by_default(self) -> None:
+        out = translate(
+            source_text_ko="외국인전형",
+            target_lang="uz",
+            glossary={},
+        )
+        assert out.via_pivot is True
+        assert out.confidence < 0.85       # pivot tax still applied
+        assert out.provider == "claude"
 
     def test_vi_raises_by_default(self) -> None:
         with pytest.raises(LanguageNotEnabledError):
