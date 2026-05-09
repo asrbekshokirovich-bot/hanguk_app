@@ -3,13 +3,18 @@
 --
 --  Captured via:
 --    pg_dump --schema=public --schema-only --no-owner --no-privileges --no-comments
---  Sanitized via services/uni_db/.sanitize_baseline.py
---    (strips ALTER OWNER, COMMENT ON ROLE, cluster GRANTs, session SETs,
---     SELECT pg_catalog.set_config, \restrict)
+--  Sanitized to strip ALTER OWNER, COMMENT ON ROLE, cluster GRANTs, most
+--  session SETs, SELECT pg_catalog.set_config, and \restrict.
 --
 --  Source-of-truth schema for the Hanguk 2026 prod project (lysjdtyanhdfphqyijsr).
 --  Subsequent uni_db_v1 / v2 / v3 migrations build on top of this.
 -- =============================================================================
+
+-- Required for round-trip restore: pg_dump emits SQL-language functions
+-- that reference tables defined later in the file. Without this set,
+-- those CREATE FUNCTION statements fail at parse time. The setting is
+-- session-local and reverts at end of statement run.
+SET check_function_bodies = false;
 
 --
 -- PostgreSQL database dump

@@ -22,8 +22,8 @@ interface RequestBody {
 
 interface DocumentRow {
   id: string;
-  bucket: string;
-  storage_object_path: string;
+  bucket: string | null;
+  storage_path: string | null;
 }
 
 const SIGNED_URL_TTL_SECONDS = 60 * 15;
@@ -95,25 +95,26 @@ Deno.serve(async (req) => {
     return jsonResponse(400, { error: 'missing_document_id' });
   }
 
-  // Look up the document. RLS allows the user to see public documents;
-  // we bypass via service role to keep this code reusable across cohorts.
+  // Look up the uni_db guideline blob. The uni_db v1 table is
+  // guideline_documents (different from prod's documents table). Service
+  // role bypasses RLS so we can read across all institutions.
   const { data: doc, error: docErr } = await serviceClient
-    .from('documents')
-    .select('id, bucket, storage_object_path')
+    .from('guideline_documents')
+    .select('id, bucket, storage_path')
     .eq('id', documentId)
     .maybeSingle<DocumentRow>();
   if (docErr) {
-    console.error('document lookup failed', docErr);
+    console.error('guideline_documents lookup failed', docErr);
     return jsonResponse(500, { error: 'lookup_failed' });
   }
-  if (!doc || !doc.storage_object_path) {
+  if (!doc || !doc.storage_path) {
     return jsonResponse(404, { error: 'document_not_found' });
   }
 
   const bucket = doc.bucket || DEFAULT_BUCKET;
   const { data: signed, error: signErr } = await serviceClient.storage
     .from(bucket)
-    .createSignedUrl(doc.storage_object_path, SIGNED_URL_TTL_SECONDS);
+    .createSignedUrl(doc.storage_path, SIGNED_URL_TTL_SECONDS);
   if (signErr || !signed?.signedUrl) {
     console.error('createSignedUrl failed', signErr);
     return jsonResponse(500, { error: 'signing_failed' });
@@ -125,14 +126,18 @@ Deno.serve(async (req) => {
   // Best-effort audit. If the audit insert fails, we still return the
   // signed URL — the alternative (refusing access) is a worse failure
   // mode for the student and the audit gap will surface in monitoring.
+  // Column names come from the Phase 2 storage_bucket migration:
+  //   guideline_document_id, storage_path, signed_url_ttl_sec, ip_address
+  // Phase 3's pdf_access_log migration adds bucket, expires_at, reason.
   const { error: logErr } = await serviceClient.from('pdf_access_log').insert({
     user_id: userId,
-    document_id: doc.id,
+    guideline_document_id: doc.id,
     bucket,
-    object_path: doc.storage_object_path,
+    storage_path: doc.storage_path,
+    signed_url_ttl_sec: SIGNED_URL_TTL_SECONDS,
     granted_at: grantedAt.toISOString(),
     expires_at: expiresAt.toISOString(),
-    ip: req.headers.get('x-real-ip') || req.headers.get('cf-connecting-ip') || null,
+    ip_address: req.headers.get('x-real-ip') || req.headers.get('cf-connecting-ip') || null,
     user_agent: req.headers.get('user-agent'),
     reason: body.reason || 'open_original',
   });
