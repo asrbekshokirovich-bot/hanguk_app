@@ -13,7 +13,7 @@ an envvar in `services/uni_db/.env.example`.
 | # | Integration | Status | Notes |
 |---|---|---|---|
 | 1 | Supabase (staging) | **Done** | `hanguk-staging` linked; Phase 0/1/2 migrations applied. See `supabase/.temp/`. |
-| 1 | Supabase (production) | Pending | Real prod baseline blocks production push — see [`MIGRATION_BASELINE_TODO.md`](../supabase/migrations/MIGRATION_BASELINE_TODO.md). |
+| 1 | Supabase (production) | **Baseline done** (2026-05-08) | Real `pg_dump` of prod replaces the staging shim. Production migration push itself is still pending — handled by Gemini deploy prompt Phase B. |
 | 2 | Cloudflare R2 | **Superseded** | [ADR-009](decisions/009-pdf-blob-access.md) replaces R2 with Supabase Storage. R2 envvars no longer needed. The `r2.py` storage backend is deprecated. |
 | 3 | Hetzner VPS | Pending | Phase 3 deliverable; provisioning sketch in [`PHASE_3_DESIGN.md` §3](../services/uni_db/PHASE_3_DESIGN.md#3-hetzner-vps-provisioning). |
 | 4 | Anthropic API | **Done** (2026-05-08) | Key set; budget alerts at $200/$400/$1000 per [ADR-001](decisions/001-budget-ceiling.md). Live calls still gated by `UNI_DB_LIVE_APIS=true` (off by default). |

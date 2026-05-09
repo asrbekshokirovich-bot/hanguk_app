@@ -60,7 +60,7 @@ fall back to local `.cache/blobs/` shim under the same flag.
 | Live ac.kr crawl | Owner approval not yet in. Discovery still runs against fixtures. | `UNI_DB_LIVE_CRAWL=true` |
 | Translation: uz / vi / mn / ru / id | ADR-004 — uz waits for Phase 3 native reviewer. Others not currently needed for the contracted-student cohort. | `UNI_DB_TRANSLATION_LANGUAGES=en,uz` (etc.) |
 | Hetzner VPS provisioning (ADR-003) | Not provisioned in Phase 1; deferred to Phase 2 ops slot. | Manual Hetzner Console step + systemd unit |
-| Production migrations | Real prod schema baseline still missing — see `MIGRATION_BASELINE_TODO.md` | Run the documented `supabase db dump` once Docker or pg_dump 17 is available |
+| Production migrations | Baseline now real (replaced 2026-05-08 via pg_dump 17 against prod). Migrations themselves still pending the staging dry-run + push sequence in the Gemini deploy prompt Phase B. | Run `supabase db push --linked` after staging confirms |
 
 ## Deferred from §I-Phase-2 per ADR-007 (internal-only)
 
@@ -105,10 +105,11 @@ blocks Phase 2 work; both flagged for transparency:
 
 ## What's gating Phase 3
 
-1. **Real prod schema baseline** still missing
-   (`supabase/migrations/MIGRATION_BASELINE_TODO.md`) — the staging
-   shim works for staging, but production push is blocked until the
-   real dump replaces it.
+1. **Real prod schema baseline** ✅ landed 2026-05-08 — replaced
+   the staging shim with a real `pg_dump` against prod
+   (`lysjdtyanhdfphqyijsr`). 81 tables, 496 DDL statements, sanitized
+   per the (now-deleted) MIGRATION_BASELINE_TODO. The next blocker is
+   running the actual staging+prod push (Gemini deploy prompt Phase B).
 2. **In-office reviewer (ADR-005) hired and onboarded** — the HITL
    workflow and the reviewer queue views exist, but no human is
    working them yet.

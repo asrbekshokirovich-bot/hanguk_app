@@ -449,8 +449,9 @@ Phase 3 target                   ~ 255 tests
 
 Don't start Phase 3 implementation until:
 
-- [ ] Real prod schema baseline replaces the staging shim
-      ([`MIGRATION_BASELINE_TODO.md`](../../supabase/migrations/MIGRATION_BASELINE_TODO.md))
+- [x] Real prod schema baseline replaces the staging shim
+      (cleared 2026-05-08; `00000000000001_lovable_baseline.sql` is
+      now a sanitized pg_dump of Hanguk 2026 prod)
 - [ ] In-office reviewer hired and granted `role='uni_db_reviewer'`
       ([ADR-005](../../docs/decisions/005-hitl-reviewer.md))
 - [ ] Anthropic API key + billing alerts at $200/$400/$1000 thresholds
