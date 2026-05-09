@@ -773,26 +773,187 @@ Anthropic and DeepL). No paid call has fired from this session.
 
 ---
 
+## 14. Update — 2026-05-08 (later again) — Phase A/B/C deployed
+
+Direct-execution session. Gemini hit DNS + Docker blockers; the rest
+ran from the local Windows machine using pg_dump 17.6 +
+supabase CLI 2.98.2 (already authenticated by Gemini's prior
+`supabase login`).
+
+### Phase A — prod schema baseline (commit `ed815b6`)
+
+* `pg_dump --schema=public --schema-only --no-owner --no-privileges
+  --no-comments` against the Hanguk 2026 prod project via the
+  session-pooler URL.
+* 6,800 lines / 245 KB → sanitized (strip session SETs except
+  `check_function_bodies=false` which is required for round-trip
+  restore of forward-referencing SQL functions; strip \\restrict and
+  pg_catalog.set_config) → 6,783 lines committed as the new
+  `00000000000001_lovable_baseline.sql`.
+* 81 prod tables, 496 DDL statements, includes every table the prior
+  staging-shim baseline lacked (payments, scheduled_payments,
+  university_documents, interview_sessions, etc.) plus richer
+  surfaces (gks_*, ai_*, call_*, intercom_calls, etc.).
+* `supabase/migrations/MIGRATION_BASELINE_TODO.md` deleted —
+  gate cleared.
+
+### Phase B — staging push (commit `0f7f3d2`)
+
+Staging required a destructive reset because the prior shim baseline
+was already in its `schema_migrations` table; Supabase tracks by
+filename version, not content. Reset via direct DB:
+
+  ```sql
+  drop schema if exists public cascade;
+  create schema public;
+  grant all on schema public to postgres, anon, authenticated, service_role;
+  delete from supabase_migrations.schema_migrations;
+  ```
+
+Three fix-it migrations had to be added before the staging push
+went green:
+
+1. **`SET check_function_bodies = false`** restored to the baseline
+   header — pg_dump emits `LANGUAGE sql` functions that reference
+   tables defined later in the file; without that setting the very
+   first migration aborts at parse time.
+
+2. **`00000000000002_pre_uni_db_scholarships_rename.sql`** — bridge
+   migration. Prod has a `public.scholarships` table from the legacy
+   Lovable schema (university_id, name, coverage, ...) that
+   collides with uni_db Phase 0's `public.scholarships`
+   (institution_id, scope, award_type, topik_tier_table, ...).
+   Bridge renames the legacy table to `legacy_scholarships`,
+   preserving prod data.
+
+3. **`00000000000003_pre_uni_db_profiles_role.sql`** — bridge
+   migration. uni_db migrations assume `profiles.role` exists; prod
+   uses a separate `public.user_roles` table for role-based access
+   (per the baseline's `has_role(uuid, app_role)` function). Bridge
+   adds `profiles.role text DEFAULT 'student'` plus an index on
+   `(user_id, role)` for the per-row RLS subquery.
+
+4. **`20260701000000_uni_db_v3_pdf_access_log.sql`** rewritten from
+   `CREATE TABLE` to `ALTER TABLE ADD COLUMN`. Phase 2's
+   `20260606000000_uni_db_v2_storage_bucket.sql` already creates
+   `pdf_access_log` with one column set; Phase 3 was duplicating the
+   CREATE then trying to index a column the existing shape didn't
+   have. Phase 3 now just adds the three Edge-Function-specific
+   columns: `bucket`, `expires_at`, `reason`.
+
+5. **`supabase/functions/get-pdf-url/index.ts`** aligned to Phase 2's
+   actual column names: looks up `guideline_documents` (not
+   `documents`), inserts `guideline_document_id` /
+   `storage_path` / `ip_address` / `signed_url_ttl_sec` rather than
+   the names I'd guessed in Phase 3.
+
+After fixes, staging push went clean: 28 migrations applied, 109
+tables in public, smoke test green on every check (RLS toggles,
+`fn_is_app_user`, `profiles_role_check`, `guideline_blobs` private,
+`trg_proposed_source_promote` trigger).
+
+### Phase B — prod push
+
+Prod's `schema_migrations` had 105 stale versions (Lovable + manual
+migrations from 2026-01-04 through 2026-03-11) that aren't in this
+git repo. Standard Supabase consolidation pattern:
+
+  ```bash
+  supabase migration repair --status reverted <105 versions>
+  supabase migration repair --status applied 00000000000001
+  supabase db push --linked
+  ```
+
+Schema unchanged (the 105 reverted migrations are baked into the
+baseline dump). Migration history compacted from 105 records →
+`00000000000001` (baseline) plus the 33 forward migrations.
+
+After the repair, dry-run showed the same 33 migrations as staging.
+Push completed clean: `Finished supabase db push.` `migration list
+--linked` confirms 34 entries with Local|Remote columns identical.
+
+### Phase C — Edge Functions
+
+Three functions deployed to both staging (`nhjzbjzhmugcmzchzxlv`)
+and prod (`lysjdtyanhdfphqyijsr`):
+
+* `get-pdf-url` — JWT verify + fn_is_app_user RPC + signed URL
+  (15-min TTL) + audit row to `pdf_access_log`
+* `register-push-token` — JWT verify + upsert to `user_push_tokens`
+* `notify-tracked-changes` — cron-triggered outbox drain (FCM HTTP
+  v1, APNs HTTP/2 with ES256 bearer JWT, web-push skeleton)
+
+Function secrets NOT yet set on either project. The functions will
+respond with platform-specific failure errors (`fcm_not_configured`,
+`apns_not_configured`, `vapid_not_configured`) until
+`supabase secrets set FCM_SERVICE_ACCOUNT_JSON=... APNS_KEY_P8=... ...`
+is run. `notify-tracked-changes` reads `UNI_DB_PUSH_ENABLED=false`
+as the killswitch default — the outbox accrues harmlessly until the
+secrets land.
+
+### Phase D — Hetzner
+
+Account created (asrbekshokirovich@gmail.com). Verification flagged
+"increased risk" → user ID upload required. Deferred until user has
+ID document available.
+
+### Phase E — final cleanup
+
+Pending Phase D completion. Once Hetzner is provisioned, will:
+
+* Push the `infra/bootstrap.sh` + systemd units
+* Set `/etc/uni_db/env` from `infra/env.example`
+* Start the four worker units
+* Verify polling logs
+
+### Action items still on you
+
+1. **Reset prod DB password again** — the password you typed in this
+   chat session was reset by you afterwards, but I want to flag that
+   any password value in the chat transcript is exposed. The
+   `services/uni_db/.prod-db-url.txt` file currently has whatever you
+   most recently wrote; consider rotating one more time and updating
+   the file (it's gitignored).
+2. **Hire the in-office reviewer** (ADR-005). Once hired, give them
+   `profiles.role = 'uni_db_reviewer'`.
+3. **Approve first live ac.kr crawl.** Flips `UNI_DB_LIVE_CRAWL=true`.
+4. **Set Edge Function secrets** when FCM / APNs / VAPID credentials
+   are available:
+     ```bash
+     supabase secrets set FCM_SERVICE_ACCOUNT_JSON=... \
+       APNS_KEY_P8=... APNS_KEY_ID=... APNS_TEAM_ID=... APNS_BUNDLE_ID=... \
+       WEB_PUSH_VAPID_PRIVATE=... WEB_PUSH_VAPID_PUBLIC=... \
+       UNI_DB_PUSH_ENABLED=false \
+       --project-ref lysjdtyanhdfphqyijsr   # and again for staging
+     ```
+5. **Recruit native Uzbek reviewer** to flip
+   `UNI_DB_TRANSLATION_LANGUAGES=en,uz` (ADR-004).
+
+---
+
 **Reading back into this on next session:**
 
 ```
-Worktree branch:   claude/vigorous-haibt-f28e2d @ HEAD (Phase 3 implementation)
-Worktree path:     C:\Users\User\Desktop\Hanguk\.claude\worktrees\vigorous-haibt-f28e2d
-Main branch:       main @ c6c8d47 (unchanged since the 2026-05-07 audit)
-Staging Supabase:  hanguk-staging (nhjzbjzhmugcmzchzxlv, ap-northeast-2)
-Phase 0+1 schema:  applied to staging
-Phase 2 schema:    applied to staging (4 v2 migrations)
-Phase 3 schema:    file-only (4 v3 migrations); apply via Gemini Phase B
-Production:        no migrations applied; gated on real prod baseline (Gemini Phase A)
-§O answers:        ADR 001–010 in docs/decisions/
-Phase 2 status:    feature-complete in code, applied to staging
-Phase 3 status:    code-complete in worktree (translation, signed URL,
-                   push outbox, /admin/review, compare, Hetzner infra);
-                   deployment delegated to docs/runbooks/gemini-deploy-prompt.md
+Worktree branch:    claude/vigorous-haibt-f28e2d @ HEAD (Phase B+C deployed)
+Worktree path:      C:\Users\User\Desktop\Hanguk\.claude\worktrees\vigorous-haibt-f28e2d
+Main branch:        main @ c6c8d47 (unchanged)
+CLI linked to:      staging (nhjzbjzhmugcmzchzxlv) — restored after prod work
+
+PHASE A — prod baseline:        ✅ done 2026-05-08 (commit ed815b6)
+PHASE B — staging migrations:   ✅ done 2026-05-08 (commit 0f7f3d2)
+                                  34 migrations, 109 tables, smoke test green
+PHASE B — prod migrations:      ✅ done 2026-05-08 (commit 0f7f3d2)
+                                  34 migrations Local|Remote in sync
+PHASE C — Edge Functions on staging: ✅ get-pdf-url, register-push-token,
+                                       notify-tracked-changes deployed
+PHASE C — Edge Functions on prod:    ✅ same three deployed
+PHASE D — Hetzner provisioning:      ⏸ blocked on user ID verification
+PHASE E — final cleanup:             pending Phase D
+
 Tests:             242 Python (pytest) + 11 Flutter passing offline
 Reviewer guide:    docs/runbooks/reviewer-onboarding.md (NOT YET ASSIGNED)
 Live integrations: still mocked behind UNI_DB_LIVE_APIS=false
-Feature flag:      kUniDbEnabled=false default; --dart-define=UNI_DB_ENABLED=true to test
+Feature flag:      kUniDbEnabled=false default
 ```
 
 ---
