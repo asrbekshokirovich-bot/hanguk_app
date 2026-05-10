@@ -2,8 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/feature_flags/uni_db_flag.dart';
+import '../domain/document_requirement_row.dart';
 import '../domain/institution_summary.dart';
 import '../domain/recruitment_target.dart';
+import '../domain/requirements_row.dart';
+import '../domain/scholarship_row.dart';
+import '../domain/tuition_row.dart';
 import '../domain/upcoming_deadline.dart';
 
 /// Read-only Riverpod providers backed by the new uni_db views (plan §H).
@@ -170,6 +174,88 @@ Future<void> setInstitutionTracking({
         .eq('institution_id', institutionId);
   }
 }
+
+/// All tuition rows for an institution, sorted academic_year desc then
+/// faculty_group then semester. Returns the most recent year first so
+/// the UI can show "current rate" cleanly.
+final institutionTuitionProvider =
+    FutureProvider.family<List<TuitionRow>, String>((ref, institutionId) async {
+  if (!kUniDbEnabled) return const [];
+  final client = Supabase.instance.client;
+  final rows = await client
+      .from('tuition')
+      .select()
+      .eq('institution_id', institutionId)
+      .order('academic_year', ascending: false)
+      .order('faculty_group')
+      .order('semester_number');
+  return (rows as List)
+      .map((r) => TuitionRow.fromMap(r as Map<String, dynamic>))
+      .toList(growable: false);
+});
+
+/// All requirements for the most-recent verified admission cycle of
+/// an institution, one row per applicant_category. Joins through
+/// admission_cycles to find the institution-scoped cycle ids.
+final institutionRequirementsProvider =
+    FutureProvider.family<List<RequirementsRow>, String>(
+  (ref, institutionId) async {
+    if (!kUniDbEnabled) return const [];
+    final client = Supabase.instance.client;
+    final rows = await client
+        .from('requirements')
+        .select(
+          '*, admission_cycles!inner(institution_id, intake_year, status)',
+        )
+        .eq('admission_cycles.institution_id', institutionId)
+        .eq('admission_cycles.status', 'verified')
+        .order('applicant_category');
+    return (rows as List)
+        .map((r) => RequirementsRow.fromMap(r as Map<String, dynamic>))
+        .toList(growable: false);
+  },
+);
+
+/// All scholarships scoped to one institution, ordered by scope
+/// (national first) then award_value desc.
+final institutionScholarshipsProvider =
+    FutureProvider.family<List<ScholarshipRow>, String>(
+  (ref, institutionId) async {
+    if (!kUniDbEnabled) return const [];
+    final client = Supabase.instance.client;
+    final rows = await client
+        .from('scholarships')
+        .select()
+        .eq('institution_id', institutionId)
+        .order('scope')
+        .order('award_value', ascending: false, nullsFirst: false);
+    return (rows as List)
+        .map((r) => ScholarshipRow.fromMap(r as Map<String, dynamic>))
+        .toList(growable: false);
+  },
+);
+
+/// All required-document rows for an institution's most-recent verified
+/// cycle. Grouped by applicant_category in the UI.
+final institutionDocumentsRequiredProvider =
+    FutureProvider.family<List<DocumentRequirementRow>, String>(
+  (ref, institutionId) async {
+    if (!kUniDbEnabled) return const [];
+    final client = Supabase.instance.client;
+    final rows = await client
+        .from('documents_required')
+        .select(
+          '*, admission_cycles!inner(institution_id, status)',
+        )
+        .eq('admission_cycles.institution_id', institutionId)
+        .eq('admission_cycles.status', 'verified')
+        .order('applicant_category')
+        .order('document_type');
+    return (rows as List)
+        .map((r) => DocumentRequirementRow.fromMap(r as Map<String, dynamic>))
+        .toList(growable: false);
+  },
+);
 
 /// Update notification prefs for one tracked institution.
 ///
