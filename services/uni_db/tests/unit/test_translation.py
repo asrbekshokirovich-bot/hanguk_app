@@ -103,9 +103,10 @@ class TestPipelineRouting:
 
 
 class TestDefaultLanguageGate:
-    """Default-on languages: `en` and `uz` (per ADR-004-amend 2026-05-08).
+    """Default-on languages: `en`, `uz`, `vi`, `mn`
+    (per ADR-004-amend-1 2026-05-08 and ADR-004-amend-2 2026-05-10).
 
-    Other languages still raise LanguageNotEnabledError until explicitly
+    `ru` and `id` still raise LanguageNotEnabledError until explicitly
     enabled via UNI_DB_TRANSLATION_LANGUAGES.
     """
 
@@ -119,11 +120,31 @@ class TestDefaultLanguageGate:
         assert out.confidence < 0.85       # pivot tax still applied
         assert out.provider == "claude"
 
-    def test_vi_raises_by_default(self) -> None:
+    def test_vi_works_by_default(self) -> None:
+        out = translate(
+            source_text_ko="외국인전형",
+            target_lang="vi",
+            glossary={},
+        )
+        # vi uses Papago directly (no pivot)
+        assert out.via_pivot is False
+        assert out.provider == "papago"
+
+    def test_mn_works_by_default(self) -> None:
+        out = translate(
+            source_text_ko="외국인전형",
+            target_lang="mn",
+            glossary={},
+        )
+        # mn pivots through English (Papago doesn't support mn)
+        assert out.via_pivot is True
+        assert out.provider == "claude"
+
+    def test_ru_raises_by_default(self) -> None:
         with pytest.raises(LanguageNotEnabledError):
             translate(
                 source_text_ko="외국인전형",
-                target_lang="vi",
+                target_lang="ru",
                 glossary={},
             )
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'design_system/theme/app_theme.dart';
+import 'features/uni_db/data/push_token_bootstrap.dart';
 import 'features/updater/presentation/update_gate.dart';
 import 'package:device_preview/device_preview.dart';
 Future<void> main() async {
@@ -78,6 +79,12 @@ class HangukApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(appRouterProvider);
+
+    // Read once so the bootstrap subscribes to auth-state changes.
+    // Without this, the provider stays cold and tokens never register.
+    // The provider is no-op until a PushTokenSource is configured (after
+    // a Firebase / APNs / VAPID SDK is wired into the app).
+    ref.read(pushTokenBootstrapProvider);
 
     return MaterialApp.router(
       title: 'Hanguk Student App',

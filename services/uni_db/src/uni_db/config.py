@@ -34,12 +34,16 @@ class Settings(BaseSettings):
     )
 
     # Translation default-on languages.
-    # ADR-004-amend (2026-05-08): owner accepted the two-hop ko->en->uz
+    # ADR-004-amend-1 (2026-05-08): owner accepted the two-hop ko->en->uz
     # quality risk and authorised Uzbek translation without a native
-    # reviewer in the queue. Default flipped to "en,uz". The reviewer can
-    # still be added later — same env var, no further code change needed.
+    # reviewer. Default flipped to "en,uz".
+    # ADR-004-amend-2 (2026-05-10): same risk profile accepted for
+    # Vietnamese and Mongolian ahead of cohort growth. Default now
+    # "en,uz,vi,mn". The HITL queue catches gross errors regardless of
+    # the reviewer's native language, and the "View original (한국어)"
+    # toggle remains the safety valve.
     translation_languages_enabled: str = Field(
-        default="en,uz", alias="UNI_DB_TRANSLATION_LANGUAGES"
+        default="en,uz,vi,mn", alias="UNI_DB_TRANSLATION_LANGUAGES"
     )
 
     # Supabase

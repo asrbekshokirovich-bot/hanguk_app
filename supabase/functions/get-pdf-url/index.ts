@@ -22,7 +22,6 @@ interface RequestBody {
 
 interface DocumentRow {
   id: string;
-  bucket: string | null;
   storage_path: string | null;
 }
 
@@ -100,7 +99,7 @@ Deno.serve(async (req) => {
   // role bypasses RLS so we can read across all institutions.
   const { data: doc, error: docErr } = await serviceClient
     .from('guideline_documents')
-    .select('id, bucket, storage_path')
+    .select('id, storage_path')
     .eq('id', documentId)
     .maybeSingle<DocumentRow>();
   if (docErr) {
@@ -111,7 +110,10 @@ Deno.serve(async (req) => {
     return jsonResponse(404, { error: 'document_not_found' });
   }
 
-  const bucket = doc.bucket || DEFAULT_BUCKET;
+  // guideline_documents has no bucket column — every blob lives in
+  // guideline-blobs per ADR-009. The pdf_access_log row records it for
+  // future-proofing if we ever shard buckets per institution.
+  const bucket = DEFAULT_BUCKET;
   const { data: signed, error: signErr } = await serviceClient.storage
     .from(bucket)
     .createSignedUrl(doc.storage_path, SIGNED_URL_TTL_SECONDS);

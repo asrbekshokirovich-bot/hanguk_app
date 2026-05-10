@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/admin_review_providers.dart';
 import '../domain/review_queue_item.dart';
@@ -340,14 +341,28 @@ class _DetailPane extends StatelessWidget {
     }
   }
 
-  void _launchPdf(BuildContext context, String url) {
-    // The PDF URL came pre-signed from the dashboard view; tapping
-    // copies it to the clipboard for the reviewer to paste into a
-    // browser. Phase 3+ swaps this for the in-app pdfx viewer once
-    // the rendering layer is wired.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Open in browser: $url')),
-    );
+  Future<void> _launchPdf(BuildContext context, String url) async {
+    // The dashboard view emits a pre-signed 15-minute URL. Tapping
+    // launches the system PDF viewer (browser on web, the user's
+    // chosen app on mobile). We prefer external launch over an in-app
+    // viewer because the reviewer typically wants to scroll through
+    // the entire admission guideline (50-100 pages) and a native
+    // viewer offers better navigation than any in-app pdfx layer.
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not parse signed URL.')),
+      );
+      return;
+    }
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open PDF — no app available to handle the URL.'),
+        ),
+      );
+    }
   }
 }
 

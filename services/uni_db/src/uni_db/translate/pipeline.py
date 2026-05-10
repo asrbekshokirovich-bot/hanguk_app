@@ -52,12 +52,13 @@ PIVOT_VIA_EN: Final[frozenset[TargetLang]] = frozenset({"uz", "mn"})
 
 
 # Default-on translation targets.
-# ADR-004-amend (2026-05-08): Uzbek added by owner override despite the
-# absence of a native reviewer. Outputs go through the same HITL queue
-# the in-office reviewer (ADR-005) works; flagged-low-confidence Uzbek
-# rows surface there for correction. Korean is canonical and isn't a
-# "translation target" per se.
-DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en", "uz"})
+# ADR-004-amend-1 (2026-05-08): Uzbek added by owner override despite
+# the absence of a native reviewer.
+# ADR-004-amend-2 (2026-05-10): Vietnamese and Mongolian added under
+# the same risk profile ahead of cohort growth. All four targets go
+# through the HITL queue; flagged-low-confidence rows surface there
+# for correction. Korean is canonical and isn't a "translation target".
+DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en", "uz", "vi", "mn"})
 
 
 class LanguageNotEnabledError(RuntimeError):

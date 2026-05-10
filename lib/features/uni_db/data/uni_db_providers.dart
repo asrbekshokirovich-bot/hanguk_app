@@ -235,6 +235,25 @@ final institutionScholarshipsProvider =
   },
 );
 
+/// The most-recent successfully-parsed guideline_documents row for an
+/// institution. Used by the detail screen to power "Open admission
+/// guide PDF" via PdfUrlService. Returns null when the institution has
+/// no parsed guideline yet.
+final institutionPrimaryGuidelineProvider =
+    FutureProvider.family<String?, String>((ref, institutionId) async {
+  if (!kUniDbEnabled) return null;
+  final client = Supabase.instance.client;
+  final row = await client
+      .from('guideline_documents')
+      .select('id')
+      .eq('institution_id', institutionId)
+      .eq('parse_status', 'succeeded')
+      .order('fetched_at', ascending: false)
+      .limit(1)
+      .maybeSingle();
+  return row?['id'] as String?;
+});
+
 /// All required-document rows for an institution's most-recent verified
 /// cycle. Grouped by applicant_category in the UI.
 final institutionDocumentsRequiredProvider =

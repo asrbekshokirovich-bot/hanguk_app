@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../data/pdf_url_service.dart';
 import '../data/uni_db_providers.dart';
 import '../domain/document_requirement_row.dart';
 import '../domain/institution_summary.dart';
@@ -76,6 +78,8 @@ class _DetailContent extends ConsumerWidget {
           institutionId: institutionId,
           tracking: tracking,
         ),
+        const SizedBox(height: 12),
+        _OpenGuidelineButton(institutionId: institutionId),
         const SizedBox(height: 24),
         Text(
           'Upcoming deadlines',
@@ -319,6 +323,82 @@ class _DeadlineTile extends StatelessWidget {
         'semester_start' => 'Semester starts',
         _ => eventType.replaceAll('_', ' '),
       };
+}
+
+/// "Open admission guide PDF" button. Calls get-pdf-url to mint a
+/// 15-minute signed URL, then launches it in the user's preferred
+/// PDF reader. The Edge Function writes a pdf_access_log audit row
+/// server-side; the client never touches that table directly.
+class _OpenGuidelineButton extends ConsumerStatefulWidget {
+  const _OpenGuidelineButton({required this.institutionId});
+  final String institutionId;
+
+  @override
+  ConsumerState<_OpenGuidelineButton> createState() => _OpenGuidelineButtonState();
+}
+
+class _OpenGuidelineButtonState extends ConsumerState<_OpenGuidelineButton> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final docId = ref.watch(institutionPrimaryGuidelineProvider(widget.institutionId));
+    return docId.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (id) {
+        if (id == null) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              'No admission guide PDF on file yet — the discovery worker '
+              'hasn’t crawled this institution’s 모집요강.',
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
+            ),
+          );
+        }
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            icon: _busy
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.picture_as_pdf),
+            label: Text(_busy ? 'Opening...' : 'Open admission guide PDF'),
+            onPressed: _busy ? null : () => _open(id),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _open(String documentId) async {
+    setState(() => _busy = true);
+    try {
+      final service = ref.read(pdfUrlServiceProvider);
+      final signed = await service.getSignedUrl(documentId);
+      final uri = Uri.tryParse(signed.signedUrl);
+      if (uri == null) throw StateError('Signed URL was not parseable');
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not launch PDF — no app available to handle the URL.'),
+          ),
+        );
+      }
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open PDF: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 }
 
 class _SectionEmpty extends StatelessWidget {
