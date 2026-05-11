@@ -16,7 +16,9 @@ class InterviewSetupView extends ConsumerStatefulWidget {
 class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
   String _sessionType = 'general';
   String _language = 'ko';
-  String _focusTopic = '';
+  // Audit U11: controller-backed so the field re-renders on edit and
+  // the cursor doesn't jump.
+  final TextEditingController _focusTopicCtrl = TextEditingController();
   String _persona = 'friendly';
   bool _timedMode = false;
   // Audit U10: when sessionType == 'university_specific', this view
@@ -27,14 +29,21 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
 
   bool get _isUniSpecific => _sessionType == 'university_specific';
 
+  @override
+  void dispose() {
+    _focusTopicCtrl.dispose();
+    super.dispose();
+  }
+
   void _start() {
     if (_isUniSpecific && _targetUniversityId == null) return;
+    final topic = _focusTopicCtrl.text.trim();
     ref.read(interviewProvider.notifier).startSession(
       sessionType: _sessionType,
       targetUniversityId: _targetUniversityId,
       targetUniversityName: _targetUniversityName,
       language: _language,
-      focusTopic: _focusTopic.isNotEmpty ? _focusTopic : null,
+      focusTopic: topic.isNotEmpty ? topic : null,
       persona: _persona,
       timedMode: _timedMode,
       timeLimitSeconds: _timedMode ? 300 : null, // 5 min default
@@ -178,6 +187,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
           _buildLabel('Focus Topic (Optional)'),
           const SizedBox(height: 8),
           TextField(
+            controller: _focusTopicCtrl,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'e.g. Discussing my computer science major...',
@@ -189,7 +199,6 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
                 borderSide: BorderSide.none,
               ),
             ),
-            onChanged: (val) => _focusTopic = val,
           ),
           const SizedBox(height: 24),
 

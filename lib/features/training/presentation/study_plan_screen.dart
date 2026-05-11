@@ -24,7 +24,6 @@ class StudyPlanScreen extends ConsumerStatefulWidget {
 
 class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   final TextEditingController _draftController = TextEditingController();
-  String? _exampleSelectedUniName;
 
   @override
   void initState() {

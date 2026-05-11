@@ -221,6 +221,18 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
           .map((data) => StudyPlanSession.fromJson(data))
           .toList();
 
+      // Audit D4: sort completed sessions to the bottom so they don't
+      // dominate the in-progress list, but keep them visible (revisiting
+      // feedback is a common use case). Within each bucket the existing
+      // updated_at DESC order is preserved.
+      // Alternative considered: filter completed entirely. Rejected —
+      // users would lose access to past feedback.
+      loaded.sort((a, b) {
+        final aCompleted = a.status == 'completed' ? 1 : 0;
+        final bCompleted = b.status == 'completed' ? 1 : 0;
+        return aCompleted - bCompleted;
+      });
+
       _setState(type, _getState(type).copyWith(isSessionsLoading: false, sessions: loaded));
     } catch (e) {
       _setState(type, _getState(type).copyWith(isSessionsLoading: false, error: e.toString()));
@@ -459,7 +471,15 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
   }
 
   void clearCurrentSession(String type) {
-    _setState(type, const StudyPlanSessionState());
+    // Audit D3: preserve the sessions list so the user doesn't see an
+    // empty list flash + a re-fetch when they close a session.
+    final s = _getState(type);
+    _setState(
+      type,
+      StudyPlanSessionState(
+        sessions: s.sessions,
+      ),
+    );
   }
 
   /// AI Invocation using Edge Functions

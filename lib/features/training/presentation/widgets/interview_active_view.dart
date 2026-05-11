@@ -169,14 +169,32 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
         } else if (eventLabel == 'status-update' || eventLabel == 'statusUpdate') {
           debugPrint('[VAPI STATUS UPDATE] $eventValue');
           final statusString = eventValue.toString().toLowerCase();
-          
+
           if (statusString.contains('error')) {
             ref.read(interviewProvider.notifier).setVapiConnected(false);
             if (mounted) {
+              // Audit U12: surface the actual error string from the
+              // event payload instead of a misleading generic message.
+              // Fall back to the generic copy only when nothing usable
+              // is available.
+              String? extractedDetail;
+              if (eventValue is Map) {
+                final m = eventValue;
+                final v = m['errorMsg'] ??
+                    m['message'] ??
+                    m['error'] ??
+                    m['detail'] ??
+                    m['status'];
+                if (v != null) extractedDetail = v.toString();
+              }
+              extractedDetail ??= eventValue.toString();
+              if (extractedDetail.length > 240) {
+                extractedDetail = '${extractedDetail.substring(0, 240)}…';
+              }
               setState(() {
                 _isCallActive = false;
                 _isAI_Speaking = false;
-                _errorMessage = 'Connection interrupted: Backend configuration mismatch or missing limits.';
+                _errorMessage = 'Connection interrupted: $extractedDetail';
               });
             }
           }
