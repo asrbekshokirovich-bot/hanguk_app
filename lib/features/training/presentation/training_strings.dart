@@ -1,14 +1,16 @@
 /// User-facing strings for the training feature.
 ///
-/// Audit L1 / L3: full `flutter_localizations` + `.arb` wiring is
-/// deferred to P2 (estimated 2 days). This file is the conservative
-/// halfway step — it consolidates the top user-visible strings into one
-/// place so a future intl migration can mechanically convert each
-/// constant into a `.arb` key without scavenging through 16 widgets.
-///
-/// Pick a `track` (`'en'` / `'ko'` / `'uz'`) and read the corresponding
-/// surface. Defaults to Uzbek when an unknown / empty track is passed.
+/// Audit L1 / L3 closure 2026-05-10: full `flutter_localizations` is
+/// now wired (see `lib/l10n/`). `TrainingStrings.fromContext(context)`
+/// returns the locale-correct surface via `AppLocalizations`.
+/// `TrainingStrings.forTrack(track)` is preserved for call sites that
+/// only have a track string (e.g. a session's `selected_track`) and no
+/// `BuildContext` — those still hit the hand-rolled tables below until
+/// a wider locale-handle plumb-through is done.
 library training_strings;
+
+import 'package:flutter/widgets.dart';
+import '../../../l10n/app_localizations.dart';
 
 class TrainingStrings {
   const TrainingStrings._({
@@ -70,6 +72,38 @@ class TrainingStrings {
       default:
         return _uz;
     }
+  }
+
+  /// Locale-aware view that pulls strings from the generated
+  /// `AppLocalizations`. Prefer this over [forTrack] in widgets — it
+  /// follows the device / `MaterialApp.locale` setting.
+  static TrainingStrings fromContext(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    if (l == null) return _en;
+    return TrainingStrings._(
+      tabTitle: l.trainingTabTitle,
+      tabSubtitle: l.trainingTabSubtitle,
+      studyPlanCardTitle: l.studyPlanCardTitle,
+      studyPlanCardDesc: l.studyPlanCardDesc,
+      personalStatementCardTitle: l.personalStatementCardTitle,
+      personalStatementCardDesc: l.personalStatementCardDesc,
+      interviewCardTitle: l.interviewCardTitle,
+      interviewCardDesc: l.interviewCardDesc,
+      applyCta: l.applyCta,
+      noApplicationsTitle: l.noApplicationsTitle,
+      noApplicationsBody: l.noApplicationsBody,
+      startInterview: l.startInterview,
+      cancel: l.cancel,
+      endInterview: l.endInterview,
+      endSession: l.endSession,
+      practiceAgain: l.practiceAgain,
+      connecting: l.connecting,
+      greetWait: l.greetWait,
+      yourTurn: l.yourTurn,
+      aiSpeaking: l.aiSpeaking,
+      wrappingUp: l.wrappingUp,
+      micRequired: l.micRequired,
+    );
   }
 
   static const TrainingStrings _en = TrainingStrings._(

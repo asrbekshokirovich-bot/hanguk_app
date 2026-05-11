@@ -13,6 +13,7 @@ import '../data/study_plan_repository.dart';
 // non-functional placeholder. Re-add when the feature is actually built.
 import 'widgets/study_plan_analysis_view.dart';
 import 'widgets/advanced_drafting_workspace.dart';
+import 'widgets/study_plan_history_view.dart';
 
 class StudyPlanScreen extends ConsumerStatefulWidget {
   final String documentType; // 'study_plan' or 'personal_statement'
@@ -53,11 +54,62 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          if (state.currentSession != null)
+          // Audit H4: dedicated history screen (more detail than the
+          // inline session list on the wizard's home step).
+          if (state.currentSession == null)
+            IconButton(
+              tooltip: 'Past drafts',
+              icon: const Icon(Icons.history, color: Colors.white),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => StudyPlanHistoryView(
+                    documentType: widget.documentType,
+                  ),
+                ),
+              ),
+            ),
+          if (state.currentSession != null) ...[
+            // Audit U8: per-session settings menu — currently exposes
+            // the selected_track switch. Add more fields here as the
+            // need surfaces.
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.tune, color: Colors.white),
+              tooltip: 'Session settings',
+              color: AppColors.backgroundNavy,
+              onSelected: (val) async {
+                final session = state.currentSession;
+                if (session == null) return;
+                if (val == 'track-en' || val == 'track-ko') {
+                  final next = val == 'track-en' ? 'en' : 'ko';
+                  await ref
+                      .read(studyPlanSessionProvider.notifier)
+                      .updateSelectedTrack(
+                        widget.documentType,
+                        sessionId: session.id,
+                        track: next,
+                      );
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'track-en',
+                  child: Text('Switch track → English',
+                      style: TextStyle(color: Colors.white)),
+                ),
+                PopupMenuItem(
+                  value: 'track-ko',
+                  child: Text('Switch track → Korean',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () => ref.read(studyPlanSessionProvider.notifier).clearCurrentSession(widget.documentType),
-            )
+              onPressed: () => ref
+                  .read(studyPlanSessionProvider.notifier)
+                  .clearCurrentSession(widget.documentType),
+            ),
+          ],
         ],
       ),
       body: SafeArea(

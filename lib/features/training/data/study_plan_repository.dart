@@ -134,20 +134,25 @@ class ChatMessage {
 class StudyPlanSessionState {
   final bool isLoading;
   final bool isSessionsLoading;
+  // Audit U6: dedicated flag for the AI analyze call so the analysis
+  // view's spinner doesn't trigger on unrelated state mutations
+  // (createSession, loadSession, saveDraft).
+  final bool isAnalyzing;
   final String? error;
-  
+
   final List<StudyPlanSession> sessions;
   final StudyPlanSession? currentSession;
   final List<StudyPlanDraft> drafts;
   final List<StudyPlanAnalysis> analyses;
   final List<ChatMessage> chatHistory;
-  
+
   // Track ongoing drafted text to preserve state across tabs locally before saving
   final String draftContent;
 
   const StudyPlanSessionState({
     this.isLoading = false,
     this.isSessionsLoading = false,
+    this.isAnalyzing = false,
     this.error,
     this.sessions = const [],
     this.currentSession,
@@ -160,6 +165,7 @@ class StudyPlanSessionState {
   StudyPlanSessionState copyWith({
     bool? isLoading,
     bool? isSessionsLoading,
+    bool? isAnalyzing,
     String? error,
     List<StudyPlanSession>? sessions,
     StudyPlanSession? currentSession,
@@ -172,6 +178,7 @@ class StudyPlanSessionState {
     return StudyPlanSessionState(
       isLoading: isLoading ?? this.isLoading,
       isSessionsLoading: isSessionsLoading ?? this.isSessionsLoading,
+      isAnalyzing: isAnalyzing ?? this.isAnalyzing,
       error: clearError ? null : (error ?? this.error),
       sessions: sessions ?? this.sessions,
       currentSession: currentSession ?? this.currentSession,
@@ -234,7 +241,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
       });
 
       _setState(type, _getState(type).copyWith(isSessionsLoading: false, sessions: loaded));
-    } catch (e) {
+    } on Exception catch (e) {
       _setState(type, _getState(type).copyWith(isSessionsLoading: false, error: e.toString()));
     }
   }
@@ -275,7 +282,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
         draftContent: '',
       ));
       return sessionWithTrack;
-    } catch (e) {
+    } on Exception catch (e) {
       _setState(type, _getState(type).copyWith(
           isLoading: false, error: 'Failed to create session: $e'));
       return null;
@@ -327,7 +334,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
         chatHistory: chatHistory,
         draftContent: drafts.isNotEmpty ? drafts.first.content : '',
       ));
-    } catch (e) {
+    } on Exception catch (e) {
       _setState(type, _getState(type).copyWith(
           isLoading: false, error: 'Failed to load session data: $e'));
     }
@@ -388,6 +395,43 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
 
     final sessionId = currentState.currentSession!.id;
     return _withSessionLock<bool>(sessionId, () async {
+      // Audit D5: best-effort multi-device stale-draft protection.
+      // Re-fetch the session row's updated_at right before insert; if
+      // a newer version exists than what we remember locally, refuse
+      // the save and surface an error so the user can refresh.
+      try {
+        final remote = await client
+            .from('study_plan_drafts')
+            .select('version')
+            .eq('session_id', sessionId)
+            .order('version', ascending: false)
+            .limit(1)
+            .maybeSingle();
+        if (remote != null) {
+          final remoteVersion = (remote['version'] as num?)?.toInt() ?? 0;
+          final localMax = _getState(type).drafts.isEmpty
+              ? 0
+              : _getState(type)
+                  .drafts
+                  .map((d) => d.version)
+                  .reduce((a, b) => a > b ? a : b);
+          if (remoteVersion > localMax) {
+            _setState(
+              type,
+              _getState(type).copyWith(
+                error:
+                    'Another device saved a newer draft. Please refresh to merge.',
+              ),
+            );
+            return false;
+          }
+        }
+      } on Exception catch (e) {
+        // Non-fatal — fall through and rely on the (session_id, version)
+        // unique constraint as the last line of defense.
+        debugPrint('D5 stale check failed: $e');
+      }
+
       // Recompute under the lock so concurrent calls don't pick the
       // same version number.
       final localState = _getState(type);
@@ -453,6 +497,50 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
     }
   }
 
+  /// Audit U8: lets the user change the session's selected track after
+  /// creation (Korean ↔ English). Target university change is the
+  /// alternative considered — rejected because the dialog already
+  /// covers that flow during creation and changing it mid-session
+  /// invalidates the analyses written against the prior target.
+  Future<bool> updateSelectedTrack(
+    String type, {
+    required String sessionId,
+    required String track,
+  }) async {
+    try {
+      final nowIso = DateTime.now().toUtc().toIso8601String();
+      await Supabase.instance.client
+          .from('study_plan_sessions')
+          .update({'selected_track': track, 'updated_at': nowIso})
+          .eq('id', sessionId);
+
+      final state = _getState(type);
+      final updated = state.sessions
+          .map(
+            (s) => s.id == sessionId
+                ? s.copyWith(selectedTrack: track, updatedAt: nowIso)
+                : s,
+          )
+          .toList();
+      _setState(
+        type,
+        state.copyWith(
+          sessions: updated,
+          currentSession: state.currentSession?.id == sessionId
+              ? state.currentSession?.copyWith(
+                  selectedTrack: track,
+                  updatedAt: nowIso,
+                )
+              : state.currentSession,
+        ),
+      );
+      return true;
+    } on Exception catch (e) {
+      _setState(type, _getState(type).copyWith(error: 'Failed to update track: $e'));
+      return false;
+    }
+  }
+
   Future<void> deleteSession(String type, String sessionId) async {
     try {
       await Supabase.instance.client
@@ -488,7 +576,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
     final draft = currentState.drafts.isNotEmpty ? currentState.drafts.first : null;
     if (draft == null || currentState.currentSession == null) return null;
 
-    _setState(type, currentState.copyWith(isLoading: true, clearError: true));
+    _setState(type, currentState.copyWith(isAnalyzing: true, clearError: true));
     try {
       final client = Supabase.instance.client;
       final response = await client.functions.invoke(
@@ -551,11 +639,19 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
           .single();
 
       final analysis = StudyPlanAnalysis.fromJson(insertResp);
-      _setState(type, _getState(type).copyWith(isLoading: false, analyses: [analysis, ..._getState(type).analyses]));
+      _setState(
+        type,
+        _getState(type).copyWith(
+          isAnalyzing: false,
+          analyses: [analysis, ..._getState(type).analyses],
+        ),
+      );
       return analysis;
-
-    } catch (e) {
-      _setState(type, _getState(type).copyWith(isLoading: false, error: 'AI Error: $e'));
+    } on Exception catch (e) {
+      _setState(
+        type,
+        _getState(type).copyWith(isAnalyzing: false, error: 'AI Error: $e'),
+      );
       return null;
     }
   }
@@ -590,7 +686,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
         return Map<String, dynamic>.from(jsonDecode(aiResponseText));
       }
       return {};
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Supervise AI Error: $e');
       return null;
     }

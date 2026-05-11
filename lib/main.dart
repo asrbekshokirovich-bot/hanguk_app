@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'design_system/theme/app_theme.dart';
 import 'features/uni_db/data/push_token_bootstrap.dart';
 import 'features/updater/presentation/update_gate.dart';
+import 'l10n/app_localizations.dart';
 import 'package:device_preview/device_preview.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -98,6 +100,17 @@ class HangukApp extends ConsumerWidget {
         return DevicePreview.appBuilder(context, wrapped);
       },
       locale: DevicePreview.locale(context),
+      // Audit L1/L3 closure 2026-05-10: full flutter_localizations wiring.
+      // Non-English ARB files seeded with English placeholders + a
+      // `TODO: translate` marker so a translator can fill them in
+      // later without blocking the wiring.
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }

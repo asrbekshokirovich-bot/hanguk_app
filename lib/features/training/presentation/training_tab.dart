@@ -400,9 +400,32 @@ class TrainingTab extends ConsumerWidget {
                       if (!kIsWeb) {
                         final status = await Permission.microphone.request();
                         if (!status.isGranted && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Microphone access is required for the interview.')),
-                          );
+                          // Audit U16: if the user has permanently denied
+                          // the permission, a snackbar alone is a dead
+                          // end. Offer to deep-link them into the OS
+                          // settings page where they can re-enable.
+                          if (status.isPermanentlyDenied) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text(
+                                  'Microphone is blocked in system settings.',
+                                ),
+                                action: SnackBarAction(
+                                  label: 'Open settings',
+                                  onPressed: () => openAppSettings(),
+                                ),
+                                duration: const Duration(seconds: 6),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Microphone access is required for the interview.',
+                                ),
+                              ),
+                            );
+                          }
                           return;
                         }
                       }

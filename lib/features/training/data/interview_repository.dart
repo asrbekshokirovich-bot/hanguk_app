@@ -132,9 +132,32 @@ class InterviewSessionState {
 // Notifier
 // ---------------------------------------------------------------------------
 class InterviewNotifier extends Notifier<InterviewSessionState> {
+  // Audit D8: track every TTS temp file we write so the next session
+  // boundary (or `cleanupTtsFiles()` call) can delete them. Without
+  // tracking, repeated sessions accumulated `tts_<epoch>.mp3` files
+  // forever in the temp dir.
+  final List<String> _ttsFilePaths = [];
+
   @override
   InterviewSessionState build() {
     return const InterviewSessionState();
+  }
+
+  /// Delete any temp TTS files written during the current/previous
+  /// session. Safe to call eagerly — missing files are ignored.
+  Future<void> cleanupTtsFiles() async {
+    final paths = List<String>.from(_ttsFilePaths);
+    _ttsFilePaths.clear();
+    for (final p in paths) {
+      try {
+        final f = File(p);
+        if (await f.exists()) {
+          await f.delete();
+        }
+      } on FileSystemException catch (e) {
+        debugPrint('TTS cleanup failed for $p: $e');
+      }
+    }
   }
 
   // ── Session lifecycle ────────────────────────────────────────────────────
@@ -216,7 +239,7 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
         // Vapi handles the greeting via its own firstMessage field.
         // Calling sendMessage here caused a duplicate greeting race condition.
       );
-    } catch (e) {
+    } on Exception catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to start interview: ${e.toString()}',
@@ -288,11 +311,18 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
     state = state.copyWith(isProcessing: true, clearError: true);
 
+    // Audit D7: previously a temp student message was added with id
+    // `'temp-…'` and never removed if the AI call failed — the user
+    // saw their utterance but no response. We now track the temp id
+    // so the catch block can roll it back.
+    String? tempId;
+
     try {
       // Add temporary student message
       if (!studentText.contains('[Interview started')) {
+        tempId = 'temp-${DateTime.now().millisecondsSinceEpoch}';
         final newStudentMsg = InterviewMessage(
-          id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
+          id: tempId,
           role: 'student',
           content: studentText,
           createdAt: DateTime.now().toIso8601String(),
@@ -333,13 +363,24 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
     } on FunctionException catch (e) {
       final errDetail = (e.details is Map) ? (e.details as Map)['error'] : e.details;
+      _rollbackTempMessage(tempId);
       state = state.copyWith(error: 'AI Interview error: ${errDetail ?? e.toString()}');
       return null;
-    } catch (e) {
+    } on Exception catch (e) {
+      _rollbackTempMessage(tempId);
       state = state.copyWith(error: 'Failed to process answer: ${e.toString()}');
       return null;
     } finally {
       state = state.copyWith(isProcessing: false);
+    }
+  }
+
+  void _rollbackTempMessage(String? tempId) {
+    if (tempId == null) return;
+    final remaining =
+        state.messages.where((m) => m.id != tempId).toList(growable: false);
+    if (remaining.length != state.messages.length) {
+      state = state.copyWith(messages: remaining);
     }
   }
 
@@ -387,6 +428,11 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
   Future<Map<String, dynamic>?> endSession({String language = 'ko'}) async {
     final sessionId = state.sessionId;
     if (sessionId == null) return null;
+    // Audit D10: guard against double-fire. Tapping "End Session" twice
+    // (or the AppBar end + the auto-end timer triggering simultaneously)
+    // would otherwise hit `interview-feedback` twice and produce
+    // duplicate feedback rows.
+    if (state.isLoading || state.status == 'completed') return state.feedback;
 
     state = state.copyWith(isLoading: true, clearError: true);
 
@@ -494,8 +540,14 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
         }),
       );
 
-      if (response.statusCode == 401 || response.body.contains('Invalid_api_key')) {
-        debugPrint('ElevenLabs API Key error (401). Falling back to Browser TTS.');
+      // Audit B6: rely on the status code only. The previous string
+      // match against `'Invalid_api_key'` was brittle and would silently
+      // miss any other 401 shape the ElevenLabs TTS proxy returns.
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        debugPrint(
+          'ElevenLabs TTS auth error (${response.statusCode}). '
+          'Falling back to browser TTS.',
+        );
         return '__BROWSER_TTS__';
       }
 
@@ -507,10 +559,11 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/tts_${DateTime.now().millisecondsSinceEpoch}.mp3');
       await file.writeAsBytes(response.bodyBytes);
-      
+      // Audit D8: register so cleanupTtsFiles can sweep on
+      // session-end / resetSession.
+      _ttsFilePaths.add(file.path);
       return file.path;
-
-    } catch (e) {
+    } on Exception catch (e) {
       state = state.copyWith(error: 'Voice playback error: ${e.toString()}');
       return null;
     }
@@ -547,7 +600,7 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
             .toList();
         state = state.copyWith(liveHints: parsedHints);
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Failed to get hints: $e');
     }
   }
@@ -580,7 +633,14 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getSessionHistory() async {
+  /// Returns at most [limit] historical sessions, ordered newest-first.
+  /// Audit D9: previously unbounded — could OOM for prolific users.
+  /// Conservative default of 50; raise via [limit] or pass [offset] to
+  /// fetch older pages.
+  Future<List<Map<String, dynamic>>> getSessionHistory({
+    int limit = 50,
+    int offset = 0,
+  }) async {
     try {
       final client = Supabase.instance.client;
       final user = client.auth.currentUser;
@@ -590,10 +650,11 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
           .from('interview_sessions')
           .select('*, institution:target_institution_id(name_en, name_ko)')
           .eq('student_id', user.id)
-          .order('created_at', ascending: false);
-          
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
       return List<Map<String, dynamic>>.from(response);
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Failed to fetch session history: $e');
       return [];
     }
@@ -618,7 +679,18 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
   // ── Reset ────────────────────────────────────────────────────────────────
 
   void resetSession() {
+    unawaited(cleanupTtsFiles()); // audit D8
     state = const InterviewSessionState();
+  }
+
+  /// Audit U15: like [resetSession] but **preserves the feedback** from
+  /// the most-recent completed session so the user can revisit it via
+  /// history without it being wiped. Used by the "Start another"
+  /// button on the post-session analytics view.
+  void resetForNewSession() {
+    unawaited(cleanupTtsFiles()); // audit D8
+    final keep = state.feedback;
+    state = InterviewSessionState(feedback: keep);
   }
 }
 

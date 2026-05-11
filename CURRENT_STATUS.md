@@ -1049,6 +1049,109 @@ PHASE C — Edge Functions:       ✅ deployed staging+prod
 PHASE D — Hetzner provisioning: ⏸ blocked on user ID verification
 PHASE E — final cleanup:        pending Phase D
 
+## 19. Update — 2026-05-10 (latest) — training audit P2 batch shipped
+
+All 26 P2 items now closed in code. Highlights:
+
+- **Full `flutter_localizations` wiring** (audit L1/L3). New
+  `lib/l10n/app_en.arb` is the source of truth; `app_uz.arb`,
+  `app_ko.arb`, `app_ru.arb`, `app_vi.arb` are seeded with English +
+  `TODO: translate` so a translator can fill in without blocking. New
+  `l10n.yaml` + `flutter_localizations` dep + delegates wired on
+  `MaterialApp.router` in `lib/main.dart`. `training_strings.dart`
+  gained `fromContext(context)` that pulls from `AppLocalizations`.
+- **Mocked Vapi integration test** (`test/features/training/vapi_integration_test.dart`):
+  one happy-path test (greet → exchange → endCall → speech-end →
+  feedback hook) and one error-path test (status-update with error →
+  abandoned, refuses double-end). Drives the same pure-Dart event
+  handler logic without needing a real WebRTC connection.
+- **Quality wins**: `endSession` guarded against double-fire (D10);
+  `getSessionHistory` paginated (D9); TTS files tracked + cleaned up
+  on reset (D8); temp messages rolled back on AI failure (D7);
+  multi-device stale-draft check on save (D5, best-effort).
+- **UX wins**: two-sided transcript display during interview (U14);
+  "Start another interview" button preserves feedback (U15); deep-link
+  to OS settings on mic permanently-denied (U16); app-lifecycle
+  observer ends the interview cleanly on background (U18); session
+  settings menu with track switch (U8); paged history with locale-aware
+  dates, delete with confirm, in-progress-tap toast (H1-H3).
+- **Hardening**: Vapi `start()` wrapped in 30-second timeout (B5);
+  ElevenLabs TTS auth check is status-code-only, not string-match
+  (B6); pubspec note for vendored Vapi version pin (B7); 11 `catch (e)`
+  sites converted to `on Exception catch (e)`; dummy `FocusNode` leak
+  closed (A4); ghost text now renders at the cursor (A2/A3); draft
+  capped at 12 000 chars (A7); resolver refuses to split a surrogate
+  pair (A8); issue overlap validation (A9).
+- **Cleanup**: dead `InterviewFeedbackView` stubbed (F16); unused
+  `_exampleSelectedUniName` removed (U7); `focusTopic` got a real
+  TextEditingController (U11); Vapi error event's text now surfaces in
+  the active view (U12); `clearCurrentSession` preserves the list
+  (D3); completed sessions sort to bottom of `fetchSessions` instead
+  of being dropped (D4 — alternative was filter-out; rejected).
+
+Files this session:
+
+New:
+- `l10n.yaml`
+- `lib/l10n/app_en.arb` + `app_uz.arb` + `app_ko.arb` + `app_ru.arb` + `app_vi.arb`
+- `test/features/training/vapi_integration_test.dart`
+
+Edited:
+- `pubspec.yaml` — `flutter_localizations`, Vapi pin note
+- `lib/main.dart` — `localizationsDelegates` + `supportedLocales`
+- `lib/features/training/data/study_plan_repository.dart` — `isAnalyzing`
+  flag, `updateSelectedTrack`, multi-device stale check, sessions-list
+  preserve, completed-to-bottom sort, typed exception catches
+- `lib/features/training/data/interview_repository.dart` —
+  `cleanupTtsFiles`, paginated `getSessionHistory`, double-end guard
+  on `endSession`, `resetForNewSession`, temp-message rollback,
+  TTS auth status-code check, typed exception catches
+- `lib/features/training/presentation/study_plan_screen.dart` —
+  session settings menu, history-screen AppBar action, removed unused
+  field
+- `lib/features/training/presentation/training_tab.dart` — mic
+  perma-denied → openAppSettings snackbar
+- `lib/features/training/presentation/widgets/interview_active_view.dart`
+  — Vapi `start()` timeout, real error event surfacing, two-sided
+  transcript display, app lifecycle observer
+- `lib/features/training/presentation/widgets/interview_setup_view.dart`
+  — `focusTopic` TextEditingController + dispose
+- `lib/features/training/presentation/widgets/interview_history_view.dart`
+  — locale-aware dates, in-progress tap explainer, delete with confirm
+- `lib/features/training/presentation/widgets/interview_analytics_view.dart`
+  — "Start another interview" CTA preserving feedback
+- `lib/features/training/presentation/widgets/interview_feedback_view.dart`
+  — stubbed (deprecated) per F16
+- `lib/features/training/presentation/widgets/advanced_drafting_workspace.dart`
+  — disposed FocusNode, cursor-aware ghost text insertion, max length
+- `lib/features/training/presentation/widgets/ai_highlighting_text_controller.dart`
+  — ghost text rendered at cursor
+- `lib/features/training/presentation/widgets/study_plan_analysis_view.dart`
+  — uses dedicated `isAnalyzing` flag
+- `lib/features/training/presentation/training_strings.dart` —
+  `fromContext(BuildContext)` accessor delegating to AppLocalizations
+- `lib/features/training/data/grammar_issue_resolver.dart` —
+  surrogate-pair guard, overlap mask
+- `test/features/training/grammar_issue_resolver_test.dart` — added
+  surrogate-pair test + nested overlap test
+
+**What's still on the user's side:**
+
+- Generated localization sources land via `flutter pub get` running
+  `gen-l10n`. On first build the generator creates
+  `lib/l10n/app_localizations.dart` (+ per-locale files). If the build
+  fails complaining the file is missing, run `flutter pub get` once;
+  the generator wires on every subsequent build per `generate: true`
+  in pubspec.
+- Translator pass on `app_uz.arb` / `app_ko.arb` / `app_ru.arb` /
+  `app_vi.arb` — search for `TODO: translate` markers.
+- Delete the stub files left in place by the sandbox's read-only-for-
+  delete mount (`study_plan_chat_fab.dart`, `interview_feedback_view.dart`)
+  whenever convenient.
+- Same `index.lock` carry-over from prior batches.
+
+---
+
 ## 18. Update — 2026-05-10 (latest) — training audit P1 batch shipped
 
 After the 9 P0 fixes landed in §17, worked through all 23 P1 items from

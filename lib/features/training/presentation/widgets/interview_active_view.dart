@@ -14,7 +14,8 @@ class InterviewActiveView extends ConsumerStatefulWidget {
   ConsumerState<InterviewActiveView> createState() => _InterviewActiveViewState();
 }
 
-class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
+class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
+    with WidgetsBindingObserver {
   VapiClient? _client;
   VapiCall? _call;
   StreamSubscription? _eventSub;
@@ -35,7 +36,29 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initVapi();
+  }
+
+  // Audit U18: backgrounding the app mid-call should end the session
+  // cleanly instead of leaving an orphan Vapi WebRTC connection and a
+  // permanently-`active` DB row.
+  //
+  // Conservative choice: **end on background.** The alternative is
+  // pause-and-resume — much more complex, Vapi-side fragile (mic
+  // permission may revoke, peers may renegotiate), and a longer-lived
+  // session means more cost. The audit's stated default is correct;
+  // we revisit if users complain that backgrounding for a Slack
+  // notification kills their practice.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      if (_isCallActive && !_didEndSession) {
+        _didEndSession = true;
+        unawaited(_completeAutoEnd());
+      }
+    }
   }
 
   Future<void> _initVapi() async {
@@ -117,9 +140,13 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
     );
 
     try {
-      _call = await _client?.start(
-        waitUntilActive: true,
-        assistant: {
+      // Audit B5: wrap the Vapi handshake in a 30-second timeout so a
+      // stuck WebRTC negotiation surfaces as a real error instead of a
+      // spinner forever.
+      _call = await _client
+          ?.start(
+            waitUntilActive: true,
+            assistant: {
           'model': {
             'provider': 'openai',
             'model': 'gpt-4o',
@@ -148,7 +175,13 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
               ? '안녕하세요! $targetUni 지원자님, 면접을 시작할 준비가 되셨나요?'
               : 'Hello! Are you ready to begin our interview for $targetUni?',
         },
-      );
+      )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () => throw TimeoutException(
+              'Vapi handshake timed out after 30 seconds.',
+            ),
+          );
 
       // Notify the global provider that Vapi is now live
       ref.read(interviewProvider.notifier).setVapiConnected(true);
@@ -359,6 +392,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     // Delegate to _stopCall for centralized cleanup — ensures stop() is
     // always called before dispose().
     _stopCall();
@@ -526,14 +560,66 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
                         ),
                       ),
                     ],
+                    // Audit U14: show a two-sided ledger of the last few
+                    // turns instead of just the very last student utterance.
+                    // While Vapi is mid-utterance, live partial transcript
+                    // is also shown at the top.
                     Flexible(
                       child: SingleChildScrollView(
-                        child: Text(
-                          _isCallActive
-                              ? _currentWords
-                              : (state.messages.isNotEmpty ? state.messages.last.content : ''),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white, fontSize: 18, height: 1.5),
+                        reverse: true,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (_isCallActive && _currentWords.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Text(
+                                  _currentWords,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            for (final m in _lastTurns(state.messages, 6))
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: 64,
+                                      child: Text(
+                                        m.role == 'interviewer'
+                                            ? 'AI'
+                                            : 'You',
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          color: m.role == 'interviewer'
+                                              ? AppColors.vibrantLime
+                                              : Colors.white54,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        m.content,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          height: 1.45,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -573,6 +659,21 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
           const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime)),
       ],
     );
+  }
+
+  /// Returns the most-recent [maxTurns] interview messages in
+  /// chronological order, after stripping the synthetic
+  /// "[Interview started …]" sentinel a previous version of
+  /// `sendMessage` used to emit.
+  List<InterviewMessage> _lastTurns(
+    List<InterviewMessage> messages,
+    int maxTurns,
+  ) {
+    final cleaned = messages
+        .where((m) => !m.content.contains('[Interview started'))
+        .toList(growable: false);
+    if (cleaned.length <= maxTurns) return cleaned;
+    return cleaned.sublist(cleaned.length - maxTurns);
   }
 
   String _buildStatusText() {

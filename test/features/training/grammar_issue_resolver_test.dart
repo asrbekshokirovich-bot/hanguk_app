@@ -66,5 +66,43 @@ void main() {
       );
       expect(issues, isEmpty);
     });
+
+    test('issues do not overlap when needles are nested (audit A9)', () {
+      const text = 'application applications';
+      final issues = resolveIssues(
+        draftText: text,
+        rawIssues: const [
+          {'originalText': 'application', 'suggestion': 'app'},
+          // Second issue would have matched at index 0 again if the
+          // consumed mask weren't enforced; instead it matches the
+          // longer occurrence inside "applications".
+          {'originalText': 'applications', 'suggestion': 'apps'},
+        ],
+      );
+      // After "application" claims [0..11), "applications" needs an
+      // un-consumed match — there isn't one (only the still-claimed
+      // substring matches), so it's dropped.
+      expect(issues, hasLength(1));
+      expect(issues.single.originalText, 'application');
+    });
+
+    test(
+      'an issue whose needle would split a surrogate pair is dropped (audit A8)',
+      () {
+        // 👋 is U+1F44B — a surrogate pair in UTF-16. Slicing between
+        // its two code units would produce an invalid string.
+        const text = 'wave 👋 here';
+        final issues = resolveIssues(
+          draftText: text,
+          rawIssues: const [
+            // Look for half of the surrogate pair (low surrogate at
+            // index 6). The matcher finds it but resolution must
+            // refuse to slice.
+            {'originalText': '\uDC4B here', 'suggestion': 'noop'},
+          ],
+        );
+        expect(issues, isEmpty);
+      },
+    );
   });
 }

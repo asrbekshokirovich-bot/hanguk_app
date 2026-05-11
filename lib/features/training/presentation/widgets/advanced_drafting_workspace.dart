@@ -215,17 +215,29 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
   }
 
   void _acceptSuggestion() {
-    if (_controller.ghostText != null) {
-      final currentText = _controller.text;
-      final addedText = _controller.ghostText!;
-      
-      final newText = currentText + addedText;
+    final ghost = _controller.ghostText;
+    if (ghost == null || ghost.isEmpty) return;
+    // Audit A2/A3: insert at the cursor instead of appending to the
+    // end. If the cursor is unknown (selection.isValid == false), fall
+    // back to appending (preserves the prior behaviour).
+    final current = _controller.text;
+    final sel = _controller.selection;
+    if (!sel.isValid || sel.start < 0 || sel.start > current.length) {
+      final newText = current + ghost;
       _controller.value = TextEditingValue(
         text: newText,
         selection: TextSelection.collapsed(offset: newText.length),
       );
-      _controller.setGhostText(null);
+    } else {
+      final insertAt = sel.end >= 0 ? sel.end : sel.start;
+      final newText =
+          current.substring(0, insertAt) + ghost + current.substring(insertAt);
+      _controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: insertAt + ghost.length),
+      );
     }
+    _controller.setGhostText(null);
   }
 
   void _applyGrammarFix(GrammarIssue issue) {
@@ -370,6 +382,20 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
                   focusNode: _focusNode,
                   maxLines: null,
                   expands: true,
+                  // Audit A7: cap at 12 000 characters. Covers a long
+                  // Personal Statement (~5 000) and a maxed-out Study
+                  // Plan (~8 000) with headroom, while keeping AI
+                  // supervision token cost bounded.
+                  maxLength: 12000,
+                  // Hide the maxLength counter on the field itself; the
+                  // LiveMetricsBar already shows word/char counts.
+                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                  buildCounter: (
+                    BuildContext context, {
+                    required int currentLength,
+                    required bool isFocused,
+                    required int? maxLength,
+                  }) => null,
                   style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
                   decoration: InputDecoration(
                     border: InputBorder.none,

@@ -11,8 +11,13 @@ class StudyPlanAnalysisView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(documentSessionProvider(documentType));
 
-    if (state.isLoading) {
-       return const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime));
+    // Audit U6: use the dedicated isAnalyzing flag so we don't show a
+    // spinner during unrelated state mutations (createSession,
+    // loadSession, saveDraft all flip isLoading).
+    if (state.isAnalyzing) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.vibrantLime),
+      );
     }
 
     final analysis = state.analyses.isNotEmpty ? state.analyses.first : null;

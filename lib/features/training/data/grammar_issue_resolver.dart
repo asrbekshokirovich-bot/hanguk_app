@@ -53,6 +53,11 @@ int findFirstUnconsumed({
 /// Resolve raw `{originalText, suggestion}` issue payloads against the
 /// current draft text. Returns one [ResolvedIssue] per matched issue,
 /// preserving the original casing of the matched substring.
+///
+/// Audit A8: ranges are validated to not split a UTF-16 surrogate pair
+/// (emoji etc.). A match that would split a pair is dropped.
+/// Audit A9: each match is recorded in a "consumed" mask so two issues
+/// pointing at the same word can't produce overlapping spans.
 List<ResolvedIssue> resolveIssues({
   required String draftText,
   required Iterable<Map<dynamic, dynamic>> rawIssues,
@@ -72,6 +77,13 @@ List<ResolvedIssue> resolveIssues({
     );
     if (index == -1) continue;
     final endExclusive = index + original.length;
+
+    // Audit A8: bail if the start or end would split a surrogate pair.
+    if (_splitsSurrogate(draftText, index) ||
+        _splitsSurrogate(draftText, endExclusive)) {
+      continue;
+    }
+
     results.add(ResolvedIssue(
       start: index,
       end: endExclusive,
@@ -83,4 +95,11 @@ List<ResolvedIssue> resolveIssues({
     }
   }
   return results;
+}
+
+bool _splitsSurrogate(String text, int index) {
+  if (index <= 0 || index >= text.length) return false;
+  final prev = text.codeUnitAt(index - 1);
+  // High surrogate range 0xD800–0xDBFF
+  return prev >= 0xD800 && prev <= 0xDBFF;
 }
