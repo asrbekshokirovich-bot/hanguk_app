@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,6 +13,8 @@ class StudyPlanSession {
   final String status;
   final String? universityNameEn;
   final String? selectedTrack; // 'english' or 'korean'
+  final String? updatedAt;
+  final String? createdAt;
 
   StudyPlanSession({
     required this.id,
@@ -21,6 +25,8 @@ class StudyPlanSession {
     required this.status,
     this.universityNameEn,
     this.selectedTrack,
+    this.updatedAt,
+    this.createdAt,
   });
 
   factory StudyPlanSession.fromJson(Map<String, dynamic> json) {
@@ -28,11 +34,41 @@ class StudyPlanSession {
       id: json['id'],
       studentId: json['student_id'],
       documentType: json['document_type'],
-      targetUniversityId: json['target_university_id'],
+      targetUniversityId: json['target_institution_id'],
       currentStep: json['current_step'],
       status: json['status'],
-      universityNameEn: json['university']?['name_en'],
+      universityNameEn: (json['institution'] as Map?)?['name_en']
+          ?? (json['institution'] as Map?)?['name_ko']
+          ?? (json['university'] as Map?)?['name_en'],
       selectedTrack: json['selected_track'],
+      updatedAt: json['updated_at']?.toString(),
+      createdAt: json['created_at']?.toString(),
+    );
+  }
+
+  StudyPlanSession copyWith({
+    String? id,
+    String? studentId,
+    String? documentType,
+    String? targetUniversityId,
+    int? currentStep,
+    String? status,
+    String? universityNameEn,
+    String? selectedTrack,
+    String? updatedAt,
+    String? createdAt,
+  }) {
+    return StudyPlanSession(
+      id: id ?? this.id,
+      studentId: studentId ?? this.studentId,
+      documentType: documentType ?? this.documentType,
+      targetUniversityId: targetUniversityId ?? this.targetUniversityId,
+      currentStep: currentStep ?? this.currentStep,
+      status: status ?? this.status,
+      universityNameEn: universityNameEn ?? this.universityNameEn,
+      selectedTrack: selectedTrack ?? this.selectedTrack,
+      updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
@@ -176,7 +212,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
     try {
       final response = await client
           .from('study_plan_sessions')
-          .select('*, university:target_university_id(name_en)')
+          .select('*, institution:target_institution_id(name_en, name_ko)')
           .eq('student_id', user.id)
           .eq('document_type', type) // Filter by document type
           .order('updated_at', ascending: false);
@@ -202,24 +238,20 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
       final response = await client.from('study_plan_sessions').insert({
         'student_id': user.id,
         'document_type': documentType,
-        'target_university_id': targetUniversityId,
+        'target_institution_id': targetUniversityId,
         'current_step': 1,
         'status': 'in_progress',
-      }).select('*, university:target_university_id(name_en)').single();
+        'selected_track': selectedTrack, // audit F2 — was in-memory only
+      }).select('*, institution:target_institution_id(name_en, name_ko)').single();
 
+      // fromJson now reads selected_track straight from the row; the
+      // explicit copyWith is a no-op overwrite that defends against an
+      // older Edge Function response shape where the column would be
+      // absent.
       final session = StudyPlanSession.fromJson(response);
-      
-      // Manually add the selectedTrack into the session object for the in-memory state
-      final sessionWithTrack = StudyPlanSession(
-        id: session.id,
-        studentId: session.studentId,
-        documentType: session.documentType,
-        currentStep: session.currentStep,
-        status: session.status,
-        targetUniversityId: session.targetUniversityId,
-        universityNameEn: session.universityNameEn,
-        selectedTrack: selectedTrack,
-      );
+      final sessionWithTrack = session.selectedTrack == null
+          ? session.copyWith(selectedTrack: selectedTrack)
+          : session;
 
       _setState(type, _getState(type).copyWith(
         isLoading: false,
@@ -247,7 +279,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
     try {
       final sessionResp = await client
           .from('study_plan_sessions')
-          .select('*, university:target_university_id(name_en)')
+          .select('*, institution:target_institution_id(name_en, name_ko)')
           .eq('id', sessionId)
           .eq('student_id', user.id)
           .single();
@@ -293,55 +325,119 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
     final currentSession = _getState(type).currentSession;
     if (currentSession == null) return;
     try {
+      final nowIso = DateTime.now().toUtc().toIso8601String();
       await Supabase.instance.client
           .from('study_plan_sessions')
-          .update({'current_step': step, 'updated_at': DateTime.now().toIso8601String()})
+          .update({'current_step': step, 'updated_at': nowIso})
           .eq('id', currentSession.id);
-      
-      final updatedSession = StudyPlanSession(
-         id: currentSession.id,
-         studentId: currentSession.studentId,
-         documentType: currentSession.documentType,
-         currentStep: step,
-         status: currentSession.status,
-         targetUniversityId: currentSession.targetUniversityId,
-         universityNameEn: currentSession.universityNameEn,
-         selectedTrack: currentSession.selectedTrack,
+
+      // Audit F3: previous version reconstructed the session manually,
+      // dropping updatedAt/createdAt. copyWith preserves all fields.
+      final updatedSession = currentSession.copyWith(
+        currentStep: step,
+        updatedAt: nowIso,
       );
 
-      final updatedSessions = _getState(type).sessions.map((s) => s.id == updatedSession.id ? updatedSession : s).toList();
-      
-      _setState(type, _getState(type).copyWith(currentSession: updatedSession, sessions: updatedSessions));
-    } catch (e) {
-      print('Failed to update session step: $e');
+      final updatedSessions = _getState(type)
+          .sessions
+          .map((s) => s.id == updatedSession.id ? updatedSession : s)
+          .toList();
+
+      _setState(
+        type,
+        _getState(type).copyWith(
+          currentSession: updatedSession,
+          sessions: updatedSessions,
+        ),
+      );
+    } on Exception catch (e) {
+      debugPrint('Failed to update session step: $e');
     }
   }
 
-  Future<void> saveDraft(String type, String content) async {
+  /// Persists a draft for the active session. Returns `true` on success.
+  /// Audit U1/A5: previously this swallowed failures and the workspace
+  /// still flipped to "saved" status. The bool result lets the caller
+  /// surface failure in the UI.
+  ///
+  /// Audit D1: a per-session save mutex serializes concurrent saves so
+  /// they don't race on `(session_id, version)`. The mutex lives on the
+  /// notifier (in-memory) — across-device concurrency is still a
+  /// follow-up.
+  ///
+  /// Audit D2: no longer overwrites `draftContent` after a successful
+  /// save — the latest text is already in state from `setDraftContent`,
+  /// and overwriting could clobber characters typed during the save.
+  Future<bool> saveDraft(String type, String content) async {
     final client = Supabase.instance.client;
     final user = client.auth.currentUser;
     final currentState = _getState(type);
-    if (currentState.currentSession == null || user == null) return;
+    if (currentState.currentSession == null || user == null) return false;
 
-    final wordCount = content.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).length;
-    final nextVersion = currentState.drafts.isNotEmpty 
-      ? currentState.drafts.map((d) => d.version).reduce((a, b) => a > b ? a : b) + 1 
-      : 1;
+    final sessionId = currentState.currentSession!.id;
+    return _withSessionLock<bool>(sessionId, () async {
+      // Recompute under the lock so concurrent calls don't pick the
+      // same version number.
+      final localState = _getState(type);
+      final nextVersion = localState.drafts.isNotEmpty
+          ? localState.drafts
+                  .map((d) => d.version)
+                  .reduce((a, b) => a > b ? a : b) +
+              1
+          : 1;
+      final wordCount = content
+          .split(RegExp(r'\s+'))
+          .where((s) => s.isNotEmpty)
+          .length;
 
+      try {
+        final response = await client.from('study_plan_drafts').insert({
+          'session_id': sessionId,
+          'student_id': user.id,
+          'version': nextVersion,
+          'content': content,
+          'word_count': wordCount,
+          'source': 'typed',
+        }).select().single();
+
+        final draft = StudyPlanDraft.fromJson(response);
+        final stateNow = _getState(type);
+        _setState(
+          type,
+          stateNow.copyWith(drafts: [draft, ...stateNow.drafts]),
+        );
+        return true;
+      } on Exception catch (e) {
+        _setState(
+          type,
+          _getState(type).copyWith(error: 'Failed to save draft: $e'),
+        );
+        return false;
+      }
+    });
+  }
+
+  // ── Per-session save mutex (audit D1) ───────────────────────────────────
+  final Map<String, Completer<void>> _saveLocks = {};
+
+  Future<T> _withSessionLock<T>(
+    String sessionId,
+    Future<T> Function() body,
+  ) async {
+    while (_saveLocks[sessionId] != null) {
+      try {
+        await _saveLocks[sessionId]!.future;
+      } on Exception {
+        // ignore — predecessor surfaced its own error
+      }
+    }
+    final completer = Completer<void>();
+    _saveLocks[sessionId] = completer;
     try {
-      final response = await client.from('study_plan_drafts').insert({
-        'session_id': currentState.currentSession!.id,
-        'student_id': user.id,
-        'version': nextVersion,
-        'content': content,
-        'word_count': wordCount,
-        'source': 'typed',
-      }).select().single();
-
-      final draft = StudyPlanDraft.fromJson(response);
-      _setState(type, currentState.copyWith(drafts: [draft, ...currentState.drafts], draftContent: content));
-    } catch (e) {
-      _setState(type, currentState.copyWith(error: 'Failed to save draft: $e'));
+      return await body();
+    } finally {
+      _saveLocks.remove(sessionId);
+      completer.complete();
     }
   }
 
@@ -358,7 +454,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
         currentSession: _getState(type).currentSession?.id == sessionId ? null : _getState(type).currentSession
       ));
     } catch(e) {
-      print('delete error: $e');
+      debugPrint('delete error: $e');
     }
   }
 
@@ -394,11 +490,45 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
 
       final aiResponseText = data['response'] as String? ?? '';
 
-      final insertResp = await client.from('study_plan_analyses').insert({
+      // Audit F6: try to parse a structured JSON envelope. The Edge
+      // Function sometimes returns plain prose (legacy shape) and
+      // sometimes returns
+      //   { overall_score, grammar_errors, content_feedback,
+      //     strengths, improvements, narrative }
+      // (newer shape). Populate the matching DB columns when present.
+      Map<String, dynamic>? parsed;
+      final trimmed = aiResponseText.trim();
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        try {
+          final decoded = jsonDecode(trimmed);
+          if (decoded is Map<String, dynamic>) parsed = decoded;
+        } on FormatException catch (e) {
+          debugPrint('Analysis JSON parse failed (treating as prose): $e');
+        }
+      }
+
+      final insertPayload = <String, dynamic>{
         'session_id': currentState.currentSession!.id,
         'draft_id': draft.id,
         'ai_response': aiResponseText,
-      }).select().single();
+        if (parsed != null) ...{
+          if (parsed['overall_score'] is num)
+            'overall_score': parsed['overall_score'],
+          if (parsed['grammar_errors'] is List)
+            'grammar_errors': parsed['grammar_errors'],
+          if (parsed['content_feedback'] is String)
+            'content_feedback': parsed['content_feedback'],
+          if (parsed['strengths'] is List)
+            'strengths': parsed['strengths'],
+          if (parsed['improvements'] is List)
+            'improvements': parsed['improvements'],
+        },
+      };
+      final insertResp = await client
+          .from('study_plan_analyses')
+          .insert(insertPayload)
+          .select()
+          .single();
 
       final analysis = StudyPlanAnalysis.fromJson(insertResp);
       _setState(type, _getState(type).copyWith(isLoading: false, analyses: [analysis, ..._getState(type).analyses]));
@@ -441,7 +571,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
       }
       return {};
     } catch (e) {
-      print('Supervise AI Error: $e');
+      debugPrint('Supervise AI Error: $e');
       return null;
     }
   }

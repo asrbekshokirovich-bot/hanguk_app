@@ -931,29 +931,306 @@ Pending Phase D completion. Once Hetzner is provisioned, will:
 
 ---
 
+## 15. Update — 2026-05-10 — Phase 3R-A landed (reviewer queue in CRM)
+
+Picking up from the §14 handoff. Phase 3R-A (the lowest-risk slice of
+the universities-system replacement: add a reviewer queue page to the
+React staff CRM) is implemented. Phase 3R-B (data cleanup + cutover)
+is still pending answers to the four open questions in
+`docs/runbooks/next-session-prompt.md` §"Open questions still on the table".
+
+### Database migration applied (staging + prod)
+
+`supabase/migrations/20260701001000_uni_db_v3_review_action_rpcs.sql`
+adds three RPCs the reviewer-onboarding doc had been describing as if
+they already existed:
+
+| function | signature |
+|---|---|
+| `fn_review_accept` | `(queue_item_id uuid, reviewer_user_id uuid default null) → uuid` |
+| `fn_review_edit_accept` | `(queue_item_id uuid, corrected_payload jsonb, reviewer_user_id uuid default null, reviewer_notes text default null) → uuid` |
+| `fn_review_reject` | `(queue_item_id uuid, reason text, reason_detail text default null, reviewer_user_id uuid default null) → uuid` |
+
+All three are SECURITY DEFINER + pinned `search_path` + reviewer-role
+gate inside the function body. They do NOT bypass the existing
+`trg_review_queue_audit` trigger — they just transition `review_queue.status`
+to `approved`/`rejected` and the trigger writes the immutable
+`review_decisions` audit row.
+
+The migration also adds a `review_queue_reviewer_select` RLS policy.
+Without it, `v_review_queue_dashboard` (security_invoker) returned
+empty for `profiles.role='uni_db_reviewer'` users because the prior
+RLS allowed only `admin` SELECT.
+
+Verified on both projects via `pg_proc` lookup post-apply.
+
+### React CRM patch (in handoff/, NOT yet pushed)
+
+`handoff/0001-hanguk-uz-uni-db-review-screen.patch` is a
+git-format-patch ready to apply on the `hanguk-uz` repo. Targets
+`main @ 43382a5` and creates a new branch `claude/uni-db-review-screen`.
+
+5 files / +826 −91:
+
+| file | change |
+|---|---|
+| `src/hooks/useUniDbReviewer.ts` | NEW — reads `profiles.role`, returns `{role, isUniDbReviewer, isUniDbAdmin, loading}`. Coexists with the existing `useUserRole()` (which reads `user_roles.app_role`). |
+| `src/hooks/useReviewQueue.ts` | NEW — react-query wrapper around `v_review_queue_dashboard` plus three mutations. 60s refetch. |
+| `src/components/crm/pages/UniDbReviewContent.tsx` | NEW — page UI: forbidden card if not reviewer; 4-card stats header (open / overdue / P1+P2 / avg confidence); 2-column queue grid with priority badges, SLA-overdue indicator, source URL link, expandable JSON payload, and Accept / Edit & Accept / Reject buttons (each with its own confirm/edit dialog). |
+| `src/components/crm/CRMSidebar.tsx` | refactored — extracted the duplicate-`groups` literal into a `buildGroups()` helper. Adds an `isUniDbReviewer` prop and a "Uni DB Review" item under the existing Admin group, gated on that flag. |
+| `src/pages/CRMPortal.tsx` | imports `useUniDbReviewer`, threads the flag to `<CRMSidebar>` and `useSidebarGroups`, adds `/crm/admin/uni-db-review` URL prefix recognition + a `'uni-db-review'` `renderContent` case + lazy import. |
+
+Push to `hanguk-uz` is **NOT yet done** — no git auth available in the
+build sandbox. To finish:
+
+```bash
+# from a checkout of hanguk-uz on a machine with push auth
+git switch -c claude/uni-db-review-screen
+git am < /path/to/handoff/0001-hanguk-uz-uni-db-review-screen.patch
+git push -u origin claude/uni-db-review-screen
+# Vercel preview URL appears in the GitHub PR / branch list
+```
+
+Vercel preview should be smoke-tested before merging to `main` — the
+build sandbox couldn't run `vite build` (npm install kept timing out
+against the disk-tight tmpfs).
+
+### Prod data picture confirmed (read-only via MCP)
+
+| metric | prod value |
+|---|---|
+| `public.universities` rows | 697 |
+| `name_ko IS NULL` rows | 249 (36%) |
+| `is_partner = true` rows | 5 (KAIST, Korea, SNU, SKKU, Yonsei — all have `name_ko`, all referenced by `applications`) |
+| `public.institutions` rows | 0 |
+| Distinct unis touched by `applications` + `student_university_priorities` | 19 |
+
+**FK web is wider than the audit suggested.** 20 tables reference
+`public.universities` (the audit only mentioned 2). Full list: `applications`,
+`student_university_priorities`, `interview_sessions` (`target_university_id`),
+`interview_questions`, `university_programs`, `university_admission_periods`,
+`application_form_cache`, `application_form_changes`,
+`application_form_validations`, `university_documents`, `university_notes`,
+`university_rooms`, `university_admissions`, `university_staff_assignments`,
+`study_plan_sessions` (`target_university_id`),
+`university_document_requirements`, `peer_review_queue`,
+`legacy_scholarships`, `gks_designated_universities`, `student_suggestions`.
+
+The Phase 3R-B dedupe migration has to repoint all 20 — material
+change to risk profile vs the audit doc.
+
+### Open questions still on the table for Phase 3R-B
+
+Same four as the next-session prompt; awaiting Asrbek's answers before
+any destructive prod operation:
+
+1. Drop legacy `universities` entirely after cutover, or keep as
+   `legacy_universities` for one quarter (mirror of `legacy_scholarships`)?
+2. Lock `AIUniversityForm` and the bulk-import button during cleanup?
+3. Acceptable downtime window for the cutover (~30s of stale-cached
+   data on the Universities tab)?
+4. The 5 `is_partner = true` rows above — confirm those are the
+   currently-contracted partners worth explicit guard rails.
+
+---
+
 **Reading back into this on next session:**
 
 ```
-Worktree branch:    claude/vigorous-haibt-f28e2d @ HEAD (Phase B+C deployed)
+Worktree branch:    claude/vigorous-haibt-f28e2d @ HEAD (Phase 3R-A done)
 Worktree path:      C:\Users\User\Desktop\Hanguk\.claude\worktrees\vigorous-haibt-f28e2d
 Main branch:        main @ c6c8d47 (unchanged)
 CLI linked to:      staging (nhjzbjzhmugcmzchzxlv) — restored after prod work
 
 PHASE A — prod baseline:        ✅ done 2026-05-08 (commit ed815b6)
 PHASE B — staging migrations:   ✅ done 2026-05-08 (commit 0f7f3d2)
-                                  34 migrations, 109 tables, smoke test green
 PHASE B — prod migrations:      ✅ done 2026-05-08 (commit 0f7f3d2)
-                                  34 migrations Local|Remote in sync
-PHASE C — Edge Functions on staging: ✅ get-pdf-url, register-push-token,
-                                       notify-tracked-changes deployed
-PHASE C — Edge Functions on prod:    ✅ same three deployed
-PHASE D — Hetzner provisioning:      ⏸ blocked on user ID verification
-PHASE E — final cleanup:             pending Phase D
+PHASE C — Edge Functions:       ✅ deployed staging+prod
+PHASE D — Hetzner provisioning: ⏸ blocked on user ID verification
+PHASE E — final cleanup:        pending Phase D
+
+## 18. Update — 2026-05-10 (latest) — training audit P1 batch shipped
+
+After the 9 P0 fixes landed in §17, worked through all 23 P1 items from
+`docs/audits/training_audit_2026-05-10.md`. 22 closed fully in code; 1
+(L1/L3 — full intl infra) closed partially with a strings table that's a
+migration target for the next session's `flutter_localizations` work.
+
+**Database change applied (staging + prod):**
+- `20260510140000_training_add_selected_track.sql` — adds
+  `study_plan_sessions.selected_track` (text). Closes audit F2.
+
+**New files this session:**
+- `lib/features/training/data/training_contracts.dart` — typed parsers
+  for the three Edge Function response shapes (B1/B4).
+- `lib/features/training/data/vapi_event_parser.dart` — pure-Dart
+  `isEndCallTool` lifted from the active view for testability.
+- `lib/features/training/data/grammar_issue_resolver.dart` —
+  pure-Dart first-un-claimed match resolver, replacing the brittle
+  `lastIndexOf` (A1).
+- `lib/features/training/data/step_one_guide_helper.dart` — `normalizeTrack`.
+- `lib/features/training/presentation/training_strings.dart` — 22
+  strings × 3 locales (en / ko / uz). Conservative L1/L3 — full intl
+  infra still P2.
+- `test/features/training/{vapi_event_parser,grammar_issue_resolver,step_one_guide_helper,training_contracts,training_strings}_test.dart`
+  — 27 tests covering the highest-leverage logic the founder asked for.
+- `supabase/migrations/20260510140000_training_add_selected_track.sql`.
+
+**Files edited:**
+- `lib/features/training/data/interview_repository.dart` — `clearError`,
+  `markAbandoned`, `logTranscriptWithRole`, `focusTopic` + `timedMode` +
+  `timeLimitSeconds` in state, `_persistVapiCallId` retry, defensive
+  `interview_feedback` insert.
+- `lib/features/training/data/study_plan_repository.dart` — `copyWith`
+  on `StudyPlanSession`, per-session save mutex (`_withSessionLock`),
+  `saveDraft` returns bool + skips `draftContent` overwrite,
+  `selected_track` write, structured analyze parsing, `debugPrint`
+  cleanup.
+- `lib/features/training/presentation/training_tab.dart` — persona
+  dropdown, `clearError` on dialog open.
+- `lib/features/training/presentation/study_plan_screen.dart` —
+  empty-applications CTA in the create-session dialog, `'en'`/`'ko'`
+  track values, `normalizeTrack`-aware Step 1.
+- `lib/features/training/presentation/interview_screen.dart` —
+  `initialPersona` accepted and threaded into `startSession`.
+- `lib/features/training/presentation/widgets/interview_active_view.dart`
+  — delegates to `vapi.isEndCallTool`, filler-word regex with word
+  boundaries, `markAbandoned` on dispose, `debugPrint` cleanup.
+- `lib/features/training/presentation/widgets/interview_setup_view.dart`
+  — real `_UniversityPicker` for `university_specific` sessions.
+- `lib/features/training/presentation/widgets/interview_feedback_view.dart`
+  — score normalization (1–10 ↔ 0–100).
+- `lib/features/training/presentation/widgets/advanced_drafting_workspace.dart`
+  — disposed FocusNode, rate cap on ghost-text AI, awaited save →
+  analyze sequence, error save status, delegates to
+  `grammar_issue_resolver`.
+- `lib/features/training/presentation/widgets/live_metrics_bar.dart`
+  — `SaveStatus.error` added.
+- `docs/audits/training_audit_2026-05-10.md` — P1 backlog annotated.
+
+**What's still on the user's side after this session:**
+- Same `index.lock` blocker as prior sessions — needs the Windows-side
+  `del` before commits go through.
+- Delete `lib/features/training/presentation/widgets/study_plan_chat_fab.dart`
+  entirely from Windows (carries over from §17 — stub was left because
+  the sandbox can't unlink).
+- Rebuild the Flutter app to ship P1 to users.
+- Full intl wiring (L1/L3) — defer to P2 when a translator can be
+  scheduled. The `training_strings.dart` table is the migration target.
+- Open P2 backlog (~26 items, ~3–5 dev-days) is unchanged.
+
+---
+
+## 17. Update — 2026-05-10 (latest) — training audit + all 9 P0 fixes shipped
+
+Two related deliverables landed back-to-back:
+
+**Audit** — `docs/audits/training_audit_2026-05-10.md` (a 388-line deep audit of `lib/features/training/`). Investigated all six training-area dimensions (functional bugs, UX, data integrity, backend contracts, localization, parity, tests) plus the Phase 3R-B knock-ons. 58 findings across P0/P1/P2. Headline number that drove most of the work: **0 automated tests** on 4,882 lines of training code, **0 i18n adoption**.
+
+**P0 fixes — all 9 shipped in code** (build still needed; no new tests):
+
+| # | item | resolution |
+|---|---|---|
+| F8 | Manual-exit "End Interview" button bypassed feedback | Now calls `_completeAutoEnd()` (same path as AI-driven auto-end). |
+| F1 | Resumed Study Plan / Personal Statement sessions opened blank | `_buildDraftingStep` seeds `AdvancedDraftingWorkspace` with `state.drafts.first.content` (or `draftContent`). ValueKey forces remount on session switch. |
+| F13 | Interview history showed "Unknown Target" for every session | `_buildSessionCard` reads the new `institution` alias, falls back to legacy `universities` key for cached responses. |
+| F10 | "Timed Mode" toggle did nothing | `InterviewSessionState` now carries `timedMode` + `timeLimitSeconds`; `_startCall` schedules a real timer that triggers `_completeAutoEnd` on expiry. |
+| F11 | `focus_topic` collected but ignored | Now threaded through state and appended to the Vapi system prompt. |
+| U4 | `StudyPlanChatFab` was a non-functional placeholder | **Deleted** per founder pre-decision. Stub file still on disk (sandbox can't unlink) but returns `SizedBox.shrink()`; consumer in `study_plan_screen.dart` removed. `study_plan_chat_history` DB table preserved for future real build. |
+| F9 | AI-side transcripts dropped during Vapi calls | `interview_repository.logTranscriptWithRole(text, role)` added; active view logs both `user` and `assistant` final transcripts (assistant rows write `role='interviewer'`). |
+| F7 | 3 dummy "Tavsiya etilgan videolar" tiles | Section removed entirely. |
+| L2 | Step 1 guide hardcoded Uzbek for all users | `_stepOneGuide(track, documentType)` returns Korean / English / Uzbek copy based on `selectedTrack`. Track-mismatch warning in `study_plan_analysis_view` similarly switches. |
+
+Files touched this session (all in worktree, none committed yet):
+
+- `lib/features/training/data/interview_repository.dart` — state class + `logTranscriptWithRole`
+- `lib/features/training/presentation/interview_screen.dart` (no edit, comment updated previously)
+- `lib/features/training/presentation/widgets/interview_active_view.dart` — manual-end fix, focus prompt, time-limit timer, assistant transcripts
+- `lib/features/training/presentation/widgets/interview_history_view.dart` — alias fallback
+- `lib/features/training/presentation/study_plan_screen.dart` — workspace seed, dummy-video removal, localized Step 1, FAB removed
+- `lib/features/training/presentation/widgets/study_plan_chat_fab.dart` — stub-only (DELETE the file Windows-side)
+- `lib/features/training/presentation/widgets/study_plan_analysis_view.dart` — localized track-mismatch warning
+- `docs/audits/training_audit_2026-05-10.md` — annotated P0 closures
+
+What's still on the user's side:
+
+- **Delete `lib/features/training/presentation/widgets/study_plan_chat_fab.dart`** entirely (Windows-side `del`). The stub left behind is harmless but should not stay in the tree long-term.
+- Same `index.lock` + commit dance from prior sessions; nothing changed there. After deleting the file, commit the rest with a single `feat(training): close audit P0s` message.
+- Rebuild the Flutter app to ship #2-#5 + #7-#9 to users (no platform-specific changes; an Android APK build is enough). Hot-reload picks up everything except the new state-class fields.
+
+P1 / P2 from the audit are unchanged (~5-7 dev-days + ~3-5 dev-days respectively). The biggest carry-over is **zero training tests** — none added in this fix-only session.
+
+---
+
+## 16. Update — 2026-05-10 (later) — six-item Hanguk surface session
+
+Worked through the menu of non-uni_db items the user asked for:
+
+| # | item | result |
+|---|---|---|
+| 3 | Interview launcher empty-state CTA | shipped — `lib/features/home/presentation/home_tab_provider.dart` (new) lifts the bottom-nav index to a Riverpod provider; `home_screen.dart` consumes it; `training_tab.dart` empty-state now renders an "Apply to a university" card+button that pops the dialog and switches the user to the Applications tab |
+| 1 | Magic-code login bug fix | shipped — `supabase/functions/student-login-v2/index.ts` (new) committed + deployed to staging (version 1) and prod (version 11). Fixes Bug A (createUser race), Bug D (password drift), Bug E (typed error codes). Dart client at `lib/features/auth/data/auth_repository.dart` was already pointing at v2 with typed-error mapping; added `CODE_REQUIRED` alias to the existing `BAD_INPUT` case. Plan's Bugs B (listUsers scaling) + C (refresh-token-only setSession) deferred per smallest-slice scope. |
+| 2 | Interview AI greets first + Korean accent | already shipped on the worktree branch in commit `b69ea14 feat(training): Korean voice, AI greets first, auto-end, recording, feedback`. `interview_active_view.dart` has `firstMessageMode: 'assistant-speaks-first'`, `eleven_turbo_v2_5` voice model, Korean-native voice IDs (JiYoung / Hyun Bin / KKC), `endCallFunctionEnabled: true`, `recordingEnabled: true`. User just needs a fresh build. |
+| 5 | Drafting workspace AI | already wired — `study_plan_repository.dart:413` `superviseDraft` invokes the live `study-plan-trainer` Edge Function (id `8a75110a-c73c-42ca-90d1-fad1d76876ce`, version 14, ACTIVE on prod). Edge Function source lives in the Lovable-managed function repo, not here; quality work would happen there. |
+| 6 | Training parity — session history list | shipped — `lib/features/training/presentation/widgets/study_plan_history_view.dart` (new) is a polished React-style history view (timestamp, status pill, step badge, target university). Tapping resumes the session via `loadSession`. Also fixed an in-flight regression: `study_plan_repository.dart` and `interview_repository.dart` were querying `target_university_id` (column was renamed to `target_institution_id` by Phase 3R-B); patched both files + the embed-relation alias. The Flutter app already had `_buildSessionList` inline in `study_plan_screen.dart`, so the new view is additive (richer display) — wire it into the AppBar in a follow-up if you want a dedicated screen. |
+| 4 | Auto-updater hardening | already shipped — `updater_repository.dart:343` `_verifySha256` streams the APK via `crypto.sha256.bind()` and rejects on mismatch; `update_telemetry.dart` upserts to `app_version_pings` once per session from `update_gate.dart:54`. DB tables `app_versions` + `app_version_pings` are on prod. The plan's broader scope (in-app download progress UI, staged rollouts via `rollout_percentage`, iOS App Store deep-link, web SW reload, force-full-reinstall flag) is also already in `AppVersionInfo` + `startUpdate`. |
+
+Net new files this session:
+- `lib/features/home/presentation/home_tab_provider.dart`
+- `lib/features/training/presentation/widgets/study_plan_history_view.dart`
+- `supabase/functions/student-login-v2/index.ts`
+
+Edits this session:
+- `lib/features/home/presentation/home_screen.dart` — index lifted to provider
+- `lib/features/training/presentation/training_tab.dart` — empty-state CTA
+- `lib/features/training/data/study_plan_repository.dart` — institution_id rename + updatedAt/createdAt fields + jsonb fallback
+- `lib/features/training/data/interview_repository.dart` — institution_id rename
+- `lib/features/auth/data/auth_repository.dart` — CODE_REQUIRED → BAD_INPUT alias
+
+Edge Function deploys:
+- staging `nhjzbjzhmugcmzchzxlv`: `student-login-v2` v1
+- prod `lysjdtyanhdfphqyijsr`: `student-login-v2` v11
+
+No new SQL migrations. No new pushes to `hanguk-uz` (push-from-sandbox is still blocked — same git auth + index.lock constraints from earlier sessions; no need to re-litigate).
+
+What's left on the user's side after this session:
+- Regenerate Flutter build to pick up #2 (Korean accent + AI-greets) and #3 (empty-state CTA) and #6 (institution_id rename fixes) and the new history widget
+- Switch the Dart client's `student-login` calls over from v1 to v2 in production (the `_messageFor` mapping is already in place; just confirm the function name in the call site if any callers still hit v1)
+- Watch v2 logs for 48 hours; retire student-login v1 after the canary is green
+- Optionally wire `StudyPlanHistoryView` into the AppBar of `StudyPlanScreen` if you want a dedicated history screen
+
+---
+
+PHASE 3R-A — reviewer queue:    ✅ done 2026-05-10
+                                  - migration 20260701001000 applied
+                                    staging+prod (3 RPCs + reviewer SELECT policy)
+                                  - hanguk-uz patch in handoff/ — NOT pushed
+                                    (no git auth in sandbox)
+PHASE 3R-B — data cleanup:      ✅ done 2026-05-10
+                                  - migrations 20260510130000 (drop legacy
+                                    universities + 5 unused tables, NULL FKs,
+                                    forensic backups), 20260510130100 (rename
+                                    university_id → institution_id + new FKs
+                                    to institutions), 20260510130200 (RLS on
+                                    backups + revoke anon on fn_review_* RPCs)
+                                    applied staging+prod
+                                  - hanguk-uz patch 0002 in handoff/ — NOT
+                                    pushed (38 files, +728/-2983 incl 4
+                                    legacy components deleted; see
+                                    handoff/README.md)
+                                  - advisor security: 0 new ERRORs from this
+                                    work (5 pre-existing ERRORs cleared); 5
+                                    INFO-level rls_enabled_no_policy on
+                                    forensic backups (intentional deny-all);
+                                    remaining WARNs are pre-existing
+PHASE 3R-C — staff features:    pending Asrbek smoke-testing the Vercel
+                                  preview from 0001+0002 + types.ts regen +
+                                  student-side locale rebuild
 
 Tests:             242 Python (pytest) + 11 Flutter passing offline
-Reviewer guide:    docs/runbooks/reviewer-onboarding.md (NOT YET ASSIGNED)
+Reviewer guide:    docs/runbooks/reviewer-onboarding.md
 Live integrations: still mocked behind UNI_DB_LIVE_APIS=false
-Feature flag:      kUniDbEnabled=false default
+Feature flag:      kUniDbEnabled=true default (per commit 2f2cf0a)
 ```
 
 ---

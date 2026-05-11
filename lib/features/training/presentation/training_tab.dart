@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../applications/data/applications_repository.dart';
+import '../../home/presentation/home_tab_provider.dart';
 import '../data/interview_repository.dart';
 import 'study_plan_screen.dart';
 import 'interview_screen.dart';
@@ -178,8 +179,14 @@ class TrainingTab extends ConsumerWidget {
   }
   void _showInterviewSetupDialog(BuildContext context, WidgetRef ref) {
     String selectedTrack = 'ko';
+    String selectedPersona = 'friendly'; // audit F12 — was hardcoded
     String? selectedUniId;
     String? selectedUniName;
+
+    // Audit U17: error from a previous attempt would persist in state and
+    // render at the bottom of this dialog when re-opened, even though it
+    // was no longer relevant. Clear it before showing.
+    ref.read(interviewProvider.notifier).clearError();
 
     showDialog(
       context: context,
@@ -211,7 +218,61 @@ class TrainingTab extends ConsumerWidget {
                       error: (e, s) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
                       data: (applications) {
                         if (applications.isEmpty) {
-                          return const Text('No active applications found. Please apply first.', style: TextStyle(color: Colors.white54, fontSize: 12));
+                          // Empty-state CTA: send the user to the Applications tab
+                          // so they can add a university (the previous behaviour
+                          // left "Start Interview" permanently disabled with no
+                          // path forward — see INTERVIEW_QA_REPORT.md §1).
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.white10),
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white.withOpacity(0.02),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'No applications yet',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Add a target university first — interview '
+                                  'practice tailors questions to that school.',
+                                  style: TextStyle(
+                                    color: Colors.white60,
+                                    fontSize: 12,
+                                    height: 1.35,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.vibrantLime,
+                                      foregroundColor: Colors.black,
+                                    ),
+                                    icon: const Icon(Icons.school, size: 18),
+                                    label: const Text(
+                                      'Apply to a university',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    onPressed: () {
+                                      // 0 = Applications tab in HomeScreen.
+                                      ref.read(homeTabProvider.notifier).state = 0;
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         }
                         return Container(
                           height: 150,
@@ -266,6 +327,49 @@ class TrainingTab extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 24),
+                    // Audit F12 — persona was previously hardcoded to
+                    // 'friendly' on this entry path.
+                    const Text(
+                      '3. Interviewer Persona',
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedPersona,
+                          isExpanded: true,
+                          dropdownColor: AppColors.backgroundNavy,
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'friendly',
+                              child: Text('Friendly admissions officer'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'strict',
+                              child: Text('Strict professor'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'impatient',
+                              child: Text('Impatient visa officer'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              setDialogState(() => selectedPersona = val);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -319,6 +423,7 @@ class TrainingTab extends ConsumerWidget {
                               initialUniversityId: selectedUniId,
                               initialUniversityName: selectedUniName,
                               initialLanguage: selectedTrack,
+                              initialPersona: selectedPersona,
                             ),
                           ),
                         );

@@ -90,8 +90,19 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
 
   Widget _buildSessionCard(Map<String, dynamic> session) {
     String uniName = 'Unknown Target';
-    if (session['universities'] != null) {
-      uniName = session['universities']['name_en'] ?? session['universities']['name_ko'] ?? 'Unknown University';
+    // Phase 3R-B renamed the FK column from `target_university_id` to
+    // `target_institution_id`; the embed-relation alias in
+    // InterviewNotifier.getSessionHistory() now reads `institution`.
+    // Accept either alias for backwards compatibility with any cached
+    // responses still in flight.
+    final inst = (session['institution'] as Map?) ??
+        (session['universities'] as Map?);
+    if (inst != null) {
+      final en = inst['name_en'] as String?;
+      final ko = inst['name_ko'] as String?;
+      uniName = (en != null && en.isNotEmpty)
+          ? en
+          : ((ko != null && ko.isNotEmpty) ? ko : 'Unknown University');
     }
 
     final createdAt = DateTime.parse(session['created_at']).toLocal();

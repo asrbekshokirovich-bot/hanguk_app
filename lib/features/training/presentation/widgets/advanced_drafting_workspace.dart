@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../design_system/theme/app_colors.dart';
+import '../../data/grammar_issue_resolver.dart' as resolver;
 import '../../data/study_plan_repository.dart';
 import 'ai_highlighting_text_controller.dart';
 import 'live_metrics_bar.dart';
@@ -27,9 +28,18 @@ class AdvancedDraftingWorkspace extends ConsumerStatefulWidget {
 class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWorkspace> {
   late AiHighlightingTextController _controller;
   final FocusNode _focusNode = FocusNode();
-  
+  // Reused FocusNode for the KeyboardListener that captures Tab presses.
+  // Previously a fresh `FocusNode()` was constructed inline on every
+  // build, leaking one node per rebuild — see audit A4.
+  final FocusNode _keyboardListenerFocus = FocusNode();
+
   Timer? _saveDebounceTimer;
   Timer? _aiSuggestionTimer;
+  // Audit A10: rate-cap the AI supervise calls to once every
+  // _aiMinInterval. Without it, long sessions of intermittent typing
+  // pauses can fire dozens of paid Edge Function calls per minute.
+  DateTime? _lastAiCallAt;
+  static const Duration _aiMinInterval = Duration(seconds: 6);
   
   SaveStatus _saveStatus = SaveStatus.saved;
   
@@ -65,6 +75,7 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _focusNode.dispose();
+    _keyboardListenerFocus.dispose();
     super.dispose();
   }
 
@@ -110,20 +121,23 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
     });
   }
 
-  Future<void> _saveDraft(String text) async {
-    if (!mounted) return;
-    
+  Future<bool> _saveDraft(String text) async {
+    if (!mounted) return false;
+
     setState(() {
       _saveStatus = SaveStatus.saving;
     });
-    
-    await ref.read(studyPlanSessionProvider.notifier).saveDraft(widget.documentType, text);
-    
+
+    final ok = await ref
+        .read(studyPlanSessionProvider.notifier)
+        .saveDraft(widget.documentType, text);
+
     if (mounted) {
       setState(() {
-        _saveStatus = SaveStatus.saved;
+        _saveStatus = ok ? SaveStatus.saved : SaveStatus.error;
       });
     }
+    return ok;
   }
 
   Future<void> _generateAiSuggestion(String text) async {
@@ -138,7 +152,22 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
       }
       return;
     }
-    
+
+    // Audit A10 — rate cap. Skip the call if we just made one;
+    // _onTextChanged keeps the debounce timer running so we'll
+    // re-attempt automatically.
+    final now = DateTime.now();
+    if (_lastAiCallAt != null &&
+        now.difference(_lastAiCallAt!) < _aiMinInterval) {
+      if (mounted) {
+        setState(() {
+          _aiContextStatus = 'AI cooling down…';
+        });
+      }
+      return;
+    }
+    _lastAiCallAt = now;
+
     if (mounted) {
       setState(() {
         _aiContextStatus = "AI analyzing...";
@@ -159,26 +188,22 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
     final ghostText = result['ghostText'] as String? ?? '';
     final issuesList = result['issues'] as List<dynamic>? ?? [];
 
-    List<GrammarIssue> detectedIssues = [];
-    final lowerText = text.toLowerCase();
-
-    for (var issueItem in issuesList) {
-      final original = issueItem['originalText']?.toString() ?? '';
-      final suggestion = issueItem['suggestion']?.toString() ?? '';
-      
-      if (original.isNotEmpty) {
-        // Find the last occurrence since the AI analyzes recent text
-        int index = lowerText.lastIndexOf(original.toLowerCase());
-        if (index != -1) {
-          detectedIssues.add(GrammarIssue(
-            start: index,
-            end: index + original.length,
-            originalText: text.substring(index, index + original.length),
-            suggestion: suggestion,
-          ));
-        }
-      }
-    }
+    // Audit A1: delegate to the pure-Dart resolver so the matching
+    // behavior is unit-testable.
+    final detectedIssues = resolver
+        .resolveIssues(
+          draftText: text,
+          rawIssues: issuesList.whereType<Map>(),
+        )
+        .map(
+          (r) => GrammarIssue(
+            start: r.start,
+            end: r.end,
+            originalText: r.originalText,
+            suggestion: r.suggestion,
+          ),
+        )
+        .toList(growable: false);
 
     setState(() {
       _aiContextStatus = ghostText.isNotEmpty ? "AI Predicting..." : "AI Supervision Active";
@@ -255,11 +280,19 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
               ),
             ),
             TextButton(
-              onPressed: () {
-                 _saveDraft(_controller.text).then((_) {
-                    ref.read(studyPlanSessionProvider.notifier).analyzeCurrentDraft(widget.documentType);
-                    ref.read(studyPlanSessionProvider.notifier).updateSessionStep(widget.documentType, 4);
-                 });
+              onPressed: () async {
+                // Audit A6: previously this fire-and-forgot. If save
+                // failed the analyzer ran on a stale draft. Now we wait
+                // for the save and bail on failure (the SaveStatus error
+                // tag is shown in the LiveMetricsBar).
+                final saved = await _saveDraft(_controller.text);
+                if (!saved || !mounted) return;
+                ref
+                    .read(studyPlanSessionProvider.notifier)
+                    .analyzeCurrentDraft(widget.documentType);
+                ref
+                    .read(studyPlanSessionProvider.notifier)
+                    .updateSessionStep(widget.documentType, 4);
               },
               child: const Text('Analyze', style: TextStyle(color: AppColors.royalBlue, fontWeight: FontWeight.bold)),
             ),
@@ -320,7 +353,7 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
               border: Border.all(color: Colors.white.withOpacity(0.1)),
             ),
             child: KeyboardListener(
-              focusNode: FocusNode(), // Dummy focus node to capture key events at bubble phase
+              focusNode: _keyboardListenerFocus,
               onKeyEvent: (KeyEvent event) {
                 if (event is KeyDownEvent && 
                     event.logicalKey == LogicalKeyboardKey.tab && 

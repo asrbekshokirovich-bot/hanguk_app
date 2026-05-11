@@ -109,8 +109,15 @@ class _MessageFixCard extends StatefulWidget {
 class _MessageFixCardState extends State<_MessageFixCard> {
   bool _expanded = false;
 
+  // Audit F17: the Edge Function has historically returned per-message
+  // scores on a 0–10 scale while `_ScoreBar` (above) assumes 0–100. We
+  // standardize on 0–100 by scaling small values up. A score that's
+  // already 0–100 stays untouched.
+  num get _scoreOn100 => widget.score <= 10 ? widget.score * 10 : widget.score;
+
   @override
   Widget build(BuildContext context) {
+    final score100 = _scoreOn100;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -122,12 +129,22 @@ class _MessageFixCardState extends State<_MessageFixCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ListTile(
-            title: Text('You said:', style: const TextStyle(color: Colors.white54, fontSize: 12)),
-            subtitle: Text(widget.originalText, style: const TextStyle(color: Colors.white)),
+            title: const Text('You said:',
+                style: TextStyle(color: Colors.white54, fontSize: 12)),
+            subtitle: Text(widget.originalText,
+                style: const TextStyle(color: Colors.white)),
             trailing: CircleAvatar(
-               backgroundColor: widget.score > 7 ? AppColors.vibrantLime : AppColors.warning,
-               radius: 14,
-               child: Text('${widget.score}', style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+              backgroundColor:
+                  score100 > 70 ? AppColors.vibrantLime : AppColors.warning,
+              radius: 14,
+              child: Text(
+                '${score100.round()}',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
           if (widget.idealHint != null && widget.idealHint!.isNotEmpty) ...[
@@ -175,26 +192,40 @@ class _ScoreBar extends StatelessWidget {
 
   const _ScoreBar({required this.label, required this.score});
 
+  // Same normalization as `_MessageFixCard` (audit F17). Accept either
+  // a 0–10 score (Edge Function legacy shape) or a 0–100 score.
+  num get _scoreOn100 => score <= 10 ? score * 10 : score;
+
   @override
   Widget build(BuildContext context) {
+    final s = _scoreOn100.clamp(0, 100);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         children: [
-          SizedBox(width: 100, child: Text(label, style: const TextStyle(color: Colors.white70))),
+          SizedBox(
+            width: 100,
+            child: Text(label, style: const TextStyle(color: Colors.white70)),
+          ),
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
-                value: score / 100,
+                value: s / 100,
                 minHeight: 8,
                 backgroundColor: Colors.white10,
-                color: score > 70 ? AppColors.vibrantLime : AppColors.warning,
+                color: s > 70 ? AppColors.vibrantLime : AppColors.warning,
               ),
             ),
           ),
           const SizedBox(width: 16),
-          Text('$score%', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          Text(
+            '${s.round()}%',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );

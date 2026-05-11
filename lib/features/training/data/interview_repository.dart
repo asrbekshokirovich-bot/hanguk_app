@@ -59,6 +59,9 @@ class InterviewSessionState {
   final String? error;
   final bool isVapiConnected; // true when WebRTC call is live
   final String? vapiCallId; // Stores the underlying session ID for audio recordings
+  final String? focusTopic; // Optional free-text steer for the AI's questions
+  final bool timedMode;
+  final int? timeLimitSeconds; // Hard cap; null = untimed
 
   const InterviewSessionState({
     this.sessionId,
@@ -76,6 +79,9 @@ class InterviewSessionState {
     this.error,
     this.isVapiConnected = false,
     this.vapiCallId,
+    this.focusTopic,
+    this.timedMode = false,
+    this.timeLimitSeconds,
   });
 
   InterviewSessionState copyWith({
@@ -95,6 +101,9 @@ class InterviewSessionState {
     bool clearError = false,
     bool? isVapiConnected,
     String? vapiCallId,
+    String? focusTopic,
+    bool? timedMode,
+    int? timeLimitSeconds,
   }) {
     return InterviewSessionState(
       sessionId: sessionId ?? this.sessionId,
@@ -112,6 +121,9 @@ class InterviewSessionState {
       error: clearError ? null : (error ?? this.error),
       isVapiConnected: isVapiConnected ?? this.isVapiConnected,
       vapiCallId: vapiCallId ?? this.vapiCallId,
+      focusTopic: focusTopic ?? this.focusTopic,
+      timedMode: timedMode ?? this.timedMode,
+      timeLimitSeconds: timeLimitSeconds ?? this.timeLimitSeconds,
     );
   }
 }
@@ -126,6 +138,35 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
   }
 
   // ── Session lifecycle ────────────────────────────────────────────────────
+
+  /// Clears any prior error message in state. Used by the interview-setup
+  /// dialog so a stale error doesn't render on a re-open (audit U17).
+  void clearError() {
+    if (state.error != null) {
+      state = state.copyWith(clearError: true);
+    }
+  }
+
+  /// Mark the current session row as `abandoned` and clear in-memory
+  /// state. Used when the user backs out of the interview screen
+  /// without ever pressing End — previously the row stayed `status =
+  /// 'active'` forever and history-replay couldn't tell what happened
+  /// (audit F14). The status string follows the existing `'completed'` /
+  /// `'rejected'` pattern in the table; no enum migration needed.
+  Future<void> markAbandoned() async {
+    final sessionId = state.sessionId;
+    if (sessionId == null) return;
+    if (state.status != 'active') return;
+    try {
+      await Supabase.instance.client
+          .from('interview_sessions')
+          .update({'status': 'abandoned'})
+          .eq('id', sessionId);
+    } on Exception catch (e) {
+      debugPrint('Failed to mark session abandoned: $e');
+    }
+    state = state.copyWith(status: 'abandoned', isVapiConnected: false);
+  }
 
   Future<void> startSession({
     String sessionType = 'general',
@@ -148,7 +189,7 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
       final response = await client.from('interview_sessions').insert({
         'student_id': user.id,
         'session_type': sessionType,
-        'target_university_id': targetUniversityId,
+        'target_institution_id': targetUniversityId,
         'status': 'active',
         'focus_topic': focusTopic,
         'timed_mode': timedMode,
@@ -168,6 +209,9 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
         selectedLanguage: language,
         interviewerPersona: persona,
         liveHints: [],
+        focusTopic: focusTopic,
+        timedMode: timedMode,
+        timeLimitSeconds: timeLimitSeconds,
         // NOTE: We do NOT call sendMessage here anymore.
         // Vapi handles the greeting via its own firstMessage field.
         // Calling sendMessage here caused a duplicate greeting race condition.
@@ -200,14 +244,37 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
   }
 
   Future<void> _persistVapiCallId(String sessionId, String callId) async {
-    try {
-      await Supabase.instance.client
-          .from('interview_sessions')
-          .update({'vapi_call_id': callId})
-          .eq('id', sessionId);
-    } catch (e) {
-      debugPrint('Failed to persist vapi_call_id: $e');
+    // Audit D6: failures here meant the row had vapi_call_id=NULL and
+    // history-replay later showed "Audio recording not found". We now
+    // retry up to 3 times with exponential backoff, then surface a
+    // non-blocking error so the UI can show "audio unavailable" later.
+    const delays = [
+      Duration(seconds: 1),
+      Duration(seconds: 4),
+      Duration(seconds: 12),
+    ];
+    Object? lastError;
+    for (var attempt = 0; attempt < delays.length; attempt++) {
+      try {
+        await Supabase.instance.client
+            .from('interview_sessions')
+            .update({'vapi_call_id': callId})
+            .eq('id', sessionId);
+        return;
+      } on Exception catch (e) {
+        lastError = e;
+        debugPrint(
+          'Failed to persist vapi_call_id (attempt ${attempt + 1}/${delays.length}): $e',
+        );
+        if (attempt < delays.length - 1) {
+          await Future<void>.delayed(delays[attempt]);
+        }
+      }
     }
+    state = state.copyWith(
+      error: 'Could not save audio link for this session ($lastError). '
+          'Replay may be unavailable.',
+    );
   }
 
   // ── Text-only interview: full AI round-trip ──────────────────────────────
@@ -281,28 +348,37 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
   /// Used during a live Vapi WebRTC session to persist the student's
   /// transcript to the DB without triggering a redundant Gemini AI response.
   /// The voice AI (GPT-4o via Vapi) already handles the conversation.
-  Future<void> logTranscript(String studentText) async {
+  Future<void> logTranscript(String studentText) =>
+      logTranscriptWithRole(studentText, 'student');
+
+  /// Persist a transcript line for either side of the conversation. Adding
+  /// AI-side transcripts (role = 'interviewer') closes a regression where
+  /// `interview-feedback` was scoring a one-sided dialogue — see audit F9.
+  Future<void> logTranscriptWithRole(String text, String role) async {
     final sessionId = state.sessionId;
     if (sessionId == null) return;
+    if (text.isEmpty) return;
+
+    final dbRole = role == 'assistant' ? 'interviewer' : role;
 
     try {
       final client = Supabase.instance.client;
       await client.from('interview_messages').insert({
         'session_id': sessionId,
-        'role': 'student',
-        'content': studentText,
+        'role': dbRole,
+        'content': text,
       });
 
-      final newStudentMsg = InterviewMessage(
-        id: 'vapi-${DateTime.now().millisecondsSinceEpoch}',
-        role: 'student',
-        content: studentText,
+      final newMsg = InterviewMessage(
+        id: 'vapi-$dbRole-${DateTime.now().millisecondsSinceEpoch}',
+        role: dbRole,
+        content: text,
         createdAt: DateTime.now().toIso8601String(),
       );
-      state = state.copyWith(messages: [...state.messages, newStudentMsg]);
-    } catch (e) {
-      // Non-critical — don't surface to user, just log
-      debugPrint('Failed to log Vapi transcript: $e');
+      state = state.copyWith(messages: [...state.messages, newMsg]);
+    } on Exception catch (e) {
+      // Non-critical — don't surface to user, just log.
+      debugPrint('Failed to log Vapi transcript ($dbRole): $e');
     }
   }
 
@@ -330,8 +406,51 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
         throw Exception(data?['error'] ?? 'Failed to get feedback');
       }
 
-      final fb = data['feedback'] as Map<String, dynamic>;
-      
+      // Audit F15: the `interview-feedback` Edge Function persists into
+      // public.interview_feedback (UNIQUE on session_id). We defensively
+      // verify the row landed; if it didn't, insert it ourselves so
+      // history-replay always has feedback to show.
+      final fbRaw = data['feedback'];
+      if (fbRaw is! Map) {
+        throw Exception('Unexpected feedback shape from server');
+      }
+      final fb = Map<String, dynamic>.from(fbRaw);
+
+      try {
+        final row = await client
+            .from('interview_feedback')
+            .select('session_id')
+            .eq('session_id', sessionId)
+            .maybeSingle();
+        if (row == null) {
+          await client.from('interview_feedback').insert({
+            'session_id': sessionId,
+            if (fb['overall_score'] is num)
+              'overall_score': (fb['overall_score'] as num).round().clamp(1, 10),
+            if (fb['communication_score'] is num)
+              'communication_score':
+                  (fb['communication_score'] as num).round().clamp(1, 10),
+            if (fb['confidence_score'] is num)
+              'confidence_score':
+                  (fb['confidence_score'] as num).round().clamp(1, 10),
+            if (fb['content_score'] is num)
+              'content_score': (fb['content_score'] as num).round().clamp(1, 10),
+            if (fb['language_score'] is num)
+              'language_score':
+                  (fb['language_score'] as num).round().clamp(1, 10),
+            if (fb['strengths'] is List) 'strengths': fb['strengths'],
+            if (fb['improvements'] is List) 'improvements': fb['improvements'],
+            if (fb['message_scores'] is List)
+              'message_scores': fb['message_scores'],
+            if (fb['detailed_feedback'] is String)
+              'detailed_feedback': fb['detailed_feedback'],
+          });
+        }
+      } on Exception catch (e) {
+        // Non-fatal — the in-memory feedback is still available.
+        debugPrint('Defensive interview_feedback insert failed: $e');
+      }
+
       state = state.copyWith(
         status: 'completed',
         feedback: fb,
@@ -339,7 +458,7 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
       );
 
       return fb;
-    } catch (e) {
+    } on Exception catch (e) {
       state = state.copyWith(error: 'Failed to end session: ${e.toString()}');
       return null;
     } finally {
@@ -469,7 +588,7 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
       final response = await client
           .from('interview_sessions')
-          .select('*, universities:target_university_id(name_en, name_ko)')
+          .select('*, institution:target_institution_id(name_en, name_ko)')
           .eq('student_id', user.id)
           .order('created_at', ascending: false);
           
