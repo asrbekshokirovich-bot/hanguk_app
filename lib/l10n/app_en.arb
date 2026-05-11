@@ -1,0 +1,34 @@
+{
+  "@@locale": "en",
+
+  "trainingTabTitle": "Training Center",
+  "@trainingTabTitle": { "description": "Title of the Training bottom-nav tab." },
+
+  "trainingTabSubtitle": "Prepare for your university applications with AI-guided training modules.",
+  "@trainingTabSubtitle": { "description": "One-line description of the Training tab." },
+
+  "studyPlanCardTitle": "Study Plan Builder",
+  "studyPlanCardDesc": "Craft a compelling roadmap for your academic journey.",
+  "personalStatementCardTitle": "Personal Statement",
+  "personalStatementCardDesc": "Write effective and engaging personal essays.",
+  "interviewCardTitle": "Interview Preparation",
+  "interviewCardDesc": "Practice mock questions and improve your confidence.",
+
+  "applyCta": "Apply to a university",
+  "noApplicationsTitle": "No applications yet",
+  "noApplicationsBody": "Add a target university first — drafting starts from a target school.",
+
+  "startInterview": "Start Interview",
+  "cancel": "Cancel",
+  "endInterview": "End Interview",
+  "endSession": "End Session",
+  "practiceAgain": "Practice Again",
+
+  "connecting": "Connecting...",
+  "greetWait": "Connecting — your interviewer will greet you shortly...",
+  "yourTurn": "Your turn to speak",
+  "aiSpeaking": "Interviewer is speaking...",
+  "wrappingUp": "Wrapping up the interview...",
+
+  "micRequired": "Microphone access is required for the interview."
+}

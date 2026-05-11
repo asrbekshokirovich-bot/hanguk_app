@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/interview_repository.dart';
-import '../../../../design_system/theme/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../design_system/theme/app_colors.dart';
+import '../../data/interview_repository.dart';
 import 'interview_analytics_view.dart';
 
 class InterviewHistoryView extends ConsumerStatefulWidget {
@@ -106,8 +107,13 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
     }
 
     final createdAt = DateTime.parse(session['created_at']).toLocal();
-    final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(createdAt);
-    final isCompleted = session['status'] == 'completed';
+    // Audit H3: locale-aware date format. `Localizations.localeOf` is
+    // safe to read here because the widget rebuilds on locale change.
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final formattedDate = DateFormat.yMMMd(locale).add_jm().format(createdAt);
+    final status = session['status'] as String? ?? 'unknown';
+    final isCompleted = status == 'completed';
+    final isAbandoned = status == 'abandoned';
 
     return GestureDetector(
       onTap: () {
@@ -119,6 +125,17 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                 overrideSessionId: session['id'],
                 overrideVapiCallId: session['vapi_call_id'] as String?,
                 onBackPressed: () => Navigator.pop(context),
+              ),
+            ),
+          );
+        } else {
+          // Audit H1: explain why an in-progress session can't be opened.
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                isAbandoned
+                    ? 'This session ended without feedback — no replay available.'
+                    : 'This session is still active. Finish it to see feedback.',
               ),
             ),
           );
@@ -137,12 +154,22 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isCompleted ? Colors.greenAccent.withOpacity(0.1) : Colors.orangeAccent.withOpacity(0.1),
+                color: isCompleted
+                    ? Colors.greenAccent.withOpacity(0.1)
+                    : (isAbandoned
+                        ? Colors.white12
+                        : Colors.orangeAccent.withOpacity(0.1)),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isCompleted ? Icons.check_circle_outline : Icons.pending_outlined,
-                color: isCompleted ? Colors.greenAccent : Colors.orangeAccent,
+                isCompleted
+                    ? Icons.check_circle_outline
+                    : (isAbandoned
+                        ? Icons.cancel_outlined
+                        : Icons.pending_outlined),
+                color: isCompleted
+                    ? Colors.greenAccent
+                    : (isAbandoned ? Colors.white54 : Colors.orangeAccent),
               ),
             ),
             const SizedBox(width: 16),
@@ -164,11 +191,57 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
+            // Audit H2: deletion. Confirms first because the row is gone
+            // for good.
+            IconButton(
+              tooltip: 'Delete session',
+              icon: const Icon(Icons.delete_outline, color: Colors.white38, size: 20),
+              onPressed: () => _confirmDelete(session['id'] as String),
+            ),
             Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3)),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(String sessionId) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.backgroundNavy,
+        title: const Text('Delete this session?',
+            style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'The feedback and recording link will be permanently removed.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await Supabase.instance.client
+          .from('interview_sessions')
+          .delete()
+          .eq('id', sessionId);
+      await _loadHistory();
+    } on Exception catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Delete failed: $e')),
+      );
+    }
   }
 }

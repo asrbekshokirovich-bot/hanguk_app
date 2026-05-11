@@ -27,6 +27,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Audit L1/L3: Material widget translations + the localizationsDelegates
+  # composite + intl runtime for `AppLocalizations`. Required for the
+  # generated training l10n files under lib/l10n/.
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.3.1
@@ -41,6 +46,10 @@ dependencies:
   dio: ^5.9.2
   path_provider: ^2.1.5
   open_filex: ^4.7.0
+  # Audit B7: vapi is vendored under ./packages/vapi (see overrides
+  # below), pinning the wire format. Bumping requires regenerating
+  # `vapi_event_parser.dart` + retesting the 4 known endCall event
+  # shapes in test/features/training/vapi_event_parser_test.dart.
   vapi: any
   http: ^1.6.0
   webview_flutter_web: ^0.2.3+4
@@ -82,6 +91,7 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   assets:

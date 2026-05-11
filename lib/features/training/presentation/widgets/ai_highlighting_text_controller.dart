@@ -74,8 +74,48 @@ class AiHighlightingTextController extends TextEditingController {
       }
     }
 
-    // Append ghost text if available
+    // Audit A2: render ghost text at the cursor instead of always at
+    // the end. Falls back to "append at end" when there's no valid
+    // selection (e.g. on first build before focus).
     if (ghostText != null && ghostText!.isNotEmpty) {
+      final cursor = selection.baseOffset;
+      final cursorValid =
+          cursor >= 0 && cursor <= sourceText.length && selection.isCollapsed;
+
+      if (cursorValid && cursor < sourceText.length) {
+        // Rebuild children, inserting the ghost span at the cursor.
+        // We have to rewalk the existing children because each one is
+        // a TextSpan whose `text` we cleared into substrings above.
+        final rebuilt = <InlineSpan>[];
+        var consumed = 0;
+        for (final span in children) {
+          final t = (span is TextSpan ? span.text : null) ?? '';
+          final next = consumed + t.length;
+          if (cursor < next && cursor >= consumed) {
+            final splitAt = cursor - consumed;
+            rebuilt.add(TextSpan(
+              style: span is TextSpan ? span.style : null,
+              text: t.substring(0, splitAt),
+            ));
+            rebuilt.add(TextSpan(
+              style: style?.copyWith(
+                color: Colors.white24,
+                fontStyle: FontStyle.italic,
+              ),
+              text: ghostText,
+            ));
+            rebuilt.add(TextSpan(
+              style: span is TextSpan ? span.style : null,
+              text: t.substring(splitAt),
+            ));
+          } else {
+            rebuilt.add(span);
+          }
+          consumed = next;
+        }
+        return TextSpan(style: style, children: rebuilt);
+      }
+
       children.add(TextSpan(
         style: style?.copyWith(
           color: Colors.white24, // Muted color for ghost text

@@ -147,7 +147,31 @@ class _InterviewAnalyticsViewState extends ConsumerState<InterviewAnalyticsView>
         _buildListSection('Strengths', fb['strengths'] as List<dynamic>?, Icons.thumb_up, Colors.greenAccent),
         const SizedBox(height: 24),
         _buildListSection('Areas to Improve', fb['improvements'] as List<dynamic>?, Icons.build, Colors.orangeAccent),
-        
+
+        const SizedBox(height: 32),
+        // Audit U15: "Start another interview" preserves the in-memory
+        // feedback (the prior implementation called resetSession which
+        // wiped it). Routes back through the setup view by transitioning
+        // status: 'completed' -> 'idle' via resetForNewSession.
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.vibrantLime,
+            foregroundColor: Colors.black,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+          icon: const Icon(Icons.refresh),
+          label: const Text(
+            'Start another interview',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          onPressed: () => ref
+              .read(interviewProvider.notifier)
+              .resetForNewSession(),
+        ),
+
         const SizedBox(height: 48),
       ],
     );

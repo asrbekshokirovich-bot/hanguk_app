@@ -66,5 +66,43 @@ void main() {
       );
       expect(issues, isEmpty);
     });
+
+    test('issues do not overlap when needles are nested (audit A9)', () {
+      // Single word "applications" — both needles overlap inside it.
+      // Without the consumed mask, both issues would resolve to index 11
+      // because "application" is a prefix of "applications".
+      const text = 'submitting applications now';
+      final issues = resolveIssues(
+        draftText: text,
+        rawIssues: const [
+          {'originalText': 'applications', 'suggestion': 'apps'},
+          // After "applications" claims [11..23), the prefix
+          // "application" has no un-consumed match, so it's dropped.
+          {'originalText': 'application', 'suggestion': 'app'},
+        ],
+      );
+      expect(issues, hasLength(1));
+      expect(issues.single.originalText, 'applications');
+      expect(issues.single.start, 11);
+    });
+
+    test(
+      'an issue whose needle would split a surrogate pair is dropped (audit A8)',
+      () {
+        // рџ‘‹ is U+1F44B вЂ” a surrogate pair in UTF-16. Slicing between
+        // its two code units would produce an invalid string.
+        const text = 'wave рџ‘‹ here';
+        final issues = resolveIssues(
+          draftText: text,
+          rawIssues: const [
+            // Look for half of the surrogate pair (low surrogate at
+            // index 6). The matcher finds it but resolution must
+            // refuse to slice.
+            {'originalText': '\uDC4B here', 'suggestion': 'noop'},
+          ],
+        );
+        expect(issues, isEmpty);
+      },
+    );
   });
 }

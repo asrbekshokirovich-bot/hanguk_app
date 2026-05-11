@@ -5,8 +5,12 @@
 > path, what's wrong, what good looks like, and a rough effort
 > estimate. Backlog at the bottom is sorted P0/P1/P2.
 >
-> **2026-05-10 update — all 9 P0 items and all 23 P1 items are closed
-> in code.** P2 backlog is unchanged. New artefacts added by the P1
+> **2026-05-10 update — all 9 P0, all 23 P1, and all 26 P2 items are
+> closed in code.** Full intl wiring (`lib/l10n/` + 5 ARB files +
+> `MaterialApp` delegates) and a mocked Vapi integration test landed in
+> the final P2 batch. Translations seeded with English placeholders +
+> `TODO: translate` markers on uz / ko / ru / vi so a translator can
+> fill them in without blocking the wiring. New artefacts added by the P1
 > pass:
 > - `supabase/migrations/20260510140000_training_add_selected_track.sql` (applied to staging + prod)
 > - `lib/features/training/data/training_contracts.dart` (Edge Function shapes + parsers, audit B1/B4)
@@ -363,6 +367,45 @@ Net: Flutter is a working subset of React. Most-impactful gaps are `StudyPlanCha
 **P1 total: 22 / 23 closed in code. Item 32 (L1/L3) partial — strings extracted but full intl infra deferred to P2.**
 
 ### P2 — nice-to-have
+
+> **All 26 closed in code on 2026-05-10.** Status per item below.
+>
+> 33 ✅ F16 — `InterviewFeedbackView` stubbed deprecated; consumer was already gone. Delete file Windows-side.
+> 34 ✅ U2 — Track-mismatch warning was localized during P0 #9 (Step 1 guide pass).
+> 35 ✅ U6 — Added `isAnalyzing` flag on `StudyPlanSessionState`; analysis view reads it instead of `isLoading`.
+> 36 ✅ U7 — Removed unused `_exampleSelectedUniName` from `_StudyPlanScreenState`.
+> 37 ✅ U8 — Session settings AppBar menu with "Switch track" action; `updateSelectedTrack` persists to `study_plan_sessions.selected_track` and updates state.
+> 38 ✅ U11 — `_focusTopicCtrl` (TextEditingController) replaces the bare onChanged variable; disposed properly.
+> 39 ✅ U12 — Status-update error events now extract real detail strings (`errorMsg` / `message` / `error` / `detail` / `status`) instead of the misleading generic.
+> 40 ✅ U14 — Two-sided transcript display: live partial words on top, then a 6-turn ledger labelled You / AI.
+> 41 ✅ U15 — `resetForNewSession()` preserves `feedback`; new "Start another interview" CTA on `InterviewAnalyticsView` uses it.
+> 42 ✅ U16 — `Permission.microphone.isPermanentlyDenied` branch shows a "Open settings" SnackBarAction calling `openAppSettings()`.
+> 43 ✅ U18 — `_InterviewActiveViewState` now `with WidgetsBindingObserver`; on `paused`/`detached` mid-call it routes through `_completeAutoEnd` (conservative: end-on-background rather than pause/resume).
+> 44 ✅ D2 — closed in P1 alongside U1/A5 (`saveDraft` no longer overwrites `draftContent`).
+> 45 ✅ D3 — `clearCurrentSession` preserves the sessions list; only nukes per-session state.
+> 46 ✅ D4 — `fetchSessions` sorts completed rows to the bottom (alternative considered: filter them out; rejected — users would lose access to past feedback).
+> 47 ✅ D5 — Best-effort multi-device stale-draft check on `saveDraft`: re-fetches max remote version, refuses if it exceeds local max with an "Another device saved a newer draft" error. The `(session_id, version)` unique constraint stays as the last line of defence.
+> 48 ✅ D7 — Temp message id is tracked; both catch arms call `_rollbackTempMessage(tempId)`.
+> 49 ✅ D8 — `_ttsFilePaths` registry + `cleanupTtsFiles()`; called on `resetSession` and `resetForNewSession`.
+> 50 ✅ D9 — `getSessionHistory({limit=50, offset=0})`; uses `.range()` for paging.
+> 51 ✅ D10 — `endSession` returns early when `isLoading` or `status == 'completed'`.
+> 52 ✅ A2/A3 — `_acceptSuggestion` inserts at the cursor; ghost text renders at the cursor via `buildTextSpan`. Both fall back to "append at end" when there's no valid selection.
+> 53 ✅ A7 — `TextField.maxLength: 12000`; counter hidden (LiveMetricsBar already shows word/char).
+> 54 ✅ A8 — `_splitsSurrogate` guard in `resolveIssues` drops any match that would slice a surrogate pair.
+> 55 ✅ A9 — Tested directly via the consumed-mask resolver introduced in P1 A1; new test asserts nested needles don't overlap.
+> 56 ✅ B5 — `_client?.start(...)` wrapped in `.timeout(Duration(seconds: 30))`.
+>    ✅ B6 — `Invalid_api_key` string-match replaced with `statusCode == 401 || 403`.
+>    ✅ B7 — Pubspec comment documents the vendored Vapi pin + test-suite expectation when bumping.
+> 57 ✅ C2/C3/C4 — 11 `catch (e)` sites converted to `on Exception catch (e)` across both repos. Reasonable bang-op cases remain (audit said reduce-where-cheap, not eliminate).
+> 58 ✅ H1-H5 —
+>    H1: in-progress / abandoned sessions now show an explanatory SnackBar on tap.
+>    H2: delete-with-confirm IconButton in the interview history card.
+>    H3: `DateFormat.yMMMd(locale).add_jm()` replaces the hardcoded `MMM d, yyyy`.
+>    H4: `StudyPlanHistoryView` wired into the StudyPlanScreen AppBar (history icon, only shown on the list step).
+>    H5: existing inline list on the wizard's home step kept (it's already used + working); H4 is the additive richer view.
+
+(legacy list preserved below for reference)
+
 
 33. F16 — Decide fate of `InterviewFeedbackView`. (5 m delete)
 34. U2 — Track-mismatch warning localization (after L1).
