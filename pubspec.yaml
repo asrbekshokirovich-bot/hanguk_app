@@ -65,9 +65,9 @@ dependencies:
   crypto: ^3.0.6              # SHA-256 verification of downloaded APK
   device_info_plus: ^11.5.0   # OS / model info for telemetry pings
   # Audit K10 (2026-05-11): pre-emptive add ahead of any future
-  # Kakao Login (or other OAuth) flow — OAuth tokens cannot live
+  # Kakao Login (or other OAuth) flow вЂ” OAuth tokens cannot live
   # in SharedPreferences. Keychain (iOS) + EncryptedSharedPreferences
-  # (Android). Not consumed by any code yet — see docs/runbooks/kakao.md.
+  # (Android). Not consumed by any code yet вЂ” see docs/runbooks/kakao.md.
   flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
@@ -135,4 +135,17 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: "assets/app_icon2.png"
- 
+    background_color: "#ffffff"
+    theme_color: "#ffffff"
+  image_path: "assets/app_icon2.png"
+  min_sdk_android: 21
+
+dependency_overrides:
+  freezed_annotation: ^3.1.0
+  vapi:
+    path: ./packages/vapi
+  # QA fix 2026-05-06: dart_jsonwebtoken 3.4.0 (transitive via gotrue/supabase_flutter)
+  # references pointycastle 3.x APIs (ECPrivateKey, ASN1Parser, etc.) that were
+  # removed in pointycastle 4.0.0. Pin pointycastle to the last 3.x line so the
+  # Dart compiler can resolve those symbols.
+  pointycastle: ^3.9.1
