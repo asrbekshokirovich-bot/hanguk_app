@@ -48,7 +48,7 @@ class UniversityCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          _buildRankBadge(),
+          _buildTierBadge(),
           if (university.isPartner) ...[
             const SizedBox(width: 6),
             _buildPartnerChip(),
@@ -89,28 +89,37 @@ class UniversityCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRankBadge() {
-    if (university.ranking == null) return const SizedBox.shrink();
-    final isTop100 = university.ranking! <= 100;
+  /// Audit M3 (2026-05-11): the legacy `_buildRankBadge` rendered
+  /// `#${ranking}` from a column that no longer exists. Replaced with
+  /// a tier-based "Top" pill: tier 0 (flagship) and tier 1 (top-ranked)
+  /// get highlighted treatment; tier 2–4 show a dimmer "Tier N" label.
+  /// Unclassified institutions (tier == null) render no badge.
+  Widget _buildTierBadge() {
+    final tier = university.tier;
+    if (tier == null) return const SizedBox.shrink();
+
+    final isTop = tier <= 1;
+    final label = isTop ? 'Top' : 'Tier $tier';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: isTop100
+        color: isTop
             ? AppColors.vibrantLime.withOpacity(0.15)
             : Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isTop100
+          color: isTop
               ? AppColors.vibrantLime.withOpacity(0.4)
               : Colors.white.withOpacity(0.08),
         ),
       ),
       child: Text(
-        '#${university.ranking}',
+        label,
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: isTop100 ? AppColors.vibrantLime : Colors.white38,
+          color: isTop ? AppColors.vibrantLime : Colors.white38,
         ),
       ),
     );

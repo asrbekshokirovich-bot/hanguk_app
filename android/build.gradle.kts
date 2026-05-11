@@ -2,7 +2,11 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/") }
+        // Audit K3 (2026-05-11): Removed Kakao Maven repository
+        // (https://devrepo.kakao.com/nexus/repository/kakaomap-releases/).
+        // It was left over from an abandoned `kakao_maps_flutter` SDK
+        // attempt. No Gradle dependency in this project pulls from it.
+        // See docs/audits/kakaotalk_audit_2026-05-11.md §3 K3.
     }
 }
 

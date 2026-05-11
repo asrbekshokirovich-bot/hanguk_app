@@ -17,7 +17,11 @@ class MapTab extends ConsumerStatefulWidget {
 class _MapTabState extends ConsumerState<MapTab> {
   final TextEditingController _searchController = TextEditingController();
   bool _isMapMode = true;
-  String _activeFilter = 'all'; // 'all' | 'partner' | 'top100'
+  // Audit M3 (2026-05-11): replaced the legacy 'top100' filter with
+  // 'top'. The new schema has a `tier` smallint (0–4) instead of an
+  // open-ended `ranking` int — `tier ≤ 1` is the closest equivalent
+  // to "top-100".
+  String _activeFilter = 'all'; // 'all' | 'partner' | 'top'
   String _searchQuery = '';
 
   @override
@@ -50,8 +54,12 @@ class _MapTabState extends ConsumerState<MapTab> {
       case 'partner':
         filtered = filtered.where((u) => u.isPartner).toList();
         break;
-      case 'top100':
-        filtered = filtered.where((u) => u.ranking != null && u.ranking! <= 100).toList();
+      case 'top':
+        // Audit M3 (2026-05-11): tier-based "top" filter replaces the
+        // legacy `ranking <= 100` check. `tier` is the new 0–4 quality
+        // tier on `institutions`; `isTopTier` returns true for tier
+        // 0 or 1.
+        filtered = filtered.where((u) => u.isTopTier).toList();
         break;
     }
 
@@ -150,10 +158,14 @@ class _MapTabState extends ConsumerState<MapTab> {
                   ),
                   const SizedBox(width: 8),
                   _FilterChip(
-                    label: 'Top 100',
+                    // Audit M3 (2026-05-11): label changed from "Top
+                    // 100" to "Top". The semantics moved from a
+                    // numeric `ranking` cap to the categorical `tier`
+                    // (0 or 1).
+                    label: 'Top',
                     icon: Icons.workspace_premium_outlined,
-                    selected: _activeFilter == 'top100',
-                    onTap: () => setState(() => _activeFilter = 'top100'),
+                    selected: _activeFilter == 'top',
+                    onTap: () => setState(() => _activeFilter = 'top'),
                   ),
                 ],
               ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../../design_system/theme/app_colors.dart';
 import '../../domain/university.dart';
 import 'university_roadview_screen.dart';
@@ -110,54 +112,27 @@ class UniversityDetailSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // Stats Row
-                      _buildStatsRow(),
+                      // Audit M4 (2026-05-11): the legacy stats row
+                      // showed `ranking` and `localRank` from columns
+                      // that no longer exist on `institutions`.
+                      // Replaced with the new tier + next-event
+                      // signals sourced from `v_institutions_for_map`.
+                      _buildSignalsRow(),
 
                       const SizedBox(height: 20),
                       const Divider(color: AppColors.borderGlass),
                       const SizedBox(height: 16),
 
-                      // Tuition
-                      if (university.tuitionMin != null ||
-                          university.tuitionMax != null)
-                        _buildInfoRow(
-                          Icons.payments_outlined,
-                          'Annual Tuition',
-                          _formatTuition(),
-                        ),
-
-                      // Acceptance Rate
-                      if (university.acceptanceRate != null)
-                        _buildInfoRow(
-                          Icons.how_to_reg_outlined,
-                          'Acceptance Rate',
-                          '${(university.acceptanceRate! * 100).toStringAsFixed(1)}%',
-                        ),
-
-                      // Description
-                      if (university.descriptionEn != null &&
-                          university.descriptionEn!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'About',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          university.descriptionEn!,
-                          style: const TextStyle(
-                            color: Colors.white54,
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                          maxLines: 6,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                      // Audit M4 (2026-05-11): the legacy rows for
+                      // Annual Tuition, Acceptance Rate and the
+                      // "About" description block were removed. Those
+                      // signals lived on the dropped `universities`
+                      // table and don't have a 1:1 mapping on
+                      // `institutions`. They are surfaced in
+                      // `InstitutionDetailScreen` (uni_db feature)
+                      // when present. Leaving the rows here would
+                      // always render them empty and make the sheet
+                      // look broken.
 
                       const SizedBox(height: 24),
 
@@ -258,21 +233,35 @@ class UniversityDetailSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsRow() {
+  /// Audit M4 (2026-05-11): replaces the legacy ranking-based stats
+  /// row with the new institutions-shape signals — Tier, Verified
+  /// (IEQAS) status, and the next admission-cycle event. Renders
+  /// nothing when no signals are present (rather than rendering an
+  /// empty card).
+  Widget _buildSignalsRow() {
     final items = <_StatItem>[];
 
-    if (university.ranking != null) {
+    if (university.tier != null) {
+      final isTop = university.isTopTier;
       items.add(_StatItem(
-        label: 'Global Rank',
-        value: '#${university.ranking}',
-        highlight: university.ranking! <= 100,
+        label: isTop ? 'Top Tier' : 'Tier',
+        value: isTop ? 'Top' : 'T${university.tier}',
+        highlight: isTop,
       ));
     }
-    if (university.localRank != null) {
+
+    if (university.isAccredited) {
+      items.add(const _StatItem(
+        label: 'Verified',
+        value: 'IEQAS',
+        highlight: true,
+      ));
+    }
+
+    if (university.nextEventAt != null) {
       items.add(_StatItem(
-        label: 'Korea Rank',
-        value: '#${university.localRank}',
-        highlight: university.localRank! <= 50,
+        label: 'Next event',
+        value: DateFormat.MMMd().format(university.nextEventAt!),
       ));
     }
 
@@ -284,7 +273,8 @@ class UniversityDetailSheet extends StatelessWidget {
             (item) => Expanded(
               child: Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 decoration: BoxDecoration(
                   color: item.highlight
                       ? AppColors.vibrantLime.withOpacity(0.08)
@@ -301,7 +291,9 @@ class UniversityDetailSheet extends StatelessWidget {
                     Text(
                       item.value,
                       style: TextStyle(
-                        color: item.highlight ? AppColors.vibrantLime : Colors.white,
+                        color: item.highlight
+                            ? AppColors.vibrantLime
+                            : Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -309,7 +301,8 @@ class UniversityDetailSheet extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       item.label,
-                      style: const TextStyle(color: Colors.white38, fontSize: 11),
+                      style:
+                          const TextStyle(color: Colors.white38, fontSize: 11),
                     ),
                   ],
                 ),
@@ -320,53 +313,12 @@ class UniversityDetailSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Colors.white38),
-          const SizedBox(width: 10),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white54, fontSize: 13),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatTuition() {
-    final min = university.tuitionMin;
-    final max = university.tuitionMax;
-    if (min != null && max != null) {
-      return '\$${_fmt(min)} – \$${_fmt(max)} / yr';
-    } else if (min != null) {
-      return 'From \$${_fmt(min)} / yr';
-    } else if (max != null) {
-      return 'Up to \$${_fmt(max!)} / yr';
-    }
-    return 'Contact university';
-  }
-
-  String _fmt(int n) {
-    return n.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]},',
-        );
-  }
-
   Future<void> _launchWebsite(String url) async {
-    final uri = Uri.parse(url.startsWith('http') ? url : 'https://$url');
+    // Audit M10 (P1; pulled forward as a hygiene fix during the P0
+    // batch): use `Uri.tryParse` so a malformed url doesn't throw on
+    // the UI thread.
+    final uri = Uri.tryParse(url.startsWith('http') ? url : 'https://$url');
+    if (uri == null) return;
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -378,5 +330,9 @@ class _StatItem {
   final String value;
   final bool highlight;
 
-  _StatItem({required this.label, required this.value, this.highlight = false});
+  const _StatItem({
+    required this.label,
+    required this.value,
+    this.highlight = false,
+  });
 }

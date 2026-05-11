@@ -1338,4 +1338,83 @@ Feature flag:      kUniDbEnabled=true default (per commit 2f2cf0a)
 
 ---
 
+## Addendum 2026-05-11 — Kakao + Map/Walkaround P0 batch
+
+Two audit reports landed on 2026-05-11
+(`docs/audits/kakaotalk_audit_2026-05-11.md`,
+`docs/audits/map_walkaround_audit_2026-05-11.md`). All P0 items from
+both audits have been shipped:
+
+```
+SCOPE 1 — KAKAOTALK INTEGRATION
+  K1 — Data-source fix (drop the dead `universities` query)   ✅ shipped
+       (lib/features/map/data/map_repository.dart →
+        from('v_institutions_for_map').select(...))
+  K2 — JS key off source                                       ✅ shipped
+       (lib/core/config/app_config.dart::kakaoJsKey =
+        String.fromEnvironment('KAKAO_JS_KEY', defaultValue:
+        'c695b428…'); both HTML generators templated with
+        AppConfig.kakaoJsKey)
+       (test_map.html neutralized — sandbox can't rm; orchestrator
+        to `git rm` on commit)
+  K3 — Orphan native Kakao SDK deletion                        ✅ shipped
+       (AndroidManifest com.kakao.sdk.AppKey meta-data removed;
+        android/build.gradle.kts Kakao Maven repo removed;
+        iOS Info.plist never wired for Kakao — no edits needed)
+
+SCOPE 2 — MAP + WALKAROUND
+  M1 — Data-source fix                                         ✅ shipped (same as K1)
+  M2 — Domain remodel                                          ✅ shipped
+       (lib/features/map/domain/university.dart →
+        added nameKo/nameKoShort/nameEn/nameUz/tier/ieqasStatus/
+        nextEventAt + isTopTier + isAccredited; legacy fields
+        @Deprecated)
+       (test/features/map/university_domain_test.dart — new
+        unit-test coverage)
+  M3 — Filter chip + tier badge                                ✅ shipped
+       ("Top 100" → "Top", predicate = u.isTopTier;
+        university_card.dart's _buildRankBadge → _buildTierBadge)
+  M4 — Detail-sheet rows                                       ✅ shipped
+       (stats row → _buildSignalsRow with Tier/IEQAS/next-event;
+        legacy tuition/acceptance/about rows removed)
+       (M10 pulled forward: _launchWebsite now uses Uri.tryParse)
+
+OPERATOR PRE-DECISION (P1 partial)
+  Roadview radius → 200m, no auto-expand fallback              ✅ shipped
+       (lib/features/map/presentation/widgets/roadview_html.dart;
+        empty-state UI in English; M6 will localize via the new
+        window.HangukRoadviewChannel JS bridge)
+
+DEFERRED TO NEXT BATCH
+  K6 / M12 — Delete kakao-roadview-proxy Edge Function         pending decision
+       (called by no client; scrapes undocumented endpoints;
+        delete preferred if Pannellum path isn't picked up)
+  P1 / P2 items                                                deferred per plan
+```
+
+Files touched in this batch:
+
+  - `android/app/src/main/AndroidManifest.xml` (K3)
+  - `android/build.gradle.kts` (K3)
+  - `lib/core/config/app_config.dart` (K2)
+  - `lib/features/map/data/map_repository.dart` (K1/M1)
+  - `lib/features/map/domain/university.dart` (M2)
+  - `lib/features/map/presentation/map_tab.dart` (M3)
+  - `lib/features/map/presentation/widgets/university_card.dart` (M3)
+  - `lib/features/map/presentation/widgets/university_detail_sheet.dart` (M4, M10)
+  - `lib/features/map/presentation/widgets/university_map_html.dart` (K2)
+  - `lib/features/map/presentation/widgets/roadview_html.dart` (K2, Roadview radius)
+  - `test/features/map/university_domain_test.dart` (new — M2 coverage)
+  - `test_map.html` (K2/K7 — neutralized, awaiting `git rm`)
+  - `docs/audits/kakaotalk_audit_2026-05-11.md` (P0 status closed)
+  - `docs/audits/map_walkaround_audit_2026-05-11.md` (P0 status closed)
+  - `CURRENT_STATUS.md` (this addendum)
+
+Git: per operating rules, no commits made from the sandbox. Worktree
+HEAD remains at the audit-reports commit (`762c671` on
+`claude/audits-kakao-and-map`); the operator handles the branch
+state for the implementation commit.
+
+---
+
 Report path: `C:\Users\User\Desktop\Hanguk\CURRENT_STATUS.md`

@@ -24,6 +24,22 @@ Sister scope: `docs/audits/map_walkaround_audit_2026-05-11.md`.
 
 ---
 
+## Status banner (2026-05-11)
+
+  - **All 3 P0 items shipped** (K1, K2, K3). See §3 status column for
+    per-item detail. The map renders against `v_institutions_for_map`;
+    the Kakao JS key now reads from `AppConfig.kakaoJsKey` overridable
+    by `--dart-define=KAKAO_JS_KEY=...`; the orphan native-SDK plumbing
+    (`com.kakao.sdk.AppKey` meta-data + Kakao Maven repo) is removed.
+  - **`test_map.html`** was neutralized in place — the sandbox can't
+    `rm` files in the worktree, so its body is now a comment slated for
+    `git rm` in the same commit.
+  - **P1 / P2 deferred** to the next batch as planned. K6 (delete the
+    orphan `kakao-roadview-proxy` Edge Function) still pending an
+    operator decision.
+
+---
+
 ## Executive summary
 
 Hanguk's **only** Kakao integration that is wired and used in production
@@ -398,11 +414,11 @@ P1 = within the quarter; P2 = nice-to-have.
 
 ### P0 — must fix before next student-facing release
 
-| ID | File / line | Issue | Fix |
-|---|---|---|---|
-| K1 | `lib/features/map/data/map_repository.dart:6–13` | Queries the **dropped** `universities` table (Phase 3R-B dropped it on 2026-05-10, migration `20260510130000_uni_db_v3_drop_legacy_universities.sql`). Map renders empty in prod. | Switch to `select(...).from('v_institutions_for_map')`. View is already created in `20260601000100_uni_db_v1_views.sql`. Map the columns to `University` domain object. **NB: this is also P0 #1 in the map/walkaround audit — it's the same fix.** |
-| K2 | `lib/features/map/presentation/widgets/university_map_html.dart` (`appkey=c695b428...`) and `roadview_html.dart` (same) | Three Kakao app keys hardcoded in source (`bce5c81e...`, `c695b428...`, `2adc9e88...`). APK consumers can extract them. | (a) Move JS key to `--dart-define KAKAO_JS_KEY=...` and inject at compile time. (b) Delete `test_map.html` (orphan with a third key). (c) If we ever ship the native SDK, native app key likewise becomes `--dart-define` + key.properties pattern we already use for signing. |
-| K3 | `android/app/src/main/AndroidManifest.xml:41–43` + `android/build.gradle.kts:5` | Orphan Kakao SDK setup left over from the failed `kakao_maps_flutter` attempt. Declares a Kakao Native AppKey nothing reads, registers Kakao's Maven repo nothing pulls from. Confuses future maintainers and ships a key in the APK for no reason. | Decide: either (a) **delete** the meta-data and the Maven repo line (preferred — we're not shipping Kakao Login), or (b) **wire it properly** by adding `kakao_flutter_sdk_user` to pubspec, an OAuth intent-filter, and an iOS URL scheme. K3 blocks K2's cleanup. |
+| ID | File / line | Issue | Fix | Status |
+|---|---|---|---|---|
+| K1 | `lib/features/map/data/map_repository.dart:6–13` | Queries the **dropped** `universities` table (Phase 3R-B dropped it on 2026-05-10, migration `20260510130000_uni_db_v3_drop_legacy_universities.sql`). Map renders empty in prod. | Switch to `select(...).from('v_institutions_for_map')`. View is already created in `20260601000100_uni_db_v1_views.sql`. Map the columns to `University` domain object. **NB: this is also P0 #1 in the map/walkaround audit — it's the same fix.** | ✅ **Shipped 2026-05-11.** Repository now queries `v_institutions_for_map`; `PostgrestException` caught + logged separately. Same commit as M1. |
+| K2 | `lib/features/map/presentation/widgets/university_map_html.dart` (`appkey=c695b428...`) and `roadview_html.dart` (same) | Three Kakao app keys hardcoded in source (`bce5c81e...`, `c695b428...`, `2adc9e88...`). APK consumers can extract them. | (a) Move JS key to `--dart-define KAKAO_JS_KEY=...` and inject at compile time. (b) Delete `test_map.html` (orphan with a third key). (c) If we ever ship the native SDK, native app key likewise becomes `--dart-define` + key.properties pattern we already use for signing. | ✅ **Shipped 2026-05-11.** `AppConfig.kakaoJsKey` reads `String.fromEnvironment('KAKAO_JS_KEY', defaultValue: ...)`. Both HTML generators now templated with the AppConfig key. `test_map.html` neutralized (sandbox can't `rm`; orchestrator to `git rm` on commit). Native app key was deleted under K3, so (c) is no-op until Kakao Login lands. |
+| K3 | `android/app/src/main/AndroidManifest.xml:41–43` + `android/build.gradle.kts:5` | Orphan Kakao SDK setup left over from the failed `kakao_maps_flutter` attempt. Declares a Kakao Native AppKey nothing reads, registers Kakao's Maven repo nothing pulls from. Confuses future maintainers and ships a key in the APK for no reason. | Decide: either (a) **delete** the meta-data and the Maven repo line (preferred — we're not shipping Kakao Login), or (b) **wire it properly** by adding `kakao_flutter_sdk_user` to pubspec, an OAuth intent-filter, and an iOS URL scheme. K3 blocks K2's cleanup. | ✅ **Shipped 2026-05-11** (operator pre-decided option **(a) delete**). Removed `<meta-data name="com.kakao.sdk.AppKey">` from `AndroidManifest.xml` and the `devrepo.kakao.com` Maven entry from `android/build.gradle.kts`. Both removals replaced with audit-cite comments so future maintainers know why. iOS `Info.plist` was never wired for Kakao so no edits needed there. |
 
 ### P1 — within the quarter
 

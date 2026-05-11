@@ -22,6 +22,24 @@ JS SDK key hygiene + native-SDK orphan plumbing live there).
 
 ---
 
+## Status banner (2026-05-11)
+
+  - **All 4 P0 items shipped** (M1, M2, M3, M4). Plus operator
+    pre-decided to tighten the Roadview radius to 200m in the same
+    batch, so **M5 is partial-shipped** (radius fix done; full empty-
+    state localization deferred to M6). And **M10** (`Uri.tryParse` for
+    the website button) was pulled forward as a hygiene win during M4.
+  - The map now reads from `v_institutions_for_map`; the `University`
+    domain object matches the new shape; the "Top 100" filter is now
+    `tier ≤ 1`; the detail sheet's stats row shows Tier / IEQAS /
+    next-event instead of ranking. New unit tests cover the domain
+    contract.
+  - **P1 / P2 deferred** to the next batch. M12 (delete the orphan
+    `kakao-roadview-proxy` Edge Function) still pending operator
+    decision (mirrors K6).
+
+---
+
 ## Executive summary
 
 The map surface is a four-piece system: a `MapTab` shell with
@@ -505,23 +523,23 @@ Codes: M = Map/walkaround item.
 
 ### P0 — must fix before next student-facing release
 
-| ID | File / line | Issue | Fix |
-|---|---|---|---|
-| M1 | `lib/features/map/data/map_repository.dart:6–13` | Queries dropped `universities` table → map empty in prod. **Same fix as Kakao audit K1.** | `from('v_institutions_for_map').select(...)`. Map `name_en`/`name_uz`/`name_ko` per locale into `University.name`; map `city_ko` into `University.location` until the i18n city-name story lands. |
-| M2 | `lib/features/map/domain/university.dart` | Domain object models legacy fields that don't exist on `institutions` (`ranking`, `tuitionMin`, `tuitionMax`, `acceptanceRate`, `descriptionEn`, `website`). | Remodel to match `v_institutions_for_map`: add `nameKo`, `nameKoShort`, `nameUz`, `tier`, `ieqasStatus`, `nextEventAt`. Keep `ranking` *optional* for the transition window so the UI doesn't have to change in lockstep, but document it as deprecated. |
-| M3 | `lib/features/map/presentation/map_tab.dart:54` (`top100` filter) and `lib/features/map/presentation/widgets/university_card.dart:92–117` (rank badge) | Both reference `university.ranking`, which is always null under the new schema. | Either (a) remove the `top100` filter chip and the rank badge entirely, or (b) replace `ranking <= 100` with `tier <= 1` and badge text with the tier label. **(b) preferred.** |
-| M4 | `lib/features/map/presentation/widgets/university_detail_sheet.dart:113–160` | Stats row, tuition row, acceptance rate row, description row all reference fields that will be permanently null. Sheet looks bare. | Short-term: hide all four rows when null (already done — they collapse silently, sheet looks bare but doesn't crash). Medium-term: replace with: (a) "Tier 1 verified" badge, (b) `next_event_at` row, (c) one-line description from `institutions.institution_type` enum. Long-term: deep-link to `InstitutionDetailScreen` from `lib/features/uni_db/presentation/` which already has the full picture. |
+| ID | File / line | Issue | Fix | Status |
+|---|---|---|---|---|
+| M1 | `lib/features/map/data/map_repository.dart:6–13` | Queries dropped `universities` table → map empty in prod. **Same fix as Kakao audit K1.** | `from('v_institutions_for_map').select(...)`. Map `name_en`/`name_uz`/`name_ko` per locale into `University.name`; map `city_ko` into `University.location` until the i18n city-name story lands. | ✅ **Shipped 2026-05-11.** `universitiesProvider` now reads `v_institutions_for_map`. Display-name resolution: en → uz → ko_short → ko (always-readable fallback). `next_event_at` parsed via `DateTime.tryParse`. `PostgrestException` and generic `Exception` caught separately (per dart/security.md). |
+| M2 | `lib/features/map/domain/university.dart` | Domain object models legacy fields that don't exist on `institutions` (`ranking`, `tuitionMin`, `tuitionMax`, `acceptanceRate`, `descriptionEn`, `website`). | Remodel to match `v_institutions_for_map`: add `nameKo`, `nameKoShort`, `nameUz`, `tier`, `ieqasStatus`, `nextEventAt`. Keep `ranking` *optional* for the transition window so the UI doesn't have to change in lockstep, but document it as deprecated. | ✅ **Shipped 2026-05-11.** Added `nameKo`, `nameKoShort`, `nameEn`, `nameUz`, `tier`, `ieqasStatus`, `nextEventAt`. Legacy fields (`ranking`, `localRank`, `acceptanceRate`, `tuitionMin`, `tuitionMax`, `website`, `descriptionEn`) marked `@Deprecated(...)` with replacement guidance. Added `isTopTier` and `isAccredited` convenience getters. New `test/features/map/university_domain_test.dart` covers both getters + the deprecated-null contract. |
+| M3 | `lib/features/map/presentation/map_tab.dart:54` (`top100` filter) and `lib/features/map/presentation/widgets/university_card.dart:92–117` (rank badge) | Both reference `university.ranking`, which is always null under the new schema. | Either (a) remove the `top100` filter chip and the rank badge entirely, or (b) replace `ranking <= 100` with `tier <= 1` and badge text with the tier label. **(b) preferred.** | ✅ **Shipped 2026-05-11** (option **(b)**). Filter chip renamed "Top 100" → "Top"; predicate switched to `u.isTopTier`. Card rank badge replaced with tier badge ("Top" for tier ≤ 1, "Tier N" otherwise, hidden when tier is null). |
+| M4 | `lib/features/map/presentation/widgets/university_detail_sheet.dart:113–160` | Stats row, tuition row, acceptance rate row, description row all reference fields that will be permanently null. Sheet looks bare. | Short-term: hide all four rows when null (already done — they collapse silently, sheet looks bare but doesn't crash). Medium-term: replace with: (a) "Tier 1 verified" badge, (b) `next_event_at` row, (c) one-line description from `institutions.institution_type` enum. Long-term: deep-link to `InstitutionDetailScreen` from `lib/features/uni_db/presentation/` which already has the full picture. | ✅ **Shipped 2026-05-11.** Stats row replaced with `_buildSignalsRow`: Tier (highlighted for tier ≤ 1), IEQAS Verified badge, and the next admission-cycle event date (formatted with `intl`'s `DateFormat.MMMd()`). Tuition / Acceptance / About rows removed entirely (no replacement; those signals live in `InstitutionDetailScreen` of the uni_db feature). Pulled M10 (`Uri.tryParse` for the website button) forward as a hygiene win in the same edit. |
 
 ### P1 — within the quarter
 
-| ID | File / line | Issue | Fix |
-|---|---|---|---|
-| M5 | `lib/features/map/presentation/widgets/roadview_html.dart` (`getNearestPanoId(pos, 2000, cb)`) | 2 km radius is wrong for "campus walkaround." Lands on motor road. | Two-pass: try 300 m; on null, try 1000 m; on null, show localized "no walkaround." |
+| ID | File / line | Issue | Fix | Status |
+|---|---|---|---|---|
+| M5 | `lib/features/map/presentation/widgets/roadview_html.dart` (`getNearestPanoId(pos, 2000, cb)`) | 2 km radius is wrong for "campus walkaround." Lands on motor road. | Two-pass: try 300 m; on null, try 1000 m; on null, show localized "no walkaround." | ✅ **Partial — shipped 2026-05-11** alongside the P0 batch (operator pre-decided to tighten to **200m with no auto-expand**, since auto-expand brings the drive-by panorama back and defeats the purpose). Empty-state copy in English; full localization deferred to M6. Roadview HTML also gained a `window.HangukRoadviewChannel` JS bridge that posts `'sdk_blocked' \| 'no_pano' \| 'init_error' \| 'network' \| 'ready'` so the Dart side can attach a Channel and surface a localized fallback UI later (M6). |
 | M6 | `roadview_html.dart` ("Booting … Walkaround…" / "Walkaround data completely isolated." / "Network connection denied.") | English-only error/loading strings. | Add `walkaroundLoading`, `walkaroundUnavailable`, `walkaroundNetworkError` to all 5 `.arb` files. Load via `AppLocalizations.of(context)`. (Same shape as the `KakaoTalk K5` fix.) |
 | M7 | `lib/features/map/presentation/widgets/university_map_html.dart` (top of `<head>`) | Leaflet CSS+JS loaded statically every render. ~150 KB waste when Kakao succeeds. | Move Leaflet `<link>` and `<script>` injection into `fallbackToOsm()`. |
 | M8 | `lib/features/map/presentation/widgets/map_view/map_mobile.dart` and `map_web.dart` | Neither implementation auto-fits the camera to the marker bounds — both hard-code `(36.5, 127.8)` Korea-wide zoom. With a filtered list of 3 Seoul universities the user sees an unhelpful overview. | After markers are added, call `map.setBounds(bounds.extend(LatLng(lat,lng)))` on Kakao and `map.fitBounds(L.featureGroup(markers).getBounds(), {padding:[40,40]})` on Leaflet. |
 | M9 | `lib/features/map/presentation/widgets/university_detail_sheet.dart:171–177` | Walkaround navigation bypasses `go_router` — uses `Navigator.of(context).push(MaterialPageRoute(...))`. Inconsistent with the rest of the app and breaks deep-linking. | Register `/walkaround/:institutionId` in `lib/core/router/app_router.dart`. Call `context.push('/walkaround/$id')`. |
-| M10 | `lib/features/map/presentation/widgets/university_detail_sheet.dart:368–372` (`_launchWebsite`) | Uses `Uri.parse` (throws on malformed URL) instead of `Uri.tryParse`. | Switch to `Uri.tryParse` + null-check, show snackbar on parse failure. |
+| M10 | `lib/features/map/presentation/widgets/university_detail_sheet.dart:368–372` (`_launchWebsite`) | Uses `Uri.parse` (throws on malformed URL) instead of `Uri.tryParse`. | Switch to `Uri.tryParse` + null-check, show snackbar on parse failure. | ✅ **Shipped 2026-05-11** as a hygiene win in the M4 detail-sheet rewrite. `_launchWebsite` now uses `Uri.tryParse`, returns silently on parse failure. Snackbar fallback deferred (the website button only shows when `university.website` is non-null and the new domain always emits null for that field, so the function is effectively unreachable until the uni_db detail screen is the source). |
 | M11 | `lib/features/map/presentation/map_tab.dart` (no deep-link) | No `/map/:institutionId` route. Cannot link to a university view from outside. | Add a `GoRoute('/map/:institutionId')` that opens MapTab, awaits `universitiesProvider`, then raises the bottom sheet. Useful for push-notification deep links + shared links. |
 | M12 | `supabase/functions/kakao-roadview-proxy/index.ts` (entire) | Edge Function exists, scrapes undocumented endpoints, called by nothing. (Same as Kakao audit K6.) | Decide: delete (if we don't ship Option B's Pannellum-over-Kakao hybrid) or wire (if we do). **Recommend delete** because Pannellum can render official tours directly without scraping. |
 | M13 | `test_map.html` (repo root) | Stray test scaffold; third hardcoded JS key; not referenced by build. (Same as Kakao audit K7.) | Delete. |

@@ -39,9 +39,14 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <meta-data
-            android:name="com.kakao.sdk.AppKey"
-            android:value="bce5c81e0cedaaa8cdc5334d39ab38ed" />
+        <!-- Audit K3 (2026-05-11): removed orphan `com.kakao.sdk.AppKey`
+             meta-data that was left over from an abandoned
+             `kakao_maps_flutter` SDK attempt. We do not ship Kakao
+             Login / Share / Channel / AlimTalk; no Kakao native SDK is
+             in pubspec to read this meta-data. If we ever ship Kakao
+             Login, this meta-data + the `kakao{NATIVE_KEY}` OAuth
+             intent-filter need to be added back together.
+             See docs/audits/kakaotalk_audit_2026-05-11.md §3 K3. -->
 
         <provider
             android:name="androidx.core.content.FileProvider"

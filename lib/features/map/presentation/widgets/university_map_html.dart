@@ -1,7 +1,14 @@
+import '../../../../core/config/app_config.dart';
 import '../../domain/university.dart';
 
 String generateMapHtml(List<University> universities) {
-  final validUnis = universities.where((u) => u.latitude != null && u.longitude != null);
+  // Audit K2 (2026-05-11): Kakao JS key sourced from AppConfig
+  // (overridable via `--dart-define=KAKAO_JS_KEY=...`). The HTML
+  // string is templated by Dart before being loaded into the WebView;
+  // no external input touches the interpolation site.
+  final kakaoJsKey = AppConfig.kakaoJsKey;
+  final validUnis =
+      universities.where((u) => u.latitude != null && u.longitude != null);
 
   final kakaoMarkersJs = validUnis.map((u) {
     final safeName = u.name.replaceAll("'", "\\'").replaceAll('"', '\\"');
@@ -105,7 +112,7 @@ String generateMapHtml(List<University> universities) {
 
         // Try Loading Kakao JS dynamically
         var script = document.createElement('script');
-        script.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=c695b428933e192ca1d8582e3aab14a4&autoload=false";
+        script.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=$kakaoJsKey&autoload=false";
         script.onload = function() {
             try {
                 if (typeof kakao === 'undefined' || !kakao.maps) {
