@@ -60,6 +60,15 @@ class University {
   final bool isPartner;
   final bool isVisibleOnMap;
 
+  // Audit M17/M18 (2026-05-12). When `virtualTour` is non-null, the
+  // detail sheet surfaces a curated "Virtual Tour" button (Pannellum
+  // viewer). When `walkaroundUrl` is non-null and `virtualTour` is
+  // null, the tour button instead opens the official VR page in an
+  // external browser. Otherwise, the Kakao Roadview "Virtual
+  // Walkaround" remains the only option.
+  final Map<String, dynamic>? virtualTour;
+  final String? walkaroundUrl;
+
   // ── Deprecated legacy fields ────────────────────────────────────────────
   // Kept nullable so existing widgets continue to compile during the
   // transition. The repository always emits `null` — these fields used
@@ -95,6 +104,8 @@ class University {
     this.nextEventAt,
     this.isPartner = false,
     this.isVisibleOnMap = true,
+    this.virtualTour,
+    this.walkaroundUrl,
     // ignore: deprecated_member_use_from_same_package
     this.ranking,
     // ignore: deprecated_member_use_from_same_package
@@ -120,4 +131,28 @@ class University {
   /// "verified" badge on cards and the detail sheet.
   bool get isAccredited =>
       ieqasStatus == 'outstanding' || ieqasStatus == 'accredited';
+
+  /// True when a curated Pannellum tour spec is set for this row.
+  bool get hasVirtualTour => virtualTour != null;
+
+  /// Audit M19 (2026-05-12): returns the most appropriate display
+  /// name for the given locale code. Falls back to the
+  /// repository-resolved `name` if no locale-specific label is set.
+  String nameForLocale(String localeCode) {
+    switch (localeCode) {
+      case 'ko':
+        return (nameKoShort?.isNotEmpty ?? false)
+            ? nameKoShort!
+            : (nameKo?.isNotEmpty ?? false)
+                ? nameKo!
+                : name;
+      case 'uz':
+        return (nameUz?.isNotEmpty ?? false) ? nameUz! : name;
+      case 'en':
+      case 'ru':
+      case 'vi':
+      default:
+        return (nameEn?.isNotEmpty ?? false) ? nameEn! : name;
+    }
+  }
 }

@@ -10,13 +10,13 @@ import '../domain/university.dart';
 /// The replacement contract is `v_institutions_for_map`, defined in
 /// `supabase/migrations/20260601000100_uni_db_v1_views.sql`.
 ///
-/// Audit M24 (deferred to a follow-up): the previous version silently
-/// swallowed errors and returned `[]`, so the user could not tell
-/// "empty" from "broken". For the P0 batch we keep the same swallow
-/// shape (returns `[]` on error) so the UI continues to render
-/// gracefully; the empty-state copy is descriptive enough that the
-/// failure mode is clear. M24 will re-throw and route the failure
-/// through the proper error-state path.
+/// Audit M24 (2026-05-12): the provider now re-throws on failure so
+/// `AsyncValue.error` reaches `MapTab._buildErrorState`, which has a
+/// retry button. The previous "swallow → []" shape made every
+/// failure look like an empty list, hiding the actual problem. The
+/// catch blocks below preserve the structured `debugPrint` for
+/// diagnostics, then rethrow so the UI distinguishes "no
+/// institutions yet" from "the network is down."
 final universitiesProvider = FutureProvider<List<University>>((ref) async {
   try {
     final data = await Supabase.instance.client
@@ -25,7 +25,10 @@ final universitiesProvider = FutureProvider<List<University>>((ref) async {
           'id, name_ko, name_ko_short, name_en, name_uz, '
           'city_ko, latitude, longitude, logo_url, tier, '
           'ieqas_status, is_partner, is_visible_on_map, '
-          'last_verified_at, next_event_at',
+          'last_verified_at, next_event_at, '
+          // Audit M17 / M18 (2026-05-12): pulled from
+          // migration 20260512120000_institutions_virtual_tour.sql.
+          'virtual_tour, walkaround_url',
         )
         .eq('is_visible_on_map', true)
         // No `ranking` column on the new view — `tier` is the closest
@@ -77,14 +80,18 @@ final universitiesProvider = FutureProvider<List<University>>((ref) async {
         nextEventAt: nextEventAt,
         isPartner: map['is_partner'] as bool? ?? false,
         isVisibleOnMap: map['is_visible_on_map'] as bool? ?? true,
+        virtualTour: map['virtual_tour'] is Map<String, dynamic>
+            ? map['virtual_tour'] as Map<String, dynamic>
+            : null,
+        walkaroundUrl: map['walkaround_url'] as String?,
         // Deprecated legacy fields — always null after the migration.
       );
     }).toList();
   } on PostgrestException catch (e) {
     debugPrint('[MapRepository] Postgrest error: ${e.code} ${e.message}');
-    return const [];
+    rethrow;
   } on Exception catch (e) {
     debugPrint('[MapRepository] Failed to load institutions: $e');
-    return const [];
+    rethrow;
   }
 });

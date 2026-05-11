@@ -79,4 +79,43 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get micRequired => 'Microphone access is required for the interview.';
+
+  @override
+  String get walkaroundLoadingTitle => 'Loading campus walkaround';
+
+  @override
+  String get walkaroundLoadingSubtitle => 'Fetching street view near campus.';
+
+  @override
+  String get walkaroundNoPanoTitle => 'No street view here';
+
+  @override
+  String get walkaroundNoPanoSubtitle =>
+      "This campus doesn't have a walkable street view nearby.";
+
+  @override
+  String get walkaroundBlockedTitle => 'Street view unavailable';
+
+  @override
+  String get walkaroundBlockedSubtitle =>
+      'The map provider blocked this request. Try again on a different network.';
+
+  @override
+  String get walkaroundNetworkTitle => "Couldn't reach the map provider";
+
+  @override
+  String get walkaroundNetworkSubtitle => 'Check your connection and try again.';
+
+  @override
+  String get walkaroundInitErrorTitle => "Street view couldn't start";
+
+  @override
+  String get walkaroundInitErrorSubtitle =>
+      'Something went wrong starting the walkaround. Please try again.';
+
+  @override
+  String get virtualTourTitle => 'Virtual Tour';
+
+  @override
+  String get virtualWalkaroundTitle => 'Virtual Walkaround';
 }

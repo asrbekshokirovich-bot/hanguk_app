@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../design_system/theme/app_colors.dart';
 import '../../domain/university.dart';
-import 'university_roadview_screen.dart';
+import 'virtual_tour_screen.dart';
 
 class UniversityDetailSheet extends StatelessWidget {
   final University university;
@@ -136,7 +137,90 @@ class UniversityDetailSheet extends StatelessWidget {
 
                       const SizedBox(height: 24),
 
-                      // Walkaround Campus Button
+                      // Audit M17 / M18 (2026-05-12): when this
+                      // institution has a curated Pannellum tour
+                      // (`virtualTour` JSONB) OR an external VR URL
+                      // (`walkaroundUrl`), surface a "Virtual Tour"
+                      // button ABOVE the Kakao Roadview walkaround.
+                      // Roadview remains as a fallback for everything
+                      // else.
+                      if (university.hasVirtualTour)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => VirtualTourScreen(
+                                    institutionName: university.name,
+                                    tourSpec: university.virtualTour!,
+                                  ),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.threesixty,
+                                size: 18,
+                                color: AppColors.pureBlack,
+                              ),
+                              label: const Text(
+                                'Virtual Tour',
+                                style: TextStyle(
+                                  color: AppColors.pureBlack,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.vibrantLime,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (university.walkaroundUrl != null &&
+                          university.walkaroundUrl!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () =>
+                                  _launchWebsite(university.walkaroundUrl!),
+                              icon: const Icon(
+                                Icons.open_in_new_rounded,
+                                size: 18,
+                                color: AppColors.vibrantLime,
+                              ),
+                              label: const Text(
+                                'Virtual Tour',
+                                style: TextStyle(color: AppColors.vibrantLime),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                side: BorderSide(
+                                  color:
+                                      AppColors.vibrantLime.withOpacity(0.4),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Walkaround Campus Button (Kakao Roadview)
+                      //
+                      // Audit M9 (2026-05-11): navigation goes through
+                      // go_router (`/walkaround/:institutionId`) so
+                      // deep-links work. When a curated Virtual Tour
+                      // exists, this is the secondary entry point;
+                      // otherwise it's the only one.
                       if (university.latitude != null && university.longitude != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -144,10 +228,9 @@ class UniversityDetailSheet extends StatelessWidget {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => UniversityRoadviewScreen(university: university),
-                                  ),
+                                context.push(
+                                  '/walkaround/${university.id}',
+                                  extra: university,
                                 );
                               },
                               icon: const Icon(Icons.threesixty, size: 18, color: AppColors.pureBlack),
@@ -336,3 +419,4 @@ class _StatItem {
     this.highlight = false,
   });
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       

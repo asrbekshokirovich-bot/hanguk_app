@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../data/map_repository.dart';
 import '../domain/university.dart';
+import 'map_deeplink_provider.dart';
 import 'widgets/university_card.dart';
 import 'widgets/university_detail_sheet.dart';
 import 'widgets/university_map_view.dart';
@@ -78,6 +79,25 @@ class _MapTabState extends ConsumerState<MapTab> {
   @override
   Widget build(BuildContext context) {
     final uniAsync = ref.watch(universitiesProvider);
+
+    // Audit M11 (2026-05-11): deep-link handler. When the router or a
+    // push notification writes an institution id into
+    // `pendingMapDetailProvider`, raise the detail sheet for that
+    // institution and clear the provider so the sheet doesn't reopen
+    // on rebuild. We listen rather than watch+raise-in-build to avoid
+    // showModalBottomSheet during the build phase.
+    ref.listen<String?>(pendingMapDetailProvider, (prev, next) {
+      if (next == null || next.isEmpty) return;
+      final unis = uniAsync.valueOrNull;
+      if (unis == null) return;
+      final match = unis.where((u) => u.id == next).firstOrNull;
+      ref.read(pendingMapDetailProvider.notifier).state = null;
+      if (match == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _showDetail(context, match);
+      });
+    });
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -180,14 +200,39 @@ class _MapTabState extends ConsumerState<MapTab> {
                 error: (e, _) => _buildErrorState(),
                 data: (unis) {
                   final filtered = _applyFilters(unis);
+                  // Audit M25 (2026-05-12): when map mode is active
+                  // and the current filter/search produces 0 results,
+                  // overlay an explanatory badge so the user knows
+                  // the map looks empty because of their filter, not
+                  // because no universities are mapped.
+                  final showEmptyBadge = _isMapMode &&
+                      filtered.isEmpty &&
+                      unis.isNotEmpty;
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 350),
                     switchInCurve: Curves.easeOut,
                     switchOutCurve: Curves.easeIn,
                     child: _isMapMode
-                        ? UniversityMapView(
+                        ? Stack(
                             key: const ValueKey('map'),
-                            universities: filtered,
+                            children: [
+                              UniversityMapView(
+                                universities: filtered,
+                              ),
+                              if (showEmptyBadge)
+                                Positioned(
+                                  top: 16,
+                                  left: 16,
+                                  right: 16,
+                                  child: _FilterEmptyBadge(
+                                    onClear: () => setState(() {
+                                      _activeFilter = 'all';
+                                      _searchController.clear();
+                                      _searchQuery = '';
+                                    }),
+                                  ),
+                                ),
+                            ],
                           )
                         : _buildList(filtered),
                   );
@@ -289,26 +334,33 @@ class _ToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isMapMode
-              ? AppColors.vibrantLime.withOpacity(0.15)
-              : Colors.white.withOpacity(0.07),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
+    return Semantics(
+      // Audit M21 (2026-05-12): screen-reader label for the list/map
+      // toggle. The icon is purely visual; without this Semantics
+      // node the toggle is announced as an empty button.
+      button: true,
+      label: isMapMode ? 'Switch to list view' : 'Switch to map view',
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
             color: isMapMode
-                ? AppColors.vibrantLime.withOpacity(0.4)
-                : Colors.white.withOpacity(0.08),
+                ? AppColors.vibrantLime.withOpacity(0.15)
+                : Colors.white.withOpacity(0.07),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isMapMode
+                  ? AppColors.vibrantLime.withOpacity(0.4)
+                  : Colors.white.withOpacity(0.08),
+            ),
           ),
-        ),
-        child: Icon(
-          isMapMode ? Icons.list_rounded : Icons.map_outlined,
-          color: isMapMode ? AppColors.vibrantLime : Colors.white60,
-          size: 20,
+          child: Icon(
+            isMapMode ? Icons.list_rounded : Icons.map_outlined,
+            color: isMapMode ? AppColors.vibrantLime : Colors.white60,
+            size: 20,
+          ),
         ),
       ),
     );
@@ -330,42 +382,101 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.vibrantLime.withOpacity(0.15)
-              : Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
+    return Semantics(
+      // Audit M21 (2026-05-12): explicit accessibility labels on the
+      // filter chips and the list/map toggle so screen readers
+      // announce "Top filter, selected" instead of falling back to
+      // the empty Container default.
+      button: true,
+      selected: selected,
+      label: '$label filter',
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
             color: selected
-                ? AppColors.vibrantLime.withOpacity(0.5)
-                : Colors.white.withOpacity(0.08),
+                ? AppColors.vibrantLime.withOpacity(0.15)
+                : Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected
+                  ? AppColors.vibrantLime.withOpacity(0.5)
+                  : Colors.white.withOpacity(0.08),
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: selected ? AppColors.vibrantLime : Colors.white38,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                color: selected ? AppColors.vibrantLime : Colors.white54,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: selected ? AppColors.vibrantLime : Colors.white38,
               ),
-            ),
-          ],
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  color: selected ? AppColors.vibrantLime : Colors.white54,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+class _FilterEmptyBadge extends StatelessWidget {
+  final VoidCallback onClear;
+  const _FilterEmptyBadge({required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      // Audit M21 (2026-05-12): screen readers announce this badge
+      // so non-sighted users know the map is empty because of an
+      // active filter.
+      liveRegion: true,
+      label: 'No universities match the current filter',
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white24),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.filter_list_off,
+                  color: AppColors.vibrantLime, size: 18),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'No universities match — adjust your filter or search.',
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+              TextButton(
+                onPressed: onClear,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.vibrantLime,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                ),
+                child: const Text('Clear'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
