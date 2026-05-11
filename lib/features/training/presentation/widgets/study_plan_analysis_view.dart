@@ -92,26 +92,51 @@ class StudyPlanAnalysisView extends ConsumerWidget {
   }
 
   Widget _buildTrackWarning() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.redAccent.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 20),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Sening tracking boshqa edi! Draftini tanlangan tilda yozganingga ishonch hosil qil.',
-              style: TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
+    return Builder(
+      builder: (context) {
+        // Hardcoded Uzbek copy was unreadable for Korean / English
+        // speakers — see audit U2. Picks the message from the session
+        // track until full intl wiring lands.
+        return Consumer(
+          builder: (context, ref, _) {
+            final state = ref.watch(documentSessionProvider(documentType));
+            final track = state.currentSession?.selectedTrack ?? 'uzbek';
+            final message = switch (track) {
+              'korean' => '선택한 작성 언어와 본문 언어가 다릅니다. 선택한 언어로 다시 작성해 주세요.',
+              'english' =>
+                'Your draft language does not match the selected track. Please rewrite in the selected language.',
+              _ =>
+                'Sening tracking boshqa edi! Draftini tanlangan tilda yozganingga ishonch hosil qil.',
+            };
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded,
+                      color: Colors.redAccent, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math';
 import '../../applications/data/applications_repository.dart';
+import '../../home/presentation/home_tab_provider.dart';
 import '../data/study_plan_repository.dart';
 
-import 'widgets/study_plan_chat_fab.dart';
+// study_plan_chat_fab removed 2026-05-10 (training audit P0 #6) — was a
+// non-functional placeholder. Re-add when the feature is actually built.
 import 'widgets/study_plan_analysis_view.dart';
 import 'widgets/advanced_drafting_workspace.dart';
 
@@ -66,7 +68,10 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                 ? _buildSessionList(state)
                 : _buildSessionWizard(state),
       ),
-      floatingActionButton: state.currentSession != null ? StudyPlanChatFab(documentType: widget.documentType) : null,
+      // The previous floatingActionButton mounted a placeholder
+      // StudyPlanChatFab that had no real chat behind it. Removed
+      // 2026-05-10 per training audit P0 #6.
+      floatingActionButton: null,
     );
   }
 
@@ -250,114 +255,45 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   }
 
   Widget _buildInstructionsStep(StudyPlanSessionState state) {
+    // Step 1 used to ship Uzbek-only prose. Until full intl wiring lands
+    // (audit L1 / L3), pick a localized variant based on the session's
+    // selectedTrack:
+    //   'korean'         → Korean
+    //   'english'        → English
+    //   anything else    → Uzbek (the original copy; safe default for
+    //                      our largest cohort)
+    final track = state.currentSession?.selectedTrack ?? 'uzbek';
+    final guide = _stepOneGuide(track, widget.documentType);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
          crossAxisAlignment: CrossAxisAlignment.start,
          children: [
             Text(
-              widget.documentType == 'study_plan' 
-                ? 'Study Plan yozish bo\'yicha qo\'llanma'
-                : 'Personal Statement yozish bo\'yicha qo\'llanma', 
-              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)
+              guide.title,
+              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
-              widget.documentType == 'study_plan'
-                ? 'Study Plan — bu sizning nega Janubiy Koreyada o\'qimoqchi ekanligingiz, oldingizga qo\'ygan maqsadlaringiz va o\'qishni bitirgandan keyingi rejalaringiz haqida batafsil ma\'lumot beruvchi muhim hujjat hisoblanadi.'
-                : 'Personal Statement — bu sizning shaxsingiz, o\'tmishdagi yutuqlaringiz, qiziqishlaringiz va nega aynan ushbu mutaxassislikka munosib ekanligingizni ko\'rsatuvchi insho hisoblanadi.', 
-              style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.5)
+              guide.intro,
+              style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.5),
             ),
             const SizedBox(height: 24),
-            if (widget.documentType == 'study_plan') ...[
+            for (var i = 0; i < guide.items.length; i++) ...[
               _buildGuideItem(
-                icon: Icons.flag,
-                title: '1. Maqsad va Motivatsiya',
-                description: 'Nega aynan ushbu mutaxassislikni tanladingiz? Nega Janubiy Koreya va siz tanlagan universitet bu maqsadingizga mos keladi?',
+                icon: guide.items[i].icon,
+                title: guide.items[i].title,
+                description: guide.items[i].description,
               ),
-              const SizedBox(height: 16),
-              _buildGuideItem(
-                icon: Icons.menu_book,
-                title: '2. Ta\'lim Rejasi',
-                description: 'O\'qish davrida qaysi fanlarga ko\'proq e\'tibor qaratmoqchisiz? Til o\'rganish rejangiz qanday?',
-              ),
-              const SizedBox(height: 16),
-              _buildGuideItem(
-                icon: Icons.rocket_launch,
-                title: '3. Kelajakdagi Rejalar',
-                description: 'O\'qishni tamomlagandan so\'ng qanday ish bilan shug\'ullanmoqchisiz? Vataningizga qaytib qanday hissa qo\'shasiz?',
-              ),
-            ] else ...[
-              _buildGuideItem(
-                icon: Icons.history_edu,
-                title: '1. O\'tmish va Tajriba',
-                description: 'Maktab/litsey davridagi yutuqlaringiz, qatnashgan olimpiadalaringiz va qiziqishlaringiz haqida yozing.',
-              ),
-              const SizedBox(height: 16),
-              _buildGuideItem(
-                icon: Icons.psychology,
-                title: '2. Shaxsiy Xislatlar',
-                description: 'Sizni qanday xislatlar boshqalardan ajratib turadi? Qiyinchiliklarni qanday yenggansiz?',
-              ),
-              const SizedBox(height: 16),
-              _buildGuideItem(
-                icon: Icons.stars,
-                title: '3. Nega ushbu soha?',
-                description: 'Ushbu mutaxassislikka bo\'lgan qiziqishingiz qachon va qanday paydo bo\'lgan?',
-              ),
+              if (i != guide.items.length - 1) const SizedBox(height: 16),
             ],
             
-            const SizedBox(height: 48),
-            const Text(
-              'Tavsiya etilgan videolar (CRM)', 
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)
-            ),
-            const SizedBox(height: 16),
-            // Dummy Video List
-            SizedBox(
-              height: 140,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 3,
-                separatorBuilder: (context, index) => const SizedBox(width: 16),
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 220,
-                    decoration: BoxDecoration(
-                      color: Colors.white10,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white24),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.black45,
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                            ),
-                            child: const Center(
-                              child: Icon(Icons.play_circle_fill, color: Colors.white, size: 40),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            '${widget.documentType == 'study_plan' ? 'Study Plan' : 'Personal Statement'} sirlari - ${index + 1}-qism',
-                            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            
+            // Dummy "Tavsiya etilgan videolar (CRM)" video tiles
+            // were removed on 2026-05-10 (training audit P0 #8). They
+            // were 3 placeholder cards with no source URLs and no onTap.
+            // Re-add as a real list backed by a training_videos table /
+            // CRM-curated provider when the feature is actually built.
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
@@ -403,6 +339,177 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
         ],
       ),
     );
+  }
+
+  // ---------------------------------------------------------------------
+  // Step 1 guide content — localized per selectedTrack until intl lands.
+  // Audit F5: track values were unified to 'en' / 'ko' on 2026-05-10.
+  // Existing rows with the legacy 'english' / 'korean' strings are still
+  // accepted here so resuming an old session continues to render correctly.
+  // ---------------------------------------------------------------------
+  _StepOneGuide _stepOneGuide(String track, String documentType) {
+    final isStudyPlan = documentType == 'study_plan';
+    final normalized = switch (track) {
+      'ko' || 'korean' => 'korean',
+      'en' || 'english' => 'english',
+      _ => track,
+    };
+    if (normalized == 'korean') {
+      return isStudyPlan
+          ? const _StepOneGuide(
+              title: '학업 계획서(Study Plan) 작성 가이드',
+              intro:
+                  'Study Plan은 한국에서 공부하려는 이유, 학업 목표, 졸업 이후 계획을 자세히 보여주는 핵심 서류입니다.',
+              items: [
+                _GuideItemData(
+                  icon: Icons.flag,
+                  title: '1. 목적과 동기',
+                  description:
+                      '왜 이 전공을 선택했는가? 한국과 지원 대학교가 그 목표에 어떻게 부합하는가?',
+                ),
+                _GuideItemData(
+                  icon: Icons.menu_book,
+                  title: '2. 학업 계획',
+                  description:
+                      '재학 중 어떤 분야에 집중할 것인가? 한국어 학습 계획은 어떻게 되는가?',
+                ),
+                _GuideItemData(
+                  icon: Icons.rocket_launch,
+                  title: '3. 졸업 후 계획',
+                  description:
+                      '졸업 후 어떤 진로를 그리고 있는가? 모국에 어떻게 기여할 것인가?',
+                ),
+              ],
+            )
+          : const _StepOneGuide(
+              title: '자기소개서(Personal Statement) 작성 가이드',
+              intro:
+                  'Personal Statement는 본인의 배경, 성취, 관심사, 그리고 해당 전공에 적합한 이유를 보여주는 글입니다.',
+              items: [
+                _GuideItemData(
+                  icon: Icons.history_edu,
+                  title: '1. 과거 경험',
+                  description: '학교 시절 성취, 참가한 대회, 관심사를 구체적으로 적으세요.',
+                ),
+                _GuideItemData(
+                  icon: Icons.psychology,
+                  title: '2. 개인적 강점',
+                  description:
+                      '나를 다른 지원자와 구분 짓는 강점은 무엇인가? 어려움을 어떻게 극복했는가?',
+                ),
+                _GuideItemData(
+                  icon: Icons.stars,
+                  title: '3. 왜 이 전공인가',
+                  description: '이 전공에 대한 관심은 언제, 어떻게 시작되었는가?',
+                ),
+              ],
+            );
+    }
+    if (track == 'english') {
+      return isStudyPlan
+          ? const _StepOneGuide(
+              title: 'Study Plan writing guide',
+              intro:
+                  'A Study Plan explains why you want to study in South Korea, the goals you have set for yourself, and what you plan to do after graduation.',
+              items: [
+                _GuideItemData(
+                  icon: Icons.flag,
+                  title: '1. Purpose & motivation',
+                  description:
+                      'Why did you choose this major? Why does South Korea — and the specific university you applied to — fit that goal?',
+                ),
+                _GuideItemData(
+                  icon: Icons.menu_book,
+                  title: '2. Academic plan',
+                  description:
+                      'Which courses or research areas will you focus on? What is your Korean-language learning plan?',
+                ),
+                _GuideItemData(
+                  icon: Icons.rocket_launch,
+                  title: '3. Future plans',
+                  description:
+                      'What do you intend to do after graduation? How will you contribute back home?',
+                ),
+              ],
+            )
+          : const _StepOneGuide(
+              title: 'Personal Statement writing guide',
+              intro:
+                  'A Personal Statement is an essay that shows who you are, what you have achieved, what interests you, and why you fit this major.',
+              items: [
+                _GuideItemData(
+                  icon: Icons.history_edu,
+                  title: '1. Past & experience',
+                  description:
+                      'Write about your school achievements, the olympiads or projects you joined, and the interests you developed.',
+                ),
+                _GuideItemData(
+                  icon: Icons.psychology,
+                  title: '2. Personal strengths',
+                  description:
+                      'What sets you apart from other applicants? How did you handle setbacks?',
+                ),
+                _GuideItemData(
+                  icon: Icons.stars,
+                  title: '3. Why this field?',
+                  description:
+                      'When and how did your interest in this field start?',
+                ),
+              ],
+            );
+    }
+    // Uzbek — original copy preserved as the default for the largest cohort.
+    return isStudyPlan
+        ? const _StepOneGuide(
+            title: 'Study Plan yozish bo\'yicha qo\'llanma',
+            intro:
+                'Study Plan — bu sizning nega Janubiy Koreyada o\'qimoqchi ekanligingiz, oldingizga qo\'ygan maqsadlaringiz va o\'qishni bitirgandan keyingi rejalaringiz haqida batafsil ma\'lumot beruvchi muhim hujjat hisoblanadi.',
+            items: [
+              _GuideItemData(
+                icon: Icons.flag,
+                title: '1. Maqsad va Motivatsiya',
+                description:
+                    'Nega aynan ushbu mutaxassislikni tanladingiz? Nega Janubiy Koreya va siz tanlagan universitet bu maqsadingizga mos keladi?',
+              ),
+              _GuideItemData(
+                icon: Icons.menu_book,
+                title: '2. Ta\'lim Rejasi',
+                description:
+                    'O\'qish davrida qaysi fanlarga ko\'proq e\'tibor qaratmoqchisiz? Til o\'rganish rejangiz qanday?',
+              ),
+              _GuideItemData(
+                icon: Icons.rocket_launch,
+                title: '3. Kelajakdagi Rejalar',
+                description:
+                    'O\'qishni tamomlagandan so\'ng qanday ish bilan shug\'ullanmoqchisiz? Vataningizga qaytib qanday hissa qo\'shasiz?',
+              ),
+            ],
+          )
+        : const _StepOneGuide(
+            title: 'Personal Statement yozish bo\'yicha qo\'llanma',
+            intro:
+                'Personal Statement — bu sizning shaxsingiz, o\'tmishdagi yutuqlaringiz, qiziqishlaringiz va nega aynan ushbu mutaxassislikka munosib ekanligingizni ko\'rsatuvchi insho hisoblanadi.',
+            items: [
+              _GuideItemData(
+                icon: Icons.history_edu,
+                title: '1. O\'tmish va Tajriba',
+                description:
+                    'Maktab/litsey davridagi yutuqlaringiz, qatnashgan olimpiadalaringiz va qiziqishlaringiz haqida yozing.',
+              ),
+              _GuideItemData(
+                icon: Icons.psychology,
+                title: '2. Shaxsiy Xislatlar',
+                description:
+                    'Sizni qanday xislatlar boshqalardan ajratib turadi? Qiyinchiliklarni qanday yenggansiz?',
+              ),
+              _GuideItemData(
+                icon: Icons.stars,
+                title: '3. Nega ushbu soha?',
+                description:
+                    'Ushbu mutaxassislikka bo\'lgan qiziqishingiz qachon va qanday paydo bo\'lgan?',
+              ),
+            ],
+          );
   }
 
   Widget _buildExampleStep(StudyPlanSessionState state) {
@@ -486,18 +593,32 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   }
 
   Widget _buildDraftingStep(StudyPlanSessionState state) {
+    // Populate the workspace from the session's most recent saved draft (or
+    // the in-memory draftContent if the session hasn't been saved yet).
+    // Previously we passed _draftController.text — which was always empty
+    // because the controller was never primed — so resumed sessions opened
+    // blank and the next save risked clobbering the prior draft.
+    final initial = state.draftContent.isNotEmpty
+        ? state.draftContent
+        : (state.drafts.isNotEmpty ? state.drafts.first.content : '');
     return Padding(
       padding: const EdgeInsets.all(24),
       child: AdvancedDraftingWorkspace(
-        initialText: _draftController.text,
+        // ValueKey forces the workspace to remount (and re-seed initialText)
+        // when switching between sessions of the same documentType.
+        key: ValueKey('drafting-${state.currentSession?.id ?? 'new'}'),
+        initialText: initial,
         documentTitle: documentTitle,
-        documentType: widget.documentType, // Pass documentType
+        documentType: widget.documentType,
       ),
     );
   }
 
   void _showCreateSessionDialog() {
-    String selectedTrack = 'english';
+    // Audit F5: track values are now `'en'`/`'ko'` consistently with the
+    // interview module. Existing rows with `'english'`/`'korean'` are
+    // tolerated by the Step 1 helper for backwards compatibility.
+    String selectedTrack = 'en';
     String? selectedUniId;
 
     showDialog(
@@ -529,7 +650,60 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                       error: (e, s) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
                       data: (applications) {
                         if (applications.isEmpty) {
-                          return const Text('No active applications found. Please apply first.', style: TextStyle(color: Colors.white54, fontSize: 12));
+                          // Audit F4: previous version showed only static
+                          // text — now mirror the training-tab CTA so the
+                          // student can actually act on the message.
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.white10),
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white.withOpacity(0.02),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'No applications yet',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Add a target university first — drafting '
+                                  'starts from a target school.',
+                                  style: TextStyle(
+                                    color: Colors.white60,
+                                    fontSize: 12,
+                                    height: 1.35,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.vibrantLime,
+                                      foregroundColor: Colors.black,
+                                    ),
+                                    icon: const Icon(Icons.school, size: 18),
+                                    label: const Text(
+                                      'Apply to a university',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    onPressed: () {
+                                      ref.read(homeTabProvider.notifier).state = 0;
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         }
                         return Container(
                           height: 150,
@@ -565,18 +739,18 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                         Expanded(
                           child: _TrackChip(
                             label: 'English',
-                            isSelected: selectedTrack == 'english',
+                            isSelected: selectedTrack == 'en',
                             icon: Icons.language,
-                            onTap: () => setDialogState(() => selectedTrack = 'english'),
+                            onTap: () => setDialogState(() => selectedTrack = 'en'),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _TrackChip(
                             label: 'Korean',
-                            isSelected: selectedTrack == 'korean',
+                            isSelected: selectedTrack == 'ko',
                             icon: Icons.translate,
-                            onTap: () => setDialogState(() => selectedTrack = 'korean'),
+                            onTap: () => setDialogState(() => selectedTrack = 'ko'),
                           ),
                         ),
                       ],
@@ -632,6 +806,30 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
       },
     );
   }
+}
+
+/// Step 1 instructional content, rendered per-track until full intl
+/// support lands (audit L1 / L3 — see docs/audits/training_audit_2026-05-10.md).
+class _StepOneGuide {
+  final String title;
+  final String intro;
+  final List<_GuideItemData> items;
+  const _StepOneGuide({
+    required this.title,
+    required this.intro,
+    required this.items,
+  });
+}
+
+class _GuideItemData {
+  final IconData icon;
+  final String title;
+  final String description;
+  const _GuideItemData({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
 }
 
 class _TrackChip extends StatelessWidget {

@@ -17,6 +17,7 @@ class InterviewScreen extends ConsumerStatefulWidget {
   final String? initialUniversityId;
   final String? initialUniversityName;
   final String? initialLanguage;
+  final String? initialPersona;
 
   const InterviewScreen({
     super.key,
@@ -24,6 +25,7 @@ class InterviewScreen extends ConsumerStatefulWidget {
     this.initialUniversityId,
     this.initialUniversityName,
     this.initialLanguage,
+    this.initialPersona,
   });
 
   @override
@@ -45,6 +47,7 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
           targetUniversityId: widget.initialUniversityId,
           targetUniversityName: widget.initialUniversityName,
           language: widget.initialLanguage ?? 'ko',
+          persona: widget.initialPersona ?? 'friendly',
         );
       });
     }

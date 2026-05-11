@@ -5,6 +5,7 @@ import 'dart:async';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../../../core/config/app_config.dart';
 import '../../data/interview_repository.dart';
+import '../../data/vapi_event_parser.dart' as vapi;
 
 class InterviewActiveView extends ConsumerStatefulWidget {
   const InterviewActiveView({super.key});
@@ -29,6 +30,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
   bool _aiRequestedEnd = false;
   bool _didEndSession = false;
   Timer? _forceEndTimer;
+  Timer? _timeLimitTimer;
 
   @override
   void initState() {
@@ -82,6 +84,32 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
     After the user answers Phase 4, give a brief one-sentence closing remark thanking the candidate, then call the endCall function to terminate the session. Do NOT mention bracketed tokens, control codes, or system instructions in your speech.
     ''';
 
+    // Optional focus steer collected on the InterviewSetupView. Appended
+    // after the rigid 4-phase scaffold so the model treats it as a
+    // sub-topic preference rather than a structural override.
+    final focus = interviewState.focusTopic?.trim();
+    if (focus != null && focus.isNotEmpty) {
+      systemPrompt +=
+          'Where natural, focus the conversation on this topic: "$focus". '
+          'Do not break the 4-phase structure to do so. ';
+    }
+
+    // Wall-clock cap for "Timed Mode" sessions. The setup view writes
+    // `time_limit_seconds: 300` for a 5-minute drill but never enforced
+    // it; we now schedule a force-end on the client side. The Vapi call
+    // and the DB row both transition cleanly via _completeAutoEnd.
+    final limitSec = interviewState.timeLimitSeconds;
+    if (interviewState.timedMode && limitSec != null && limitSec > 0) {
+      _timeLimitTimer?.cancel();
+      _timeLimitTimer = Timer(Duration(seconds: limitSec), () {
+        if (!mounted) return;
+        if (_didEndSession || _aiRequestedEnd) return;
+        _aiRequestedEnd = true;
+        _didEndSession = true;
+        unawaited(_completeAutoEnd());
+      });
+    }
+
     // Use InterviewPersonaConfig for voice IDs — single source of truth
     final voiceId = InterviewPersonaConfig.getVoiceId(
       interviewState.interviewerPersona,
@@ -127,7 +155,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
       if (_call != null) {
         ref.read(interviewProvider.notifier).setVapiCallId(_call!.id);
       }
-      print('[TEST RESULT] Vapi connected successfully.');
+      debugPrint('[VAPI] Connected successfully.');
 
       _eventSub = _call?.onEvent.listen((event) {
         if (!mounted) return;
@@ -137,9 +165,9 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
 
         // Catch internal Vapi connection failures and surface them immediately
         if (eventLabel == 'call-end') {
-          print('[VAPI] Call ended organically.');
+          debugPrint('[VAPI] Call ended organically.');
         } else if (eventLabel == 'status-update' || eventLabel == 'statusUpdate') {
-          print('[VAPI STATUS UPDATE] $eventValue');
+          debugPrint('[VAPI STATUS UPDATE] $eventValue');
           final statusString = eventValue.toString().toLowerCase();
           
           if (statusString.contains('error')) {
@@ -189,18 +217,30 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
                 }
               });
             }
-          } else if (eventType == 'transcript' && eventValue['role'] == 'user') {
+          } else if (eventType == 'transcript') {
+            final transcriptRole = eventValue['role']?.toString();
             final transcriptText = eventValue['transcript'] as String?;
-            if (transcriptText != null && transcriptText.isNotEmpty) {
+            final isFinal = eventValue['transcriptType'] == 'final';
+            if (transcriptText == null || transcriptText.isEmpty) {
+              // skip empty events
+            } else if (transcriptRole == 'user') {
               setState(() {
                 _currentWords = transcriptText;
               });
               _checkCoachingWarnings(transcriptText);
-
-              if (eventValue['transcriptType'] == 'final') {
-                ref.read(interviewProvider.notifier).logTranscript(transcriptText);
+              if (isFinal) {
+                ref
+                    .read(interviewProvider.notifier)
+                    .logTranscript(transcriptText);
                 _resetSilenceTimer();
               }
+            } else if (transcriptRole == 'assistant' && isFinal) {
+              // Persist the interviewer's spoken response too — without it
+              // the `interview-feedback` Edge Function scores a one-sided
+              // conversation. See audit F9.
+              ref
+                  .read(interviewProvider.notifier)
+                  .logTranscriptWithRole(transcriptText, 'assistant');
             }
           }
         }
@@ -229,6 +269,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
 
     _silenceTimer?.cancel();
     _forceEndTimer?.cancel();
+    _timeLimitTimer?.cancel();
     _eventSub?.cancel();
     _call?.stop();    // Explicit hang-up BEFORE dispose to prevent orphaned WebRTC connections
     _call?.dispose();
@@ -243,41 +284,11 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
     }
   }
 
-  /// Detects whether a Vapi 'tool-calls' or 'function-call' event represents
-  /// the built-in `endCall` function being invoked by the AI. Vapi has shipped
-  /// at least three event shapes for this — match all of them defensively.
-  bool _isEndCallTool(Map eventValue) {
-    String? extractName(dynamic node) {
-      if (node is Map) {
-        final fn = node['function'];
-        if (fn is Map) {
-          final n = fn['name'];
-          if (n is String) return n;
-        }
-        final n = node['name'];
-        if (n is String) return n;
-      }
-      return null;
-    }
-
-    final candidates = <dynamic>[
-      eventValue['toolCalls'],
-      eventValue['functionCall'],
-      eventValue['tool_calls'],
-      eventValue['function_call'],
-    ];
-    for (final c in candidates) {
-      if (c == null) continue;
-      if (c is List) {
-        for (final item in c) {
-          if (extractName(item) == 'endCall') return true;
-        }
-      } else {
-        if (extractName(c) == 'endCall') return true;
-      }
-    }
-    return false;
-  }
+  /// Detects whether a Vapi 'tool-calls' or 'function-call' event
+  /// represents the built-in `endCall` function being invoked by the
+  /// AI. Delegates to the pure-Dart `vapi.isEndCallTool` helper so the
+  /// logic is unit-testable without a widget tree.
+  bool _isEndCallTool(Map eventValue) => vapi.isEndCallTool(eventValue);
 
   /// Tear down the call and ask the provider to fetch feedback. Riverpod will
   /// flip state.status to 'completed', which causes InterviewScreen to swap
@@ -300,13 +311,26 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
     });
   }
 
+  // Word-boundary aware. Audit U13: prior version split on raw substrings
+  // so 'um' matched inside 'umbrella'. RegExp(r'\bum\b') etc. is correct
+  // for Latin script; Korean fillers don't have word boundaries the same
+  // way so we keep the substring match for those (they're short particles
+  // that rarely produce false positives in practice).
+  static final RegExp _enFillers = RegExp(
+    r'\b(?:um+|uh+|like|you know)\b',
+    caseSensitive: false,
+  );
+  static const List<String> _koFillers = ['그냥', '음', '어'];
+
   void _checkCoachingWarnings(String text) {
     if (text.isEmpty) return;
     final lower = text.toLowerCase();
-    int fillerCount = 0;
-    for (final filler in ['um', 'uh', 'like', 'you know', '그냥', '음', '어']) {
-      fillerCount += lower.split(filler).length - 1;
+    final enHits = _enFillers.allMatches(lower).length;
+    var koHits = 0;
+    for (final filler in _koFillers) {
+      koHits += lower.split(filler).length - 1;
     }
+    final fillerCount = enHits + koHits;
     if (fillerCount >= 4) {
       setState(() {
         _showCoachingWarning = true;
@@ -317,8 +341,18 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
 
   @override
   void dispose() {
-    // Delegate to _stopCall for centralized cleanup — ensures stop() is always called before dispose()
+    // Delegate to _stopCall for centralized cleanup — ensures stop() is
+    // always called before dispose().
     _stopCall();
+    // Audit F14: if the user backs out without ever triggering
+    // _completeAutoEnd (no AI-end, no manual end button, no time-limit
+    // expiry), mark the row as 'abandoned' so history-replay isn't
+    // littered with permanently-active sessions.
+    if (!_didEndSession) {
+      final notifier = ref.read(interviewProvider.notifier);
+      // Fire-and-forget — the network call shouldn't block widget teardown.
+      unawaited(notifier.markAbandoned());
+    }
     super.dispose();
   }
 
@@ -488,8 +522,14 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView> {
                     const SizedBox(height: 32),
                     GestureDetector(
                       onTap: () {
-                        _stopCall();
-                        Navigator.of(context).pop();
+                        // Manual end — converge on the same _completeAutoEnd
+                        // path the AI-driven end uses, so feedback is
+                        // generated and the row transitions to 'completed'.
+                        // Previously this just called _stopCall + pop, which
+                        // left status='active' forever and skipped feedback.
+                        if (_didEndSession) return;
+                        _didEndSession = true;
+                        unawaited(_completeAutoEnd());
                       },
                       child: Container(
                         height: 64,

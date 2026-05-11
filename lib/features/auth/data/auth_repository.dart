@@ -149,6 +149,7 @@ class AuthRepository {
   String _messageFor(String code, String? detail) {
     switch (code) {
       case 'BAD_INPUT':
+      case 'CODE_REQUIRED':
         return 'Please enter a valid 6–10 character access code.';
       case 'CODE_NOT_FOUND':
         return "We don't recognise this code. Please double-check it with your counsellor.";

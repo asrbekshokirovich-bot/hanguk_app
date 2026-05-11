@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../design_system/theme/app_colors.dart';
 
-enum SaveStatus { unsaved, saving, saved }
+/// Status tags consumed by [LiveMetricsBar]. `error` was added 2026-05-10
+/// (audit U1/A5) so save failures surface to the user instead of silently
+/// flipping to `saved`.
+enum SaveStatus { unsaved, saving, saved, error }
 
 class LiveMetricsBar extends StatelessWidget {
   final int wordCount;
@@ -85,6 +88,11 @@ class LiveMetricsBar extends StatelessWidget {
         icon = Icons.cloud_done_outlined;
         color = AppColors.vibrantLime;
         text = 'Saved';
+        break;
+      case SaveStatus.error:
+        icon = Icons.cloud_off_outlined;
+        color = Colors.redAccent;
+        text = 'Save failed';
         break;
     }
 

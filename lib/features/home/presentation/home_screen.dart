@@ -9,6 +9,7 @@ import '../../chat/presentation/chat_tab.dart';
 import '../../training/presentation/training_tab.dart';
 import '../../updater/data/updater_repository.dart';
 import '../../updater/presentation/update_dialog.dart';
+import 'home_tab_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -18,8 +19,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _currentIndex = 0;
-
   final List<Widget> _tabs = [
     const ApplicationsTab(),
     const MapTab(),
@@ -68,8 +67,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = ref.watch(homeTabProvider);
     return HangukScaffold(
-      body: _tabs[_currentIndex],
+      body: _tabs[currentIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openAIChat(context),
         backgroundColor: AppColors.vibrantLime,
@@ -77,11 +77,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: const Icon(Icons.smart_toy, color: Colors.black, size: 28),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         onTap: (index) {
-          setState(() {
-             _currentIndex = index;
-          });
+          ref.read(homeTabProvider.notifier).state = index;
         },
         items: const [
           BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.school)),
