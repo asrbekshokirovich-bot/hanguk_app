@@ -68,30 +68,30 @@ void main() {
     });
 
     test('issues do not overlap when needles are nested (audit A9)', () {
-      const text = 'application applications';
+      // Single word "applications" — both needles overlap inside it.
+      // Without the consumed mask, both issues would resolve to index 11
+      // because "application" is a prefix of "applications".
+      const text = 'submitting applications now';
       final issues = resolveIssues(
         draftText: text,
         rawIssues: const [
-          {'originalText': 'application', 'suggestion': 'app'},
-          // Second issue would have matched at index 0 again if the
-          // consumed mask weren't enforced; instead it matches the
-          // longer occurrence inside "applications".
           {'originalText': 'applications', 'suggestion': 'apps'},
+          // After "applications" claims [11..23), the prefix
+          // "application" has no un-consumed match, so it's dropped.
+          {'originalText': 'application', 'suggestion': 'app'},
         ],
       );
-      // After "application" claims [0..11), "applications" needs an
-      // un-consumed match — there isn't one (only the still-claimed
-      // substring matches), so it's dropped.
       expect(issues, hasLength(1));
-      expect(issues.single.originalText, 'application');
+      expect(issues.single.originalText, 'applications');
+      expect(issues.single.start, 11);
     });
 
     test(
       'an issue whose needle would split a surrogate pair is dropped (audit A8)',
       () {
-        // 👋 is U+1F44B — a surrogate pair in UTF-16. Slicing between
+        // рџ‘‹ is U+1F44B вЂ” a surrogate pair in UTF-16. Slicing between
         // its two code units would produce an invalid string.
-        const text = 'wave 👋 here';
+        const text = 'wave рџ‘‹ here';
         final issues = resolveIssues(
           draftText: text,
           rawIssues: const [
