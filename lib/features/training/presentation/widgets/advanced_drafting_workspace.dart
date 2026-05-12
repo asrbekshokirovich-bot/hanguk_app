@@ -22,10 +22,12 @@ class AdvancedDraftingWorkspace extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AdvancedDraftingWorkspace> createState() => _AdvancedDraftingWorkspaceState();
+  ConsumerState<AdvancedDraftingWorkspace> createState() =>
+      _AdvancedDraftingWorkspaceState();
 }
 
-class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWorkspace> {
+class _AdvancedDraftingWorkspaceState
+    extends ConsumerState<AdvancedDraftingWorkspace> {
   late AiHighlightingTextController _controller;
   final FocusNode _focusNode = FocusNode();
   // Reused FocusNode for the KeyboardListener that captures Tab presses.
@@ -40,12 +42,12 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
   // pauses can fire dozens of paid Edge Function calls per minute.
   DateTime? _lastAiCallAt;
   static const Duration _aiMinInterval = Duration(seconds: 6);
-  
+
   SaveStatus _saveStatus = SaveStatus.saved;
-  
+
   int _wordCount = 0;
   int _charCount = 0;
-  
+
   String _aiContextStatus = "Waiting for input...";
   List<GrammarIssue> _activeIssues = [];
 
@@ -54,15 +56,15 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
     super.initState();
     _controller = AiHighlightingTextController(text: widget.initialText);
     _updateMetrics(widget.initialText);
-    
+
     _controller.addListener(_onTextChanged);
   }
 
   @override
   void didUpdateWidget(AdvancedDraftingWorkspace oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialText != widget.initialText && 
-        _controller.text != widget.initialText && 
+    if (oldWidget.initialText != widget.initialText &&
+        _controller.text != widget.initialText &&
         _saveStatus != SaveStatus.unsaved) {
       _controller.text = widget.initialText;
     }
@@ -82,19 +84,21 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
   void _onTextChanged() {
     final text = _controller.text;
     _updateMetrics(text);
-    
+
     // Clear ghost text immediately when the user starts typing
     if (_controller.ghostText != null) {
       _controller.setGhostText(null);
     }
-    
+
     // Update local state
     setState(() {
       _saveStatus = SaveStatus.unsaved;
     });
 
     // Notify provider of local draft change immediately
-    ref.read(studyPlanSessionProvider.notifier).setDraftContent(widget.documentType, text);
+    ref
+        .read(studyPlanSessionProvider.notifier)
+        .setDraftContent(widget.documentType, text);
 
     // AI Ghost Text Debounce (1 second)
     _aiSuggestionTimer?.cancel();
@@ -111,10 +115,12 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
 
   void _updateMetrics(String text) {
     if (!mounted) return;
-    
+
     final trimmed = text.trim();
-    final wordCount = trimmed.isEmpty ? 0 : trimmed.split(RegExp(r'\s+')).length;
-    
+    final wordCount = trimmed.isEmpty
+        ? 0
+        : trimmed.split(RegExp(r'\s+')).length;
+
     setState(() {
       _wordCount = wordCount;
       _charCount = text.length;
@@ -174,8 +180,10 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
       });
     }
 
-    final result = await ref.read(studyPlanSessionProvider.notifier).superviseDraft(widget.documentType, text);
-    
+    final result = await ref
+        .read(studyPlanSessionProvider.notifier)
+        .superviseDraft(widget.documentType, text);
+
     if (!mounted) return;
 
     if (result == null || result.isEmpty) {
@@ -191,10 +199,7 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
     // Audit A1: delegate to the pure-Dart resolver so the matching
     // behavior is unit-testable.
     final detectedIssues = resolver
-        .resolveIssues(
-          draftText: text,
-          rawIssues: issuesList.whereType<Map>(),
-        )
+        .resolveIssues(draftText: text, rawIssues: issuesList.whereType<Map>())
         .map(
           (r) => GrammarIssue(
             start: r.start,
@@ -206,7 +211,9 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
         .toList(growable: false);
 
     setState(() {
-      _aiContextStatus = ghostText.isNotEmpty ? "AI Predicting..." : "AI Supervision Active";
+      _aiContextStatus = ghostText.isNotEmpty
+          ? "AI Predicting..."
+          : "AI Supervision Active";
       _activeIssues = detectedIssues;
     });
 
@@ -242,11 +249,16 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
 
   void _applyGrammarFix(GrammarIssue issue) {
     String currentText = _controller.text;
-    String newText = currentText.substring(0, issue.start) + issue.suggestion + currentText.substring(issue.end);
-    
+    String newText =
+        currentText.substring(0, issue.start) +
+        issue.suggestion +
+        currentText.substring(issue.end);
+
     _controller.value = TextEditingValue(
       text: newText,
-      selection: TextSelection.collapsed(offset: issue.start + issue.suggestion.length),
+      selection: TextSelection.collapsed(
+        offset: issue.start + issue.suggestion.length,
+      ),
     );
     _onTextChanged();
   }
@@ -264,11 +276,18 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
           children: [
             const Text(
               'Workspace',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Flexible(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.royalBlue.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
@@ -277,14 +296,22 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.psychology, size: 14, color: AppColors.vibrantLime),
+                    const Icon(
+                      Icons.psychology,
+                      size: 14,
+                      color: AppColors.vibrantLime,
+                    ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         _aiContextStatus,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
-                        style: const TextStyle(color: AppColors.vibrantLime, fontSize: 11, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: AppColors.vibrantLime,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -306,7 +333,13 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
                     .read(studyPlanSessionProvider.notifier)
                     .updateSessionStep(widget.documentType, 4);
               },
-              child: const Text('Analyze', style: TextStyle(color: AppColors.royalBlue, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Analyze',
+                style: TextStyle(
+                  color: AppColors.royalBlue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -325,9 +358,19 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 18),
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.orangeAccent,
+                      size: 18,
+                    ),
                     SizedBox(width: 8),
-                    Text('AI Supervision Warnings:', style: TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold)),
+                    Text(
+                      'AI Supervision Warnings:',
+                      style: TextStyle(
+                        color: Colors.orangeAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -337,15 +380,32 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
                   children: _activeIssues.map((issue) {
                     return ActionChip(
                       backgroundColor: AppColors.backgroundNavy,
-                      side: BorderSide(color: Colors.redAccent.withOpacity(0.5)),
+                      side: BorderSide(
+                        color: Colors.redAccent.withOpacity(0.5),
+                      ),
                       label: RichText(
                         text: TextSpan(
-                          style: const TextStyle(fontSize: 13, color: Colors.white),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.white,
+                          ),
                           children: [
                             const TextSpan(text: 'Replace '),
-                            TextSpan(text: '"${issue.originalText}"', style: const TextStyle(color: Colors.redAccent, decoration: TextDecoration.lineThrough)),
+                            TextSpan(
+                              text: '"${issue.originalText}"',
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
                             const TextSpan(text: ' with '),
-                            TextSpan(text: '"${issue.suggestion}"', style: const TextStyle(color: AppColors.vibrantLime, fontWeight: FontWeight.bold)),
+                            TextSpan(
+                              text: '"${issue.suggestion}"',
+                              style: const TextStyle(
+                                color: AppColors.vibrantLime,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -367,17 +427,18 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
             child: KeyboardListener(
               focusNode: _keyboardListenerFocus,
               onKeyEvent: (KeyEvent event) {
-                if (event is KeyDownEvent && 
-                    event.logicalKey == LogicalKeyboardKey.tab && 
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.tab &&
                     _controller.ghostText != null) {
                   _acceptSuggestion();
                 }
               },
               child: CallbackShortcuts(
-                 bindings: {
-                    const SingleActivator(LogicalKeyboardKey.tab): _acceptSuggestion,
-                 },
-                 child: TextField(
+                bindings: {
+                  const SingleActivator(LogicalKeyboardKey.tab):
+                      _acceptSuggestion,
+                },
+                child: TextField(
                   controller: _controller,
                   focusNode: _focusNode,
                   maxLines: null,
@@ -390,22 +451,41 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
                   // Hide the maxLength counter on the field itself; the
                   // LiveMetricsBar already shows word/char counts.
                   maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                  buildCounter: (
-                    BuildContext context, {
-                    required int currentLength,
-                    required bool isFocused,
-                    required int? maxLength,
-                  }) => null,
-                  style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+                  buildCounter:
+                      (
+                        BuildContext context, {
+                        required int currentLength,
+                        required bool isFocused,
+                        required int? maxLength,
+                      }) => null,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    height: 1.5,
+                  ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: 'Type your ${widget.documentTitle.toLowerCase()} here...',
+                    hintText:
+                        'Type your ${widget.documentTitle.toLowerCase()} here...',
                     hintStyle: const TextStyle(color: Colors.white30),
                   ),
-                 ),
+                ),
               ),
             ),
           ),
+        ),
+        // UI/UX audit P0 K5 (2026-05-12): visible mobile-accessible
+        // accept affordance for the AI ghost-text suggestion. The Tab
+        // keyboard shortcut above is desktop/web only — phone soft
+        // keyboards have no Tab key, so before this bar users could
+        // see suggestions but had no way to insert them without
+        // retyping. Now the suggestion preview, the entire row, and
+        // the explicit "Accept" button are all tap targets that call
+        // `_acceptSuggestion`. A dismiss "✕" clears the ghost so the
+        // user can keep typing without inserting.
+        _GhostSuggestionBar(
+          controller: _controller,
+          onAccept: _acceptSuggestion,
         ),
         LiveMetricsBar(
           wordCount: _wordCount,
@@ -414,6 +494,127 @@ class _AdvancedDraftingWorkspaceState extends ConsumerState<AdvancedDraftingWork
           track: currentTrack,
         ),
       ],
+    );
+  }
+}
+
+/// UI/UX audit P0 K5 (2026-05-12): a thin bar that surfaces the
+/// currently-pending ghost-text suggestion with a mobile-tappable
+/// accept affordance.
+///
+/// Why this widget exists separately:
+///   - Subscribes to the controller via `AnimatedBuilder` so it
+///     rebuilds when the ghost text changes, without forcing the
+///     surrounding `_AdvancedDraftingWorkspaceState` to rebuild on
+///     every keystroke.
+///   - Hides itself (renders `SizedBox.shrink()`) when there is no
+///     active suggestion, so it takes zero vertical space in the
+///     common case.
+///   - All three regions (preview text, "Accept" button, dismiss "✕")
+///     have ≥ 48 dp tap targets, satisfying M3 / iOS HIG minimums.
+///   - Keeps the Tab-key path in `_AdvancedDraftingWorkspaceState`
+///     intact for physical-keyboard users on desktop and web; this
+///     bar is the mobile path, not a replacement.
+class _GhostSuggestionBar extends StatelessWidget {
+  const _GhostSuggestionBar({required this.controller, required this.onAccept});
+
+  final AiHighlightingTextController controller;
+  final VoidCallback onAccept;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final ghost = controller.ghostText;
+        final hasGhost = ghost != null && ghost.isNotEmpty;
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          alignment: Alignment.topCenter,
+          child: hasGhost
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onAccept,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.royalBlue.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.royalBlue.withValues(alpha: 0.6),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome,
+                              size: 16,
+                              color: AppColors.vibrantLime,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Semantics(
+                                button: true,
+                                label: 'AI suggestion — tap to insert',
+                                child: Text(
+                                  ghost,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 13,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Explicit Accept button — primary action,
+                            // visible label for first-time users.
+                            TextButton.icon(
+                              onPressed: onAccept,
+                              icon: const Icon(Icons.check, size: 16),
+                              label: const Text('Accept'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.vibrantLime,
+                                backgroundColor: AppColors.vibrantLime
+                                    .withValues(alpha: 0.12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                minimumSize: const Size(72, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            // Dismiss — clears the ghost without
+                            // inserting, so the user can keep typing.
+                            IconButton(
+                              onPressed: () => controller.setGhostText(null),
+                              icon: const Icon(Icons.close, size: 18),
+                              color: Colors.white70,
+                              tooltip: 'Dismiss suggestion',
+                              constraints: const BoxConstraints(
+                                minWidth: 48,
+                                minHeight: 48,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        );
+      },
     );
   }
 }
