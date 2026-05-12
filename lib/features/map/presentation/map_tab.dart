@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../data/map_analytics.dart';
 import '../data/map_repository.dart';
 import '../domain/university.dart';
@@ -30,7 +31,9 @@ class _MapTabState extends ConsumerState<MapTab> {
   void initState() {
     super.initState();
     _searchController.addListener(() {
-      setState(() => _searchQuery = _searchController.text.toLowerCase().trim());
+      setState(
+        () => _searchQuery = _searchController.text.toLowerCase().trim(),
+      );
     });
   }
 
@@ -83,6 +86,7 @@ class _MapTabState extends ConsumerState<MapTab> {
   @override
   Widget build(BuildContext context) {
     final uniAsync = ref.watch(universitiesProvider);
+    final l = AppLocalizations.of(context)!;
 
     // Audit M11 (2026-05-11): deep-link handler. When the router or a
     // push notification writes an institution id into
@@ -115,11 +119,11 @@ class _MapTabState extends ConsumerState<MapTab> {
               child: Row(
                 children: [
                   // Title
-                  const Padding(
-                    padding: EdgeInsets.only(right: 12),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
                     child: Text(
-                      'Universities',
-                      style: TextStyle(
+                      l.mapTabTitle,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -133,11 +137,20 @@ class _MapTabState extends ConsumerState<MapTab> {
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Search...',
-                        hintStyle: const TextStyle(color: Colors.white38, fontSize: 14),
-                        prefixIcon: const Icon(Icons.search_rounded, color: Colors.white38, size: 20),
+                        hintStyle: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 14,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: Colors.white38,
+                          size: 20,
+                        ),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.07),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
@@ -145,7 +158,11 @@ class _MapTabState extends ConsumerState<MapTab> {
                         suffixIcon: _searchQuery.isNotEmpty
                             ? GestureDetector(
                                 onTap: () => _searchController.clear(),
-                                child: const Icon(Icons.close, color: Colors.white38, size: 18),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white38,
+                                  size: 18,
+                                ),
                               )
                             : null,
                       ),
@@ -198,9 +215,8 @@ class _MapTabState extends ConsumerState<MapTab> {
             // ── Content ──────────────────────────────────
             Expanded(
               child: uniAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
+                loading: () =>
+                    const Center(child: CircularProgressIndicator.adaptive()),
                 error: (e, _) => _buildErrorState(),
                 data: (unis) {
                   final filtered = _applyFilters(unis);
@@ -209,9 +225,8 @@ class _MapTabState extends ConsumerState<MapTab> {
                   // overlay an explanatory badge so the user knows
                   // the map looks empty because of their filter, not
                   // because no universities are mapped.
-                  final showEmptyBadge = _isMapMode &&
-                      filtered.isEmpty &&
-                      unis.isNotEmpty;
+                  final showEmptyBadge =
+                      _isMapMode && filtered.isEmpty && unis.isNotEmpty;
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 350),
                     switchInCurve: Curves.easeOut,
@@ -220,9 +235,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                         ? Stack(
                             key: const ValueKey('map'),
                             children: [
-                              UniversityMapView(
-                                universities: filtered,
-                              ),
+                              UniversityMapView(universities: filtered),
                               if (showEmptyBadge)
                                 Positioned(
                                   top: 16,
@@ -256,7 +269,11 @@ class _MapTabState extends ConsumerState<MapTab> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off_rounded, color: Colors.white24, size: 64),
+            const Icon(
+              Icons.search_off_rounded,
+              color: Colors.white24,
+              size: 64,
+            ),
             const SizedBox(height: 16),
             Text(
               _searchQuery.isNotEmpty
@@ -270,7 +287,10 @@ class _MapTabState extends ConsumerState<MapTab> {
                 _searchController.clear();
                 setState(() => _activeFilter = 'all');
               },
-              child: const Text('Clear filters', style: TextStyle(color: AppColors.vibrantLime)),
+              child: const Text(
+                'Clear filters',
+                style: TextStyle(color: AppColors.vibrantLime),
+              ),
             ),
           ],
         ),
@@ -299,12 +319,20 @@ class _MapTabState extends ConsumerState<MapTab> {
               color: Colors.red.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.wifi_off_rounded, color: Colors.white38, size: 40),
+            child: const Icon(
+              Icons.wifi_off_rounded,
+              color: Colors.white38,
+              size: 40,
+            ),
           ),
           const SizedBox(height: 20),
           const Text(
             'Could not load universities',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 6),
           const Text(
@@ -314,11 +342,20 @@ class _MapTabState extends ConsumerState<MapTab> {
           const SizedBox(height: 20),
           OutlinedButton.icon(
             onPressed: () => ref.refresh(universitiesProvider),
-            icon: const Icon(Icons.refresh_rounded, size: 18, color: AppColors.vibrantLime),
-            label: const Text('Retry', style: TextStyle(color: AppColors.vibrantLime)),
+            icon: const Icon(
+              Icons.refresh_rounded,
+              size: 18,
+              color: AppColors.vibrantLime,
+            ),
+            label: const Text(
+              'Retry',
+              style: TextStyle(color: AppColors.vibrantLime),
+            ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.vibrantLime.withOpacity(0.4)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
@@ -398,8 +435,7 @@ class _FilterChip extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             color: selected
                 ? AppColors.vibrantLime.withOpacity(0.15)
@@ -459,8 +495,11 @@ class _FilterEmptyBadge extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.filter_list_off,
-                  color: AppColors.vibrantLime, size: 18),
+              const Icon(
+                Icons.filter_list_off,
+                color: AppColors.vibrantLime,
+                size: 18,
+              ),
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
@@ -483,4 +522,3 @@ class _FilterEmptyBadge extends StatelessWidget {
     );
   }
 }
-

@@ -55,5 +55,24 @@
   "virtualTourTitle": "Virtual Tour",
   "@virtualTourTitle": { "description": "Button label for the curated panorama tour (Pannellum), when available." },
   "virtualWalkaroundTitle": "Virtual Walkaround",
-  "@virtualWalkaroundTitle": { "description": "Button label for the Kakao Roadview walkaround." }
+  "@virtualWalkaroundTitle": { "description": "Button label for the Kakao Roadview walkaround." },
+
+  "navHome": "Home",
+  "@navHome": { "description": "Bottom-nav label for the Applications/Home tab." },
+  "navMap": "Map",
+  "@navMap": { "description": "Bottom-nav label for the Map tab." },
+  "navDocs": "Docs",
+  "@navDocs": { "description": "Bottom-nav label for the Documents tab." },
+  "navTraining": "Training",
+  "@navTraining": { "description": "Bottom-nav label for the Training tab. Kept short for the nav bar — the full screen title is trainingTabTitle." },
+
+  "applicationsTabTitle": "My Applications",
+  "@applicationsTabTitle": { "description": "AppBar title for the Applications tab." },
+  "mapTabTitle": "Universities",
+  "@mapTabTitle": { "description": "Top-bar title for the Map tab." },
+  "documentsTabTitle": "My Documents",
+  "@documentsTabTitle": { "description": "AppBar title for the Documents tab." },
+
+  "accountTooltip": "Account",
+  "@accountTooltip": { "description": "Tooltip for the account icon button in the Applications AppBar — opens the AccountScreen with sign-out, data export, and delete account." }
 }

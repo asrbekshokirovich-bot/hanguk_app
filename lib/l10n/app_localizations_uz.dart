@@ -9,11 +9,11 @@ class AppLocalizationsUz extends AppLocalizations {
   AppLocalizationsUz([String locale = 'uz']) : super(locale);
 
   @override
-  String get trainingTabTitle => 'Training Center';
+  String get trainingTabTitle => 'Tayyorgarlik markazi';
 
   @override
   String get trainingTabSubtitle =>
-      'Prepare for your university applications with AI-guided training modules.';
+      'Universitet arizalaringizni sun\'iy intellekt yordamida mashq qiling.';
 
   @override
   String get studyPlanCardTitle => 'Study Plan Builder';
@@ -119,4 +119,28 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get virtualWalkaroundTitle => 'Virtual Walkaround';
+
+  @override
+  String get navHome => 'Bosh';
+
+  @override
+  String get navMap => 'Xarita';
+
+  @override
+  String get navDocs => 'Hujjatlar';
+
+  @override
+  String get navTraining => 'Tayyorgarlik';
+
+  @override
+  String get applicationsTabTitle => 'Arizalarim';
+
+  @override
+  String get mapTabTitle => 'Universitetlar';
+
+  @override
+  String get documentsTabTitle => 'Hujjatlarim';
+
+  @override
+  String get accountTooltip => 'Hisob';
 }

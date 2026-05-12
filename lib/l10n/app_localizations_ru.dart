@@ -119,4 +119,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get virtualWalkaroundTitle => 'Virtual Walkaround';
+
+  @override
+  String get navHome => 'Главная';
+
+  @override
+  String get navMap => 'Карта';
+
+  @override
+  String get navDocs => 'Документы';
+
+  @override
+  String get navTraining => 'Подготовка';
+
+  @override
+  String get applicationsTabTitle => 'Мои заявки';
+
+  @override
+  String get mapTabTitle => 'Университеты';
+
+  @override
+  String get documentsTabTitle => 'Мои документы';
+
+  @override
+  String get accountTooltip => 'Аккаунт';
 }

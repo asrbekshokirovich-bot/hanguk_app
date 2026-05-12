@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../applications/data/applications_repository.dart';
 import '../../home/presentation/home_tab_provider.dart';
 import '../data/interview_repository.dart';
@@ -14,6 +15,7 @@ class TrainingTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -23,21 +25,18 @@ class TrainingTab extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
-              const Text(
-                'Training Center',
-                style: TextStyle(
+              Text(
+                l.trainingTabTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Prepare for your university applications with AI-guided training modules.',
-                style: TextStyle(
-                  color: Colors.white60,
-                  fontSize: 14,
-                ),
+              Text(
+                l.trainingTabSubtitle,
+                style: const TextStyle(color: Colors.white60, fontSize: 14),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -47,31 +46,41 @@ class TrainingTab extends ConsumerWidget {
                     _buildTrainingCard(
                       context,
                       title: 'Study Plan Builder',
-                      description: 'Craft a compelling roadmap for your academic journey.',
+                      description:
+                          'Craft a compelling roadmap for your academic journey.',
                       icon: Icons.edit_document,
                       color: Colors.white,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const StudyPlanScreen(documentType: 'study_plan')),
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const StudyPlanScreen(documentType: 'study_plan'),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     _buildTrainingCard(
                       context,
                       title: 'Personal Statement',
-                      description: 'Write effective and engaging personal essays.',
+                      description:
+                          'Write effective and engaging personal essays.',
                       icon: Icons.person_search_rounded,
                       color: Colors.white,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const StudyPlanScreen(documentType: 'personal_statement')),
+                        MaterialPageRoute(
+                          builder: (_) => const StudyPlanScreen(
+                            documentType: 'personal_statement',
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     _buildTrainingCard(
                       context,
                       title: 'Interview Preparation',
-                      description: 'Practice mock questions and improve your confidence.',
+                      description:
+                          'Practice mock questions and improve your confidence.',
                       icon: Icons.mic_rounded,
                       color: AppColors.vibrantLime,
                       isDarkIcon: true,
@@ -88,10 +97,11 @@ class TrainingTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildTrainingCard(BuildContext context, {
-    required String title, 
-    required String description, 
-    required IconData icon, 
+  Widget _buildTrainingCard(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required IconData icon,
     required Color color,
     bool isDarkIcon = false,
     VoidCallback? onTap,
@@ -119,10 +129,7 @@ class TrainingTab extends ConsumerWidget {
               width: 64,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    color.withOpacity(0.4),
-                    color.withOpacity(0.1),
-                  ],
+                  colors: [color.withOpacity(0.4), color.withOpacity(0.1)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -133,8 +140,8 @@ class TrainingTab extends ConsumerWidget {
                     color: color.withOpacity(0.2),
                     blurRadius: 12,
                     spreadRadius: 2,
-                  )
-                ]
+                  ),
+                ],
               ),
               child: Icon(icon, color: color, size: 32),
             ),
@@ -170,13 +177,18 @@ class TrainingTab extends ConsumerWidget {
                 color: Colors.white.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.arrow_forward_ios_rounded, color: color.withOpacity(0.8), size: 16),
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: color.withOpacity(0.8),
+                size: 16,
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
   void _showInterviewSetupDialog(BuildContext context, WidgetRef ref) {
     String selectedTrack = 'ko';
     String selectedPersona = 'friendly'; // audit F12 — was hardcoded
@@ -204,18 +216,31 @@ class TrainingTab extends ConsumerWidget {
               ),
               title: const Text(
                 'Interview Preparation',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('1. Select Target University', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    const Text(
+                      '1. Select Target University',
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
                     const SizedBox(height: 12),
                     applicationsAsync.when(
-                      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime)),
-                      error: (e, s) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.vibrantLime,
+                        ),
+                      ),
+                      error: (e, s) => Text(
+                        'Error: $e',
+                        style: const TextStyle(color: Colors.red),
+                      ),
                       data: (applications) {
                         if (applications.isEmpty) {
                           // Empty-state CTA: send the user to the Applications tab
@@ -261,11 +286,15 @@ class TrainingTab extends ConsumerWidget {
                                     icon: const Icon(Icons.school, size: 18),
                                     label: const Text(
                                       'Apply to a university',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                     onPressed: () {
                                       // 0 = Applications tab in HomeScreen.
-                                      ref.read(homeTabProvider.notifier).setTab(0);
+                                      ref
+                                          .read(homeTabProvider.notifier)
+                                          .setTab(0);
                                       Navigator.pop(context);
                                     },
                                   ),
@@ -290,9 +319,26 @@ class TrainingTab extends ConsumerWidget {
                               final isSelected = selectedUniId == uni.id;
                               return ListTile(
                                 dense: true,
-                                title: Text(uni.name, style: TextStyle(color: isSelected ? AppColors.vibrantLime : Colors.white)),
-                                leading: Icon(Icons.school, color: isSelected ? AppColors.vibrantLime : Colors.white24),
-                                trailing: isSelected ? const Icon(Icons.check_circle, color: AppColors.vibrantLime) : null,
+                                title: Text(
+                                  uni.name,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? AppColors.vibrantLime
+                                        : Colors.white,
+                                  ),
+                                ),
+                                leading: Icon(
+                                  Icons.school,
+                                  color: isSelected
+                                      ? AppColors.vibrantLime
+                                      : Colors.white24,
+                                ),
+                                trailing: isSelected
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: AppColors.vibrantLime,
+                                      )
+                                    : null,
                                 onTap: () => setDialogState(() {
                                   selectedUniId = uni.id;
                                   selectedUniName = uni.name;
@@ -304,7 +350,10 @@ class TrainingTab extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 24),
-                    const Text('2. Select Interview Track', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    const Text(
+                      '2. Select Interview Track',
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -313,7 +362,8 @@ class TrainingTab extends ConsumerWidget {
                             label: 'Korean',
                             isSelected: selectedTrack == 'ko',
                             icon: Icons.translate,
-                            onTap: () => setDialogState(() => selectedTrack = 'ko'),
+                            onTap: () =>
+                                setDialogState(() => selectedTrack = 'ko'),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -322,7 +372,8 @@ class TrainingTab extends ConsumerWidget {
                             label: 'English',
                             isSelected: selectedTrack == 'en',
                             icon: Icons.language,
-                            onTap: () => setDialogState(() => selectedTrack = 'en'),
+                            onTap: () =>
+                                setDialogState(() => selectedTrack = 'en'),
                           ),
                         ),
                       ],
@@ -347,7 +398,10 @@ class TrainingTab extends ConsumerWidget {
                           value: selectedPersona,
                           isExpanded: true,
                           dropdownColor: AppColors.backgroundNavy,
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                           items: const [
                             DropdownMenuItem(
                               value: 'friendly',
@@ -379,13 +433,21 @@ class TrainingTab extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       interviewState.error!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: interviewState.isLoading ? null : () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                  onPressed: interviewState.isLoading
+                      ? null
+                      : () => Navigator.pop(context),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white54),
+                  ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -393,66 +455,70 @@ class TrainingTab extends ConsumerWidget {
                     foregroundColor: Colors.black,
                   ),
                   onPressed: selectedUniId == null
-                    ? null
-                    : () async {
-                      // Proactively request microphone synchronously within the button tap user gesture.
-                      // On Web, browsers handle microphone natively during Vapi JS start, and permission_handler will crash.
-                      if (!kIsWeb) {
-                        final status = await Permission.microphone.request();
-                        if (!status.isGranted && context.mounted) {
-                          // Audit U16: if the user has permanently denied
-                          // the permission, a snackbar alone is a dead
-                          // end. Offer to deep-link them into the OS
-                          // settings page where they can re-enable.
-                          if (status.isPermanentlyDenied) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  'Microphone is blocked in system settings.',
-                                ),
-                                action: SnackBarAction(
-                                  label: 'Open settings',
-                                  onPressed: () => openAppSettings(),
-                                ),
-                                duration: const Duration(seconds: 6),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Microphone access is required for the interview.',
+                      ? null
+                      : () async {
+                          // Proactively request microphone synchronously within the button tap user gesture.
+                          // On Web, browsers handle microphone natively during Vapi JS start, and permission_handler will crash.
+                          if (!kIsWeb) {
+                            final status = await Permission.microphone
+                                .request();
+                            if (!status.isGranted && context.mounted) {
+                              // Audit U16: if the user has permanently denied
+                              // the permission, a snackbar alone is a dead
+                              // end. Offer to deep-link them into the OS
+                              // settings page where they can re-enable.
+                              if (status.isPermanentlyDenied) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text(
+                                      'Microphone is blocked in system settings.',
+                                    ),
+                                    action: SnackBarAction(
+                                      label: 'Open settings',
+                                      onPressed: () => openAppSettings(),
+                                    ),
+                                    duration: const Duration(seconds: 6),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Microphone access is required for the interview.',
+                                    ),
+                                  ),
+                                );
+                              }
+                              return;
+                            }
+                          }
+
+                          // Reset any previous session state
+                          ref.read(interviewProvider.notifier).resetSession();
+
+                          // [FIXED] Navigate FIRST, then let InterviewScreen start the session.
+                          // Previously, startSession() was awaited here, blocking the dialog UI
+                          // for seconds. Now the user sees the interview screen immediately.
+                          if (context.mounted) {
+                            Navigator.pop(context); // Close dialog
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => InterviewScreen(
+                                  initialSessionType: 'university_specific',
+                                  initialUniversityId: selectedUniId,
+                                  initialUniversityName: selectedUniName,
+                                  initialLanguage: selectedTrack,
+                                  initialPersona: selectedPersona,
                                 ),
                               ),
                             );
                           }
-                          return;
-                        }
-                      }
-
-                      // Reset any previous session state
-                      ref.read(interviewProvider.notifier).resetSession();
-
-                      // [FIXED] Navigate FIRST, then let InterviewScreen start the session.
-                      // Previously, startSession() was awaited here, blocking the dialog UI
-                      // for seconds. Now the user sees the interview screen immediately.
-                      if (context.mounted) {
-                        Navigator.pop(context); // Close dialog
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => InterviewScreen(
-                              initialSessionType: 'university_specific',
-                              initialUniversityId: selectedUniId,
-                              initialUniversityName: selectedUniName,
-                              initialLanguage: selectedTrack,
-                              initialPersona: selectedPersona,
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  child: const Text('Start Interview', style: TextStyle(fontWeight: FontWeight.bold)),
+                        },
+                  child: const Text(
+                    'Start Interview',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             );

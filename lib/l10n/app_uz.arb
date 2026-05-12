@@ -1,9 +1,9 @@
 {
   "@@locale": "uz",
-  "@@x-translator-status": "TODO: translate. English seeds copied verbatim.",
+  "@@x-translator-status": "TODO: translate. Most older strings still English seeds. 2026-05-12 i18n adoption pass: training tab + bottom-nav + tab titles translated.",
 
-  "trainingTabTitle": "Training Center",
-  "trainingTabSubtitle": "Prepare for your university applications with AI-guided training modules.",
+  "trainingTabTitle": "Tayyorgarlik markazi",
+  "trainingTabSubtitle": "Universitet arizalaringizni sun'iy intellekt yordamida mashq qiling.",
   "studyPlanCardTitle": "Study Plan Builder",
   "studyPlanCardDesc": "Craft a compelling roadmap for your academic journey.",
   "personalStatementCardTitle": "Personal Statement",
@@ -36,5 +36,16 @@
   "walkaroundInitErrorTitle": "Street view couldn't start",
   "walkaroundInitErrorSubtitle": "Something went wrong starting the walkaround. Please try again.",
   "virtualTourTitle": "Virtual Tour",
-  "virtualWalkaroundTitle": "Virtual Walkaround"
+  "virtualWalkaroundTitle": "Virtual Walkaround",
+
+  "navHome": "Bosh",
+  "navMap": "Xarita",
+  "navDocs": "Hujjatlar",
+  "navTraining": "Tayyorgarlik",
+
+  "applicationsTabTitle": "Arizalarim",
+  "mapTabTitle": "Universitetlar",
+  "documentsTabTitle": "Hujjatlarim",
+
+  "accountTooltip": "Hisob"
 }

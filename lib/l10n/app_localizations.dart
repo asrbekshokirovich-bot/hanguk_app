@@ -307,6 +307,57 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Virtual Walkaround'**
   String get virtualWalkaroundTitle;
+
+  /// Bottom-nav label for the Applications/Home tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// Bottom-nav label for the Map tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get navMap;
+
+  /// Bottom-nav label for the Documents tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Docs'**
+  String get navDocs;
+
+  /// Bottom-nav label for the Training tab. Kept short for the nav bar —
+  /// the full screen title is trainingTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get navTraining;
+
+  /// AppBar title for the Applications tab.
+  ///
+  /// In en, this message translates to:
+  /// **'My Applications'**
+  String get applicationsTabTitle;
+
+  /// Top-bar title for the Map tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Universities'**
+  String get mapTabTitle;
+
+  /// AppBar title for the Documents tab.
+  ///
+  /// In en, this message translates to:
+  /// **'My Documents'**
+  String get documentsTabTitle;
+
+  /// Tooltip for the account icon button in the Applications AppBar —
+  /// opens the AccountScreen with sign-out, data export, and delete
+  /// account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountTooltip;
 }
 
 class _AppLocalizationsDelegate
