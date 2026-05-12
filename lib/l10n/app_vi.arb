@@ -23,5 +23,18 @@
   "yourTurn": "Your turn to speak",
   "aiSpeaking": "Interviewer is speaking...",
   "wrappingUp": "Wrapping up the interview...",
-  "micRequired": "Microphone access is required for the interview."
+  "micRequired": "Microphone access is required for the interview.",
+
+  "walkaroundLoadingTitle": "Loading campus walkaround",
+  "walkaroundLoadingSubtitle": "Fetching street view near campus.",
+  "walkaroundNoPanoTitle": "No street view here",
+  "walkaroundNoPanoSubtitle": "This campus doesn't have a walkable street view nearby.",
+  "walkaroundBlockedTitle": "Street view unavailable",
+  "walkaroundBlockedSubtitle": "The map provider blocked this request. Try again on a different network.",
+  "walkaroundNetworkTitle": "Couldn't reach the map provider",
+  "walkaroundNetworkSubtitle": "Check your connection and try again.",
+  "walkaroundInitErrorTitle": "Street view couldn't start",
+  "walkaroundInitErrorSubtitle": "Something went wrong starting the walkaround. Please try again.",
+  "virtualTourTitle": "Virtual Tour",
+  "virtualWalkaroundTitle": "Virtual Walkaround"
 }

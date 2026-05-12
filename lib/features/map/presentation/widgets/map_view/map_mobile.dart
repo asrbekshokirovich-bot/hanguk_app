@@ -9,20 +9,28 @@ Widget buildMap({
   required List<University> universities,
   required void Function(University u) onMarkerClick,
 }) {
+  // Audit M19 (2026-05-12): capture the active locale once and thread
+  // it into the WebView HTML generator so marker labels render in the
+  // student's language. Default to 'en' if the Localizations widget
+  // is missing (e.g. test harness).
+  final localeCode = Localizations.maybeLocaleOf(context)?.languageCode ?? 'en';
   return _MobileMapWidget(
     universities: universities,
     onMarkerClick: onMarkerClick,
+    locale: localeCode,
   );
 }
 
 class _MobileMapWidget extends StatefulWidget {
   final List<University> universities;
   final void Function(University u) onMarkerClick;
+  final String locale;
 
   const _MobileMapWidget({
     Key? key,
     required this.universities,
     required this.onMarkerClick,
+    required this.locale,
   }) : super(key: key);
 
   @override
@@ -50,7 +58,10 @@ class _MobileMapWidgetState extends State<_MobileMapWidget> {
           }
         },
       )
-      ..loadHtmlString(generateMapHtml(widget.universities), baseUrl: 'https://hanguk.uz');
+      ..loadHtmlString(
+        generateMapHtml(widget.universities, locale: widget.locale),
+        baseUrl: 'https://hanguk.uz',
+      );
   }
 
   @override

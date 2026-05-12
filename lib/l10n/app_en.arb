@@ -30,5 +30,30 @@
   "aiSpeaking": "Interviewer is speaking...",
   "wrappingUp": "Wrapping up the interview...",
 
-  "micRequired": "Microphone access is required for the interview."
+  "micRequired": "Microphone access is required for the interview.",
+
+  "walkaroundLoadingTitle": "Loading campus walkaround",
+  "@walkaroundLoadingTitle": { "description": "Shown while the Kakao Roadview WebView is fetching a panorama." },
+  "walkaroundLoadingSubtitle": "Fetching street view near campus.",
+
+  "walkaroundNoPanoTitle": "No street view here",
+  "@walkaroundNoPanoTitle": { "description": "Shown when no Kakao panorama is found within 200m of the campus pin." },
+  "walkaroundNoPanoSubtitle": "This campus doesn't have a walkable street view nearby.",
+
+  "walkaroundBlockedTitle": "Street view unavailable",
+  "@walkaroundBlockedTitle": { "description": "Shown when the Kakao JS SDK loads but is blocked at runtime." },
+  "walkaroundBlockedSubtitle": "The map provider blocked this request. Try again on a different network.",
+
+  "walkaroundNetworkTitle": "Couldn't reach the map provider",
+  "@walkaroundNetworkTitle": { "description": "Shown when the Kakao JS SDK fails to load (network error)." },
+  "walkaroundNetworkSubtitle": "Check your connection and try again.",
+
+  "walkaroundInitErrorTitle": "Street view couldn't start",
+  "@walkaroundInitErrorTitle": { "description": "Shown when initializing the Kakao Roadview throws unexpectedly." },
+  "walkaroundInitErrorSubtitle": "Something went wrong starting the walkaround. Please try again.",
+
+  "virtualTourTitle": "Virtual Tour",
+  "@virtualTourTitle": { "description": "Button label for the curated panorama tour (Pannellum), when available." },
+  "virtualWalkaroundTitle": "Virtual Walkaround",
+  "@virtualWalkaroundTitle": { "description": "Button label for the Kakao Roadview walkaround." }
 }

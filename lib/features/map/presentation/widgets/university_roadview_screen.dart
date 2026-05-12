@@ -1,9 +1,46 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/university.dart';
 import 'roadview_html.dart';
+
+/// Audit K5 / M6 (2026-05-11): the Roadview WebView posts state
+/// transitions through `window.HangukRoadviewChannel`. This screen
+/// attaches a JavaScript channel of that name, maintains a sealed
+/// state, and renders a localized overlay on top of the WebView
+/// when the state is anything other than `loading` or `ready`. The
+/// HTML keeps English fallback copy in case the bridge isn't wired
+/// (defensive), but the Dart overlay paints over it.
+sealed class _RoadviewState {
+  const _RoadviewState();
+}
+
+final class _RvLoading extends _RoadviewState {
+  const _RvLoading();
+}
+
+final class _RvReady extends _RoadviewState {
+  const _RvReady();
+}
+
+final class _RvNoPano extends _RoadviewState {
+  const _RvNoPano();
+}
+
+final class _RvSdkBlocked extends _RoadviewState {
+  const _RvSdkBlocked();
+}
+
+final class _RvNetwork extends _RoadviewState {
+  const _RvNetwork();
+}
+
+final class _RvInitError extends _RoadviewState {
+  const _RvInitError();
+}
 
 class UniversityRoadviewScreen extends StatefulWidget {
   final University university;
@@ -11,11 +48,13 @@ class UniversityRoadviewScreen extends StatefulWidget {
   const UniversityRoadviewScreen({super.key, required this.university});
 
   @override
-  State<UniversityRoadviewScreen> createState() => _UniversityRoadviewScreenState();
+  State<UniversityRoadviewScreen> createState() =>
+      _UniversityRoadviewScreenState();
 }
 
 class _UniversityRoadviewScreenState extends State<UniversityRoadviewScreen> {
   late final WebViewController _controller;
+  _RoadviewState _state = const _RvLoading();
 
   @override
   void initState() {
@@ -29,19 +68,64 @@ class _UniversityRoadviewScreenState extends State<UniversityRoadviewScreen> {
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFF0F1626)) // Match map base color
+      ..setBackgroundColor(const Color(0xFF0F1626))
+      ..addJavaScriptChannel(
+        'HangukRoadviewChannel',
+        onMessageReceived: _onChannelMessage,
+      )
       ..loadHtmlString(htmlContent);
+  }
+
+  void _onChannelMessage(JavaScriptMessage message) {
+    if (!mounted) return;
+    final next = switch (message.message) {
+      'ready' => const _RvReady(),
+      'no_pano' => const _RvNoPano(),
+      'sdk_blocked' => const _RvSdkBlocked(),
+      'network' => const _RvNetwork(),
+      'init_error' => const _RvInitError(),
+      _ => _state,
+    };
+    setState(() => _state = next);
+  }
+
+  ({String title, String subtitle})? _overlayCopy(AppLocalizations l) {
+    return switch (_state) {
+      _RvLoading() => (
+        title: l.walkaroundLoadingTitle,
+        subtitle: l.walkaroundLoadingSubtitle,
+      ),
+      _RvReady() => null,
+      _RvNoPano() => (
+        title: l.walkaroundNoPanoTitle,
+        subtitle: l.walkaroundNoPanoSubtitle,
+      ),
+      _RvSdkBlocked() => (
+        title: l.walkaroundBlockedTitle,
+        subtitle: l.walkaroundBlockedSubtitle,
+      ),
+      _RvNetwork() => (
+        title: l.walkaroundNetworkTitle,
+        subtitle: l.walkaroundNetworkSubtitle,
+      ),
+      _RvInitError() => (
+        title: l.walkaroundInitErrorTitle,
+        subtitle: l.walkaroundInitErrorSubtitle,
+      ),
+    };
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final overlay = _overlayCopy(l);
     return Scaffold(
       backgroundColor: const Color(0xFF0F1626),
       body: Stack(
         children: [
-          // The strict EagerGestureRecognizer prevents the WebView from 
-          // passing gestures UP to Flutter. This completely solves the 
-          // touch-dragging panning issue common to Kakao Roadview inside Flutter apps.
+          // EagerGestureRecognizer prevents WebView gestures from
+          // bubbling up to Flutter — fixes the panning friction
+          // common to Kakao Roadview inside a Flutter app.
           WebViewWidget(
             controller: _controller,
             gestureRecognizers: {
@@ -50,8 +134,54 @@ class _UniversityRoadviewScreenState extends State<UniversityRoadviewScreen> {
               ),
             },
           ),
-          
-          // Custom Back Button Overlay 
+
+          if (overlay != null)
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: _state is _RvReady,
+                child: Container(
+                  color: const Color(0xFF0F1626).withOpacity(0.92),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _state is _RvLoading
+                                ? Icons.hourglass_top
+                                : Icons.directions_walk_outlined,
+                            color: Colors.white70,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            overlay.title,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            overlay.subtitle,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Back button overlay.
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             left: 16,
@@ -73,7 +203,7 @@ class _UniversityRoadviewScreenState extends State<UniversityRoadviewScreen> {
             ),
           ),
 
-          // Label Overlay
+          // Label overlay (top-right pill).
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             right: 16,
@@ -85,12 +215,21 @@ class _UniversityRoadviewScreenState extends State<UniversityRoadviewScreen> {
                 border: Border.all(color: Colors.white24),
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                   const Icon(Icons.directions_walk, color: Colors.white, size: 16),
-                   const SizedBox(width: 8),
-                   Text(
+                  const Icon(
+                    Icons.directions_walk,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
                     widget.university.name,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),

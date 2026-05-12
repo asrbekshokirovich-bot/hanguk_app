@@ -10,20 +10,25 @@ Widget buildMap({
   required List<University> universities,
   required void Function(University u) onMarkerClick,
 }) {
+  // Audit M19 (2026-05-12): see map_mobile.dart for rationale.
+  final localeCode = Localizations.maybeLocaleOf(context)?.languageCode ?? 'en';
   return _WebMapWidget(
     universities: universities,
     onMarkerClick: onMarkerClick,
+    locale: localeCode,
   );
 }
 
 class _WebMapWidget extends StatefulWidget {
   final List<University> universities;
   final void Function(University u) onMarkerClick;
+  final String locale;
 
   const _WebMapWidget({
     Key? key,
     required this.universities,
     required this.onMarkerClick,
+    required this.locale,
   }) : super(key: key);
 
   @override
@@ -40,7 +45,7 @@ class _WebMapWidgetState extends State<_WebMapWidget> {
     _uniById = {for (final u in widget.universities) u.id: u};
     _viewId = 'kakao-map-${DateTime.now().millisecondsSinceEpoch}';
 
-    final htmlTemplate = generateMapHtml(widget.universities);
+    final htmlTemplate = generateMapHtml(widget.universities, locale: widget.locale);
     
     final iframe = html.IFrameElement()
       ..style.border = 'none'

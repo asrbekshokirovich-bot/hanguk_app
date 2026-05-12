@@ -79,4 +79,42 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get micRequired => 'Microphone access is required for the interview.';
+
+  @override
+  String get walkaroundLoadingTitle => '캠퍼스 워크어라운드 로딩 중';
+
+  @override
+  String get walkaroundLoadingSubtitle => '캠퍼스 주변 거리뷰를 가져오는 중입니다.';
+
+  @override
+  String get walkaroundNoPanoTitle => '이 위치의 거리뷰가 없습니다';
+
+  @override
+  String get walkaroundNoPanoSubtitle => '이 캠퍼스 근처에는 걸어볼 수 있는 거리뷰가 없습니다.';
+
+  @override
+  String get walkaroundBlockedTitle => '거리뷰를 사용할 수 없습니다';
+
+  @override
+  String get walkaroundBlockedSubtitle =>
+      '지도 제공자가 요청을 차단했습니다. 다른 네트워크에서 다시 시도해 주세요.';
+
+  @override
+  String get walkaroundNetworkTitle => '지도 서비스에 연결할 수 없습니다';
+
+  @override
+  String get walkaroundNetworkSubtitle => '연결 상태를 확인하고 다시 시도해 주세요.';
+
+  @override
+  String get walkaroundInitErrorTitle => '거리뷰를 시작할 수 없습니다';
+
+  @override
+  String get walkaroundInitErrorSubtitle =>
+      '워크어라운드 시작 중 오류가 발생했습니다. 다시 시도해 주세요.';
+
+  @override
+  String get virtualTourTitle => '가상 투어';
+
+  @override
+  String get virtualWalkaroundTitle => '가상 워크어라운드';
 }

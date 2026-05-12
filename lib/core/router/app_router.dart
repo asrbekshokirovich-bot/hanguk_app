@@ -1,18 +1,157 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/home/presentation/home_screen.dart';
-import '../../features/home/presentation/welcome_screen.dart';
-import '../../features/auth/presentation/login_screen.dart';
+
 import '../../features/auth/data/auth_repository.dart';
-import '../feature_flags/uni_db_flag.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
+import '../../features/home/presentation/home_tab_provider.dart';
+import '../../features/home/presentation/welcome_screen.dart';
+import '../../features/map/data/map_repository.dart';
+import '../../features/map/domain/university.dart';
+import '../../features/map/presentation/map_deeplink_provider.dart';
+import '../../features/map/presentation/widgets/university_roadview_screen.dart';
 import '../../features/uni_db/presentation/admin_review_screen.dart';
 import '../../features/uni_db/presentation/application_tracker_screen.dart';
 import '../../features/uni_db/presentation/institution_compare_screen.dart';
 import '../../features/uni_db/presentation/institution_detail_screen.dart';
 import '../../features/uni_db/presentation/notification_settings_screen.dart';
+import '../feature_flags/uni_db_flag.dart';
 
 part 'app_router.g.dart';
+
+// Audit M9 / M11 (2026-05-11): map-feature routes registered as
+// plain GoRoute entries so flipping or extending them doesn't
+// require running `build_runner` (same pattern as `_uniDbRoutes`).
+//
+// - `/walkaround/:institutionId` — opens the Kakao Roadview WebView
+//   for the institution. Accepts a `University` via `extra:` for the
+//   common in-app case (detail sheet → walkaround); falls back to
+//   fetching the row from `universitiesProvider` for cold deep-links.
+//
+// - `/map/:institutionId` — switches the home-tab to Map, then
+//   writes the institution id into `pendingMapDetailProvider` so
+//   MapTab raises the detail bottom sheet. Used by push
+//   notifications and external "share this university" links.
+List<RouteBase> _mapRoutes() => [
+      GoRoute(
+        path: '/walkaround/:institutionId',
+        builder: (context, state) {
+          final id = state.pathParameters['institutionId'] ?? '';
+          final extraUni =
+              state.extra is University ? state.extra as University : null;
+          return _WalkaroundRouteEntry(institutionId: id, seed: extraUni);
+        },
+      ),
+      GoRoute(
+        path: '/map/:institutionId',
+        builder: (context, state) {
+          final id = state.pathParameters['institutionId'] ?? '';
+          return _MapDeepLinkEntry(institutionId: id);
+        },
+      ),
+    ];
+
+/// Entry-point widget for `/walkaround/:institutionId`. If the caller
+/// already had the University in hand (extra), uses it. Otherwise
+/// awaits `universitiesProvider` and finds the matching row. Renders
+/// a clean empty state if neither path resolves.
+class _WalkaroundRouteEntry extends ConsumerWidget {
+  const _WalkaroundRouteEntry({required this.institutionId, this.seed});
+
+  final String institutionId;
+  final University? seed;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (seed != null) {
+      return UniversityRoadviewScreen(university: seed!);
+    }
+    final unisAsync = ref.watch(universitiesProvider);
+    return unisAsync.when(
+      loading: () => const _RouteLoadingShell(),
+      error: (_, __) => const _RouteMissingShell(),
+      data: (unis) {
+        University? match;
+        for (final u in unis) {
+          if (u.id == institutionId) {
+            match = u;
+            break;
+          }
+        }
+        if (match == null) return const _RouteMissingShell();
+        return UniversityRoadviewScreen(university: match);
+      },
+    );
+  }
+}
+
+/// Entry-point widget for `/map/:institutionId`. Writes the id into
+/// `pendingMapDetailProvider` and renders the home screen; MapTab
+/// picks the id up on its next build and raises the detail sheet.
+class _MapDeepLinkEntry extends ConsumerWidget {
+  const _MapDeepLinkEntry({required this.institutionId});
+
+  final String institutionId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Schedule the writes for after first build to avoid mutating
+    // providers during the build phase.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 1 = Map tab in the home bottom-nav (per home_screen.dart).
+      ref.read(homeTabProvider.notifier).state = 1;
+      ref.read(pendingMapDetailProvider.notifier).state = institutionId;
+    });
+    return const HomeScreen();
+  }
+}
+
+class _RouteLoadingShell extends StatelessWidget {
+  const _RouteLoadingShell();
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+        backgroundColor: Color(0xFF0F1626),
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.white70),
+        ),
+      );
+}
+
+class _RouteMissingShell extends StatelessWidget {
+  const _RouteMissingShell();
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: const Color(0xFF0F1626),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Icon(Icons.public_off,
+                    color: Colors.white54, size: 56),
+                const SizedBox(height: 16),
+                const Text(
+                  'University not found',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                const SizedBox(height: 24),
+                TextButton(
+                  onPressed: () => context.go('/'),
+                  child: const Text(
+                    'Back to home',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+}
 
 // University DB routes (plan §H.3) — only registered when the
 // `UNI_DB_ENABLED` compile-time flag is true. Kept as plain GoRoute
@@ -57,14 +196,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     routes: <RouteBase>[
       ...$appRoutes,
+      ..._mapRoutes(),
       if (kUniDbEnabled) ..._uniDbRoutes(),
     ],
     redirect: (context, state) {
       final isLoading = authStateAsync.isLoading;
       final isAuthenticated = authStateAsync.value?.session != null;
-      
-      final isGoingToLogin = state.uri.toString() == '/login';
-      final isGoingToWelcome = state.uri.toString() == '/welcome';
+
+      final loc = state.uri.toString();
+      final isGoingToLogin = loc == '/login';
+      final isGoingToWelcome = loc == '/welcome';
 
       if (isLoading) return null;
 
@@ -84,7 +225,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 @TypedGoRoute<HomeRoute>(path: '/')
 class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute();
-  
+
   @override
   Widget build(BuildContext context, GoRouterState state) => const HomeScreen();
 }
@@ -92,15 +233,16 @@ class HomeRoute extends GoRouteData with $HomeRoute {
 @TypedGoRoute<WelcomeRoute>(path: '/welcome')
 class WelcomeRoute extends GoRouteData with $WelcomeRoute {
   const WelcomeRoute();
-  
+
   @override
-  Widget build(BuildContext context, GoRouterState state) => const WelcomeScreen();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const WelcomeScreen();
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')
 class LoginRoute extends GoRouteData with $LoginRoute {
   const LoginRoute();
-  
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     final extra = state.extra as Map<String, dynamic>?;

@@ -1,6 +1,28 @@
+import '../../../../core/config/app_config.dart';
+
+/// Generates the Kakao Roadview WebView HTML for a single campus.
+///
+/// Audit K2 (2026-05-11): the Kakao JS key is sourced from
+/// [AppConfig.kakaoJsKey] (overridable via `--dart-define=KAKAO_JS_KEY=...`)
+/// rather than hardcoded.
+///
+/// Audit P0 — Roadview radius (2026-05-11): the search radius was
+/// previously 2000m which almost always returned a panorama, but
+/// rarely one on campus — usually the nearest motor road. The
+/// operator decision is to tighten to **200m**; if no panorama is
+/// within 200m we show a clean empty state ("no street view here")
+/// rather than auto-expanding the radius. Auto-expansion defeats the
+/// purpose: it brings the drive-by panorama back.
+///
+/// The visible empty-state copy is loaded from `AppLocalizations` by
+/// the caller (`UniversityRoadviewScreen`) and surfaced via a
+/// `window.HangukRoadviewChannel` JS bridge when the WebView hits an
+/// unavailable / error state. Inline English strings here are the
+/// safe technical fallback if the JS bridge isn't wired.
 String generateRoadviewHtml(double lat, double lng, String name) {
   final safeName = name.replaceAll("'", "\\'").replaceAll('"', '\\"');
-  
+  final kakaoJsKey = AppConfig.kakaoJsKey;
+
   return '''
 <!DOCTYPE html>
 <html>
@@ -18,59 +40,94 @@ String generateRoadviewHtml(double lat, double lng, String name) {
             color: white;
             font-family: sans-serif;
             text-align: center;
+            padding: 0 24px;
+            max-width: 320px;
         }
+        .loading-container h3 { font-weight: 600; margin-bottom: 8px; }
+        .loading-container p  { color: rgba(255,255,255,0.6); font-size: 13px; margin: 0; }
         * { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
 <body>
     <div id="roadview">
         <div class="loading-container" id="loadingText">
-            <h3>Booting $safeName Campus Walkaround...</h3>
+            <h3>Loading $safeName...</h3>
+            <p>Fetching street view near campus.</p>
         </div>
     </div>
     <script>
-        function triggerError(msg) {
-            document.getElementById('roadview').innerHTML = "<div class='loading-container'>Error initializing Roadview: " + msg + "</div>";
+        function postState(state) {
+            try {
+                if (window.HangukRoadviewChannel) {
+                    window.HangukRoadviewChannel.postMessage(state);
+                }
+            } catch (_) {}
+        }
+
+        function showMessage(title, subtitle) {
+            var html = "<div class='loading-container'><h3>" + title + "</h3>";
+            if (subtitle) html += "<p>" + subtitle + "</p>";
+            html += "</div>";
+            document.getElementById('roadview').innerHTML = html;
+        }
+
+        function triggerError(state, title, subtitle) {
+            postState(state);
+            showMessage(title, subtitle);
         }
 
         // Try Loading Kakao JS dynamically
         var script = document.createElement('script');
-        script.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=c695b428933e192ca1d8582e3aab14a4&autoload=false";
-        
+        script.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=$kakaoJsKey&autoload=false";
+
         script.onload = function() {
             try {
                 if (typeof kakao === 'undefined' || !kakao.maps) {
-                    triggerError("Kakao SDK Blocked");
+                    triggerError('sdk_blocked',
+                        'Street view is unavailable',
+                        'The map provider blocked this request. Try again on a different network.');
                     return;
                 }
-                
+
                 kakao.maps.load(function() {
                     try {
                         var rvContainer = document.getElementById('roadview');
-                        var rv = new kakao.maps.Roadview(rvContainer); 
-                        var rvClient = new kakao.maps.RoadviewClient(); 
-                        
+                        var rv = new kakao.maps.Roadview(rvContainer);
+                        var rvClient = new kakao.maps.RoadviewClient();
+
                         var targetPosition = new kakao.maps.LatLng($lat, $lng);
 
-                        // Increased radius to 2000 meters to guarantee a valid panoId nearby
-                        rvClient.getNearestPanoId(targetPosition, 2000, function(panoId) {
+                        // Audit P0 (2026-05-11): radius tightened from
+                        // 2000m -> 200m so the panorama returned is on
+                        // campus, not on the nearest motor road. NO
+                        // auto-expand fallback: if no panorama is
+                        // within 200m, show the empty state. Expanding
+                        // defeats the purpose of the walkaround.
+                        rvClient.getNearestPanoId(targetPosition, 200, function(panoId) {
                             if (panoId === null) {
-                                triggerError("Walkaround data completely isolated.");
+                                triggerError('no_pano',
+                                    'No street view here',
+                                    'This campus does not have a walkable street view nearby.');
                             } else {
+                                postState('ready');
                                 rv.setPanoId(panoId, targetPosition);
                             }
                         });
 
                     } catch(e) {
-                         triggerError(e.message);
+                        triggerError('init_error', 'Street view could not start', e.message || '');
                     }
                 });
 
             } catch (e) {
-                 triggerError(e.message);
+                triggerError('init_error', 'Street view could not start', e.message || '');
             }
         };
-        script.onerror = function() { triggerError("Network connection denied."); };
+        script.onerror = function() {
+            triggerError('network',
+                'Could not reach the map provider',
+                'Check your connection and try again.');
+        };
         document.head.appendChild(script);
     </script>
 </body>

@@ -235,6 +235,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Microphone access is required for the interview.'**
   String get micRequired;
+
+  /// Loading title for the campus walkaround WebView.
+  ///
+  /// In en: 'Loading campus walkaround'
+  String get walkaroundLoadingTitle;
+
+  /// Loading subtitle for the campus walkaround WebView.
+  String get walkaroundLoadingSubtitle;
+
+  /// Shown when no panorama is found within 200m of the campus pin.
+  String get walkaroundNoPanoTitle;
+  String get walkaroundNoPanoSubtitle;
+
+  /// Shown when the Kakao JS SDK loads but is blocked at runtime.
+  String get walkaroundBlockedTitle;
+  String get walkaroundBlockedSubtitle;
+
+  /// Shown when the Kakao JS SDK fails to load (network error).
+  String get walkaroundNetworkTitle;
+  String get walkaroundNetworkSubtitle;
+
+  /// Shown when initializing the Kakao Roadview throws unexpectedly.
+  String get walkaroundInitErrorTitle;
+  String get walkaroundInitErrorSubtitle;
+
+  /// Button label for the curated panorama tour (Pannellum).
+  String get virtualTourTitle;
+
+  /// Button label for the Kakao Roadview walkaround.
+  String get virtualWalkaroundTitle;
 }
 
 class _AppLocalizationsDelegate

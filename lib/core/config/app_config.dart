@@ -42,4 +42,27 @@ class AppConfig {
   static const String voiceIdEnFriendly = 'nPczCjzI2devNBz1zQrb';
   static const String voiceIdEnStrict = 'pNInz6obbfdqIjc9VDzA';
   static const String voiceIdEnImpatient = 'MF3mGyEYCl7XYWbV9V6O';
+
+  // ── Kakao Maps JavaScript SDK ────────────────────────────────────────────
+  // Audit K2 (2026-05-11): the Kakao Maps JS key was hardcoded in three
+  // places (`university_map_html.dart`, `roadview_html.dart`, and an
+  // orphan `test_map.html`). Centralised here and made overridable at
+  // build time via `--dart-define=KAKAO_JS_KEY=<key>`.
+  //
+  // This is a *JavaScript* key (not an admin/REST key): per Kakao's
+  // security guideline it is bound to a JavaScript-SDK domain
+  // allowlist in the developer console, so leaking it from the APK is
+  // less catastrophic than leaking the admin key — but rotating it is
+  // still a normal hygiene step. The default below mirrors the value
+  // that was in source before the audit so existing builds keep
+  // working without the build flag.
+  //
+  // For Roadview the same key is used. If we ever shard keys per
+  // surface, add `KAKAO_JS_KEY_ROADVIEW` separately.
+  //
+  // See docs/audits/kakaotalk_audit_2026-05-11.md §3 K2.
+  static const String kakaoJsKey = String.fromEnvironment(
+    'KAKAO_JS_KEY',
+    defaultValue: 'c695b428933e192ca1d8582e3aab14a4',
+  );
 }
