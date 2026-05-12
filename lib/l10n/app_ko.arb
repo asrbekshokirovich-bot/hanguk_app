@@ -1,9 +1,9 @@
 {
   "@@locale": "ko",
-  "@@x-translator-status": "TODO: translate. Most strings English seeds copied verbatim. walkaround/virtualTour strings translated.",
+  "@@x-translator-status": "TODO: translate. Most older strings still English seeds. walkaround/virtualTour translated. 2026-05-12 i18n adoption pass: training tab + bottom-nav + tab titles translated.",
 
-  "trainingTabTitle": "Training Center",
-  "trainingTabSubtitle": "Prepare for your university applications with AI-guided training modules.",
+  "trainingTabTitle": "트레이닝 센터",
+  "trainingTabSubtitle": "AI 가이드 트레이닝 모듈로 대학 지원을 준비하세요.",
   "studyPlanCardTitle": "Study Plan Builder",
   "studyPlanCardDesc": "Craft a compelling roadmap for your academic journey.",
   "personalStatementCardTitle": "Personal Statement",
@@ -36,5 +36,16 @@
   "walkaroundInitErrorTitle": "거리뷰를 시작할 수 없습니다",
   "walkaroundInitErrorSubtitle": "워크어라운드 시작 중 오류가 발생했습니다. 다시 시도해 주세요.",
   "virtualTourTitle": "가상 투어",
-  "virtualWalkaroundTitle": "가상 워크어라운드"
+  "virtualWalkaroundTitle": "가상 워크어라운드",
+
+  "navHome": "홈",
+  "navMap": "지도",
+  "navDocs": "서류",
+  "navTraining": "트레이닝",
+
+  "applicationsTabTitle": "내 지원서",
+  "mapTabTitle": "대학교",
+  "documentsTabTitle": "내 서류",
+
+  "accountTooltip": "계정"
 }

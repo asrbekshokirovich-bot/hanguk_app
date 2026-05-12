@@ -36,5 +36,16 @@
   "walkaroundInitErrorTitle": "Street view couldn't start",
   "walkaroundInitErrorSubtitle": "Something went wrong starting the walkaround. Please try again.",
   "virtualTourTitle": "Virtual Tour",
-  "virtualWalkaroundTitle": "Virtual Walkaround"
+  "virtualWalkaroundTitle": "Virtual Walkaround",
+
+  "navHome": "Trang chủ",
+  "navMap": "Bản đồ",
+  "navDocs": "Tài liệu",
+  "navTraining": "Đào tạo",
+
+  "applicationsTabTitle": "Đơn của tôi",
+  "mapTabTitle": "Trường đại học",
+  "documentsTabTitle": "Tài liệu của tôi",
+
+  "accountTooltip": "Tài khoản"
 }

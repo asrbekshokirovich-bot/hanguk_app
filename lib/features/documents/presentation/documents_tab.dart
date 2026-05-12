@@ -8,6 +8,7 @@ import '../data/documents_repository.dart';
 import '../domain/document_type.dart';
 import '../domain/document.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'widgets/document_slot.dart';
 
 class DocumentsTab extends ConsumerStatefulWidget {
@@ -29,20 +30,20 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
 
       if (result != null && result.files.single.path != null) {
         setState(() => _uploadingDocs[type.id] = true);
-        
+
         File file = File(result.files.single.path!);
         final repo = ref.read(documentsRepositoryProvider);
-        
+
         await repo.uploadDocument(file, type);
-        
+
         // Refresh provider
         ref.invalidate(documentsProvider);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
       }
     } finally {
       if (mounted) {
@@ -69,9 +70,9 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Preview error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Preview error: $e')));
       }
     }
   }
@@ -79,16 +80,17 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
   @override
   Widget build(BuildContext context) {
     final docsAsync = ref.watch(documentsProvider);
+    final l = AppLocalizations.of(context)!;
 
     return CustomScrollView(
       slivers: [
-        const SliverAppBar(
-          title: Text('My Documents'),
+        SliverAppBar(
+          title: Text(l.documentsTabTitle),
           backgroundColor: Colors.transparent,
           floating: true,
           snap: true,
         ),
-        
+
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -100,7 +102,9 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
                   decoration: BoxDecoration(
                     color: AppColors.vibrantLime.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.vibrantLime.withOpacity(0.2)),
+                    border: Border.all(
+                      color: AppColors.vibrantLime.withOpacity(0.2),
+                    ),
                   ),
                   child: const Row(
                     children: [
@@ -118,7 +122,11 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
                 const SizedBox(height: 24),
                 const Text(
                   'Required Documents',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -131,51 +139,50 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
             return SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final type = DocumentConstants.requiredDocuments[index];
-                    
-                    // Match uploaded doc safely
-                    AppDocument? uploadedMatch;
-                    for (final doc in uploadedDocs) {
-                      if (doc.name.contains('[${type.id}]') || doc.filePath.contains('${type.id}-')) {
-                        uploadedMatch = doc;
-                        break;
-                      }
-                    }
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final type = DocumentConstants.requiredDocuments[index];
 
-                    return DocumentSlot(
-                      index: index,
-                      type: type,
-                      uploadedDoc: uploadedMatch,
-                      isUploading: _uploadingDocs[type.id] ?? false,
-                      onUploadTap: () => _handleUpload(type),
-                      onPreviewTap: uploadedMatch != null
-                          ? () => _handlePreview(uploadedMatch!)
-                          : null,
-                      onDeleteTap: () async {
-                         if (uploadedMatch != null) {
-                           setState(() => _uploadingDocs[type.id] = true);
-                           await ref.read(documentsRepositoryProvider).deleteDocument(uploadedMatch);
-                           ref.invalidate(documentsProvider);
-                           setState(() => _uploadingDocs[type.id] = false);
-                         }
-                      },
-                    );
-                  },
-                  childCount: DocumentConstants.requiredDocuments.length,
-                ),
+                  // Match uploaded doc safely
+                  AppDocument? uploadedMatch;
+                  for (final doc in uploadedDocs) {
+                    if (doc.name.contains('[${type.id}]') ||
+                        doc.filePath.contains('${type.id}-')) {
+                      uploadedMatch = doc;
+                      break;
+                    }
+                  }
+
+                  return DocumentSlot(
+                    index: index,
+                    type: type,
+                    uploadedDoc: uploadedMatch,
+                    isUploading: _uploadingDocs[type.id] ?? false,
+                    onUploadTap: () => _handleUpload(type),
+                    onPreviewTap: uploadedMatch != null
+                        ? () => _handlePreview(uploadedMatch!)
+                        : null,
+                    onDeleteTap: () async {
+                      if (uploadedMatch != null) {
+                        setState(() => _uploadingDocs[type.id] = true);
+                        await ref
+                            .read(documentsRepositoryProvider)
+                            .deleteDocument(uploadedMatch);
+                        ref.invalidate(documentsProvider);
+                        setState(() => _uploadingDocs[type.id] = false);
+                      }
+                    },
+                  );
+                }, childCount: DocumentConstants.requiredDocuments.length),
               ),
             );
           },
           loading: () => const SliverFillRemaining(
             child: Center(child: CircularProgressIndicator.adaptive()),
           ),
-          error: (err, stack) => SliverFillRemaining(
-            child: Center(child: Text('Error: \$err')),
-          ),
+          error: (err, stack) =>
+              SliverFillRemaining(child: Center(child: Text('Error: \$err'))),
         ),
-        
+
         const SliverPadding(padding: EdgeInsets.only(bottom: 60)),
       ],
     );

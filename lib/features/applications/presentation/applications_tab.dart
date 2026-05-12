@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../uni_db/presentation/widgets/home_recent_changes_banner.dart';
 import '../../uni_db/presentation/widgets/verified_deadlines_overlay.dart';
 import 'widgets/application_card.dart';
@@ -14,13 +15,14 @@ class ApplicationsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabStateAsync = ref.watch(applicationsTabProvider);
+    final l = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: const Text('My Applications'),
+            title: Text(l.applicationsTabTitle),
             floating: true,
             snap: true,
             actions: [
@@ -33,7 +35,7 @@ class ApplicationsTab extends ConsumerWidget {
               // hosts Sign out, Download my data, and Delete account.
               IconButton(
                 icon: const Icon(Icons.account_circle_outlined),
-                tooltip: 'Account',
+                tooltip: l.accountTooltip,
                 onPressed: () => context.push('/account'),
               ),
             ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../applications/presentation/applications_tab.dart';
 import '../../map/presentation/map_tab.dart';
 import '../../documents/presentation/documents_tab.dart';
@@ -58,7 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (_) => Container(
         height: MediaQuery.of(context).size.height * 0.9,
         decoration: const BoxDecoration(
-          color: Color(0xFF071221), 
+          color: Color(0xFF071221),
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: ClipRRect(
@@ -72,6 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(homeTabProvider);
+    final l = AppLocalizations.of(context)!;
     return HangukScaffold(
       body: _tabs[currentIndex],
       floatingActionButton: FloatingActionButton(
@@ -85,11 +87,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onTap: (index) {
           ref.read(homeTabProvider.notifier).setTab(index);
         },
-        items: const [
-          BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.school)),
-          BottomNavigationBarItem(label: 'Map', icon: Icon(Icons.map)),
-          BottomNavigationBarItem(label: 'Docs', icon: Icon(Icons.description)),
-          BottomNavigationBarItem(label: 'Training', icon: Icon(Icons.model_training_outlined)),
+        items: [
+          BottomNavigationBarItem(
+            label: l.navHome,
+            icon: const Icon(Icons.school),
+          ),
+          BottomNavigationBarItem(label: l.navMap, icon: const Icon(Icons.map)),
+          BottomNavigationBarItem(
+            label: l.navDocs,
+            icon: const Icon(Icons.description),
+          ),
+          BottomNavigationBarItem(
+            label: l.navTraining,
+            icon: const Icon(Icons.model_training_outlined),
+          ),
         ],
       ),
     );

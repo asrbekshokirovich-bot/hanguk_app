@@ -9,11 +9,10 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
-  String get trainingTabTitle => 'Training Center';
+  String get trainingTabTitle => '트레이닝 센터';
 
   @override
-  String get trainingTabSubtitle =>
-      'Prepare for your university applications with AI-guided training modules.';
+  String get trainingTabSubtitle => 'AI 가이드 트레이닝 모듈로 대학 지원을 준비하세요.';
 
   @override
   String get studyPlanCardTitle => 'Study Plan Builder';
@@ -117,4 +116,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get virtualWalkaroundTitle => '가상 워크어라운드';
+
+  @override
+  String get navHome => '홈';
+
+  @override
+  String get navMap => '지도';
+
+  @override
+  String get navDocs => '서류';
+
+  @override
+  String get navTraining => '트레이닝';
+
+  @override
+  String get applicationsTabTitle => '내 지원서';
+
+  @override
+  String get mapTabTitle => '대학교';
+
+  @override
+  String get documentsTabTitle => '내 서류';
+
+  @override
+  String get accountTooltip => '계정';
 }

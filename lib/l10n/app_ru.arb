@@ -36,5 +36,16 @@
   "walkaroundInitErrorTitle": "Street view couldn't start",
   "walkaroundInitErrorSubtitle": "Something went wrong starting the walkaround. Please try again.",
   "virtualTourTitle": "Virtual Tour",
-  "virtualWalkaroundTitle": "Virtual Walkaround"
+  "virtualWalkaroundTitle": "Virtual Walkaround",
+
+  "navHome": "Главная",
+  "navMap": "Карта",
+  "navDocs": "Документы",
+  "navTraining": "Подготовка",
+
+  "applicationsTabTitle": "Мои заявки",
+  "mapTabTitle": "Университеты",
+  "documentsTabTitle": "Мои документы",
+
+  "accountTooltip": "Аккаунт"
 }
