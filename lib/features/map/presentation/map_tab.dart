@@ -92,10 +92,10 @@ class _MapTabState extends ConsumerState<MapTab> {
     // showModalBottomSheet during the build phase.
     ref.listen<String?>(pendingMapDetailProvider, (prev, next) {
       if (next == null || next.isEmpty) return;
-      final unis = uniAsync.valueOrNull;
+      final unis = uniAsync.value;
       if (unis == null) return;
       final match = unis.where((u) => u.id == next).firstOrNull;
-      ref.read(pendingMapDetailProvider.notifier).state = null;
+      ref.read(pendingMapDetailProvider.notifier).set(null);
       if (match == null) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;

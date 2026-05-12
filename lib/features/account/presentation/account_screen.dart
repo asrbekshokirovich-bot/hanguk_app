@@ -153,7 +153,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authStateProvider).valueOrNull?.session?.user;
+    final user = ref.watch(authStateProvider).value?.session?.user;
     final email = user?.email;
     final phone = user?.phone;
 

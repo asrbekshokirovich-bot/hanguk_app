@@ -34,7 +34,7 @@ android {
     defaultConfig {
         applicationId = "com.hanguk.studentapp.hanguk_app"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 35  // Pinned: Play Store 2026 hard requirement
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
