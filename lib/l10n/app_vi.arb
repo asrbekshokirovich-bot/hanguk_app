@@ -47,5 +47,88 @@
   "mapTabTitle": "Trường đại học",
   "documentsTabTitle": "Tài liệu của tôi",
 
-  "accountTooltip": "Tài khoản"
+  "accountTooltip": "Tài khoản",
+
+  "ok": "OK",
+  "loadingLabel": "Loading...",
+
+  "accountBackTooltip": "Back",
+  "accountTitle": "Account",
+  "accountSignedInAs": "Signed in as",
+  "accountUnknownAccount": "(unknown account)",
+  "accountSessionLabel": "Session",
+  "accountSigningOut": "Signing out…",
+  "accountSignOut": "Sign out",
+  "accountYourDataLabel": "Your data",
+  "accountYourDataBody": "Download a JSON copy of everything Hanguk holds about your account — profile, applications, study plans, drafts, interview sessions and feedback.",
+  "accountPreparingExport": "Preparing export…",
+  "accountDownloadMyData": "Download my data",
+  "accountDangerZoneLabel": "Danger zone",
+  "accountDangerZoneBody": "Deleting your account is permanent. We will erase your profile, applications, study plans, personal-statement drafts, interview sessions, and transcripts. Documents in storage are removed within 30 days; backups age out within 90 days.",
+  "accountDeleteAccount": "Delete account",
+  "accountPrivacyPolicy": "Privacy Policy",
+  "accountTermsOfService": "Terms of Service",
+  "accountDeleteErrorTitle": "Could not delete account",
+  "accountDeleteErrorBody": "We hit an error while deleting your data:\n\n{error}\n\nPlease email privacy@hanguk.uz so we can finish the deletion for you.",
+  "@accountDeleteErrorBody": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "accountExportFailed": "Export failed: {error}",
+  "@accountExportFailed": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "accountDeleteDialogTitle": "Delete your account?",
+  "accountDeleteDialogBody": "This will permanently delete your account, applications, study plans, personal-statement drafts, interview sessions, and transcripts.\n\nType DELETE to confirm.",
+  "accountDeleteDialogConfirm": "Delete forever",
+  "accountDeleteProgress": "Deleting your account…",
+
+  "loginStudentPortal": "Student Portal",
+  "loginAccessCodeHelp": "Enter the 8-character access code (letters and numbers) provided by your consultant or university representative.",
+  "loginAccessCodeButton": "Login manually with Access Code",
+  "loginSwitchToPhone": "← I actually want to Log in via Phone Number",
+  "loginComingSoonTitle": "Coming Soon",
+  "loginComingSoonBody": "Public sign up and phone login are currently under maintenance as we upgrade our systems.\n\nStudents: Please use your Magic Access Code to log in for now.",
+  "loginSwitchToMagicCode": "Switch to Magic Code Login",
+  "loginErrorInvalidPhone": "Please enter a valid phone number (e.g. +12345678).",
+  "loginErrorPasswordTooShort": "Password must be at least 6 characters.",
+  "loginErrorInvalidCredentials": "Invalid phone number or password.",
+  "loginErrorInvalidAccessCode": "Please enter a valid access code (min 6 characters).",
+  "signUpErrorNameRequired": "Full Name is required.",
+  "signUpErrorPhoneRequired": "A valid phone number is required (e.g. +12345678).",
+  "signUpErrorPasswordMismatch": "Passwords do not match.",
+  "signUpSuccess": "Account created successfully! Please log in.",
+
+  "notifSettingsTitle": "Notification settings",
+  "notifSettingsEmptyTitle": "No tracked universities yet",
+  "notifSettingsEmptyBody": "Tap \"Track this institution\" on a university page to follow it. Notification preferences appear here once you have at least one tracked institution.",
+  "notifSettingsCalendar": "Calendar changes",
+  "notifSettingsCalendarDesc": "Deadline dates move",
+  "notifSettingsCorrection": "Correction notices",
+  "notifSettingsCorrectionDesc": "정정공고 published — highest priority",
+  "notifSettingsRequirement": "Requirement changes",
+  "notifSettingsRequirementDesc": "TOPIK / GPA / language test rules change",
+  "notifSettingsScholarship": "Scholarship updates",
+  "notifSettingsScholarshipDesc": "Off by default — high volume",
+  "notifSettingsLoadError": "Error: {error}",
+  "@notifSettingsLoadError": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "notifSettingsPushLanguage": "Push payload language: {lang}",
+  "@notifSettingsPushLanguage": {
+    "placeholders": {
+      "lang": { "type": "String" }
+    }
+  },
+  "notifSettingsUpdateError": "Could not update preference: {error}",
+  "@notifSettingsUpdateError": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  }
 }

@@ -1,6 +1,6 @@
 {
   "@@locale": "uz",
-  "@@x-translator-status": "TODO: translate. Most older strings still English seeds. 2026-05-12 i18n adoption pass: training tab + bottom-nav + tab titles translated.",
+  "@@x-translator-status": "TODO: translate. Most older strings still English seeds. 2026-05-12 i18n adoption pass: training tab + bottom-nav + tab titles translated. 2026-05-12 i18n phase 2: account + auth + notification settings translated.",
 
   "trainingTabTitle": "Tayyorgarlik markazi",
   "trainingTabSubtitle": "Universitet arizalaringizni sun'iy intellekt yordamida mashq qiling.",
@@ -47,5 +47,88 @@
   "mapTabTitle": "Universitetlar",
   "documentsTabTitle": "Hujjatlarim",
 
-  "accountTooltip": "Hisob"
+  "accountTooltip": "Hisob",
+
+  "ok": "OK",
+  "loadingLabel": "Yuklanmoqda...",
+
+  "accountBackTooltip": "Orqaga",
+  "accountTitle": "Hisob",
+  "accountSignedInAs": "Tizimga kirgan hisob",
+  "accountUnknownAccount": "(noma'lum hisob)",
+  "accountSessionLabel": "Sessiya",
+  "accountSigningOut": "Chiqilmoqda...",
+  "accountSignOut": "Tizimdan chiqish",
+  "accountYourDataLabel": "Sizning ma'lumotlaringiz",
+  "accountYourDataBody": "Hanguk saqlab turgan barcha hisob ma'lumotlaringizning — profil, arizalar, o'quv rejalari, qoralamalar, intervyu seanslari va izohlar — JSON nusxasini yuklab oling.",
+  "accountPreparingExport": "Eksport tayyorlanmoqda...",
+  "accountDownloadMyData": "Ma'lumotlarimni yuklab olish",
+  "accountDangerZoneLabel": "Xavfli zona",
+  "accountDangerZoneBody": "Hisobni o'chirish qaytarib bo'lmaydigan amaldir. Profilingiz, arizalaringiz, o'quv rejalaringiz, motivatsion xat qoralamalari, intervyu seanslari va yozuvlaringiz butunlay o'chiriladi. Saqlangan hujjatlar 30 kun ichida, zaxira nusxalari esa 90 kun ichida muddati tugaydi.",
+  "accountDeleteAccount": "Hisobni o'chirish",
+  "accountPrivacyPolicy": "Maxfiylik siyosati",
+  "accountTermsOfService": "Foydalanish shartlari",
+  "accountDeleteErrorTitle": "Hisob o'chirilmadi",
+  "accountDeleteErrorBody": "Ma'lumotlaringizni o'chirishda xatolik yuz berdi:\n\n{error}\n\nO'chirishni yakunlay olishimiz uchun privacy@hanguk.uz manziliga email yuboring.",
+  "@accountDeleteErrorBody": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "accountExportFailed": "Eksport amalga oshmadi: {error}",
+  "@accountExportFailed": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "accountDeleteDialogTitle": "Hisobingizni o'chirib tashlaysizmi?",
+  "accountDeleteDialogBody": "Bu hisobingizni, arizalaringizni, o'quv rejalaringizni, motivatsion xat qoralamalarini, intervyu seanslari va yozuvlarini butunlay o'chirib tashlaydi.\n\nTasdiqlash uchun DELETE deb yozing.",
+  "accountDeleteDialogConfirm": "Butunlay o'chirish",
+  "accountDeleteProgress": "Hisob o'chirilmoqda...",
+
+  "loginStudentPortal": "Talaba portali",
+  "loginAccessCodeHelp": "Konsultantingiz yoki universitet vakili bergan 8 belgili kirish kodini (harflar va raqamlar) kiriting.",
+  "loginAccessCodeButton": "Kirish kodi orqali kirish",
+  "loginSwitchToPhone": "← Telefon raqami orqali kirmoqchiman",
+  "loginComingSoonTitle": "Tez orada",
+  "loginComingSoonBody": "Tizimlarimiz yangilanayotgani sababli ommaviy ro'yxatdan o'tish va telefon orqali kirish vaqtincha to'xtatildi.\n\nTalabalar: hozircha sehrli kirish kodingiz bilan tizimga kiring.",
+  "loginSwitchToMagicCode": "Sehrli kod orqali kirishga o'tish",
+  "loginErrorInvalidPhone": "Iltimos, to'g'ri telefon raqamini kiriting (masalan, +12345678).",
+  "loginErrorPasswordTooShort": "Parol kamida 6 ta belgidan iborat bo'lishi kerak.",
+  "loginErrorInvalidCredentials": "Telefon raqami yoki parol noto'g'ri.",
+  "loginErrorInvalidAccessCode": "Iltimos, to'g'ri kirish kodini kiriting (kamida 6 belgi).",
+  "signUpErrorNameRequired": "To'liq ismni kiritish shart.",
+  "signUpErrorPhoneRequired": "To'g'ri telefon raqami kerak (masalan, +12345678).",
+  "signUpErrorPasswordMismatch": "Parollar mos kelmadi.",
+  "signUpSuccess": "Hisob yaratildi! Iltimos, tizimga kiring.",
+
+  "notifSettingsTitle": "Bildirishnoma sozlamalari",
+  "notifSettingsEmptyTitle": "Hali kuzatilayotgan universitet yo'q",
+  "notifSettingsEmptyBody": "Universitet sahifasida \"Bu muassasani kuzatish\"ni bosib obuna bo'ling. Kamida bitta kuzatuv qo'shilgach, bildirishnoma sozlamalari shu yerda paydo bo'ladi.",
+  "notifSettingsCalendar": "Taqvim o'zgarishlari",
+  "notifSettingsCalendarDesc": "Muddat sanalari o'zgarsa",
+  "notifSettingsCorrection": "Tuzatish e'lonlari",
+  "notifSettingsCorrectionDesc": "정정공고 e'lon qilindi — eng yuqori ustuvorlik",
+  "notifSettingsRequirement": "Talab o'zgarishlari",
+  "notifSettingsRequirementDesc": "TOPIK / GPA / til imtihoni qoidalari o'zgarsa",
+  "notifSettingsScholarship": "Stipendiya yangiliklari",
+  "notifSettingsScholarshipDesc": "Standart bo'yicha o'chirilgan — ko'p bildirishnoma keladi",
+  "notifSettingsLoadError": "Xato: {error}",
+  "@notifSettingsLoadError": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "notifSettingsPushLanguage": "Push bildirishnoma tili: {lang}",
+  "@notifSettingsPushLanguage": {
+    "placeholders": {
+      "lang": { "type": "String" }
+    }
+  },
+  "notifSettingsUpdateError": "Sozlamani yangilab bo'lmadi: {error}",
+  "@notifSettingsUpdateError": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  }
 }
