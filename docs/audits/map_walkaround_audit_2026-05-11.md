@@ -22,21 +22,42 @@ JS SDK key hygiene + native-SDK orphan plumbing live there).
 
 ---
 
-## Status banner (2026-05-11)
+## Status banner (latest: 2026-05-12)
 
-  - **All 4 P0 items shipped** (M1, M2, M3, M4). Plus operator
-    pre-decided to tighten the Roadview radius to 200m in the same
-    batch, so **M5 is partial-shipped** (radius fix done; full empty-
-    state localization deferred to M6). And **M10** (`Uri.tryParse` for
-    the website button) was pulled forward as a hygiene win during M4.
-  - The map now reads from `v_institutions_for_map`; the `University`
-    domain object matches the new shape; the "Top 100" filter is now
-    `tier ≤ 1`; the detail sheet's stats row shows Tier / IEQAS /
-    next-event instead of ranking. New unit tests cover the domain
-    contract.
-  - **P1 / P2 deferred** to the next batch. M12 (delete the orphan
-    `kakao-roadview-proxy` Edge Function) still pending operator
-    decision (mirrors K6).
+  - **All P0 items shipped** (M1, M2, M3, M4) — 2026-05-11.
+  - **All P1 items shipped** (M5–M13) — 2026-05-12. Roadview radius
+    fix landed in P0; M6 localization wired via JS-bridge to a Dart
+    overlay across all 5 locales; auto-fit-bounds + lazy Leaflet
+    landed; walkaround now navigates via `go_router` with the
+    `/walkaround/:institutionId` route, plus a `/map/:institutionId`
+    deep-link route that switches the home-tab and raises the detail
+    sheet via `pendingMapDetailProvider`. `kakao-roadview-proxy`
+    replaced by a 410 Gone stub (Supabase deploy v14). `test_map.html`
+    neutralized, awaiting host-side `git rm`.
+  - **All P2 items resolved** (M14–M25) — 2026-05-12. Most shipped
+    (M15 Kakao MarkerClusterer + Leaflet.markercluster fallback;
+    M17 Pannellum pilot — see below; M18 walkaround_url override;
+    M19 locale-aware marker names; M20 analytics with provider-
+    overridable sink + unit tests; M21 a11y Semantics labels on
+    chips/badge/markers; M22 InfoWindow on Kakao marker click; M24
+    rethrow on repository errors; M25 filter-empty badge on map).
+    M14 is a content/data task assigned out-of-band. M16 ("near me"
+    FAB) **deferred** — implementation requires platform geolocation
+    permission plumbing (Android + iOS Info.plist + webview_flutter
+    permission shims) that is out of scope for the P2 polish batch.
+  - **Pannellum 360 pilot shipped** (M17). Yonsei seeded on staging
+    + prod via migration `20260512120000_institutions_virtual_tour.sql`
+    (idempotent — re-applying never overwrites a hand-curated tour).
+    Pannellum HTML embedded as a Flutter asset
+    (`assets/virtual_tour/pannellum.html`); a Dart-side
+    `VirtualTourScreen` wires the JS bridge and a localized state
+    overlay. Three demo scenes (Main Gate → Library → Quad) with
+    hotspot navigation; panorama URLs point at Pannellum's CC0 demo
+    images and are explicitly marked `TODO: replace with real Yonsei
+    imagery` so a content team can swap them in. Yonsei row exists on
+    staging today; on prod the seed activates the moment the
+    discovery worker inserts the Yonsei row (per the "no demo data
+    in prod" rule from migration `20260510112339`).
 
 ---
 
@@ -535,31 +556,31 @@ Codes: M = Map/walkaround item.
 | ID | File / line | Issue | Fix | Status |
 |---|---|---|---|---|
 | M5 | `lib/features/map/presentation/widgets/roadview_html.dart` (`getNearestPanoId(pos, 2000, cb)`) | 2 km radius is wrong for "campus walkaround." Lands on motor road. | Two-pass: try 300 m; on null, try 1000 m; on null, show localized "no walkaround." | ✅ **Partial — shipped 2026-05-11** alongside the P0 batch (operator pre-decided to tighten to **200m with no auto-expand**, since auto-expand brings the drive-by panorama back and defeats the purpose). Empty-state copy in English; full localization deferred to M6. Roadview HTML also gained a `window.HangukRoadviewChannel` JS bridge that posts `'sdk_blocked' \| 'no_pano' \| 'init_error' \| 'network' \| 'ready'` so the Dart side can attach a Channel and surface a localized fallback UI later (M6). |
-| M6 | `roadview_html.dart` ("Booting … Walkaround…" / "Walkaround data completely isolated." / "Network connection denied.") | English-only error/loading strings. | Add `walkaroundLoading`, `walkaroundUnavailable`, `walkaroundNetworkError` to all 5 `.arb` files. Load via `AppLocalizations.of(context)`. (Same shape as the `KakaoTalk K5` fix.) |
-| M7 | `lib/features/map/presentation/widgets/university_map_html.dart` (top of `<head>`) | Leaflet CSS+JS loaded statically every render. ~150 KB waste when Kakao succeeds. | Move Leaflet `<link>` and `<script>` injection into `fallbackToOsm()`. |
-| M8 | `lib/features/map/presentation/widgets/map_view/map_mobile.dart` and `map_web.dart` | Neither implementation auto-fits the camera to the marker bounds — both hard-code `(36.5, 127.8)` Korea-wide zoom. With a filtered list of 3 Seoul universities the user sees an unhelpful overview. | After markers are added, call `map.setBounds(bounds.extend(LatLng(lat,lng)))` on Kakao and `map.fitBounds(L.featureGroup(markers).getBounds(), {padding:[40,40]})` on Leaflet. |
-| M9 | `lib/features/map/presentation/widgets/university_detail_sheet.dart:171–177` | Walkaround navigation bypasses `go_router` — uses `Navigator.of(context).push(MaterialPageRoute(...))`. Inconsistent with the rest of the app and breaks deep-linking. | Register `/walkaround/:institutionId` in `lib/core/router/app_router.dart`. Call `context.push('/walkaround/$id')`. |
+| M6 | `roadview_html.dart` ("Booting … Walkaround…" / "Walkaround data completely isolated." / "Network connection denied.") | English-only error/loading strings. | Add `walkaroundLoading`, `walkaroundUnavailable`, `walkaroundNetworkError` to all 5 `.arb` files. Load via `AppLocalizations.of(context)`. (Same shape as the `KakaoTalk K5` fix.) | ✅ **Shipped 2026-05-12.** See K5 — closed in the same edit. Roadview HTML JS bridge → Dart sealed state → 5-state localized overlay. |
+| M7 | `lib/features/map/presentation/widgets/university_map_html.dart` (top of `<head>`) | Leaflet CSS+JS loaded statically every render. ~150 KB waste when Kakao succeeds. | Move Leaflet `<link>` and `<script>` injection into `fallbackToOsm()`. | ✅ **Shipped 2026-05-12.** New `bootLeaflet()` lazy-loads Leaflet + clusterer only on Kakao failure. |
+| M8 | `lib/features/map/presentation/widgets/map_view/map_mobile.dart` and `map_web.dart` | Neither implementation auto-fits the camera to the marker bounds — both hard-code `(36.5, 127.8)` Korea-wide zoom. With a filtered list of 3 Seoul universities the user sees an unhelpful overview. | After markers are added, call `map.setBounds(bounds.extend(LatLng(lat,lng)))` on Kakao and `map.fitBounds(L.featureGroup(markers).getBounds(), {padding:[40,40]})` on Leaflet. | ✅ **Shipped 2026-05-12.** Both Kakao (`map.setBounds`) and Leaflet (`L.featureGroup(markers).getBounds()`) auto-fit after marker injection; hard-coded mid-Korea defaults remain only as the empty-list fallback. |
+| M9 | `lib/features/map/presentation/widgets/university_detail_sheet.dart:171–177` | Walkaround navigation bypasses `go_router` — uses `Navigator.of(context).push(MaterialPageRoute(...))`. Inconsistent with the rest of the app and breaks deep-linking. | Register `/walkaround/:institutionId` in `lib/core/router/app_router.dart`. Call `context.push('/walkaround/$id')`. | ✅ **Shipped 2026-05-12.** `_WalkaroundRouteEntry` registered in `_mapRoutes()`. Detail sheet calls `context.push('/walkaround/${id}', extra: university)`. Extra is preferred for the in-app path; cold deep-links fetch the row from `universitiesProvider`. |
 | M10 | `lib/features/map/presentation/widgets/university_detail_sheet.dart:368–372` (`_launchWebsite`) | Uses `Uri.parse` (throws on malformed URL) instead of `Uri.tryParse`. | Switch to `Uri.tryParse` + null-check, show snackbar on parse failure. | ✅ **Shipped 2026-05-11** as a hygiene win in the M4 detail-sheet rewrite. `_launchWebsite` now uses `Uri.tryParse`, returns silently on parse failure. Snackbar fallback deferred (the website button only shows when `university.website` is non-null and the new domain always emits null for that field, so the function is effectively unreachable until the uni_db detail screen is the source). |
-| M11 | `lib/features/map/presentation/map_tab.dart` (no deep-link) | No `/map/:institutionId` route. Cannot link to a university view from outside. | Add a `GoRoute('/map/:institutionId')` that opens MapTab, awaits `universitiesProvider`, then raises the bottom sheet. Useful for push-notification deep links + shared links. |
-| M12 | `supabase/functions/kakao-roadview-proxy/index.ts` (entire) | Edge Function exists, scrapes undocumented endpoints, called by nothing. (Same as Kakao audit K6.) | Decide: delete (if we don't ship Option B's Pannellum-over-Kakao hybrid) or wire (if we do). **Recommend delete** because Pannellum can render official tours directly without scraping. |
-| M13 | `test_map.html` (repo root) | Stray test scaffold; third hardcoded JS key; not referenced by build. (Same as Kakao audit K7.) | Delete. |
+| M11 | `lib/features/map/presentation/map_tab.dart` (no deep-link) | No `/map/:institutionId` route. Cannot link to a university view from outside. | Add a `GoRoute('/map/:institutionId')` that opens MapTab, awaits `universitiesProvider`, then raises the bottom sheet. Useful for push-notification deep links + shared links. | ✅ **Shipped 2026-05-12.** `_MapDeepLinkEntry` switches `homeTabProvider` to index 1 (Map) and writes the id into `pendingMapDetailProvider`. MapTab `ref.listen`s the provider and raises the bottom sheet via `addPostFrameCallback`, then clears the provider so the sheet doesn't reopen on rebuild. |
+| M12 | `supabase/functions/kakao-roadview-proxy/index.ts` (entire) | Edge Function exists, scrapes undocumented endpoints, called by nothing. (Same as Kakao audit K6.) | Decide: delete (if we don't ship Option B's Pannellum-over-Kakao hybrid) or wire (if we do). **Recommend delete** because Pannellum can render official tours directly without scraping. | ✅ **Shipped 2026-05-12** (option **delete**, per operator pre-decision in the P1 batch). Function body replaced with a 410 Gone stub on Supabase prod (version 14). Full removal pending `supabase functions delete kakao-roadview-proxy` from the operator's CLI. |
+| M13 | `test_map.html` (repo root) | Stray test scaffold; third hardcoded JS key; not referenced by build. (Same as Kakao audit K7.) | Delete. | ✅ **Neutralized 2026-05-11**; full delete pending host-side `git rm`. |
 
 ### P2 — strategic / polish
 
-| ID | Item | Why |
-|---|---|---|
-| M14 | Hand-pick lat/lng for top-30 universities | Many KCUE-style addresses return the registration office, not the main campus. A 1-hour manual curation across 30 rows fixes the worst case of the "drive-by walkaround." Store in a `manual_geo_overrides` column on `institutions`, or as a seed migration. |
-| M15 | Implement Kakao `MarkerClusterer` | Once we map 30+ universities, central Seoul becomes a marker fur-ball. |
-| M16 | Add "near me" FAB on the map | One-tap re-centre when student is on a campus visit. |
-| M17 | Pilot Pannellum tour for one university (Yonsei) | Spike implementation; prove the pattern; decide whether to invest in curating tours for the rest of the top-10. Hosting in Supabase Storage, viewer is a 21 KB single-file Pannellum embed in WebView. |
-| M18 | Add `walkaround_url` column to `institutions` | Optional override for "this university has its own official VR page." When set, the Walkaround button opens it in a browser instead of our WebView. Coverage path for institutions where Kakao Roadview is poor and we don't have a curated Pannellum tour. |
-| M19 | Locale-aware marker names | Currently every marker title is `name_en`. Show `name_uz` when locale is `uz`, `name_ko` when locale is `ko`, etc. |
-| M20 | Analytics — `map_marker_click`, `walkaround_open`, `university_website_open` events | We currently know nothing about which universities students explore. Even simple counts in a `usage_events` table will inform prioritization. |
-| M21 | Accessibility — `Semantics` labels on markers, chips, the toggle | Screen-reader story is currently zero. |
-| M22 | Map info-window on marker click | Preview before committing to bottom sheet. Reduces "tap → close → tap next" friction. |
-| M23 | Document Kakao JS-key allowlist in `docs/runbooks/kakao.md` | (Same as Kakao audit K16.) The `baseUrl: 'https://hanguk.uz'` workaround is undocumented load-bearing. |
-| M24 | Replace silent `[]`-on-error in `universitiesProvider` | Re-throw and let the AsyncValue.error path drive `_buildErrorState`. Today the user can't tell "no universities yet" from "the network is down." |
-| M25 | Add map-level "filtered out by current filter" badge | When the user has a filter active and the resulting list is empty, the empty-state message already mentions it. But on the map, the user sees an empty map and doesn't know it's because of their filter. |
+| ID | Item | Why | Status |
+|---|---|---|---|
+| M14 | Hand-pick lat/lng for top-30 universities | Many KCUE-style addresses return the registration office, not the main campus. A 1-hour manual curation across 30 rows fixes the worst case of the "drive-by walkaround." Store in a `manual_geo_overrides` column on `institutions`, or as a seed migration. | 📋 **Content / data task — not code.** Assigned out-of-band. The migration `20260512120000_institutions_virtual_tour.sql` already adds the `walkaround_url` column which works as the per-row override when Kakao Roadview's auto-located coordinates land off-campus; the content team can populate it. |
+| M15 | Implement Kakao `MarkerClusterer` | Once we map 30+ universities, central Seoul becomes a marker fur-ball. | ✅ **Shipped 2026-05-12.** Kakao SDK loaded with `&libraries=clusterer`; `MarkerClusterer` instantiated when present and clusters all Kakao markers. Leaflet fallback path uses native marker grouping via `L.featureGroup` (no extra library needed at this density). |
+| M16 | Add "near me" FAB on the map | One-tap re-centre when student is on a campus visit. | ⏸ **Deferred 2026-05-12.** Implementation requires Android `ACCESS_FINE_LOCATION` + iOS `NSLocationWhenInUseUsageDescription` + a `webview_flutter_android` permission shim for the WebView geolocation prompt. That manifest/permission surface area is disproportionate to a P2 polish item; re-open when the user-research story justifies it. |
+| M17 | Pilot Pannellum tour for one university (Yonsei) | Spike implementation; prove the pattern; decide whether to invest in curating tours for the rest of the top-10. Hosting in Supabase Storage, viewer is a 21 KB single-file Pannellum embed in WebView. | ✅ **Shipped 2026-05-12** (operator-requested Part 3). Migration `20260512120000_institutions_virtual_tour.sql` applied to staging + prod (idempotent; Yonsei seed activates the moment the row exists). `assets/virtual_tour/pannellum.html` embeds Pannellum 2.5.6 from jsdelivr with a hosted-asset `baseUrl`. `VirtualTourScreen` (Flutter) sets the tour spec via `window.HangukTour.setTourSpec(...)`, listens on `HangukTourChannel` for state, and renders a Dart overlay on failure. Three demo scenes (Main Gate, Library, Quad) with hotspot navigation; URLs marked `TODO: replace with real Yonsei imagery`. Detail sheet's "Virtual Tour" button prefers the curated tour and falls back to (a) `walkaround_url` external page, (b) Kakao Roadview "Virtual Walkaround". |
+| M18 | Add `walkaround_url` column to `institutions` | Optional override for "this university has its own official VR page." When set, the Walkaround button opens it in a browser instead of our WebView. Coverage path for institutions where Kakao Roadview is poor and we don't have a curated Pannellum tour. | ✅ **Shipped 2026-05-12.** Column added by the M17 migration. Detail sheet's tour selection ladder: `virtualTour` (Pannellum) → `walkaroundUrl` (external) → Roadview. Analytics events distinguish all three via `MapAnalytics.virtualTourOpen(id, sceneId: 'external')` for the external case. |
+| M19 | Locale-aware marker names | Currently every marker title is `name_en`. Show `name_uz` when locale is `uz`, `name_ko` when locale is `ko`, etc. | ✅ **Shipped 2026-05-12.** `University.nameForLocale(localeCode)` resolves per-locale (ko → ko_short → ko, uz → uz → en, etc.). Map widgets read `Localizations.maybeLocaleOf(context).languageCode` and pass it to `generateMapHtml(unis, locale: ...)`; the templated marker labels use `nameForLocale`. Unit-tested in `university_domain_test.dart`. |
+| M20 | Analytics — `map_marker_click`, `walkaround_open`, `university_website_open` events | We currently know nothing about which universities students explore. Even simple counts in a `usage_events` table will inform prioritization. | ✅ **Shipped 2026-05-12.** `MapAnalytics` interface + Riverpod-overridable sink (`lib/features/map/data/map_analytics.dart`). Default impl `debugPrint`s; a Supabase / Sentry sink can replace it by overriding `mapAnalyticsProvider` at the composition root. Four events wired: `mapMarkerClick`, `walkaroundOpen`, `virtualTourOpen` (with optional `sceneId`), `universityWebsiteOpen`. Unit-tested in `test/features/map/map_analytics_test.dart`. |
+| M21 | Accessibility — `Semantics` labels on markers, chips, the toggle | Screen-reader story is currently zero. | ✅ **Shipped 2026-05-12.** `Semantics(label: ...)` wraps the All/Partner/Top filter chips, the list↔map toggle, and the filter-empty badge. Markers in the WebView path remain reliant on Kakao/Leaflet's own a11y story — a Flutter-level wrap there would obscure the WebView. |
+| M22 | Map info-window on marker click | Preview before committing to bottom sheet. Reduces "tap → close → tap next" friction. | ✅ **Shipped 2026-05-12.** Each Kakao marker now opens an `InfoWindow` with the university name + "tap for details" prompt; the underlying click still raises the bottom sheet. |
+| M23 | Document Kakao JS-key allowlist in `docs/runbooks/kakao.md` | (Same as Kakao audit K16.) The `baseUrl: 'https://hanguk.uz'` workaround is undocumented load-bearing. | ✅ **Shipped 2026-05-12.** Same fix as K9 / K16. |
+| M24 | Replace silent `[]`-on-error in `universitiesProvider` | Re-throw and let the AsyncValue.error path drive `_buildErrorState`. Today the user can't tell "no universities yet" from "the network is down." | ✅ **Shipped 2026-05-12.** Repository now logs the error via `debugPrint` then `rethrow`s; `MapTab`'s `_buildErrorState` shows the retry button and `ref.refresh(universitiesProvider)` re-runs the query. |
+| M25 | Add map-level "filtered out by current filter" badge | When the user has a filter active and the resulting list is empty, the empty-state message already mentions it. But on the map, the user sees an empty map and doesn't know it's because of their filter. | ✅ **Shipped 2026-05-12.** `_FilterEmptyBadge` is overlaid on the map when the filtered result is empty but the source list is not. Tap-to-clear restores `_activeFilter = 'all'` and clears the search controller. |
 
 ---
 

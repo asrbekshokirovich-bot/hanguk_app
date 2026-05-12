@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../design_system/theme/app_colors.dart';
+import '../../data/map_analytics.dart';
 import '../../domain/university.dart';
 import 'virtual_tour_screen.dart';
 
-class UniversityDetailSheet extends StatelessWidget {
+class UniversityDetailSheet extends ConsumerWidget {
   final University university;
 
   const UniversityDetailSheet({super.key, required this.university});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Audit M20 (2026-05-12): cache the analytics sink up-front so
+    // every action callback gets the same instance and doesn't
+    // re-read on rebuild.
+    final analytics = ref.read(mapAnalyticsProvider);
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.4,
@@ -150,14 +156,17 @@ class UniversityDetailSheet extends StatelessWidget {
                           child: SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
-                              onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => VirtualTourScreen(
-                                    institutionName: university.name,
-                                    tourSpec: university.virtualTour!,
+                              onPressed: () {
+                                analytics.virtualTourOpen(university.id);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => VirtualTourScreen(
+                                      institutionName: university.name,
+                                      tourSpec: university.virtualTour!,
+                                    ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                               icon: const Icon(
                                 Icons.threesixty,
                                 size: 18,
@@ -188,8 +197,13 @@ class UniversityDetailSheet extends StatelessWidget {
                           child: SizedBox(
                             width: double.infinity,
                             child: OutlinedButton.icon(
-                              onPressed: () =>
-                                  _launchWebsite(university.walkaroundUrl!),
+                              onPressed: () {
+                                analytics.virtualTourOpen(
+                                  university.id,
+                                  sceneId: 'external',
+                                );
+                                _launchWebsite(university.walkaroundUrl!);
+                              },
                               icon: const Icon(
                                 Icons.open_in_new_rounded,
                                 size: 18,
@@ -228,6 +242,7 @@ class UniversityDetailSheet extends StatelessWidget {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () {
+                                analytics.walkaroundOpen(university.id);
                                 context.push(
                                   '/walkaround/${university.id}',
                                   extra: university,
@@ -255,7 +270,13 @@ class UniversityDetailSheet extends StatelessWidget {
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
-                            onPressed: () => _launchWebsite(university.website!),
+                            onPressed: () {
+                              analytics.universityWebsiteOpen(
+                                university.id,
+                                university.website!,
+                              );
+                              _launchWebsite(university.website!);
+                            },
                             icon: const Icon(
                               Icons.open_in_browser_rounded,
                               size: 18,
