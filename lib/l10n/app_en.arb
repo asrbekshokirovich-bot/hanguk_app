@@ -74,5 +74,192 @@
   "@documentsTabTitle": { "description": "AppBar title for the Documents tab." },
 
   "accountTooltip": "Account",
-  "@accountTooltip": { "description": "Tooltip for the account icon button in the Applications AppBar — opens the AccountScreen with sign-out, data export, and delete account." }
+  "@accountTooltip": { "description": "Tooltip for the account icon button in the Applications AppBar — opens the AccountScreen with sign-out, data export, and delete account." },
+
+  "ok": "OK",
+  "@ok": { "description": "Generic confirm/dismiss button used in alert dialogs." },
+
+  "loadingLabel": "Loading...",
+  "@loadingLabel": { "description": "Neutral 'Loading...' label used by spinner placeholder views." },
+
+  "accountBackTooltip": "Back",
+  "@accountBackTooltip": { "description": "Tooltip on the back arrow at the top of the AccountScreen." },
+
+  "accountTitle": "Account",
+  "@accountTitle": { "description": "Header shown next to the back arrow at the top of the AccountScreen. Same lemma as accountTooltip but kept separate so translators can differ between a 'header' and a 'tooltip' if their language calls for it." },
+
+  "accountSignedInAs": "Signed in as",
+  "@accountSignedInAs": { "description": "Label above the email/phone of the currently logged-in user on the AccountScreen." },
+
+  "accountUnknownAccount": "(unknown account)",
+  "@accountUnknownAccount": { "description": "Fallback shown when neither email nor phone is available for the current Supabase user." },
+
+  "accountSessionLabel": "Session",
+  "@accountSessionLabel": { "description": "Section header for the sign-out card on the AccountScreen." },
+
+  "accountSigningOut": "Signing out…",
+  "@accountSigningOut": { "description": "Label on the sign-out button while the sign-out call is in flight." },
+
+  "accountSignOut": "Sign out",
+  "@accountSignOut": { "description": "Idle label on the sign-out button." },
+
+  "accountYourDataLabel": "Your data",
+  "@accountYourDataLabel": { "description": "Section header for the data-export card on the AccountScreen (PIPA + GDPR right to data portability)." },
+
+  "accountYourDataBody": "Download a JSON copy of everything Hanguk holds about your account — profile, applications, study plans, drafts, interview sessions and feedback.",
+  "@accountYourDataBody": { "description": "Body copy under the 'Your data' header, explaining what the JSON export contains." },
+
+  "accountPreparingExport": "Preparing export…",
+  "@accountPreparingExport": { "description": "Label on the export-data button while the export-my-data Edge Function call is in flight." },
+
+  "accountDownloadMyData": "Download my data",
+  "@accountDownloadMyData": { "description": "Idle label on the data-export button." },
+
+  "accountDangerZoneLabel": "Danger zone",
+  "@accountDangerZoneLabel": { "description": "Section header for the delete-account card on the AccountScreen. Red." },
+
+  "accountDangerZoneBody": "Deleting your account is permanent. We will erase your profile, applications, study plans, personal-statement drafts, interview sessions, and transcripts. Documents in storage are removed within 30 days; backups age out within 90 days.",
+  "@accountDangerZoneBody": { "description": "Body copy under the 'Danger zone' header, enumerating exactly what gets deleted and the storage/backup retention windows. Same retention numbers appear in the privacy policy — keep them in sync if the policy is updated." },
+
+  "accountDeleteAccount": "Delete account",
+  "@accountDeleteAccount": { "description": "Label on the red 'Delete account' button that opens the confirmation dialog." },
+
+  "accountPrivacyPolicy": "Privacy Policy",
+  "@accountPrivacyPolicy": { "description": "Legal footer link on the AccountScreen — opens the privacy policy in the system browser." },
+
+  "accountTermsOfService": "Terms of Service",
+  "@accountTermsOfService": { "description": "Legal footer link on the AccountScreen — opens the terms of service in the system browser." },
+
+  "accountDeleteErrorTitle": "Could not delete account",
+  "@accountDeleteErrorTitle": { "description": "Title of the AlertDialog shown when fn_delete_my_account RPC throws." },
+
+  "accountDeleteErrorBody": "We hit an error while deleting your data:\n\n{error}\n\nPlease email privacy@hanguk.uz so we can finish the deletion for you.",
+  "@accountDeleteErrorBody": {
+    "description": "Body of the AlertDialog shown when fn_delete_my_account RPC throws. Embeds the server error message verbatim so we can debug. Falls back to manual email so the user retains their PIPA/GDPR right to erasure.",
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+
+  "accountExportFailed": "Export failed: {error}",
+  "@accountExportFailed": {
+    "description": "SnackBar message shown when the export-my-data Edge Function fails. The error is the FunctionException.details or Exception.toString().",
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+
+  "accountDeleteDialogTitle": "Delete your account?",
+  "@accountDeleteDialogTitle": { "description": "Title of the 'type DELETE to confirm' dialog." },
+
+  "accountDeleteDialogBody": "This will permanently delete your account, applications, study plans, personal-statement drafts, interview sessions, and transcripts.\n\nType DELETE to confirm.",
+  "@accountDeleteDialogBody": { "description": "Body of the 'type DELETE to confirm' dialog. NOTE: the literal word 'DELETE' that the user must type is intentionally left in English in all locales — the TextField controller compares against the uppercase literal 'DELETE'. Translators: leave 'DELETE' as-is and adapt only the surrounding sentence." },
+
+  "accountDeleteDialogConfirm": "Delete forever",
+  "@accountDeleteDialogConfirm": { "description": "Label on the red confirm button at the bottom of the 'type DELETE to confirm' dialog." },
+
+  "accountDeleteProgress": "Deleting your account…",
+  "@accountDeleteProgress": { "description": "Status text shown next to the spinner in the non-dismissible deletion progress dialog." },
+
+  "loginStudentPortal": "Student Portal",
+  "@loginStudentPortal": { "description": "Subtitle under the 'Hanguk' wordmark on the LoginScreen card." },
+
+  "loginAccessCodeHelp": "Enter the 8-character access code (letters and numbers) provided by your consultant or university representative.",
+  "@loginAccessCodeHelp": { "description": "Help text above the magic-code TextField on the LoginScreen. Explains where the code comes from." },
+
+  "loginAccessCodeButton": "Login manually with Access Code",
+  "@loginAccessCodeButton": { "description": "Label on the primary sign-in button in magic-code mode." },
+
+  "loginSwitchToPhone": "← I actually want to Log in via Phone Number",
+  "@loginSwitchToPhone": { "description": "Fallback TextButton under the magic-code form that returns to the phone-login UI. Translators: keep the leading arrow." },
+
+  "loginComingSoonTitle": "Coming Soon",
+  "@loginComingSoonTitle": { "description": "Title of the 'maintenance' card shown on the LoginScreen while public phone sign-up is disabled." },
+
+  "loginComingSoonBody": "Public sign up and phone login are currently under maintenance as we upgrade our systems.\n\nStudents: Please use your Magic Access Code to log in for now.",
+  "@loginComingSoonBody": { "description": "Body of the 'maintenance' card. Explains that public sign-up is temporarily disabled and points students at the magic-code flow." },
+
+  "loginSwitchToMagicCode": "Switch to Magic Code Login",
+  "@loginSwitchToMagicCode": { "description": "TextButton inside the 'Coming Soon' card that flips the LoginScreen into magic-code mode." },
+
+  "loginErrorInvalidPhone": "Please enter a valid phone number (e.g. +12345678).",
+  "@loginErrorInvalidPhone": { "description": "Validation error when the phone number on the Sign In tab is empty or too short." },
+
+  "loginErrorPasswordTooShort": "Password must be at least 6 characters.",
+  "@loginErrorPasswordTooShort": { "description": "Validation error when the password is shorter than 6 chars (used on both Sign In and Sign Up)." },
+
+  "loginErrorInvalidCredentials": "Invalid phone number or password.",
+  "@loginErrorInvalidCredentials": { "description": "Error shown after the Supabase signInWithPhone call rejects the credentials. Intentionally vague — does not reveal whether the phone or password was the problem." },
+
+  "loginErrorInvalidAccessCode": "Please enter a valid access code (min 6 characters).",
+  "@loginErrorInvalidAccessCode": { "description": "Validation error when the magic-code TextField is shorter than 6 chars before submission." },
+
+  "signUpErrorNameRequired": "Full Name is required.",
+  "@signUpErrorNameRequired": { "description": "Validation error on the Sign Up tab when the name field is empty." },
+
+  "signUpErrorPhoneRequired": "A valid phone number is required (e.g. +12345678).",
+  "@signUpErrorPhoneRequired": { "description": "Validation error on the Sign Up tab when the phone field is empty or too short." },
+
+  "signUpErrorPasswordMismatch": "Passwords do not match.",
+  "@signUpErrorPasswordMismatch": { "description": "Validation error on the Sign Up tab when password and confirm-password differ." },
+
+  "signUpSuccess": "Account created successfully! Please log in.",
+  "@signUpSuccess": { "description": "Success banner shown on the LoginScreen after Sign Up succeeds; the tab controller then animates back to the Sign In tab." },
+
+  "notifSettingsTitle": "Notification settings",
+  "@notifSettingsTitle": { "description": "AppBar title for the /notifications/settings screen (per-tracked-university push-notification preferences)." },
+
+  "notifSettingsEmptyTitle": "No tracked universities yet",
+  "@notifSettingsEmptyTitle": { "description": "Empty-state title on the notification settings screen — shown when user_tracked_universities is empty." },
+
+  "notifSettingsEmptyBody": "Tap \"Track this institution\" on a university page to follow it. Notification preferences appear here once you have at least one tracked institution.",
+  "@notifSettingsEmptyBody": { "description": "Empty-state body on the notification settings screen — instructs the user how to start tracking a university." },
+
+  "notifSettingsCalendar": "Calendar changes",
+  "@notifSettingsCalendar": { "description": "SwitchListTile title — toggles notify_on_calendar_change." },
+
+  "notifSettingsCalendarDesc": "Deadline dates move",
+  "@notifSettingsCalendarDesc": { "description": "SwitchListTile subtitle for the calendar-changes toggle." },
+
+  "notifSettingsCorrection": "Correction notices",
+  "@notifSettingsCorrection": { "description": "SwitchListTile title — toggles notify_on_correction (Korean: 정정공고)." },
+
+  "notifSettingsCorrectionDesc": "정정공고 published — highest priority",
+  "@notifSettingsCorrectionDesc": { "description": "SwitchListTile subtitle for the correction-notice toggle. NOTE: '정정공고' is the Korean university-admission term for an official correction announcement and is left untranslated across locales — it is the term the user actually encounters on Korean university sites." },
+
+  "notifSettingsRequirement": "Requirement changes",
+  "@notifSettingsRequirement": { "description": "SwitchListTile title — toggles notify_on_requirement_change." },
+
+  "notifSettingsRequirementDesc": "TOPIK / GPA / language test rules change",
+  "@notifSettingsRequirementDesc": { "description": "SwitchListTile subtitle for the requirement-changes toggle. 'TOPIK' is a proper noun (test name) and is left untranslated across locales." },
+
+  "notifSettingsScholarship": "Scholarship updates",
+  "@notifSettingsScholarship": { "description": "SwitchListTile title — toggles notify_on_scholarship_change." },
+
+  "notifSettingsScholarshipDesc": "Off by default — high volume",
+  "@notifSettingsScholarshipDesc": { "description": "SwitchListTile subtitle for the scholarship-updates toggle; warns the user that the channel is noisy." },
+
+  "notifSettingsLoadError": "Error: {error}",
+  "@notifSettingsLoadError": {
+    "description": "Centered error message when notificationSettingsProvider's AsyncValue is in the error state.",
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+
+  "notifSettingsPushLanguage": "Push payload language: {lang}",
+  "@notifSettingsPushLanguage": {
+    "description": "Label above each per-institution card showing the preferred language code stored on the row. The value is a BCP-47 code (e.g. 'en', 'ko').",
+    "placeholders": {
+      "lang": { "type": "String" }
+    }
+  },
+
+  "notifSettingsUpdateError": "Could not update preference: {error}",
+  "@notifSettingsUpdateError": {
+    "description": "SnackBar message when updateNotificationPrefs() throws.",
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  }
 }

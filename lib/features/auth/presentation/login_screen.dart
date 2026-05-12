@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../data/auth_repository.dart';
 
 // ─── Login Screen ──────────────────────────────────────────────────────────────
@@ -85,15 +86,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   // ─── Public Student Log In (Phone) ──────────────────────────────────────────
 
   Future<void> _handlePhoneLogin() async {
+    final l10n = AppLocalizations.of(context)!;
     final phone = _phoneCtrl.text.trim();
     final password = _passwordCtrl.text.trim();
 
     if (phone.isEmpty || phone.length < 5) {
-      _setError('Please enter a valid phone number (e.g. +12345678).');
+      _setError(l10n.loginErrorInvalidPhone);
       return;
     }
     if (password.length < 6) {
-      _setError('Password must be at least 6 characters.');
+      _setError(l10n.loginErrorPasswordTooShort);
       return;
     }
 
@@ -104,17 +106,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _setLoading(false);
 
     if (result.error != null) {
-      _setError('Invalid phone number or password.');
+      _setError(l10n.loginErrorInvalidCredentials);
     }
   }
 
   // ─── Inner Student Log In ────────────────────────────────────────────────────
 
   Future<void> _handleStudentLogin() async {
+    final l10n = AppLocalizations.of(context)!;
     final code = _codeCtrl.text.trim().toUpperCase();
 
     if (code.length < 6) {
-      _setError('Please enter a valid access code (min 6 characters).');
+      _setError(l10n.loginErrorInvalidAccessCode);
       return;
     }
 
@@ -125,6 +128,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _setLoading(false);
 
     if (result.error != null) {
+      // Server-side error string passes through unchanged; the
+      // auth_repository normalizes it for display.
       _setError(result.error);
     }
   }
@@ -132,25 +137,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   // ─── Public Student Sign Up (Phone) ─────────────────────────────────────────
 
   Future<void> _handleSignUp() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _signUpNameCtrl.text.trim();
     final phone = _signUpPhoneCtrl.text.trim();
     final password = _signUpPasswordCtrl.text.trim();
     final confirm = _signUpConfirmCtrl.text.trim();
 
     if (name.isEmpty) {
-      _setError('Full Name is required.');
+      _setError(l10n.signUpErrorNameRequired);
       return;
     }
     if (phone.isEmpty || phone.length < 5) {
-      _setError('A valid phone number is required (e.g. +12345678).');
+      _setError(l10n.signUpErrorPhoneRequired);
       return;
     }
     if (password.length < 6) {
-      _setError('Password must be at least 6 characters.');
+      _setError(l10n.loginErrorPasswordTooShort);
       return;
     }
     if (password != confirm) {
-      _setError('Passwords do not match.');
+      _setError(l10n.signUpErrorPasswordMismatch);
       return;
     }
 
@@ -162,6 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _setLoading(false);
 
     if (result.error != null) {
+      // Server-side error string passes through unchanged.
       _setError(result.error);
       if (result.isCrmAccount) {
         // Automatically switch to Magic Code Mode
@@ -183,7 +190,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         });
       }
     } else {
-      _setSuccess('Account created successfully! Please log in.');
+      _setSuccess(l10n.signUpSuccess);
       _signUpPasswordCtrl.clear();
       _signUpConfirmCtrl.clear();
       _tabController.animateTo(0);
@@ -197,6 +204,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return HangukScaffold(
       body: SafeArea(
@@ -209,6 +217,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 children: [
                   _logo(size: 40, radius: 10),
                   const SizedBox(width: 12),
+                  // Brand name — intentionally not localized.
                   const Text(
                     'Hanguk',
                     style: TextStyle(
@@ -229,6 +238,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   children: [
                      _logo(size: 72, radius: 18),
                     const SizedBox(height: 16),
+                    // Brand name — intentionally not localized.
                     const Text(
                       'Hanguk',
                       style: TextStyle(
@@ -239,7 +249,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Student Portal',
+                      l10n.loginStudentPortal,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.white.withOpacity(0.5),
@@ -299,6 +309,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Widget _buildMagicCodePortal(ColorScheme scheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -309,15 +320,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: scheme.primary.withValues(alpha: 0.3)),
           ),
-          child: const Text(
-            'Enter the 8-character access code (letters and numbers) provided by your consultant or university representative.',
+          child: Text(
+            l10n.loginAccessCodeHelp,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white60, fontSize: 13),
+            style: const TextStyle(color: Colors.white60, fontSize: 13),
           ),
         ),
         const SizedBox(height: 16),
         _HangukTextField(
           controller: _codeCtrl,
+          // Mask: code shape is enforced by the inputFormatters; not localized.
           hint: 'XXXXXXXX',
           icon: Icons.key,
           textCapitalization: TextCapitalization.characters,
@@ -334,7 +346,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         ),
         const SizedBox(height: 16),
         _HangukButton(
-          label: 'Login manually with Access Code',
+          label: l10n.loginAccessCodeButton,
           loading: _loading,
           onPressed: _handleStudentLogin,
         ),
@@ -344,9 +356,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             // Optional fallback if user navigated wrong from Welcome Page
             setState(() => _isMagicCodeMode = false);
           },
-          child: const Text(
-            '← I actually want to Log in via Phone Number',
-            style: TextStyle(color: Colors.white54, fontSize: 13),
+          child: Text(
+            l10n.loginSwitchToPhone,
+            style: const TextStyle(color: Colors.white54, fontSize: 13),
           ),
         ),
       ],
@@ -354,6 +366,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Widget _buildPublicAuthPortal(ColorScheme scheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Container(
@@ -367,19 +380,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             children: [
               const Icon(Icons.build_circle, size: 48, color: Colors.white54),
               const SizedBox(height: 16),
-              const Text(
-                'Coming Soon',
-                style: TextStyle(
+              Text(
+                l10n.loginComingSoonTitle,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Public sign up and phone login are currently under maintenance as we upgrade our systems.\n\nStudents: Please use your Magic Access Code to log in for now.',
+              Text(
+                l10n.loginComingSoonBody,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, height: 1.5, fontSize: 13),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  height: 1.5,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 24),
               TextButton.icon(
@@ -389,9 +406,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   });
                 },
                 icon: const Icon(Icons.vpn_key, color: Colors.white, size: 18),
-                label: const Text(
-                  'Switch to Magic Code Login',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                label: Text(
+                  l10n.loginSwitchToMagicCode,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 style: TextButton.styleFrom(
                   backgroundColor: scheme.primary.withValues(alpha: 0.3),
