@@ -265,7 +265,7 @@ class TrainingTab extends ConsumerWidget {
                                     ),
                                     onPressed: () {
                                       // 0 = Applications tab in HomeScreen.
-                                      ref.read(homeTabProvider.notifier).state = 0;
+                                      ref.read(homeTabProvider.notifier).setTab(0);
                                       Navigator.pop(context);
                                     },
                                   ),

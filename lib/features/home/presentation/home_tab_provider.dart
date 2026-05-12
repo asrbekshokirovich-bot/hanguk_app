@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Index of the bottom-nav tab currently shown by [HomeScreen].
-/// Lifted to a provider (rather than local widget state) so deep-linked
-/// CTAs — e.g. "Apply to a university" from the interview-launcher empty
+///
+/// Lifted to a Notifier (not local widget state) so deep-linked CTAs —
+/// e.g. "Apply to a university" from the interview-launcher empty
 /// state — can switch tabs without going through the widget tree.
 ///
 /// Tabs in order:
@@ -10,4 +11,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 ///   1 — Map
 ///   2 — Docs
 ///   3 — Training
-final homeTabProvider = StateProvider<int>((ref) => 0);
+class HomeTabNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void setTab(int index) => state = index;
+}
+
+final homeTabProvider =
+    NotifierProvider<HomeTabNotifier, int>(HomeTabNotifier.new);

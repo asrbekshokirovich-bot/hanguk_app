@@ -65,4 +65,23 @@ class AppConfig {
     'KAKAO_JS_KEY',
     defaultValue: 'c695b428933e192ca1d8582e3aab14a4',
   );
+
+  // Legal URLs - Privacy Policy and Terms of Service.
+  // Required for App Store + Play Store submissions
+  // (P0 #3 from store_readiness_audit_2026-05-12.md).
+  // Stored in Supabase Storage 'legal' bucket; override at build time
+  // with --dart-define=PRIVACY_POLICY_URL=... if you host them
+  // elsewhere.
+  static const String privacyPolicyUrl = String.fromEnvironment(
+    'PRIVACY_POLICY_URL',
+    defaultValue:
+        'https://lysjdtyanhdfphqyijsr.supabase.co/storage/v1/object/public/legal/PRIVACY_POLICY.md',
+  );
+
+  static const String termsOfServiceUrl = String.fromEnvironment(
+    'TERMS_OF_SERVICE_URL',
+    defaultValue:
+        'https://lysjdtyanhdfphqyijsr.supabase.co/storage/v1/object/public/legal/TERMS_OF_SERVICE.md',
+  );
+
 }
