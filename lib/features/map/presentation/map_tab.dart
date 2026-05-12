@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../data/map_analytics.dart';
 import '../data/map_repository.dart';
 import '../domain/university.dart';
 import 'map_deeplink_provider.dart';
@@ -68,6 +69,9 @@ class _MapTabState extends ConsumerState<MapTab> {
   }
 
   void _showDetail(BuildContext ctx, University u) {
+    // Audit M20 (2026-05-12): record the marker / row click. Sink is
+    // overridable via the mapAnalyticsProvider.
+    ref.read(mapAnalyticsProvider).mapMarkerClick(u.id);
     showModalBottomSheet(
       context: ctx,
       isScrollControlled: true,

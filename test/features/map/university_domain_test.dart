@@ -92,5 +92,82 @@ void main() {
       // ignore: deprecated_member_use_from_same_package
       expect(u.descriptionEn, isNull);
     });
+
+    // ── Audit M19 / M17 / M18 additions (2026-05-12) ───────────────
+    test('nameForLocale prefers Korean labels for ko locale', () {
+      const u = University(
+        id: 'n1',
+        name: 'Yonsei University',
+        location: 'Seoul',
+        nameKo: '연세대학교',
+        nameKoShort: '연세',
+        nameEn: 'Yonsei University',
+        nameUz: 'Yonsei universiteti',
+      );
+      expect(u.nameForLocale('ko'), '연세');
+    });
+
+    test('nameForLocale falls back to ko when ko_short missing', () {
+      const u = University(
+        id: 'n2',
+        name: 'X',
+        location: 'X',
+        nameKo: '서울대학교',
+      );
+      expect(u.nameForLocale('ko'), '서울대학교');
+    });
+
+    test('nameForLocale prefers nameUz for uz locale', () {
+      const u = University(
+        id: 'n3',
+        name: 'X',
+        location: 'X',
+        nameUz: 'Yonsei',
+        nameEn: 'Yonsei University',
+      );
+      expect(u.nameForLocale('uz'), 'Yonsei');
+    });
+
+    test('nameForLocale falls back to nameEn for English-like locales', () {
+      const u = University(
+        id: 'n4',
+        name: 'Fallback',
+        location: 'X',
+        nameEn: 'Yonsei University',
+      );
+      expect(u.nameForLocale('ru'), 'Yonsei University');
+      expect(u.nameForLocale('vi'), 'Yonsei University');
+      expect(u.nameForLocale('en'), 'Yonsei University');
+    });
+
+    test('nameForLocale falls back to resolved name when no per-locale label exists',
+        () {
+      const u = University(
+        id: 'n5',
+        name: 'Resolved Name',
+        location: 'X',
+      );
+      expect(u.nameForLocale('en'), 'Resolved Name');
+      expect(u.nameForLocale('ko'), 'Resolved Name');
+    });
+
+    test('hasVirtualTour is true when virtualTour is non-null', () {
+      const u = University(
+        id: 'v1',
+        name: 'Y',
+        location: 'Seoul',
+        virtualTour: {'scenes': []},
+      );
+      expect(u.hasVirtualTour, isTrue);
+    });
+
+    test('hasVirtualTour is false when virtualTour is null', () {
+      const u = University(
+        id: 'v2',
+        name: 'Y',
+        location: 'Seoul',
+      );
+      expect(u.hasVirtualTour, isFalse);
+    });
   });
 }

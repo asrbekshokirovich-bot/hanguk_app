@@ -91,7 +91,7 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get walkaroundNoPanoSubtitle =>
-      "This campus doesn't have a walkable street view nearby.";
+      'This campus doesn\'t have a walkable street view nearby.';
 
   @override
   String get walkaroundBlockedTitle => 'Street view unavailable';
@@ -101,13 +101,14 @@ class AppLocalizationsUz extends AppLocalizations {
       'The map provider blocked this request. Try again on a different network.';
 
   @override
-  String get walkaroundNetworkTitle => "Couldn't reach the map provider";
+  String get walkaroundNetworkTitle => 'Couldn\'t reach the map provider';
 
   @override
-  String get walkaroundNetworkSubtitle => 'Check your connection and try again.';
+  String get walkaroundNetworkSubtitle =>
+      'Check your connection and try again.';
 
   @override
-  String get walkaroundInitErrorTitle => "Street view couldn't start";
+  String get walkaroundInitErrorTitle => 'Street view couldn\'t start';
 
   @override
   String get walkaroundInitErrorSubtitle =>

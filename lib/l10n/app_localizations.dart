@@ -236,34 +236,76 @@ abstract class AppLocalizations {
   /// **'Microphone access is required for the interview.'**
   String get micRequired;
 
-  /// Loading title for the campus walkaround WebView.
+  /// Shown while the Kakao Roadview WebView is fetching a panorama.
   ///
-  /// In en: 'Loading campus walkaround'
+  /// In en, this message translates to:
+  /// **'Loading campus walkaround'**
   String get walkaroundLoadingTitle;
 
-  /// Loading subtitle for the campus walkaround WebView.
+  /// No description provided for @walkaroundLoadingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching street view near campus.'**
   String get walkaroundLoadingSubtitle;
 
-  /// Shown when no panorama is found within 200m of the campus pin.
+  /// Shown when no Kakao panorama is found within 200m of the campus pin.
+  ///
+  /// In en, this message translates to:
+  /// **'No street view here'**
   String get walkaroundNoPanoTitle;
+
+  /// No description provided for @walkaroundNoPanoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This campus doesn\'t have a walkable street view nearby.'**
   String get walkaroundNoPanoSubtitle;
 
   /// Shown when the Kakao JS SDK loads but is blocked at runtime.
+  ///
+  /// In en, this message translates to:
+  /// **'Street view unavailable'**
   String get walkaroundBlockedTitle;
+
+  /// No description provided for @walkaroundBlockedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The map provider blocked this request. Try again on a different network.'**
   String get walkaroundBlockedSubtitle;
 
   /// Shown when the Kakao JS SDK fails to load (network error).
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the map provider'**
   String get walkaroundNetworkTitle;
+
+  /// No description provided for @walkaroundNetworkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
   String get walkaroundNetworkSubtitle;
 
   /// Shown when initializing the Kakao Roadview throws unexpectedly.
+  ///
+  /// In en, this message translates to:
+  /// **'Street view couldn\'t start'**
   String get walkaroundInitErrorTitle;
+
+  /// No description provided for @walkaroundInitErrorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong starting the walkaround. Please try again.'**
   String get walkaroundInitErrorSubtitle;
 
-  /// Button label for the curated panorama tour (Pannellum).
+  /// Button label for the curated panorama tour (Pannellum), when available.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual Tour'**
   String get virtualTourTitle;
 
   /// Button label for the Kakao Roadview walkaround.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual Walkaround'**
   String get virtualWalkaroundTitle;
 }
 

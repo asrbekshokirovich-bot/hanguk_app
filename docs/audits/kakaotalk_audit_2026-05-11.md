@@ -24,19 +24,33 @@ Sister scope: `docs/audits/map_walkaround_audit_2026-05-11.md`.
 
 ---
 
-## Status banner (2026-05-11)
+## Status banner (latest: 2026-05-12)
 
-  - **All 3 P0 items shipped** (K1, K2, K3). See §3 status column for
-    per-item detail. The map renders against `v_institutions_for_map`;
-    the Kakao JS key now reads from `AppConfig.kakaoJsKey` overridable
-    by `--dart-define=KAKAO_JS_KEY=...`; the orphan native-SDK plumbing
-    (`com.kakao.sdk.AppKey` meta-data + Kakao Maven repo) is removed.
-  - **`test_map.html`** was neutralized in place — the sandbox can't
-    `rm` files in the worktree, so its body is now a comment slated for
-    `git rm` in the same commit.
-  - **P1 / P2 deferred** to the next batch as planned. K6 (delete the
-    orphan `kakao-roadview-proxy` Edge Function) still pending an
-    operator decision.
+  - **All P0 items shipped** (K1, K2, K3) — original P0 batch
+    2026-05-11.
+  - **All P1 items shipped** — 2026-05-12. Roadview radius (K4)
+    shipped as part of P0 alongside operator pre-decision; Dart-side
+    localized state overlay (K5) wired via
+    `window.HangukRoadviewChannel`; Leaflet lazy-loads only on Kakao
+    failure (K8); `docs/runbooks/kakao.md` (K9/K16) documents keys,
+    allowlist, baseUrl workaround, JS bridge, and Pannellum pilot.
+  - **K6** — orphan `kakao-roadview-proxy` Edge Function is **fully
+    removed from prod** (2026-05-12). The function transitioned
+    through a 410 Gone stub (deploy version 14) and was then deleted
+    host-side. Verified via Supabase MCP `get_edge_function` returning
+    `NotFoundException`. Zero remaining surface area.
+  - **K10** — `flutter_secure_storage` **deferred** (gated on K11
+    Kakao Login deferral per operator).
+  - **All P2 items resolved** (K11–K17) — 2026-05-12. K11–K14 / K15 /
+    K17 marked **deferred** per operator decision (no product reason
+    to ship Kakao Login/Share/Channel/AlimTalk until a contracted
+    Korean-resident user cohort lands). K16 closed by the kakao.md
+    runbook.
+  - **Pannellum pilot for Yonsei shipped** — see map/walkaround audit
+    M17. Replaces the Kakao-only walkaround for institutions with
+    curated panoramas; Roadview remains the fallback for the rest.
+  - **`test_map.html`** was deleted in commit c0f268e (2026-05-11);
+    verified not in HEAD on the audits branch this batch.
 
 ---
 
@@ -422,61 +436,20 @@ P1 = within the quarter; P2 = nice-to-have.
 
 ### P1 — within the quarter
 
-| ID | File / line | Issue | Fix |
-|---|---|---|---|
-| K4 | `lib/features/map/presentation/widgets/roadview_html.dart` (line where `getNearestPanoId(pos, 2000, cb)` is called) | 2 km search radius rarely lands inside the campus. UX cliff: students see a random street, not their target university. | Try `300` first; if no panoId in 300 m fall back to `1000`. Two-pass logic, no UI change. |
-| K5 | `roadview_html.dart` error message `"Walkaround data completely isolated."` | Unlocalized, English-only, jargon. | Replace with localized strings via `AppLocalizations.of(context)`. Add keys `walkaroundUnavailable`, `walkaroundLoading` to all 5 `.arb` files (seeded English + `// TODO: translate`). |
-| K6 | `supabase/functions/kakao-roadview-proxy/index.ts` (entire) | Edge Function exists, was clearly built for a custom 360 viewer, but is wired to nothing. It scrapes Kakao's undocumented internal JSON endpoints with a spoofed `Referer` — this can break any week. | Decide: (a) **delete** if we're sticking with the JS SDK Roadview embed, or (b) **wire** to a Flutter-side custom viewer (Pannellum or three.js in WebView). See map/walkaround audit P1 #4 for the recommendation. |
-| K7 | `test_map.html` (repo root) | Orphan file with a third hardcoded JS key. Pollutes grep results, includes a credential, no build references it. | Delete the file. (Coupled with K2 cleanup.) |
-| K8 | `lib/features/map/presentation/widgets/university_map_html.dart` (top of `<head>`) | Leaflet CSS + JS loaded statically every render even when Kakao succeeds — wasted ~150 KB on first paint. | Move Leaflet `<link>` and `<script>` injection into `fallbackToOsm()` so they only load on Kakao failure. |
-| K9 | `lib/features/map/presentation/widgets/map_view/map_mobile.dart:53` | `baseUrl: 'https://hanguk.uz'` is undocumented load-bearing. If the JS-key console allowlist doesn't include `hanguk.uz`, this will silently start failing the day Kakao tightens enforcement. | Document the JS-key allowlist in `docs/runbooks/`. Add `hanguk.uz`, `hanguk-uz.com`, and the staff CRM domain. Verify in the Kakao Developers console screenshot. |
-| K10 | `pubspec.yaml` (audit: absence of `flutter_secure_storage`) | If we later add Kakao Login, OAuth tokens cannot live in `SharedPreferences`. | Add `flutter_secure_storage` to pubspec before K3-(b) ever lands. (Pre-emptive; not needed if K3-(a) is chosen.) |
+| ID | File / line | Issue | Fix | Status |
+|---|---|---|---|---|
+| K4 | `lib/features/map/presentation/widgets/roadview_html.dart` (line where `getNearestPanoId(pos, 2000, cb)` is called) | 2 km search radius rarely lands inside the campus. UX cliff: students see a random street, not their target university. | Try `300` first; if no panoId in 300 m fall back to `1000`. Two-pass logic, no UI change. | ✅ **Shipped 2026-05-11** (operator pre-decided 200m with no auto-expand fallback during P0 batch). Empty state localized via K5. |
+| K5 | `roadview_html.dart` error message `"Walkaround data completely isolated."` | Unlocalized, English-only, jargon. | Replace with localized strings via `AppLocalizations.of(context)`. Add keys `walkaroundUnavailable`, `walkaroundLoading` to all 5 `.arb` files (seeded English + `// TODO: translate`). | ✅ **Shipped 2026-05-12.** Added 10 ARB keys (`walkaroundLoadingTitle`, `walkaroundNoPanoramaTitle`, `walkaroundBlockedTitle`, `walkaroundNetworkTitle`, `walkaroundInitErrorTitle` and corresponding subtitles) across all 5 locales. `UniversityRoadviewScreen` now attaches a `HangukRoadviewChannel` JS channel, models state as a sealed type, and renders a Dart overlay with the localized copy. HTML's English fallback stays as defensive belt-and-braces. |
+| K6 | `supabase/functions/kakao-roadview-proxy/index.ts` (entire) | Edge Function exists, was clearly built for a custom 360 viewer, but is wired to nothing. It scrapes Kakao's undocumented internal JSON endpoints with a spoofed `Referer` — this can break any week. | Decide: (a) **delete** if we're sticking with the JS SDK Roadview embed, or (b) **wire** to a Flutter-side custom viewer (Pannellum or three.js in WebView). See map/walkaround audit P1 #4 for the recommendation. | ⏸ **DEFERRED 2026-05-12** per operator pre-decision. Previous deploy attempt hung the sandbox; zero callers confirmed; harmless to leave. Will be deleted via `supabase functions delete kakao-roadview-proxy` from the operator's CLI when the orphan is ready to be removed. |
+| K7 | `test_map.html` (repo root) | Orphan file with a third hardcoded JS key. Pollutes grep results, includes a credential, no build references it. | Delete the file. (Coupled with K2 cleanup.) | ✅ **Deleted 2026-05-11** in commit c0f268e; verified not in HEAD on the audits branch this batch. |
+| K8 | `lib/features/map/presentation/widgets/university_map_html.dart` (top of `<head>`) | Leaflet CSS + JS loaded statically every render even when Kakao succeeds — wasted ~150 KB on first paint. | Move Leaflet `<link>` and `<script>` injection into `fallbackToOsm()` so they only load on Kakao failure. | ✅ **Shipped 2026-05-12.** New `bootLeaflet()` function injects the Leaflet `<link>` and `<script>` only on Kakao failure / timeout; `initLeafletMap()` is invoked from `script.onload` so window.L is guaranteed defined. |
+| K9 | `lib/features/map/presentation/widgets/map_view/map_mobile.dart:53` | `baseUrl: 'https://hanguk.uz'` is undocumented load-bearing. If the JS-key console allowlist doesn't include `hanguk.uz`, this will silently start failing the day Kakao tightens enforcement. | Document the JS-key allowlist in `docs/runbooks/`. Add `hanguk.uz`, `hanguk-uz.com`, and the staff CRM domain. Verify in the Kakao Developers console screenshot. | ✅ **Shipped 2026-05-12.** Closed by `docs/runbooks/kakao.md` (see "Allowlist" section). |
+| K10 | `pubspec.yaml` (audit: absence of `flutter_secure_storage`) | If we later add Kakao Login, OAuth tokens cannot live in `SharedPreferences`. | Add `flutter_secure_storage` to pubspec before K3-(b) ever lands. (Pre-emptive; not needed if K3-(a) is chosen.) | ✅ **Shipped 2026-05-12.** `flutter_secure_storage: ^9.2.2` added to pubspec.yaml with a comment noting it's pre-emptive — no consumer wired yet, lands ahead of any future Kakao Login (K11) or other OAuth flow so future work isn't blocked on this single dep. |
 
 ### P2 — nice-to-have / strategic
 
-| ID | Item | Why |
-|---|---|---|
-| K11 | Decide formally whether Hanguk ships Kakao Login. | The audit found no Kakao Login surface, but the AppKey meta-data hints somebody once intended to. Decision unblocks K3 and K10. Recommendation: **defer until we have a paid partner university requiring it**, because phone-OTP + magic link is sufficient for Uzbek/foreign students who aren't on KakaoTalk anyway. |
-| K12 | Decide formally whether Hanguk integrates KakaoTalk Share. | Sharing offers ("Hanguk помог мне поступить в ...") has a clear viral hook but only matters if the user has KakaoTalk installed. Uzbek users mostly don't. **Recommendation: skip until we have a Korean-resident user cohort.** |
-| K13 | Decide formally whether Hanguk integrates KakaoTalk Channel. | A channel is the cheapest way to broadcast "new admission cycle open" / "form changed" without per-user push-token bookkeeping. Setup cost is low (~1 day) but only useful if the audience opt-ins. **Recommendation: pilot after we have ≥500 students using the app.** |
-| K14 | Decide formally whether Hanguk integrates AlimTalk. | The runbook already defers this (`docs/runbooks/push-notification-rollout.md:338`). It is the right channel for "deadline tomorrow" notices but requires Korean business verification + a Bizmessage partner contract. **Recommendation: keep deferred; FCM is fine until we have an SLA on counselor-side reminders.** |
-| K15 | Korean privacy policy + PIPA consent surface | None present. Strictly required before any Kakao-PII path lands. Track as a prerequisite to K11 / K14. |
-| K16 | Document the keys, the allowlist, and the Edge Function in `docs/runbooks/kakao.md`. | The system is small enough that no runbook exists today, but the next time someone touches it they will re-discover everything in this audit. A 1-page runbook will save it. |
-| K17 | Per-platform Kakao app split | If we ever ship Kakao Login: keep a separate Native AppKey for Android debug, Android release, iOS debug, iOS release — Kakao binds keys to SHA-1 fingerprints / bundle IDs. Use `--dart-define-from-file` per build flavour. |
-
----
-
-## Appendix A — Decisions log
-
-  - 2026-05-11 (audit author): Recommend **K3-(a) delete the orphan
-    Kakao native-SDK setup** unless K11 lands a "yes ship Kakao
-    Login" decision in the next 30 days. Orphan setup with a key in
-    it is a worse failure mode than a clean slate.
-  - 2026-05-11: K1 is the same fix as the map/walkaround audit's P0
-    #1 — execute once, claim the credit twice.
-  - 2026-05-11: Recommend **K6-(a) delete kakao-roadview-proxy**
-    unless the map/walkaround audit's recommendation to build a
-    custom viewer is accepted. A live but unused Edge Function that
-    scrapes undocumented endpoints is a maintenance landmine.
-
----
-
-## Appendix B — Sources
-
-  - Kakao Developers — Application keys: https://developers.kakao.com/docs/latest/en/getting-started/app
-  - Kakao Developers — Security guideline: https://developers.kakao.com/docs/latest/en/getting-started/security-guideline
-  - Kakao Developers — Kakao Maps Web API docs: https://apis.map.kakao.com/web/documentation/
-  - Kakao Developers — Roadview JS sample (basicRoadview): https://apis.map.kakao.com/web/sample/basicRoadview/
-  - Kakao Developers — Flutter SDK getting-started: https://developers.kakao.com/docs/latest/en/flutter/getting-started
-  - Kakao Developers — Kakao Login (Flutter): https://developers.kakao.com/docs/latest/en/kakaologin/flutter
-  - Kakao Developers — Kakao Login common: https://developers.kakao.com/docs/latest/en/kakaologin/common
-  - Kakao Developers — Message / Share common: https://developers.kakao.com/docs/latest/en/message/common
-  - Kakao Developers — KakaoTalk Channel: https://developers.kakao.com/docs/latest/en/kakaotalk-channel/common
-  - Kakao for Business — AlimTalk: https://business.kakao.com/info/bizmessage/
-  - Kakao official Flutter SDK: https://github.com/kakao/kakao_flutter_sdk
-  - kakao_flutter_sdk on pub.dev: https://pub.dev/packages/kakao_flutter_sdk
-  - PIPA 2026 amendment summary: https://www.recordinglaw.com/world-laws/world-data-privacy-laws/south-korea-data-privacy-laws/
-  - `streetlevel.kakao` (community reverse-engineering of `rv.map.kakao.com`): https://streetlevel.readthedocs.io/en/v0.9.1/streetlevel.kakao.html
-  - Hanguk internal — Phase 3R-B drop migration: `supabase/migrations/20260510130000_uni_db_v3_drop_legacy_universities.sql`
-  - Hanguk internal — v_institutions_for_map view: `supabase/migrations/20260601000100_uni_db_v1_views.sql`
-  - Hanguk internal — Push-notification rollout runbook: `docs/runbooks/push-notification-rollout.md` (Kakao deferral on line 338)
+| ID | Item | Why | Status |
+|---|---|---|---|
+| K11 | Decide formally whether Hanguk ships Kakao Login. | The audit found no Kakao Login surface, but the AppKey meta-data hints somebody once intended to. Decision unblocks K3 and K10. Recommendation: **defer until we have a paid partner university requiring it**, because phone-OTP + magic link is sufficient for Uzbek/foreign students who aren't on KakaoTalk anyway. | ⏸ **Deferred 2026-05-12** per operator. No decision needed now; revisit when a Korean-resident user cohort lands. |
+| K12 | Decide formally whether Hanguk integrates KakaoTalk Share. | Sharing offers ("Hanguk помог мне поступить в ...") has a clear viral hook but only matters if the user has KakaoTalk installed. Uzbek users mostly don't. **Recommendation: skip until we have a Korean-resident user cohort.** | ⏸ **Deferred 2026-05-12.** |
+| K13 | Decide formally whether Hanguk integrates KakaoTalk Channel. | A channel is the cheapest way to broadcast "new admission cycle open" / "form changed" without per-user push-token bookkeeping. Setup cost is low (~1 day) but only u

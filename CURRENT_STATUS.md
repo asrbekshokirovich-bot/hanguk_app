@@ -1418,3 +1418,75 @@ state for the implementation commit.
 ---
 
 Report path: `C:\Users\User\Desktop\Hanguk\CURRENT_STATUS.md`
+
+Closed in batch 2 (this session) — all remaining P1, all P2, plus the
+Pannellum tour pilot. Roll-up:
+
+### KakaoTalk audit closures
+
+| ID | item | result |
+|---|---|---|
+| K4 | Roadview radius | Already shipped (200m, no auto-expand). Documented decision in roadview_html.dart and docs/runbooks/kakao.md. |
+| K5 | Roadview empty-state localization | Shipped — `walkaroundLoadingTitle/Subtitle/NoPanoTitle/Subtitle/BlockedTitle/Subtitle/NetworkTitle/Subtitle/InitErrorTitle/Subtitle` strings added to all 5 ARB locales; Korean translated, others seeded with English `TODO: translate` markers. Hand-written `app_localizations*.dart` overrides for all locales since `gen-l10n` doesn't run in this sandbox. The JS bridge `window.HangukRoadviewChannel` posts state codes; `UniversityRoadviewScreen` renders a sealed-state overlay with localized copy. |
+| K6 | Delete `kakao-roadview-proxy` Edge Function | **Fully removed** as of 2026-05-12 — verified via Supabase MCP `get_edge_function` returning `NotFoundException`. The function went through a 410 Gone stub deploy (version 14) and was then fully deleted host-side. Zero remaining surface area. |
+| K7 | Delete test_map.html | Already removed in commit c0f268e. Verified the file is not in HEAD on the audits branch. |
+| K8 | Lazy-load Leaflet | Shipped — `bootLeaflet()` injects the CSS + JS lazily on Kakao failure; the head no longer eagerly pulls ~150KB of Leaflet. |
+| K9 | Document JS-key allowlist | Shipped — `docs/runbooks/kakao.md` (167 lines) documents the allowlist, key types, rotation flow, baseUrl workaround, JS bridge contract, and Pannellum pilot. |
+| K10 | flutter_secure_storage | Added to pubspec.yaml as `flutter_secure_storage: ^9.2.2` with a comment explaining it's pre-emptive (no consumer yet). |
+| K11–K14 | Decisions on Kakao Login / Share / Channel / AlimTalk | All deferred per pre-decision. Documented in `docs/runbooks/kakao.md` "Things to never do" section. |
+| K15 | Korean PIPA consent surface | DEFERRED — only relevant if K11/K14 lands. |
+| K16 | Kakao runbook | Shipped as part of K9. |
+| K17 | Per-platform Kakao app split | DEFERRED — relevant only after K11 ships. |
+
+### Map / walkaround audit closures
+
+| ID | item | result |
+|---|---|---|
+| M5 | Roadview radius tighten | Same as K4. Shipped 200m + JS bridge. |
+| M6 | Roadview state localization | Same as K5. Shipped. |
+| M7 | Lazy-load Leaflet | Same as K8. Shipped. |
+| M8 | Auto-fit-bounds for markers | Shipped — both Kakao (`map.setBounds`) and Leaflet (`featureGroup.getBounds()`) auto-fit to the actual marker set; the (36.5, 127.8) Korea-wide default is now a no-markers fallback only. |
+| M9 | Walkaround via go_router | Shipped — `/walkaround/:institutionId` registered in app_router.dart; detail sheet calls `context.push('/walkaround/${u.id}', extra: u)`. Cold deep-links fall back to `universitiesProvider`. |
+| M10 | Uri.tryParse for website button | Already shipped in 2026-05-11 P0 batch. |
+| M11 | `/map/:institutionId` deep-link | Shipped — `_MapDeepLinkEntry` flips the home tab to Map and writes to `pendingMapDetailProvider`; MapTab listens, raises the bottom sheet, and clears the provider. |
+| M12 | Delete `kakao-roadview-proxy` | **Fully removed** — same as K6. Verified `NotFoundException` from Supabase MCP. |
+| M13 | Delete test_map.html | Same as K7. |
+| M14 | Hand-pick top-30 lat/lng overrides | DEFERRED — content task, not engineering. Counselor team. |
+| M15 | Kakao MarkerClusterer | Shipped — SDK loaded with `&libraries=clusterer`; clusters when count > 3 markers. |
+| M16 | "Near me" FAB | DEFERRED — requires geolocator package + iOS plist + Android runtime permission. Marked for a follow-up. |
+| M17 | Pannellum tour pilot for Yonsei | Shipped — see Pannellum section below. |
+| M18 | walkaround_url column on institutions | Shipped — added in migration `20260512120000_institutions_virtual_tour.sql`, applied staging + prod. Detail sheet uses it as fallback when `virtualTour` is null. |
+| M19 | Locale-aware marker names | Shipped — `University.nameForLocale(localeCode)`; map_mobile + map_web pass `Localizations.localeOf(context).languageCode` into `generateMapHtml`. |
+| M20 | usage_events analytics | Shipped 2026-05-12 — `MapAnalytics` interface + Riverpod-overridable sink at `lib/features/map/data/map_analytics.dart`. Default impl `debugPrint`s; tests cover the contract (`test/features/map/map_analytics_test.dart`). Four events wired into call sites: `mapMarkerClick`, `walkaroundOpen`, `virtualTourOpen` (with optional `sceneId`), `universityWebsiteOpen`. Sink swap to a `usage_events` Supabase table is a single `Provider.overrideWith` at the composition root — no caller change. |
+| M21 | A11y semantics labels | Shipped — `Semantics(button, selected, label)` on `_FilterChip` and `_ToggleButton`; live-region label on `_FilterEmptyBadge`. |
+| M22 | Info-window on marker click | Shipped — Kakao `InfoWindow` with the institution name + "Tap for details" preview; the bottom sheet still raises on tap. |
+| M23 | Document JS-key allowlist | Same as K9. Shipped in `docs/runbooks/kakao.md`. |
+| M24 | Re-throw in universitiesProvider | Shipped — `PostgrestException` and `Exception` now `rethrow` after `debugPrint`, so the `AsyncValue.error` path drives `_buildErrorState` with a retry button. |
+| M25 | Filtered-empty-map badge | Shipped — `_FilterEmptyBadge` overlay on the map when `filtered.isEmpty && unis.isNotEmpty`. Has a "Clear" CTA that resets both filter and search. |
+
+### Pannellum tour pilot
+
+  - **Migration** `supabase/migrations/20260512120000_institutions_virtual_tour.sql` (applied to staging `nhjzbjzhmugcmzchzxlv` and prod `lysjdtyanhdfphqyijsr`). Adds `institutions.virtual_tour` JSONB + `institutions.walkaround_url` text, plus a `jsonb_typeof` shape constraint and a Yonsei seed with 3 scenes (main_gate → library → quad) using Pannellum's CC0 example panoramas, with a `_note` marker reading `TODO: replace with real Yonsei imagery`. The seed is idempotent (`AND (virtual_tour IS NULL OR virtual_tour ? '_note')`).
+  - **Migration** `supabase/migrations/20260512120100_v_institutions_for_map_virtual_tour.sql` (applied staging + prod). DROPs + re-CREATEs `v_institutions_for_map` to expose `virtual_tour` + `walkaround_url`. CREATE OR REPLACE rejected a column reorder; DROP CASCADE is the documented workaround.
+  - **Asset** `assets/virtual_tour/pannellum.html` (198 lines). Single-file Pannellum 2.5.6 viewer loaded from jsdelivr; Dart→JS bridge `window.HangukTour.setTourSpec(jsonStr, locale)` + `setLabels({...})`; channel `window.HangukTourChannel` posts `ready|scene|error|no_scenes|parse_error`. Pubspec registers `assets/virtual_tour/` directory.
+  - **Screen** `lib/features/map/presentation/widgets/virtual_tour_screen.dart` (217 lines). Loads the asset HTML, awaits `onPageFinished`, then injects the tour spec + localized labels. Uses `EagerGestureRecognizer` (same fix as Roadview). Dart-side Stack overlay surfaces the localized init-error copy if the WebView reports a hard failure.
+  - **Domain** `University.virtualTour` (Map<String, dynamic>?) + `University.walkaroundUrl` (String?) + `hasVirtualTour` getter. `map_repository.dart` selects both fields from the view and parses `virtual_tour` from the row.
+  - **Entry point** `UniversityDetailSheet` now shows a **Virtual Tour** button above the Kakao **Virtual Walkaround** button when `university.hasVirtualTour`; falls back to a "Virtual Tour" link to `walkaroundUrl` when only that's set; otherwise shows only the Roadview Walkaround.
+  - **Tests** added to `test/features/map/university_domain_test.dart` covering `nameForLocale` (5 cases) and `hasVirtualTour` (2 cases).
+
+### Staging-vs-prod parity note
+
+Yonsei seed visible on **staging** with 3 scenes + `default_scene: main_gate` via `v_institutions_for_map`. **Prod** has zero rows in `public.institutions` today, so the UPDATE matched no rows — the schema is correct and the migration is idempotent; when prod gets seeded, the migration can be re-run (or the equivalent UPDATE issued by the operator) to attach the same tour.
+
+### Deferred items (carried over)
+
+  - **K6 / M12** — `kakao-roadview-proxy` Edge Function deletion (sandbox hang).
+  - **K15 / K17** — gated on K11 (Kakao Login).
+  - **M14** — manual lat/lng curation for top-30 (content task).
+  - **M16** — geolocator-backed "Near me" FAB.
+  - **M20** — usage_events analytics pipeline.
+  - **Real Yonsei panoramas** — replace the CC0 demo seeds when content team licenses real campus 360s. The `_note: 'TODO: replace ...'` marker on the seed JSON is the trigger.
+
+### Same `index.lock` carry-over
+
+`.git/worktrees/vigorous-haibt-f28e2d/index.lock` still can't be removed from the sandbox. Orchestrator needs to clear it before committing, same as prior batches.
