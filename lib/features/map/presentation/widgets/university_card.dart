@@ -69,6 +69,10 @@ class UniversityCard extends StatelessWidget {
           fit: BoxFit.contain,
           excludeFromSemantics: true,
           errorBuilder: (_, __, ___) => _fallbackIcon(),
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return _loadingBox();
+          },
         ),
       );
     }
@@ -90,6 +94,28 @@ class UniversityCard extends StatelessWidget {
         Icons.school_outlined,
         color: AppColors.vibrantLime,
         size: 24,
+      ),
+    );
+  }
+
+  // Low-contrast placeholder shown during slow logo loads (audit P1).
+  Widget _loadingBox() {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white24,
+          ),
+        ),
       ),
     );
   }
@@ -124,7 +150,7 @@ class UniversityCard extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: isTop ? AppColors.vibrantLime : Colors.white38,
+          color: isTop ? AppColors.vibrantLime : Colors.white70,
         ),
       ),
     );

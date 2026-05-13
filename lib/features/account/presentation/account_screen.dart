@@ -358,7 +358,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       style: const TextStyle(color: AppColors.vibrantLime),
                     ),
                   ),
-                  const Text(' • ', style: TextStyle(color: Colors.white38)),
+                  const Text(' • ', style: TextStyle(color: Colors.white70)),
                   TextButton(
                     onPressed: () => _openLegal(AppConfig.termsOfServiceUrl),
                     child: Text(
@@ -428,7 +428,7 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
               // Hint is the literal sentinel string the controller compares
               // against — must NOT be translated.
               hintText: 'DELETE',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: const TextStyle(color: Colors.white70),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.06),
               border: OutlineInputBorder(

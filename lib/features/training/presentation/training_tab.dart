@@ -36,7 +36,7 @@ class TrainingTab extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 l.trainingTabSubtitle,
-                style: const TextStyle(color: Colors.white60, fontSize: 14),
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -275,7 +275,7 @@ class TrainingTab extends ConsumerWidget {
                                 Text(
                                   l.interviewNoAppsBody,
                                   style: const TextStyle(
-                                    color: Colors.white60,
+                                    color: Colors.white70,
                                     fontSize: 12,
                                     height: 1.35,
                                   ),

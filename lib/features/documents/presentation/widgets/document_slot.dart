@@ -77,7 +77,7 @@ class DocumentSlot extends StatelessWidget {
                       '${index + 1}',
                       style: const TextStyle(
                         fontSize: 10,
-                        color: Colors.white38,
+                        color: Colors.white70,
                       ),
                     ),
                   ),

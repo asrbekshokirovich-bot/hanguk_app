@@ -75,7 +75,7 @@ class UniversityDetailSheet extends ConsumerWidget {
                                     const Icon(
                                       Icons.location_on_outlined,
                                       size: 14,
-                                      color: Colors.white38,
+                                      color: Colors.white70,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -337,6 +337,10 @@ class UniversityDetailSheet extends ConsumerWidget {
           fit: BoxFit.contain,
           excludeFromSemantics: true,
           errorBuilder: (_, __, ___) => _fallbackIconBox(size),
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return _loadingBox(size);
+          },
         ),
       );
     }
@@ -356,6 +360,28 @@ class UniversityDetailSheet extends ConsumerWidget {
         Icons.school_outlined,
         color: AppColors.vibrantLime,
         size: size * 0.45,
+      ),
+    );
+  }
+
+  // Low-contrast placeholder shown during slow logo loads (audit P1).
+  Widget _loadingBox(double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: size * 0.35,
+          height: size * 0.35,
+          child: const CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white24,
+          ),
+        ),
       ),
     );
   }
@@ -433,7 +459,7 @@ class UniversityDetailSheet extends ConsumerWidget {
                     Text(
                       item.label,
                       style: const TextStyle(
-                        color: Colors.white38,
+                        color: Colors.white70,
                         fontSize: 11,
                       ),
                     ),

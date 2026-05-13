@@ -65,8 +65,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.vibrantLime),
         ),
-        hintStyle: const TextStyle(color: Colors.white38),
-        prefixIconColor: Colors.white38,
+        hintStyle: const TextStyle(color: Colors.white70),
+        prefixIconColor: Colors.white70,
       ),
       // Retained for any incidental M2 BottomNavigationBar usage in
       // dialogs / pickers; the home shell now uses M3 NavigationBar via
@@ -74,7 +74,7 @@ class AppTheme {
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Color(0xFF0F213D),
         selectedItemColor: AppColors.vibrantLime,
-        unselectedItemColor: Colors.white38,
+        unselectedItemColor: Colors.white70,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
@@ -95,13 +95,13 @@ class AppTheme {
               fontWeight: FontWeight.w600,
             );
           }
-          return const TextStyle(color: Colors.white38, fontSize: 12);
+          return const TextStyle(color: Colors.white70, fontSize: 12);
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: AppColors.vibrantLime);
           }
-          return const IconThemeData(color: Colors.white38);
+          return const IconThemeData(color: Colors.white70);
         }),
       ),
       tabBarTheme: TabBarThemeData(

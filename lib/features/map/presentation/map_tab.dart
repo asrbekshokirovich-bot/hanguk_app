@@ -138,12 +138,12 @@ class _MapTabState extends ConsumerState<MapTab> {
                       decoration: InputDecoration(
                         hintText: 'Search...',
                         hintStyle: const TextStyle(
-                          color: Colors.white38,
+                          color: Colors.white70,
                           fontSize: 14,
                         ),
                         prefixIcon: const Icon(
                           Icons.search_rounded,
-                          color: Colors.white38,
+                          color: Colors.white70,
                           size: 20,
                         ),
                         filled: true,
@@ -163,7 +163,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                                   onTap: () => _searchController.clear(),
                                   child: const Icon(
                                     Icons.close,
-                                    color: Colors.white38,
+                                    color: Colors.white70,
                                     size: 18,
                                   ),
                                 ),
@@ -283,7 +283,7 @@ class _MapTabState extends ConsumerState<MapTab> {
               _searchQuery.isNotEmpty
                   ? 'No results for "$_searchQuery"'
                   : 'No universities match this filter',
-              style: const TextStyle(color: Colors.white38, fontSize: 14),
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
             const SizedBox(height: 12),
             TextButton(
@@ -325,7 +325,7 @@ class _MapTabState extends ConsumerState<MapTab> {
             ),
             child: const Icon(
               Icons.wifi_off_rounded,
-              color: Colors.white38,
+              color: Colors.white70,
               size: 40,
             ),
           ),
@@ -341,7 +341,7 @@ class _MapTabState extends ConsumerState<MapTab> {
           const SizedBox(height: 6),
           const Text(
             'Check your connection and try again',
-            style: TextStyle(color: Colors.white38, fontSize: 13),
+            style: TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 20),
           OutlinedButton.icon(
@@ -459,7 +459,7 @@ class _FilterChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: selected ? AppColors.vibrantLime : Colors.white38,
+                color: selected ? AppColors.vibrantLime : Colors.white70,
               ),
               const SizedBox(width: 5),
               Text(

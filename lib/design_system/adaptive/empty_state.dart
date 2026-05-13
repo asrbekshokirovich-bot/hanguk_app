@@ -57,7 +57,7 @@ class EmptyState extends StatelessWidget {
             subhead,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white60,
+              color: Colors.white70,
               fontSize: 13,
               height: 1.4,
             ),
