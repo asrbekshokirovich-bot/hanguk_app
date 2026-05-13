@@ -4,6 +4,7 @@ import 'package:vapi/vapi.dart';
 import 'dart:async';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../../../core/config/app_config.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../data/interview_repository.dart';
 import '../../data/vapi_event_parser.dart' as vapi;
 
@@ -25,7 +26,9 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
   String _currentWords = '';
   Timer? _silenceTimer;
   bool _showCoachingWarning = false;
-  String _coachingMessage = '';
+  // _errorMessage holds a raw (likely English) detail string from the
+  // Vapi SDK or a status-update payload. The locale-aware "Connection
+  // interrupted: …" wrapper is applied in _buildStatusText below.
   String? _errorMessage;
   bool _isStopping = false;
   bool _aiRequestedEnd = false;
@@ -227,7 +230,10 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
               setState(() {
                 _isCallActive = false;
                 _isAI_Speaking = false;
-                _errorMessage = 'Connection interrupted: $extractedDetail';
+                // Store raw detail; _buildStatusText wraps it with
+                // l.connectionInterrupted at render time so the wrapper
+                // follows the active locale.
+                _errorMessage = extractedDetail;
               });
             }
           }
@@ -385,7 +391,6 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     if (fillerCount >= 4) {
       setState(() {
         _showCoachingWarning = true;
-        _coachingMessage = 'Avoid using filler words!';
       });
     }
   }
@@ -410,6 +415,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final state = ref.watch(interviewProvider);
 
     return Stack(
@@ -455,8 +461,11 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
                   border: Border.all(color: AppColors.error),
                 ),
                 child: Text(
-                  '⚠️ $_coachingMessage',
-                  style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold),
+                  '⚠️ ${l.coachingFiller}',
+                  style: const TextStyle(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             const Spacer(),
@@ -503,7 +512,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
             ),
             const SizedBox(height: 32),
             Text(
-              _buildStatusText(),
+              _buildStatusText(l),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: _errorMessage != null
@@ -542,9 +551,9 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              '💡 Lifeline Hints:',
-                              style: TextStyle(
+                            Text(
+                              l.lifelineHintsTitle,
+                              style: const TextStyle(
                                 color: AppColors.royalBlue,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -593,8 +602,8 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
                                       width: 64,
                                       child: Text(
                                         m.role == 'interviewer'
-                                            ? 'AI'
-                                            : 'You',
+                                            ? l.speakerAi
+                                            : l.speakerYou,
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
                                           color: m.role == 'interviewer'
@@ -647,7 +656,13 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text('End Interview', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                    Text(
+                      l.endInterview,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -676,14 +691,14 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     return cleaned.sublist(cleaned.length - maxTurns);
   }
 
-  String _buildStatusText() {
-    if (_errorMessage != null) return _errorMessage!;
-    if (_aiRequestedEnd) return 'Wrapping up the interview...';
-    if (_isAI_Speaking) return 'Interviewer is speaking...';
+  String _buildStatusText(AppLocalizations l) {
+    if (_errorMessage != null) return l.connectionInterrupted(_errorMessage!);
+    if (_aiRequestedEnd) return l.wrappingUp;
+    if (_isAI_Speaking) return l.aiSpeaking;
     if (_isCallActive && !_firstMessageReceived) {
-      return 'Connecting — your interviewer will greet you shortly...';
+      return l.greetWait;
     }
-    if (_isCallActive) return 'Your turn to speak';
-    return 'Connecting...';
+    if (_isCallActive) return l.yourTurn;
+    return l.connecting;
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../applications/data/applications_repository.dart';
 import '../../../uni_db/presentation/widgets/university_specific_cta.dart';
 import '../../data/interview_repository.dart';
@@ -52,6 +53,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final state = ref.watch(interviewProvider);
 
     return SingleChildScrollView(
@@ -62,9 +64,13 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'AI Interview Setup',
-                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                l.interviewSetupTitle,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               IconButton(
                 icon: const Icon(Icons.history, color: AppColors.royalBlue),
@@ -73,13 +79,13 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Configure your AI interviewer settings before starting.',
-            style: TextStyle(color: Colors.white60, fontSize: 16),
+          Text(
+            l.interviewSetupSubtitle,
+            style: const TextStyle(color: Colors.white60, fontSize: 16),
           ),
           const SizedBox(height: 32),
 
-          _buildLabel('Interview Type'),
+          _buildLabel(l.interviewTypeLabel),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -94,10 +100,19 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
                 dropdownColor: AppColors.backgroundNavy,
                 isExpanded: true,
                 style: const TextStyle(color: Colors.white, fontSize: 16),
-                items: const [
-                  DropdownMenuItem(value: 'general', child: Text('General Introduction')),
-                  DropdownMenuItem(value: 'university_specific', child: Text('University Specific')),
-                  DropdownMenuItem(value: 'visa', child: Text('Visa / Embassy Check')),
+                items: [
+                  DropdownMenuItem(
+                    value: 'general',
+                    child: Text(l.interviewTypeGeneral),
+                  ),
+                  DropdownMenuItem(
+                    value: 'university_specific',
+                    child: Text(l.interviewTypeUniversitySpecific),
+                  ),
+                  DropdownMenuItem(
+                    value: 'visa',
+                    child: Text(l.interviewTypeVisa),
+                  ),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _sessionType = val);
@@ -111,7 +126,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
           // the addon below fell back to general.
           if (_isUniSpecific) ...[
             const SizedBox(height: 16),
-            _buildLabel('Target university'),
+            _buildLabel(l.targetUniversityFieldLabel),
             const SizedBox(height: 8),
             _UniversityPicker(
               selectedId: _targetUniversityId,
@@ -133,13 +148,13 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
 
           const SizedBox(height: 24),
 
-          _buildLabel('Language'),
+          _buildLabel(l.languageLabel),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: _LanguageOption(
-                  title: 'Korean',
+                  title: l.trackKorean,
                   isSelected: _language == 'ko',
                   onTap: () => setState(() => _language = 'ko'),
                 ),
@@ -147,7 +162,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
               const SizedBox(width: 16),
               Expanded(
                 child: _LanguageOption(
-                  title: 'English',
+                  title: l.trackEnglish,
                   isSelected: _language == 'en',
                   onTap: () => setState(() => _language = 'en'),
                 ),
@@ -156,7 +171,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
           ),
           const SizedBox(height: 24),
 
-          _buildLabel('Interviewer Persona'),
+          _buildLabel(l.interviewerPersonaLabel),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -171,10 +186,19 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
                 dropdownColor: AppColors.backgroundNavy,
                 isExpanded: true,
                 style: const TextStyle(color: Colors.white, fontSize: 16),
-                items: const [
-                  DropdownMenuItem(value: 'friendly', child: Text('Friendly Admissions Officer')),
-                  DropdownMenuItem(value: 'strict', child: Text('Strict Professor')),
-                  DropdownMenuItem(value: 'impatient', child: Text('Impatient Visa Officer')),
+                items: [
+                  DropdownMenuItem(
+                    value: 'friendly',
+                    child: Text(l.personaFriendlyCaps),
+                  ),
+                  DropdownMenuItem(
+                    value: 'strict',
+                    child: Text(l.personaStrictCaps),
+                  ),
+                  DropdownMenuItem(
+                    value: 'impatient',
+                    child: Text(l.personaImpatientCaps),
+                  ),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _persona = val);
@@ -184,13 +208,13 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
           ),
           const SizedBox(height: 24),
 
-          _buildLabel('Focus Topic (Optional)'),
+          _buildLabel(l.focusTopicLabel),
           const SizedBox(height: 8),
           TextField(
             controller: _focusTopicCtrl,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'e.g. Discussing my computer science major...',
+              hintText: l.focusTopicHint,
               hintStyle: const TextStyle(color: Colors.white30),
               filled: true,
               fillColor: Colors.white.withOpacity(0.05),
@@ -213,12 +237,24 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
               children: [
                 const Icon(Icons.timer, color: AppColors.royalBlue),
                 const SizedBox(width: 16),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Timed Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      Text('5 minute strict limit', style: TextStyle(color: Colors.white60, fontSize: 13)),
+                      Text(
+                        l.timedModeTitle,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        l.timedModeSubtitle,
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -245,19 +281,22 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
                 ),
               ),
               icon: const Icon(Icons.play_arrow),
-              label: const Text(
-                'Start Practice',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              label: Text(
+                l.startPracticeButton,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               onPressed:
                   (_isUniSpecific && _targetUniversityId == null) ? null : _start,
             ),
           if (_isUniSpecific && _targetUniversityId == null)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
               child: Text(
-                'Pick a target university above to enable.',
-                style: TextStyle(color: Colors.white38, fontSize: 12),
+                l.pickUniversityFirstHint,
+                style: const TextStyle(color: Colors.white38, fontSize: 12),
               ),
             ),
         ],
@@ -287,6 +326,7 @@ class _UniversityPicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final applications = ref.watch(applicationsProvider);
     return applications.when(
       loading: () => const Padding(
@@ -296,16 +336,16 @@ class _UniversityPicker extends ConsumerWidget {
         ),
       ),
       error: (e, _) => Text(
-        'Error loading applications: $e',
+        l.errorLoadingApplications(e),
         style: const TextStyle(color: Colors.redAccent, fontSize: 12),
       ),
       data: (apps) {
         if (apps.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              'No applications yet — go to the Applications tab to add one.',
-              style: TextStyle(color: Colors.white54, fontSize: 12),
+              l.noAppsInlineHint,
+              style: const TextStyle(color: Colors.white54, fontSize: 12),
             ),
           );
         }

@@ -687,6 +687,774 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update preference: {error}'**
   String notifSettingsUpdateError(Object error);
+
+  /// Step header in the training-tab interview-setup dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Select Target University'**
+  String get interviewDialogStepUniversity;
+
+  /// Step header in the training-tab interview-setup dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Select Interview Track'**
+  String get interviewDialogStepTrack;
+
+  /// Step header in the training-tab interview-setup dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Interviewer Persona'**
+  String get interviewDialogStepPersona;
+
+  /// Empty-state body in the training-tab interview-setup dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a target university first — interview practice tailors questions to that school.'**
+  String get interviewNoAppsBody;
+
+  /// Track-chip label for Korean.
+  ///
+  /// In en, this message translates to:
+  /// **'Korean'**
+  String get trackKorean;
+
+  /// Track-chip label for English.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get trackEnglish;
+
+  /// Dropdown label for the friendly persona (compact form).
+  ///
+  /// In en, this message translates to:
+  /// **'Friendly admissions officer'**
+  String get personaFriendly;
+
+  /// Dropdown label for the strict persona (compact form).
+  ///
+  /// In en, this message translates to:
+  /// **'Strict professor'**
+  String get personaStrict;
+
+  /// Dropdown label for the impatient persona (compact form).
+  ///
+  /// In en, this message translates to:
+  /// **'Impatient visa officer'**
+  String get personaImpatient;
+
+  /// Dropdown label for the friendly persona (capitalised form).
+  ///
+  /// In en, this message translates to:
+  /// **'Friendly Admissions Officer'**
+  String get personaFriendlyCaps;
+
+  /// Dropdown label for the strict persona (capitalised form).
+  ///
+  /// In en, this message translates to:
+  /// **'Strict Professor'**
+  String get personaStrictCaps;
+
+  /// Dropdown label for the impatient persona (capitalised form).
+  ///
+  /// In en, this message translates to:
+  /// **'Impatient Visa Officer'**
+  String get personaImpatientCaps;
+
+  /// SnackBar shown when microphone permission is permanently denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone is blocked in system settings.'**
+  String get micBlockedInSettings;
+
+  /// Deep-link to OS app-settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSettings;
+
+  /// Generic error message used in several training-flow loading states.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String genericError(Object error);
+
+  /// Error string when applications provider errors in the picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading applications: {error}'**
+  String errorLoadingApplications(Object error);
+
+  /// Short empty-state hint inside the InterviewSetupView university picker.
+  ///
+  /// In en, this message translates to:
+  /// **'No applications yet — go to the Applications tab to add one.'**
+  String get noAppsInlineHint;
+
+  /// AdvancedDraftingWorkspace AI status — no draft yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for input...'**
+  String get aiStatusWaiting;
+
+  /// AdvancedDraftingWorkspace AI status — rate-cap is in effect.
+  ///
+  /// In en, this message translates to:
+  /// **'AI cooling down…'**
+  String get aiStatusCoolingDown;
+
+  /// AdvancedDraftingWorkspace AI status — supervise-draft in flight.
+  ///
+  /// In en, this message translates to:
+  /// **'AI analyzing...'**
+  String get aiStatusAnalyzing;
+
+  /// AdvancedDraftingWorkspace AI status — supervise returned empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get aiStatusReady;
+
+  /// AdvancedDraftingWorkspace AI status — ghost-text available.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Predicting...'**
+  String get aiStatusPredicting;
+
+  /// AdvancedDraftingWorkspace AI status — issues but no ghost text.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Supervision Active'**
+  String get aiStatusSupervisionActive;
+
+  /// Header above the drafting TextField.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get workspaceTitle;
+
+  /// Right-aligned analyze action in the workspace header.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze'**
+  String get workspaceAnalyzeButton;
+
+  /// Label above the list of grammar-fix chips.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Supervision Warnings:'**
+  String get aiSupervisionWarningsTitle;
+
+  /// Action-chip body inside the AI Supervision Warnings list.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace "{original}" with "{suggestion}"'**
+  String grammarReplaceWith(String original, String suggestion);
+
+  /// TextField hint inside AdvancedDraftingWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your {documentTitle} here...'**
+  String draftingHint(String documentTitle);
+
+  /// Semantic label on the ghost-text suggestion preview.
+  ///
+  /// In en, this message translates to:
+  /// **'AI suggestion — tap to insert'**
+  String get ghostSuggestionSemantics;
+
+  /// Accept ghost suggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get ghostAccept;
+
+  /// Dismiss ghost suggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss suggestion'**
+  String get ghostDismiss;
+
+  /// AppBar tooltip for the past-drafts action.
+  ///
+  /// In en, this message translates to:
+  /// **'Past drafts'**
+  String get pastDraftsTooltip;
+
+  /// AppBar tooltip for the per-session settings popup menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Session settings'**
+  String get sessionSettingsTooltip;
+
+  /// PopupMenuItem to switch track to English.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch track → English'**
+  String get switchTrackEnglish;
+
+  /// PopupMenuItem to switch track to Korean.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch track → Korean'**
+  String get switchTrackKorean;
+
+  /// Primary CTA on the StudyPlanScreen session-list.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Session'**
+  String get createNewSession;
+
+  /// Section header above the past-drafts list on StudyPlanScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Saved Drafts'**
+  String get yourSavedDrafts;
+
+  /// Empty-state body inside the past-drafts list on StudyPlanScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous drafts found.'**
+  String get noPreviousDrafts;
+
+  /// Fallback university name when a draft has no target uni.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get generalDraftLabel;
+
+  /// Inline-use document name for Study Plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Plan'**
+  String get studyPlanDocumentName;
+
+  /// Inline-use document name for Personal Statement.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Statement'**
+  String get personalStatementDocumentName;
+
+  /// ListTile title in StudyPlanScreen's saved-drafts list.
+  ///
+  /// In en, this message translates to:
+  /// **'{universityName} {documentName}'**
+  String savedDraftItemTitle(String universityName, String documentName);
+
+  /// ListTile subtitle in StudyPlanScreen's saved-drafts list.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String sessionStatusLabel(String status);
+
+  /// AlertDialog title for the delete-session confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Session'**
+  String get deleteSessionTitle;
+
+  /// AlertDialog body for the delete-session confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this session? This action cannot be undone.'**
+  String get deleteSessionBody;
+
+  /// Generic delete button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteLabel;
+
+  /// Step 1 label in the StudyPlanScreen wizard stepper.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide'**
+  String get stepperLabelGuide;
+
+  /// Step 2 label.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get stepperLabelExample;
+
+  /// Step 3 label.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get stepperLabelDraft;
+
+  /// Step 4 label.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get stepperLabelFeedback;
+
+  /// CTA at the bottom of Step 1 (Guide) advancing to Step 2.
+  ///
+  /// In en, this message translates to:
+  /// **'Read Examples'**
+  String get readExamplesButton;
+
+  /// Section header above the chosen-university row on Step 2.
+  ///
+  /// In en, this message translates to:
+  /// **'Target University'**
+  String get targetUniversityLabel;
+
+  /// CTA at the bottom of Step 2 (Example) advancing to Step 3.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Drafting'**
+  String get startDraftingButton;
+
+  /// Create-session AlertDialog title for study_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Start New Study Plan'**
+  String get newStudyPlanDialogTitle;
+
+  /// Create-session AlertDialog title for personal_statement.
+  ///
+  /// In en, this message translates to:
+  /// **'Start New Personal Statement'**
+  String get newPersonalStatementDialogTitle;
+
+  /// Step header inside the StudyPlanScreen create-session dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Select Target University'**
+  String get selectTargetUniversityStep;
+
+  /// Step header inside the StudyPlanScreen create-session dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Select Language Track'**
+  String get selectLanguageTrackStep;
+
+  /// Primary CTA in the StudyPlanScreen create-session dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Session'**
+  String get createSession;
+
+  /// Header for the embassy-template AI example card.
+  ///
+  /// In en, this message translates to:
+  /// **'Embassy Example'**
+  String get aiExampleEmbassyTitle;
+
+  /// Header for the university-template AI example card.
+  ///
+  /// In en, this message translates to:
+  /// **'Example for {universityName}'**
+  String aiExampleUniversityTitle(String universityName);
+
+  /// Subtitle inside the embassy-template AI example card.
+  ///
+  /// In en, this message translates to:
+  /// **'Embassy of the Republic of Korea (Visa)'**
+  String get aiExampleEmbassyLabel;
+
+  /// Inline loading text inside the AI example card.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is writing an example...'**
+  String get aiExampleWritingPlaceholder;
+
+  /// Copy-to-clipboard button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyButton;
+
+  /// SnackBar after copying.
+  ///
+  /// In en, this message translates to:
+  /// **'Text copied!'**
+  String get copiedSnackbar;
+
+  /// Section header on Step 4 (Feedback).
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis & Feedback'**
+  String get analysisFeedbackTitle;
+
+  /// Empty-state body on Step 4 (Feedback).
+  ///
+  /// In en, this message translates to:
+  /// **'No analysis generated yet.'**
+  String get noAnalysisYet;
+
+  /// Fallback body on Step 4 (Feedback).
+  ///
+  /// In en, this message translates to:
+  /// **'AI successfully reviewed your draft.'**
+  String get aiReviewedDraft;
+
+  /// CTA at the bottom of Step 4 (Feedback).
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Drafting'**
+  String get returnToDrafting;
+
+  /// AppBar title for StudyPlanHistoryView (study_plan).
+  ///
+  /// In en, this message translates to:
+  /// **'Study Plan history'**
+  String get studyPlanHistoryTitle;
+
+  /// AppBar title for StudyPlanHistoryView (personal_statement).
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Statement history'**
+  String get personalStatementHistoryTitle;
+
+  /// AppBar title for StudyPlanHistoryView (other).
+  ///
+  /// In en, this message translates to:
+  /// **'Drafting history'**
+  String get draftingHistoryTitle;
+
+  /// Empty-state title on StudyPlanHistoryView.
+  ///
+  /// In en, this message translates to:
+  /// **'No past drafts yet'**
+  String get noPastDraftsYet;
+
+  /// Empty-state body on StudyPlanHistoryView.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new session and your drafts will appear here, ordered by most recently edited.'**
+  String get noPastDraftsBody;
+
+  /// Fallback on a session card.
+  ///
+  /// In en, this message translates to:
+  /// **'No target university'**
+  String get noTargetUniversity;
+
+  /// Step pill on a session card.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step}'**
+  String sessionStepLabel(int step);
+
+  /// Word-count label in LiveMetricsBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Words'**
+  String get metricWords;
+
+  /// Character-count label in LiveMetricsBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters'**
+  String get metricCharacters;
+
+  /// LiveMetricsBar save-status tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved'**
+  String get saveStatusUnsaved;
+
+  /// LiveMetricsBar save-status tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get saveStatusSaving;
+
+  /// LiveMetricsBar save-status tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saveStatusSaved;
+
+  /// LiveMetricsBar save-status tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed'**
+  String get saveStatusError;
+
+  /// AppBar title on InterviewScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview Practice'**
+  String get interviewPracticeTitle;
+
+  /// Loading caption on InterviewScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up your interview...'**
+  String get interviewSettingUp;
+
+  /// Header on the full InterviewSetupView.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Interview Setup'**
+  String get interviewSetupTitle;
+
+  /// Subtitle under InterviewSetupView header.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure your AI interviewer settings before starting.'**
+  String get interviewSetupSubtitle;
+
+  /// Field label for the sessionType dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview Type'**
+  String get interviewTypeLabel;
+
+  /// sessionType — general.
+  ///
+  /// In en, this message translates to:
+  /// **'General Introduction'**
+  String get interviewTypeGeneral;
+
+  /// sessionType — university_specific.
+  ///
+  /// In en, this message translates to:
+  /// **'University Specific'**
+  String get interviewTypeUniversitySpecific;
+
+  /// sessionType — visa.
+  ///
+  /// In en, this message translates to:
+  /// **'Visa / Embassy Check'**
+  String get interviewTypeVisa;
+
+  /// Field label for the uni-picker on InterviewSetupView.
+  ///
+  /// In en, this message translates to:
+  /// **'Target university'**
+  String get targetUniversityFieldLabel;
+
+  /// Field label for the language-track picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageLabel;
+
+  /// Field label for the persona dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Interviewer Persona'**
+  String get interviewerPersonaLabel;
+
+  /// Field label for the focus-topic TextField.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus Topic (Optional)'**
+  String get focusTopicLabel;
+
+  /// TextField hint for the focus-topic field.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Discussing my computer science major...'**
+  String get focusTopicHint;
+
+  /// Switch tile title.
+  ///
+  /// In en, this message translates to:
+  /// **'Timed Mode'**
+  String get timedModeTitle;
+
+  /// Switch tile subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'5 minute strict limit'**
+  String get timedModeSubtitle;
+
+  /// Primary CTA on InterviewSetupView.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Practice'**
+  String get startPracticeButton;
+
+  /// Hint under a disabled Start Practice button.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a target university above to enable.'**
+  String get pickUniversityFirstHint;
+
+  /// Coaching warning shown in InterviewActiveView.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid using filler words!'**
+  String get coachingFiller;
+
+  /// Header above the live-hints panel in InterviewActiveView.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Lifeline Hints:'**
+  String get lifelineHintsTitle;
+
+  /// Speaker label — interviewer.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get speakerAi;
+
+  /// Speaker label — user.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get speakerYou;
+
+  /// Error message on a Vapi status-update error.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection interrupted: {detail}'**
+  String connectionInterrupted(String detail);
+
+  /// Header on InterviewAnalyticsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview Analytics'**
+  String get interviewAnalyticsTitle;
+
+  /// Loading caption on InterviewAnalyticsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing transcript with AI...'**
+  String get analyzingTranscript;
+
+  /// Fallback on InterviewAnalyticsView when feedback is null.
+  ///
+  /// In en, this message translates to:
+  /// **'No feedback available.'**
+  String get noFeedbackAvailable;
+
+  /// Big-score card header on InterviewAnalyticsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Score'**
+  String get overallScoreLabel;
+
+  /// Per-metric label on InterviewAnalyticsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication'**
+  String get metricCommunication;
+
+  /// Per-metric label.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidence'**
+  String get metricConfidence;
+
+  /// Per-metric label.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get metricContent;
+
+  /// Per-metric label.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get metricLanguage;
+
+  /// Section header on InterviewAnalyticsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed Feedback'**
+  String get detailedFeedbackTitle;
+
+  /// Fallback body when feedback has no detailed_feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Great job.'**
+  String get detailedFeedbackFallback;
+
+  /// Section header on InterviewAnalyticsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Strengths'**
+  String get strengthsLabel;
+
+  /// Section header on InterviewAnalyticsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Areas to Improve'**
+  String get areasToImproveLabel;
+
+  /// CTA at the bottom of InterviewAnalyticsView.
+  ///
+  /// In en, this message translates to:
+  /// **'Start another interview'**
+  String get startAnotherInterview;
+
+  /// Header on the audio player widget.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Recording'**
+  String get sessionRecording;
+
+  /// Error string when fetchRecordingUrl returns null.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio recording not found.'**
+  String get audioRecordingNotFound;
+
+  /// Header on InterviewHistoryView.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview History'**
+  String get interviewHistoryTitle;
+
+  /// Empty-state on InterviewHistoryView.
+  ///
+  /// In en, this message translates to:
+  /// **'No past interviews found.'**
+  String get noPastInterviews;
+
+  /// Fallback target name on a session card.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Target'**
+  String get unknownTarget;
+
+  /// Fallback target name on a session card.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown University'**
+  String get unknownUniversity;
+
+  /// SnackBar shown when an abandoned session is tapped.
+  ///
+  /// In en, this message translates to:
+  /// **'This session ended without feedback — no replay available.'**
+  String get abandonedSessionNote;
+
+  /// SnackBar shown when an in-progress session is tapped.
+  ///
+  /// In en, this message translates to:
+  /// **'This session is still active. Finish it to see feedback.'**
+  String get activeSessionNote;
+
+  /// IconButton tooltip on InterviewHistoryView session cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session'**
+  String get deleteSessionTooltip;
+
+  /// AlertDialog title for the delete-session confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this session?'**
+  String get deleteInterviewDialogTitle;
+
+  /// AlertDialog body for the delete-session confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'The feedback and recording link will be permanently removed.'**
+  String get deleteInterviewDialogBody;
+
+  /// SnackBar shown when the delete-interview-session RPC throws.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String deleteFailed(Object error);
 }
 
 class _AppLocalizationsDelegate

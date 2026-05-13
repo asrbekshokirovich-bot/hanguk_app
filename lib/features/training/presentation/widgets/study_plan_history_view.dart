@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../data/study_plan_repository.dart';
 import '../study_plan_screen.dart';
 
@@ -35,14 +36,14 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
     });
   }
 
-  String get _title {
+  String _localizedTitle(AppLocalizations l) {
     switch (widget.documentType) {
       case 'study_plan':
-        return 'Study Plan history';
+        return l.studyPlanHistoryTitle;
       case 'personal_statement':
-        return 'Personal Statement history';
+        return l.personalStatementHistoryTitle;
       default:
-        return 'Drafting history';
+        return l.draftingHistoryTitle;
     }
   }
 
@@ -69,6 +70,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final state = ref.watch(documentSessionProvider(widget.documentType));
 
     return Scaffold(
@@ -77,7 +79,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          _title,
+          _localizedTitle(l),
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -95,6 +97,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
   }
 
   Widget _buildBody(StudyPlanSessionState state) {
+    final l = AppLocalizations.of(context)!;
     if (state.isSessionsLoading && state.sessions.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.vibrantLime),
@@ -109,19 +112,18 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
           const SizedBox(height: 16),
           Center(
             child: Text(
-              'No past drafts yet',
+              l.noPastDraftsYet,
               style: TextStyle(color: Colors.white.withOpacity(0.6)),
             ),
           ),
           const SizedBox(height: 8),
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'Start a new session and your drafts will appear here, '
-                'ordered by most recently edited.',
+                l.noPastDraftsBody,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white38, fontSize: 12),
+                style: const TextStyle(color: Colors.white38, fontSize: 12),
               ),
             ),
           ),
@@ -137,6 +139,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
   }
 
   Widget _buildSessionCard(StudyPlanSession session) {
+    final l = AppLocalizations.of(context)!;
     return Material(
       color: Colors.white.withOpacity(0.04),
       borderRadius: BorderRadius.circular(16),
@@ -161,7 +164,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
                 children: [
                   Expanded(
                     child: Text(
-                      session.universityNameEn ?? 'No target university',
+                      session.universityNameEn ?? l.noTargetUniversity,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
@@ -197,7 +200,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
                       size: 14, color: Colors.white38),
                   const SizedBox(width: 4),
                   Text(
-                    'Step ${session.currentStep}',
+                    l.sessionStepLabel(session.currentStep),
                     style: const TextStyle(color: Colors.white60, fontSize: 12),
                   ),
                   const SizedBox(width: 14),

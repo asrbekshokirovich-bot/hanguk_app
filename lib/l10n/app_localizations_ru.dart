@@ -328,4 +328,418 @@ class AppLocalizationsRu extends AppLocalizations {
   String notifSettingsUpdateError(Object error) {
     return 'Could not update preference: $error';
   }
+
+  @override
+  String get interviewDialogStepUniversity => '1. Select Target University';
+
+  @override
+  String get interviewDialogStepTrack => '2. Select Interview Track';
+
+  @override
+  String get interviewDialogStepPersona => '3. Interviewer Persona';
+
+  @override
+  String get interviewNoAppsBody =>
+      'Add a target university first — interview practice tailors questions to that school.';
+
+  @override
+  String get trackKorean => 'Korean';
+
+  @override
+  String get trackEnglish => 'English';
+
+  @override
+  String get personaFriendly => 'Friendly admissions officer';
+
+  @override
+  String get personaStrict => 'Strict professor';
+
+  @override
+  String get personaImpatient => 'Impatient visa officer';
+
+  @override
+  String get personaFriendlyCaps => 'Friendly Admissions Officer';
+
+  @override
+  String get personaStrictCaps => 'Strict Professor';
+
+  @override
+  String get personaImpatientCaps => 'Impatient Visa Officer';
+
+  @override
+  String get micBlockedInSettings =>
+      'Microphone is blocked in system settings.';
+
+  @override
+  String get openSettings => 'Open settings';
+
+  @override
+  String genericError(Object error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String errorLoadingApplications(Object error) {
+    return 'Error loading applications: $error';
+  }
+
+  @override
+  String get noAppsInlineHint =>
+      'No applications yet — go to the Applications tab to add one.';
+
+  @override
+  String get aiStatusWaiting => 'Waiting for input...';
+
+  @override
+  String get aiStatusCoolingDown => 'AI cooling down…';
+
+  @override
+  String get aiStatusAnalyzing => 'AI analyzing...';
+
+  @override
+  String get aiStatusReady => 'Ready';
+
+  @override
+  String get aiStatusPredicting => 'AI Predicting...';
+
+  @override
+  String get aiStatusSupervisionActive => 'AI Supervision Active';
+
+  @override
+  String get workspaceTitle => 'Workspace';
+
+  @override
+  String get workspaceAnalyzeButton => 'Analyze';
+
+  @override
+  String get aiSupervisionWarningsTitle => 'AI Supervision Warnings:';
+
+  @override
+  String grammarReplaceWith(String original, String suggestion) {
+    return 'Replace "$original" with "$suggestion"';
+  }
+
+  @override
+  String draftingHint(String documentTitle) {
+    return 'Type your $documentTitle here...';
+  }
+
+  @override
+  String get ghostSuggestionSemantics => 'AI suggestion — tap to insert';
+
+  @override
+  String get ghostAccept => 'Accept';
+
+  @override
+  String get ghostDismiss => 'Dismiss suggestion';
+
+  @override
+  String get pastDraftsTooltip => 'Past drafts';
+
+  @override
+  String get sessionSettingsTooltip => 'Session settings';
+
+  @override
+  String get switchTrackEnglish => 'Switch track → English';
+
+  @override
+  String get switchTrackKorean => 'Switch track → Korean';
+
+  @override
+  String get createNewSession => 'Create New Session';
+
+  @override
+  String get yourSavedDrafts => 'Your Saved Drafts';
+
+  @override
+  String get noPreviousDrafts => 'No previous drafts found.';
+
+  @override
+  String get generalDraftLabel => 'General';
+
+  @override
+  String get studyPlanDocumentName => 'Study Plan';
+
+  @override
+  String get personalStatementDocumentName => 'Personal Statement';
+
+  @override
+  String savedDraftItemTitle(String universityName, String documentName) {
+    return '$universityName $documentName';
+  }
+
+  @override
+  String sessionStatusLabel(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String get deleteSessionTitle => 'Delete Session';
+
+  @override
+  String get deleteSessionBody =>
+      'Are you sure you want to delete this session? This action cannot be undone.';
+
+  @override
+  String get deleteLabel => 'Delete';
+
+  @override
+  String get stepperLabelGuide => 'Guide';
+
+  @override
+  String get stepperLabelExample => 'Example';
+
+  @override
+  String get stepperLabelDraft => 'Draft';
+
+  @override
+  String get stepperLabelFeedback => 'Feedback';
+
+  @override
+  String get readExamplesButton => 'Read Examples';
+
+  @override
+  String get targetUniversityLabel => 'Target University';
+
+  @override
+  String get startDraftingButton => 'Start Drafting';
+
+  @override
+  String get newStudyPlanDialogTitle => 'Start New Study Plan';
+
+  @override
+  String get newPersonalStatementDialogTitle => 'Start New Personal Statement';
+
+  @override
+  String get selectTargetUniversityStep => '1. Select Target University';
+
+  @override
+  String get selectLanguageTrackStep => '2. Select Language Track';
+
+  @override
+  String get createSession => 'Create Session';
+
+  @override
+  String get aiExampleEmbassyTitle => 'Embassy Example';
+
+  @override
+  String aiExampleUniversityTitle(String universityName) {
+    return 'Example for $universityName';
+  }
+
+  @override
+  String get aiExampleEmbassyLabel => 'Embassy of the Republic of Korea (Visa)';
+
+  @override
+  String get aiExampleWritingPlaceholder => 'AI is writing an example...';
+
+  @override
+  String get copyButton => 'Copy';
+
+  @override
+  String get copiedSnackbar => 'Text copied!';
+
+  @override
+  String get analysisFeedbackTitle => 'Analysis & Feedback';
+
+  @override
+  String get noAnalysisYet => 'No analysis generated yet.';
+
+  @override
+  String get aiReviewedDraft => 'AI successfully reviewed your draft.';
+
+  @override
+  String get returnToDrafting => 'Return to Drafting';
+
+  @override
+  String get studyPlanHistoryTitle => 'Study Plan history';
+
+  @override
+  String get personalStatementHistoryTitle => 'Personal Statement history';
+
+  @override
+  String get draftingHistoryTitle => 'Drafting history';
+
+  @override
+  String get noPastDraftsYet => 'No past drafts yet';
+
+  @override
+  String get noPastDraftsBody =>
+      'Start a new session and your drafts will appear here, ordered by most recently edited.';
+
+  @override
+  String get noTargetUniversity => 'No target university';
+
+  @override
+  String sessionStepLabel(int step) {
+    return 'Step $step';
+  }
+
+  @override
+  String get metricWords => 'Words';
+
+  @override
+  String get metricCharacters => 'Characters';
+
+  @override
+  String get saveStatusUnsaved => 'Unsaved';
+
+  @override
+  String get saveStatusSaving => 'Saving...';
+
+  @override
+  String get saveStatusSaved => 'Saved';
+
+  @override
+  String get saveStatusError => 'Save failed';
+
+  @override
+  String get interviewPracticeTitle => 'Interview Practice';
+
+  @override
+  String get interviewSettingUp => 'Setting up your interview...';
+
+  @override
+  String get interviewSetupTitle => 'AI Interview Setup';
+
+  @override
+  String get interviewSetupSubtitle =>
+      'Configure your AI interviewer settings before starting.';
+
+  @override
+  String get interviewTypeLabel => 'Interview Type';
+
+  @override
+  String get interviewTypeGeneral => 'General Introduction';
+
+  @override
+  String get interviewTypeUniversitySpecific => 'University Specific';
+
+  @override
+  String get interviewTypeVisa => 'Visa / Embassy Check';
+
+  @override
+  String get targetUniversityFieldLabel => 'Target university';
+
+  @override
+  String get languageLabel => 'Language';
+
+  @override
+  String get interviewerPersonaLabel => 'Interviewer Persona';
+
+  @override
+  String get focusTopicLabel => 'Focus Topic (Optional)';
+
+  @override
+  String get focusTopicHint => 'e.g. Discussing my computer science major...';
+
+  @override
+  String get timedModeTitle => 'Timed Mode';
+
+  @override
+  String get timedModeSubtitle => '5 minute strict limit';
+
+  @override
+  String get startPracticeButton => 'Start Practice';
+
+  @override
+  String get pickUniversityFirstHint =>
+      'Pick a target university above to enable.';
+
+  @override
+  String get coachingFiller => 'Avoid using filler words!';
+
+  @override
+  String get lifelineHintsTitle => '💡 Lifeline Hints:';
+
+  @override
+  String get speakerAi => 'AI';
+
+  @override
+  String get speakerYou => 'You';
+
+  @override
+  String connectionInterrupted(String detail) {
+    return 'Connection interrupted: $detail';
+  }
+
+  @override
+  String get interviewAnalyticsTitle => 'Interview Analytics';
+
+  @override
+  String get analyzingTranscript => 'Analyzing transcript with AI...';
+
+  @override
+  String get noFeedbackAvailable => 'No feedback available.';
+
+  @override
+  String get overallScoreLabel => 'Overall Score';
+
+  @override
+  String get metricCommunication => 'Communication';
+
+  @override
+  String get metricConfidence => 'Confidence';
+
+  @override
+  String get metricContent => 'Content';
+
+  @override
+  String get metricLanguage => 'Language';
+
+  @override
+  String get detailedFeedbackTitle => 'Detailed Feedback';
+
+  @override
+  String get detailedFeedbackFallback => 'Great job.';
+
+  @override
+  String get strengthsLabel => 'Strengths';
+
+  @override
+  String get areasToImproveLabel => 'Areas to Improve';
+
+  @override
+  String get startAnotherInterview => 'Start another interview';
+
+  @override
+  String get sessionRecording => 'Session Recording';
+
+  @override
+  String get audioRecordingNotFound => 'Audio recording not found.';
+
+  @override
+  String get interviewHistoryTitle => 'Interview History';
+
+  @override
+  String get noPastInterviews => 'No past interviews found.';
+
+  @override
+  String get unknownTarget => 'Unknown Target';
+
+  @override
+  String get unknownUniversity => 'Unknown University';
+
+  @override
+  String get abandonedSessionNote =>
+      'This session ended without feedback — no replay available.';
+
+  @override
+  String get activeSessionNote =>
+      'This session is still active. Finish it to see feedback.';
+
+  @override
+  String get deleteSessionTooltip => 'Delete session';
+
+  @override
+  String get deleteInterviewDialogTitle => 'Delete this session?';
+
+  @override
+  String get deleteInterviewDialogBody =>
+      'The feedback and recording link will be permanently removed.';
+
+  @override
+  String deleteFailed(Object error) {
+    return 'Delete failed: $error';
+  }
 }

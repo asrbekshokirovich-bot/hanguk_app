@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../data/interview_repository.dart';
 import 'interview_analytics_view.dart';
 
@@ -36,6 +37,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Container(
       color: AppColors.backgroundNavy,
       child: SafeArea(
@@ -49,9 +51,13 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const Text(
-                    'Interview History',
-                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  Text(
+                    l.interviewHistoryTitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -66,7 +72,12 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                             children: [
                               Icon(Icons.history, size: 64, color: Colors.white.withOpacity(0.2)),
                               const SizedBox(height: 16),
-                              Text('No past interviews found.', style: TextStyle(color: Colors.white.withOpacity(0.6))),
+                              Text(
+                                l.noPastInterviews,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.6),
+                                ),
+                              ),
                             ],
                           ),
                         )
@@ -90,7 +101,8 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
   }
 
   Widget _buildSessionCard(Map<String, dynamic> session) {
-    String uniName = 'Unknown Target';
+    final l = AppLocalizations.of(context)!;
+    String uniName = l.unknownTarget;
     // Phase 3R-B renamed the FK column from `target_university_id` to
     // `target_institution_id`; the embed-relation alias in
     // InterviewNotifier.getSessionHistory() now reads `institution`.
@@ -103,7 +115,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
       final ko = inst['name_ko'] as String?;
       uniName = (en != null && en.isNotEmpty)
           ? en
-          : ((ko != null && ko.isNotEmpty) ? ko : 'Unknown University');
+          : ((ko != null && ko.isNotEmpty) ? ko : l.unknownUniversity);
     }
 
     final createdAt = DateTime.parse(session['created_at']).toLocal();
@@ -134,8 +146,8 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
             SnackBar(
               content: Text(
                 isAbandoned
-                    ? 'This session ended without feedback — no replay available.'
-                    : 'This session is still active. Finish it to see feedback.',
+                    ? l.abandonedSessionNote
+                    : l.activeSessionNote,
               ),
             ),
           );
@@ -195,7 +207,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
             // Audit H2: deletion. Confirms first because the row is gone
             // for good.
             IconButton(
-              tooltip: 'Delete session',
+              tooltip: l.deleteSessionTooltip,
               icon: const Icon(Icons.delete_outline, color: Colors.white38, size: 20),
               onPressed: () => _confirmDelete(session['id'] as String),
             ),
@@ -207,28 +219,37 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
   }
 
   Future<void> _confirmDelete(String sessionId) async {
+    final l = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.backgroundNavy,
-        title: const Text('Delete this session?',
-            style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'The feedback and recording link will be permanently removed.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+      builder: (ctx) {
+        final dl = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          backgroundColor: AppColors.backgroundNavy,
+          title: Text(
+            dl.deleteInterviewDialogTitle,
+            style: const TextStyle(color: Colors.white),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+          content: Text(
+            dl.deleteInterviewDialogBody,
+            style: const TextStyle(color: Colors.white70),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                dl.cancel,
+                style: const TextStyle(color: Colors.white54),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(dl.deleteLabel),
+            ),
+          ],
+        );
+      },
     );
     if (ok != true) return;
     try {
@@ -240,7 +261,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
     } on Exception catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Delete failed: $e')),
+        SnackBar(content: Text(l.deleteFailed(e))),
       );
     }
   }

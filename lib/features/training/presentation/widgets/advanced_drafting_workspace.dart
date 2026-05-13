@@ -4,10 +4,23 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../data/grammar_issue_resolver.dart' as resolver;
 import '../../data/study_plan_repository.dart';
 import 'ai_highlighting_text_controller.dart';
 import 'live_metrics_bar.dart';
+
+/// Sentinel tags for the AI workspace status indicator. We store a tag
+/// (not a translated string) so the on-screen status follows the current
+/// locale across rebuilds — i18n phase 3.
+enum _AiStatus {
+  waiting,
+  coolingDown,
+  analyzing,
+  ready,
+  predicting,
+  supervisionActive,
+}
 
 class AdvancedDraftingWorkspace extends ConsumerStatefulWidget {
   final String initialText;
@@ -48,7 +61,7 @@ class _AdvancedDraftingWorkspaceState
   int _wordCount = 0;
   int _charCount = 0;
 
-  String _aiContextStatus = "Waiting for input...";
+  _AiStatus _aiContextStatus = _AiStatus.waiting;
   List<GrammarIssue> _activeIssues = [];
 
   @override
@@ -150,7 +163,7 @@ class _AdvancedDraftingWorkspaceState
     if (text.trim().isEmpty) {
       if (mounted) {
         setState(() {
-          _aiContextStatus = "Waiting for input...";
+          _aiContextStatus = _AiStatus.waiting;
           _activeIssues = [];
           _controller.setIssues([]);
           _controller.setGhostText(null);
@@ -167,7 +180,7 @@ class _AdvancedDraftingWorkspaceState
         now.difference(_lastAiCallAt!) < _aiMinInterval) {
       if (mounted) {
         setState(() {
-          _aiContextStatus = 'AI cooling down…';
+          _aiContextStatus = _AiStatus.coolingDown;
         });
       }
       return;
@@ -176,7 +189,7 @@ class _AdvancedDraftingWorkspaceState
 
     if (mounted) {
       setState(() {
-        _aiContextStatus = "AI analyzing...";
+        _aiContextStatus = _AiStatus.analyzing;
       });
     }
 
@@ -188,7 +201,7 @@ class _AdvancedDraftingWorkspaceState
 
     if (result == null || result.isEmpty) {
       setState(() {
-        _aiContextStatus = "Ready";
+        _aiContextStatus = _AiStatus.ready;
       });
       return;
     }
@@ -212,13 +225,24 @@ class _AdvancedDraftingWorkspaceState
 
     setState(() {
       _aiContextStatus = ghostText.isNotEmpty
-          ? "AI Predicting..."
-          : "AI Supervision Active";
+          ? _AiStatus.predicting
+          : _AiStatus.supervisionActive;
       _activeIssues = detectedIssues;
     });
 
     _controller.setIssues(detectedIssues);
     _controller.setGhostText(ghostText.isEmpty ? null : ghostText);
+  }
+
+  String _aiStatusText(AppLocalizations l) {
+    return switch (_aiContextStatus) {
+      _AiStatus.waiting => l.aiStatusWaiting,
+      _AiStatus.coolingDown => l.aiStatusCoolingDown,
+      _AiStatus.analyzing => l.aiStatusAnalyzing,
+      _AiStatus.ready => l.aiStatusReady,
+      _AiStatus.predicting => l.aiStatusPredicting,
+      _AiStatus.supervisionActive => l.aiStatusSupervisionActive,
+    };
   }
 
   void _acceptSuggestion() {
@@ -265,6 +289,7 @@ class _AdvancedDraftingWorkspaceState
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final state = ref.watch(documentSessionProvider(widget.documentType));
     final currentTrack = state.currentSession?.selectedTrack;
 
@@ -274,9 +299,9 @@ class _AdvancedDraftingWorkspaceState
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Workspace',
-              style: TextStyle(
+            Text(
+              l.workspaceTitle,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -304,7 +329,7 @@ class _AdvancedDraftingWorkspaceState
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
-                        _aiContextStatus,
+                        _aiStatusText(l),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                         style: const TextStyle(
@@ -333,9 +358,9 @@ class _AdvancedDraftingWorkspaceState
                     .read(studyPlanSessionProvider.notifier)
                     .updateSessionStep(widget.documentType, 4);
               },
-              child: const Text(
-                'Analyze',
-                style: TextStyle(
+              child: Text(
+                l.workspaceAnalyzeButton,
+                style: const TextStyle(
                   color: AppColors.royalBlue,
                   fontWeight: FontWeight.bold,
                 ),
@@ -356,17 +381,17 @@ class _AdvancedDraftingWorkspaceState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.warning_amber_rounded,
                       color: Colors.orangeAccent,
                       size: 18,
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
-                      'AI Supervision Warnings:',
-                      style: TextStyle(
+                      l.aiSupervisionWarningsTitle,
+                      style: const TextStyle(
                         color: Colors.orangeAccent,
                         fontWeight: FontWeight.bold,
                       ),
@@ -383,30 +408,14 @@ class _AdvancedDraftingWorkspaceState
                       side: BorderSide(
                         color: Colors.redAccent.withOpacity(0.5),
                       ),
-                      label: RichText(
-                        text: TextSpan(
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.white,
-                          ),
-                          children: [
-                            const TextSpan(text: 'Replace '),
-                            TextSpan(
-                              text: '"${issue.originalText}"',
-                              style: const TextStyle(
-                                color: Colors.redAccent,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                            const TextSpan(text: ' with '),
-                            TextSpan(
-                              text: '"${issue.suggestion}"',
-                              style: const TextStyle(
-                                color: AppColors.vibrantLime,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                      label: Text(
+                        l.grammarReplaceWith(
+                          issue.originalText,
+                          issue.suggestion,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.white,
                         ),
                       ),
                       onPressed: () => _applyGrammarFix(issue),
@@ -465,8 +474,9 @@ class _AdvancedDraftingWorkspaceState
                   ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText:
-                        'Type your ${widget.documentTitle.toLowerCase()} here...',
+                    hintText: l.draftingHint(
+                      widget.documentTitle.toLowerCase(),
+                    ),
                     hintStyle: const TextStyle(color: Colors.white30),
                   ),
                 ),
@@ -523,6 +533,7 @@ class _GhostSuggestionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
@@ -560,7 +571,7 @@ class _GhostSuggestionBar extends StatelessWidget {
                             Expanded(
                               child: Semantics(
                                 button: true,
-                                label: 'AI suggestion — tap to insert',
+                                label: l.ghostSuggestionSemantics,
                                 child: Text(
                                   ghost,
                                   maxLines: 2,
@@ -580,7 +591,7 @@ class _GhostSuggestionBar extends StatelessWidget {
                             TextButton.icon(
                               onPressed: onAccept,
                               icon: const Icon(Icons.check, size: 16),
-                              label: const Text('Accept'),
+                              label: Text(l.ghostAccept),
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.vibrantLime,
                                 backgroundColor: AppColors.vibrantLime
@@ -600,7 +611,7 @@ class _GhostSuggestionBar extends StatelessWidget {
                               onPressed: () => controller.setGhostText(null),
                               icon: const Icon(Icons.close, size: 18),
                               color: Colors.white70,
-                              tooltip: 'Dismiss suggestion',
+                              tooltip: l.ghostDismiss,
                               constraints: const BoxConstraints(
                                 minWidth: 48,
                                 minHeight: 48,

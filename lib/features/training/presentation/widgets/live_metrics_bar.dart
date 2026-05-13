@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Status tags consumed by [LiveMetricsBar]. `error` was added 2026-05-10
 /// (audit U1/A5) so save failures surface to the user instead of silently
@@ -23,6 +24,7 @@ class LiveMetricsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -34,16 +36,16 @@ class LiveMetricsBar extends StatelessWidget {
         children: [
           Row(
             children: [
-              _buildMetric('Words', wordCount.toString()),
+              _buildMetric(l.metricWords, wordCount.toString()),
               const SizedBox(width: 16),
-              _buildMetric('Characters', charCount.toString()),
+              _buildMetric(l.metricCharacters, charCount.toString()),
               if (track != null) ...[
                 const SizedBox(width: 16),
                 _buildTrackIndicator(track!),
               ],
             ],
           ),
-          _buildSaveStatus(),
+          _buildSaveStatus(l),
         ],
       ),
     );
@@ -68,7 +70,7 @@ class LiveMetricsBar extends StatelessWidget {
     );
   }
 
-  Widget _buildSaveStatus() {
+  Widget _buildSaveStatus(AppLocalizations l) {
     IconData icon;
     Color color;
     String text;
@@ -77,22 +79,22 @@ class LiveMetricsBar extends StatelessWidget {
       case SaveStatus.unsaved:
         icon = Icons.edit_outlined;
         color = Colors.white54;
-        text = 'Unsaved';
+        text = l.saveStatusUnsaved;
         break;
       case SaveStatus.saving:
         icon = Icons.cloud_upload_outlined;
         color = Colors.orangeAccent;
-        text = 'Saving...';
+        text = l.saveStatusSaving;
         break;
       case SaveStatus.saved:
         icon = Icons.cloud_done_outlined;
         color = AppColors.vibrantLime;
-        text = 'Saved';
+        text = l.saveStatusSaved;
         break;
       case SaveStatus.error:
         icon = Icons.cloud_off_outlined;
         color = Colors.redAccent;
-        text = 'Save failed';
+        text = l.saveStatusError;
         break;
     }
 
