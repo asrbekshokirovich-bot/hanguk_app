@@ -24,7 +24,7 @@ class AdaptiveTextField extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
       );
     }
-    
+
     return TextField(
       controller: controller,
       decoration: InputDecoration(

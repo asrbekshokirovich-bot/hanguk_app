@@ -20,23 +20,24 @@ class ReviewQueueItem {
   });
 
   factory ReviewQueueItem.fromMap(Map<String, dynamic> map) => ReviewQueueItem(
-        id: map['id'] as String,
-        targetTable: map['target_table'] as String? ?? '',
-        targetId: map['target_id'] as String? ?? '',
-        priority: (map['priority'] as num?)?.toInt() ?? 5,
-        queuedAt: DateTime.tryParse(map['queued_at']?.toString() ?? '') ?? DateTime.now(),
-        payload: (map['payload'] as Map?)?.cast<String, dynamic>() ?? const {},
-        institutionNameKo: map['institution_name_ko'] as String?,
-        institutionNameKoShort: map['institution_name_ko_short'] as String?,
-        archetype: map['archetype'] as String?,
-        fieldGroup: map['field_group'] as String?,
-        documentId: map['document_id'] as String?,
-        pdfSignedUrl: map['pdf_signed_url'] as String?,
-        slaDeadline: map['sla_deadline'] != null
-            ? DateTime.tryParse(map['sla_deadline'].toString())
-            : null,
-        assignedReviewerId: map['assigned_reviewer_id'] as String?,
-      );
+    id: map['id'] as String,
+    targetTable: map['target_table'] as String? ?? '',
+    targetId: map['target_id'] as String? ?? '',
+    priority: (map['priority'] as num?)?.toInt() ?? 5,
+    queuedAt:
+        DateTime.tryParse(map['queued_at']?.toString() ?? '') ?? DateTime.now(),
+    payload: (map['payload'] as Map?)?.cast<String, dynamic>() ?? const {},
+    institutionNameKo: map['institution_name_ko'] as String?,
+    institutionNameKoShort: map['institution_name_ko_short'] as String?,
+    archetype: map['archetype'] as String?,
+    fieldGroup: map['field_group'] as String?,
+    documentId: map['document_id'] as String?,
+    pdfSignedUrl: map['pdf_signed_url'] as String?,
+    slaDeadline: map['sla_deadline'] != null
+        ? DateTime.tryParse(map['sla_deadline'].toString())
+        : null,
+    assignedReviewerId: map['assigned_reviewer_id'] as String?,
+  );
 
   final String id;
   final String targetTable;
@@ -55,12 +56,12 @@ class ReviewQueueItem {
 
   /// Convenience: priority label per ADR-005 SLA grid.
   String get priorityLabel => switch (priority) {
-        1 => 'P1 — correction notice (4h)',
-        2 => 'P2 — attachment change (12h)',
-        3 => 'P3 — D3 field with diff (24h)',
-        4 => 'P4 — D2 routine (48h)',
-        _ => 'P5 — D1 trivial (96h)',
-      };
+    1 => 'P1 — correction notice (4h)',
+    2 => 'P2 — attachment change (12h)',
+    3 => 'P3 — D3 field with diff (24h)',
+    4 => 'P4 — D2 routine (48h)',
+    _ => 'P5 — D1 trivial (96h)',
+  };
 
   bool get isOverdue =>
       slaDeadline != null && slaDeadline!.isBefore(DateTime.now());

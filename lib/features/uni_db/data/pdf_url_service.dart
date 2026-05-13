@@ -37,7 +37,8 @@ class PdfUrlService {
     return PdfSignedUrl(
       signedUrl: signedUrl,
       expiresAt:
-          DateTime.tryParse(expiresAt) ?? DateTime.now().add(const Duration(minutes: 15)),
+          DateTime.tryParse(expiresAt) ??
+          DateTime.now().add(const Duration(minutes: 15)),
     );
   }
 }

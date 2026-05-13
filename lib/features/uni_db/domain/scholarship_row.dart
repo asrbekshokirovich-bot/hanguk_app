@@ -15,27 +15,29 @@ class ScholarshipRow {
   });
 
   factory ScholarshipRow.fromMap(Map<String, dynamic> map) => ScholarshipRow(
-        id: map['id'] as String,
-        scope: (map['scope'] as String?) ?? 'university',
-        nameKo: (map['name_ko'] as String?) ?? '',
-        nameEn: map['name_en'] as String?,
-        awardType: (map['award_type'] as String?) ?? '',
-        awardValue: (map['award_value'] as num?)?.toDouble(),
-        applicantCategories:
-            (map['applicant_categories'] as List?)?.cast<String>(),
-        topikTierTable: (map['topik_tier_table'] as Map?)?.cast<String, dynamic>(),
-        proseKo: map['prose_ko'] as String?,
-        extractorConfidence: (map['extractor_confidence'] as num?)?.toDouble(),
-      );
+    id: map['id'] as String,
+    scope: (map['scope'] as String?) ?? 'university',
+    nameKo: (map['name_ko'] as String?) ?? '',
+    nameEn: map['name_en'] as String?,
+    awardType: (map['award_type'] as String?) ?? '',
+    awardValue: (map['award_value'] as num?)?.toDouble(),
+    applicantCategories: (map['applicant_categories'] as List?)?.cast<String>(),
+    topikTierTable: (map['topik_tier_table'] as Map?)?.cast<String, dynamic>(),
+    proseKo: map['prose_ko'] as String?,
+    extractorConfidence: (map['extractor_confidence'] as num?)?.toDouble(),
+  );
 
   final String id;
-  final String scope; // 'national' | 'university' | 'department' | 'foundation' | 'regional'
+  final String
+  scope; // 'national' | 'university' | 'department' | 'foundation' | 'regional'
   final String nameKo;
   final String? nameEn;
-  final String awardType; // 'tuition_waiver_pct' | 'tuition_waiver_krw' | 'stipend_monthly' | 'airfare' | 'other'
+  final String
+  awardType; // 'tuition_waiver_pct' | 'tuition_waiver_krw' | 'stipend_monthly' | 'airfare' | 'other'
   final double? awardValue;
   final List<String>? applicantCategories;
-  final Map<String, dynamic>? topikTierTable; // e.g. {'4': 50, '5': 70, '6': 100}
+  final Map<String, dynamic>?
+  topikTierTable; // e.g. {'4': 50, '5': 70, '6': 100}
   final String? proseKo;
   final double? extractorConfidence;
 
@@ -43,17 +45,17 @@ class ScholarshipRow {
   String get awardLabel {
     final v = awardValue;
     return switch (awardType) {
-      'tuition_waiver_pct' => v != null
-          ? 'tuition ${v.toStringAsFixed(0)}% waiver'
-          : 'tuition waiver',
-      'tuition_waiver_krw' => v != null
-          ? 'tuition ₩${_thousands(v.round())} waiver'
-          : 'tuition waiver',
-      'stipend_monthly' => v != null
-          ? '₩${_thousands(v.round())}/mo stipend'
-          : 'monthly stipend',
-      'airfare' =>
-          v != null ? 'airfare ₩${_thousands(v.round())}' : 'airfare',
+      'tuition_waiver_pct' =>
+        v != null
+            ? 'tuition ${v.toStringAsFixed(0)}% waiver'
+            : 'tuition waiver',
+      'tuition_waiver_krw' =>
+        v != null
+            ? 'tuition ₩${_thousands(v.round())} waiver'
+            : 'tuition waiver',
+      'stipend_monthly' =>
+        v != null ? '₩${_thousands(v.round())}/mo stipend' : 'monthly stipend',
+      'airfare' => v != null ? 'airfare ₩${_thousands(v.round())}' : 'airfare',
       _ => awardType,
     };
   }

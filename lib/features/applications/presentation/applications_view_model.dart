@@ -14,32 +14,33 @@ class ApplicationsTabState {
 
   bool get hasActiveApplications => applications.isNotEmpty;
   bool get hasSuggestions => suggestions.isNotEmpty;
-  
-  List<StudentApplication> get pendingApps => 
+
+  List<StudentApplication> get pendingApps =>
       applications.where((app) => app.status == 'pending_approval').toList();
-      
-  List<StudentApplication> get activeApps => 
+
+  List<StudentApplication> get activeApps =>
       applications.where((app) => app.status != 'pending_approval').toList();
 
   int get maxAllowedApplications => 3;
-  
-  bool get shouldShowSuggestions => 
+
+  bool get shouldShowSuggestions =>
       suggestions.isNotEmpty && applications.length < maxAllowedApplications;
-      
+
   // isEmpty ONLY when there are no applications AND no suggestions to show
   // i.e., the student has nothing at all — no pending, no active, no suggestions
   bool get isEmpty => applications.isEmpty && suggestions.isEmpty;
 }
 
-final applicationsTabProvider = FutureProvider.autoDispose<ApplicationsTabState>((ref) async {
-  // Fetch both concurrently to avoid race conditions and UI flickering
-  final results = await Future.wait([
-    ref.watch(applicationsProvider.future),
-    ref.watch(suggestedUniversitiesProvider.future),
-  ]);
+final applicationsTabProvider =
+    FutureProvider.autoDispose<ApplicationsTabState>((ref) async {
+      // Fetch both concurrently to avoid race conditions and UI flickering
+      final results = await Future.wait([
+        ref.watch(applicationsProvider.future),
+        ref.watch(suggestedUniversitiesProvider.future),
+      ]);
 
-  return ApplicationsTabState(
-    applications: results[0] as List<StudentApplication>,
-    suggestions: results[1] as List<University>,
-  );
-});
+      return ApplicationsTabState(
+        applications: results[0] as List<StudentApplication>,
+        suggestions: results[1] as List<University>,
+      );
+    });

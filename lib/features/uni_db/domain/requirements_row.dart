@@ -14,17 +14,17 @@ class RequirementsRow {
   });
 
   factory RequirementsRow.fromMap(Map<String, dynamic> map) => RequirementsRow(
-        id: map['id'] as String,
-        applicantCategory: (map['applicant_category'] as String?) ?? '',
-        topikMinLevel: (map['topik_min_level'] as num?)?.toInt(),
-        topikDeferred: (map['topik_deferred'] as bool?) ?? false,
-        englishTest: (map['english_test'] as Map?)?.cast<String, dynamic>(),
-        gpaFloorPct: (map['gpa_floor_pct'] as num?)?.toDouble(),
-        interviewRequired: (map['interview_required'] as bool?) ?? false,
-        practicalExamRequired: (map['practical_exam_required'] as bool?) ?? false,
-        proseKo: map['prose_ko'] as String?,
-        extractorConfidence: (map['extractor_confidence'] as num?)?.toDouble(),
-      );
+    id: map['id'] as String,
+    applicantCategory: (map['applicant_category'] as String?) ?? '',
+    topikMinLevel: (map['topik_min_level'] as num?)?.toInt(),
+    topikDeferred: (map['topik_deferred'] as bool?) ?? false,
+    englishTest: (map['english_test'] as Map?)?.cast<String, dynamic>(),
+    gpaFloorPct: (map['gpa_floor_pct'] as num?)?.toDouble(),
+    interviewRequired: (map['interview_required'] as bool?) ?? false,
+    practicalExamRequired: (map['practical_exam_required'] as bool?) ?? false,
+    proseKo: map['prose_ko'] as String?,
+    extractorConfidence: (map['extractor_confidence'] as num?)?.toDouble(),
+  );
 
   final String id;
   final String applicantCategory;

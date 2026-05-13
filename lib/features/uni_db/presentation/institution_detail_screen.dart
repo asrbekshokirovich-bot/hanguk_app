@@ -45,10 +45,7 @@ class InstitutionDetailScreen extends ConsumerWidget {
                   'crawled it, give it a few minutes.',
             );
           }
-          return _DetailContent(
-            institutionId: institutionId,
-            summary: summary,
-          );
+          return _DetailContent(institutionId: institutionId, summary: summary);
         },
       ),
     );
@@ -56,10 +53,7 @@ class InstitutionDetailScreen extends ConsumerWidget {
 }
 
 class _DetailContent extends ConsumerWidget {
-  const _DetailContent({
-    required this.institutionId,
-    required this.summary,
-  });
+  const _DetailContent({required this.institutionId, required this.summary});
 
   final String institutionId;
   final InstitutionSummary summary;
@@ -74,10 +68,7 @@ class _DetailContent extends ConsumerWidget {
       children: [
         _HeaderCard(summary: summary),
         const SizedBox(height: 16),
-        _TrackToggle(
-          institutionId: institutionId,
-          tracking: tracking,
-        ),
+        _TrackToggle(institutionId: institutionId, tracking: tracking),
         const SizedBox(height: 12),
         _OpenGuidelineButton(institutionId: institutionId),
         const SizedBox(height: 24),
@@ -147,7 +138,8 @@ class _HeaderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(summary.nameKo, style: theme.textTheme.headlineSmall),
-            if (summary.nameKoShort != null && summary.nameKoShort != summary.nameKo)
+            if (summary.nameKoShort != null &&
+                summary.nameKoShort != summary.nameKo)
               Text(summary.nameKoShort!, style: theme.textTheme.bodySmall),
             const SizedBox(height: 4),
             if (summary.nameEn != null) Text(summary.nameEn!),
@@ -159,7 +151,8 @@ class _HeaderCard extends StatelessWidget {
               runSpacing: 4,
               children: [
                 if (summary.cityKo != null) Chip(label: Text(summary.cityKo!)),
-                if (summary.tier != null) Chip(label: Text('Tier ${summary.tier}')),
+                if (summary.tier != null)
+                  Chip(label: Text('Tier ${summary.tier}')),
                 if (summary.ieqasStatus != null)
                   Chip(label: Text('IEQAS · ${summary.ieqasStatus}')),
                 if (summary.isPartner)
@@ -186,10 +179,7 @@ class _HeaderCard extends StatelessWidget {
 }
 
 class _TrackToggle extends ConsumerStatefulWidget {
-  const _TrackToggle({
-    required this.institutionId,
-    required this.tracking,
-  });
+  const _TrackToggle({required this.institutionId, required this.tracking});
 
   final String institutionId;
   final AsyncValue<Map<String, dynamic>?> tracking;
@@ -205,7 +195,11 @@ class _TrackToggleState extends ConsumerState<_TrackToggle> {
   Widget build(BuildContext context) {
     return widget.tracking.when(
       loading: () => const ListTile(
-        leading: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+        leading: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
         title: Text('Track this institution'),
       ),
       error: (e, _) => ListTile(
@@ -223,9 +217,9 @@ class _TrackToggleState extends ConsumerState<_TrackToggle> {
             subtitle: Text(
               tracking
                   ? 'You will see deadlines on the home banner and get push '
-                    'notifications when something changes.'
+                        'notifications when something changes.'
                   : 'Turn on to follow deadlines, correction notices, and '
-                    'requirement changes.',
+                        'requirement changes.',
             ),
           ),
         );
@@ -264,24 +258,24 @@ class _DeadlineTile extends StatelessWidget {
     final urgency = days <= 0
         ? 'TODAY'
         : days == 1
-            ? 'in 1 day'
-            : days <= 7
-                ? 'in $days days'
-                : 'in $days days';
+        ? 'in 1 day'
+        : days <= 7
+        ? 'in $days days'
+        : 'in $days days';
     final urgencyColor = days <= 1
         ? Colors.red
         : days <= 7
-            ? Colors.orange
-            : Theme.of(context).colorScheme.onSurfaceVariant;
+        ? Colors.orange
+        : Theme.of(context).colorScheme.onSurfaceVariant;
     return Card(
       child: ListTile(
-        leading: Icon(
-          _iconFor(deadline.eventType),
-          color: urgencyColor,
-        ),
+        leading: Icon(_iconFor(deadline.eventType), color: urgencyColor),
         title: Text(_labelFor(deadline.eventType)),
         subtitle: Text(
-          deadline.startsAt.toIso8601String().replaceFirst('T', ' ').substring(0, 16) +
+          deadline.startsAt
+                  .toIso8601String()
+                  .replaceFirst('T', ' ')
+                  .substring(0, 16) +
               (deadline.cycleTrack != null ? ' · ${deadline.cycleTrack}' : ''),
         ),
         trailing: Text(
@@ -293,36 +287,36 @@ class _DeadlineTile extends StatelessWidget {
   }
 
   IconData _iconFor(String eventType) => switch (eventType) {
-        'apply_open' => Icons.lock_open,
-        'apply_close' => Icons.lock_outline,
-        'document_submission_deadline' => Icons.upload_file,
-        'first_stage_results' => Icons.assignment_turned_in,
-        'interview' => Icons.record_voice_over,
-        'practical_exam' => Icons.science,
-        'final_results' => Icons.emoji_events,
-        'additional_admit' => Icons.add_circle_outline,
-        'registration_open' => Icons.app_registration,
-        'registration_close' => Icons.lock_clock,
-        'orientation' => Icons.school,
-        'semester_start' => Icons.calendar_today,
-        _ => Icons.event,
-      };
+    'apply_open' => Icons.lock_open,
+    'apply_close' => Icons.lock_outline,
+    'document_submission_deadline' => Icons.upload_file,
+    'first_stage_results' => Icons.assignment_turned_in,
+    'interview' => Icons.record_voice_over,
+    'practical_exam' => Icons.science,
+    'final_results' => Icons.emoji_events,
+    'additional_admit' => Icons.add_circle_outline,
+    'registration_open' => Icons.app_registration,
+    'registration_close' => Icons.lock_clock,
+    'orientation' => Icons.school,
+    'semester_start' => Icons.calendar_today,
+    _ => Icons.event,
+  };
 
   String _labelFor(String eventType) => switch (eventType) {
-        'apply_open' => 'Application opens',
-        'apply_close' => 'Application closes',
-        'document_submission_deadline' => 'Documents due',
-        'first_stage_results' => 'First-stage results',
-        'interview' => 'Interview',
-        'practical_exam' => 'Practical exam',
-        'final_results' => 'Final results',
-        'additional_admit' => 'Additional admission',
-        'registration_open' => 'Registration opens',
-        'registration_close' => 'Registration closes',
-        'orientation' => 'Orientation',
-        'semester_start' => 'Semester starts',
-        _ => eventType.replaceAll('_', ' '),
-      };
+    'apply_open' => 'Application opens',
+    'apply_close' => 'Application closes',
+    'document_submission_deadline' => 'Documents due',
+    'first_stage_results' => 'First-stage results',
+    'interview' => 'Interview',
+    'practical_exam' => 'Practical exam',
+    'final_results' => 'Final results',
+    'additional_admit' => 'Additional admission',
+    'registration_open' => 'Registration opens',
+    'registration_close' => 'Registration closes',
+    'orientation' => 'Orientation',
+    'semester_start' => 'Semester starts',
+    _ => eventType.replaceAll('_', ' '),
+  };
 }
 
 /// "Open admission guide PDF" button. Calls get-pdf-url to mint a
@@ -334,7 +328,8 @@ class _OpenGuidelineButton extends ConsumerStatefulWidget {
   final String institutionId;
 
   @override
-  ConsumerState<_OpenGuidelineButton> createState() => _OpenGuidelineButtonState();
+  ConsumerState<_OpenGuidelineButton> createState() =>
+      _OpenGuidelineButtonState();
 }
 
 class _OpenGuidelineButtonState extends ConsumerState<_OpenGuidelineButton> {
@@ -342,7 +337,9 @@ class _OpenGuidelineButtonState extends ConsumerState<_OpenGuidelineButton> {
 
   @override
   Widget build(BuildContext context) {
-    final docId = ref.watch(institutionPrimaryGuidelineProvider(widget.institutionId));
+    final docId = ref.watch(
+      institutionPrimaryGuidelineProvider(widget.institutionId),
+    );
     return docId.when(
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const SizedBox.shrink(),
@@ -386,15 +383,17 @@ class _OpenGuidelineButtonState extends ConsumerState<_OpenGuidelineButton> {
       if (!ok && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Could not launch PDF — no app available to handle the URL.'),
+            content: Text(
+              'Could not launch PDF — no app available to handle the URL.',
+            ),
           ),
         );
       }
     } catch (err) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open PDF: $err')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not open PDF: $err')));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -409,10 +408,7 @@ class _SectionEmpty extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Text(
-          message,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        child: Text(message, style: Theme.of(context).textTheme.bodySmall),
       ),
     );
   }
@@ -555,12 +551,13 @@ class _RequirementsCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 4,
               children: [
-                if (r.topikLabel != null)
-                  Chip(label: Text(r.topikLabel!)),
+                if (r.topikLabel != null) Chip(label: Text(r.topikLabel!)),
                 if (r.englishTestLabel != null)
                   Chip(label: Text(r.englishTestLabel!)),
                 if (r.gpaFloorPct != null)
-                  Chip(label: Text('GPA ≥ ${r.gpaFloorPct!.toStringAsFixed(0)}%')),
+                  Chip(
+                    label: Text('GPA ≥ ${r.gpaFloorPct!.toStringAsFixed(0)}%'),
+                  ),
                 if (r.interviewRequired)
                   const Chip(
                     avatar: Icon(Icons.record_voice_over, size: 16),
@@ -575,10 +572,7 @@ class _RequirementsCard extends StatelessWidget {
             ),
             if (r.proseKo != null && r.proseKo!.trim().isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(
-                r.proseKo!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(r.proseKo!, style: Theme.of(context).textTheme.bodySmall),
             ],
           ],
         ),
@@ -659,9 +653,7 @@ class _ScholarshipCard extends StatelessWidget {
                 runSpacing: 4,
                 children: s.topikTierTable!.entries
                     .map(
-                      (e) => Chip(
-                        label: Text('TOPIK ${e.key} → ${e.value}%'),
-                      ),
+                      (e) => Chip(label: Text('TOPIK ${e.key} → ${e.value}%')),
                     )
                     .toList(),
               ),
@@ -672,9 +664,11 @@ class _ScholarshipCard extends StatelessWidget {
               Wrap(
                 spacing: 4,
                 children: s.applicantCategories!
-                    .map((c) => Chip(
-                          label: Text(c, style: const TextStyle(fontSize: 11)),
-                        ))
+                    .map(
+                      (c) => Chip(
+                        label: Text(c, style: const TextStyle(fontSize: 11)),
+                      ),
+                    )
                     .toList(),
               ),
             ],
@@ -691,8 +685,9 @@ class _DocumentsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncRows =
-        ref.watch(institutionDocumentsRequiredProvider(institutionId));
+    final asyncRows = ref.watch(
+      institutionDocumentsRequiredProvider(institutionId),
+    );
     return asyncRows.when(
       loading: () => const _SectionLoading(),
       error: (e, _) => _SectionError(error: '$e'),
@@ -759,9 +754,9 @@ class _SectionLoading extends StatelessWidget {
   const _SectionLoading();
   @override
   Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Center(child: CircularProgressIndicator()),
-      );
+    padding: EdgeInsets.symmetric(vertical: 16),
+    child: Center(child: CircularProgressIndicator()),
+  );
 }
 
 class _SectionError extends StatelessWidget {
@@ -769,12 +764,12 @@ class _SectionError extends StatelessWidget {
   final String error;
   @override
   Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Could not load: $error',
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
-      );
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        'Could not load: $error',
+        style: const TextStyle(color: Colors.red),
+      ),
+    ),
+  );
 }

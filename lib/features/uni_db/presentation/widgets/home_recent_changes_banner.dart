@@ -28,7 +28,8 @@ class HomeRecentChangesBannerSliver extends ConsumerWidget {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
         // Promote correction notices to the top.
-        final sorted = [...rows]..sort((a, b) {
+        final sorted = [...rows]
+          ..sort((a, b) {
             if (a.isCorrectionNotice && !b.isCorrectionNotice) return -1;
             if (!a.isCorrectionNotice && b.isCorrectionNotice) return 1;
             return b.detectedAt.compareTo(a.detectedAt);
@@ -99,7 +100,9 @@ class _ChangeLine extends StatelessWidget {
   }
 
   static String _summarise(RecentChange change) {
-    final name = change.nameKo.isNotEmpty ? change.nameKo : (change.nameEn ?? '');
+    final name = change.nameKo.isNotEmpty
+        ? change.nameKo
+        : (change.nameEn ?? '');
     final tag = change.isCorrectionNotice
         ? '정정공고'
         : (change.fieldName ?? change.entityType);

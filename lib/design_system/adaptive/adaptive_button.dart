@@ -15,15 +15,9 @@ class AdaptiveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Platform.isIOS) {
-      return CupertinoButton.filled(
-        onPressed: onPressed,
-        child: child,
-      );
+      return CupertinoButton.filled(onPressed: onPressed, child: child);
     }
 
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: child,
-    );
+    return ElevatedButton(onPressed: onPressed, child: child);
   }
 }

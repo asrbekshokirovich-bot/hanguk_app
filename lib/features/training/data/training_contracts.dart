@@ -23,10 +23,7 @@ import 'dart:convert';
 /// }
 /// ```
 class SuperviseResult {
-  const SuperviseResult({
-    required this.ghostText,
-    required this.issues,
-  });
+  const SuperviseResult({required this.ghostText, required this.issues});
 
   /// Inline completion shown as italic gray text after the cursor.
   final String ghostText;
@@ -59,10 +56,7 @@ class SuperviseResult {
 }
 
 class SuperviseIssue {
-  const SuperviseIssue({
-    required this.originalText,
-    required this.suggestion,
-  });
+  const SuperviseIssue({required this.originalText, required this.suggestion});
 
   final String originalText;
   final String suggestion;
@@ -124,14 +118,21 @@ class AnalyzeResult {
     }
     try {
       final m = jsonDecode(trimmed);
-      if (m is! Map<String, dynamic>) return AnalyzeResult(aiResponseText: body);
+      if (m is! Map<String, dynamic>)
+        return AnalyzeResult(aiResponseText: body);
       return AnalyzeResult(
         aiResponseText: body,
-        overallScore: m['overall_score'] is num ? m['overall_score'] as num : null,
-        grammarErrors: m['grammar_errors'] is List ? m['grammar_errors'] as List : null,
+        overallScore: m['overall_score'] is num
+            ? m['overall_score'] as num
+            : null,
+        grammarErrors: m['grammar_errors'] is List
+            ? m['grammar_errors'] as List
+            : null,
         contentFeedback: m['content_feedback'] as String?,
         strengths: m['strengths'] is List ? m['strengths'] as List : null,
-        improvements: m['improvements'] is List ? m['improvements'] as List : null,
+        improvements: m['improvements'] is List
+            ? m['improvements'] as List
+            : null,
         narrative: m['narrative'] as String?,
       );
     } on FormatException {
@@ -195,17 +196,28 @@ class InterviewFeedback {
     final raw = Map<String, dynamic>.from(fb);
     return InterviewFeedback(
       raw: raw,
-      overallScore: raw['overall_score'] is num ? raw['overall_score'] as num : null,
-      communicationScore:
-          raw['communication_score'] is num ? raw['communication_score'] as num : null,
-      confidenceScore:
-          raw['confidence_score'] is num ? raw['confidence_score'] as num : null,
-      contentScore: raw['content_score'] is num ? raw['content_score'] as num : null,
-      languageScore: raw['language_score'] is num ? raw['language_score'] as num : null,
+      overallScore: raw['overall_score'] is num
+          ? raw['overall_score'] as num
+          : null,
+      communicationScore: raw['communication_score'] is num
+          ? raw['communication_score'] as num
+          : null,
+      confidenceScore: raw['confidence_score'] is num
+          ? raw['confidence_score'] as num
+          : null,
+      contentScore: raw['content_score'] is num
+          ? raw['content_score'] as num
+          : null,
+      languageScore: raw['language_score'] is num
+          ? raw['language_score'] as num
+          : null,
       strengths: raw['strengths'] is List ? raw['strengths'] as List : null,
-      improvements: raw['improvements'] is List ? raw['improvements'] as List : null,
-      messageScores:
-          raw['message_scores'] is List ? raw['message_scores'] as List : null,
+      improvements: raw['improvements'] is List
+          ? raw['improvements'] as List
+          : null,
+      messageScores: raw['message_scores'] is List
+          ? raw['message_scores'] as List
+          : null,
       detailedFeedback: raw['detailed_feedback'] as String?,
     );
   }

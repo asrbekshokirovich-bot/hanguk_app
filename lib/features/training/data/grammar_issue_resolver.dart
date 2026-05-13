@@ -84,12 +84,14 @@ List<ResolvedIssue> resolveIssues({
       continue;
     }
 
-    results.add(ResolvedIssue(
-      start: index,
-      end: endExclusive,
-      originalText: draftText.substring(index, endExclusive),
-      suggestion: suggestion,
-    ));
+    results.add(
+      ResolvedIssue(
+        start: index,
+        end: endExclusive,
+        originalText: draftText.substring(index, endExclusive),
+        suggestion: suggestion,
+      ),
+    );
     for (var k = index; k < endExclusive; k++) {
       consumed[k] = true;
     }

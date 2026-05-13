@@ -111,14 +111,11 @@ class TrainingStrings {
     tabSubtitle:
         'Prepare for your university applications with AI-guided training modules.',
     studyPlanCardTitle: 'Study Plan Builder',
-    studyPlanCardDesc:
-        'Craft a compelling roadmap for your academic journey.',
+    studyPlanCardDesc: 'Craft a compelling roadmap for your academic journey.',
     personalStatementCardTitle: 'Personal Statement',
-    personalStatementCardDesc:
-        'Write effective and engaging personal essays.',
+    personalStatementCardDesc: 'Write effective and engaging personal essays.',
     interviewCardTitle: 'Interview Preparation',
-    interviewCardDesc:
-        'Practice mock questions and improve your confidence.',
+    interviewCardDesc: 'Practice mock questions and improve your confidence.',
     applyCta: 'Apply to a university',
     noApplicationsTitle: 'No applications yet',
     noApplicationsBody:
@@ -166,11 +163,9 @@ class TrainingStrings {
     tabSubtitle:
         'AI yordamida universitet hujjatlaringizga tayyorgarlik ko\'ring.',
     studyPlanCardTitle: 'Study Plan tuzish',
-    studyPlanCardDesc:
-        'O\'qish maqsadlaringiz uchun ishonchli reja tuzing.',
+    studyPlanCardDesc: 'O\'qish maqsadlaringiz uchun ishonchli reja tuzing.',
     personalStatementCardTitle: 'Personal Statement',
-    personalStatementCardDesc:
-        'Samarali va jozibali shaxsiy insho yozing.',
+    personalStatementCardDesc: 'Samarali va jozibali shaxsiy insho yozing.',
     interviewCardTitle: 'Suhbatga tayyorgarlik',
     interviewCardDesc:
         'Sinov savollari bilan mashq qiling va o\'zingizga ishonchni mustahkamlang.',

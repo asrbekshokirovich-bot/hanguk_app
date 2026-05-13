@@ -144,8 +144,8 @@ class University {
         return (nameKoShort?.isNotEmpty ?? false)
             ? nameKoShort!
             : (nameKo?.isNotEmpty ?? false)
-                ? nameKo!
-                : name;
+            ? nameKo!
+            : name;
       case 'uz':
         return (nameUz?.isNotEmpty ?? false) ? nameUz! : name;
       case 'en':

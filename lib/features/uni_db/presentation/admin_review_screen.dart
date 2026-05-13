@@ -109,9 +109,9 @@ class _AdminReviewScreenState extends ConsumerState<AdminReviewScreen> {
       await body();
     } catch (err) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $err')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $err')));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -122,9 +122,9 @@ class _AdminReviewScreenState extends ConsumerState<AdminReviewScreen> {
     await _withBusy(() async {
       await actions.accept(item.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Accepted')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Accepted')));
       ref.invalidate(reviewQueueProvider);
       setState(() => _selected = null);
     });
@@ -138,9 +138,9 @@ class _AdminReviewScreenState extends ConsumerState<AdminReviewScreen> {
     await _withBusy(() async {
       await actions.editAccept(item.id, corrected);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Edited and accepted')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Edited and accepted')));
       ref.invalidate(reviewQueueProvider);
       setState(() => _selected = null);
     });
@@ -155,9 +155,9 @@ class _AdminReviewScreenState extends ConsumerState<AdminReviewScreen> {
     await _withBusy(() async {
       await actions.reject(item.id, reason: reason, reasonDetail: reasonDetail);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Rejected')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Rejected')));
       ref.invalidate(reviewQueueProvider);
       setState(() => _selected = null);
     });
@@ -185,7 +185,10 @@ class _QueueList extends StatelessWidget {
         final isSelected = item.id == selected?.id;
         return ListTile(
           selected: isSelected,
-          leading: _PriorityBadge(priority: item.priority, overdue: item.isOverdue),
+          leading: _PriorityBadge(
+            priority: item.priority,
+            overdue: item.isOverdue,
+          ),
           title: Text(
             item.institutionNameKoShort ??
                 item.institutionNameKo ??
@@ -243,14 +246,15 @@ class _DetailPane extends StatelessWidget {
   final bool busy;
   final Future<void> Function(ReviewQueueItem) onAccept;
   final Future<void> Function(ReviewQueueItem, Map<String, dynamic>)
-      onEditAccept;
+  onEditAccept;
   final Future<void> Function(ReviewQueueItem, String reason, String? detail)
-      onReject;
+  onReject;
 
   @override
   Widget build(BuildContext context) {
-    final formattedJson =
-        const JsonEncoder.withIndent('  ').convert(item.payload);
+    final formattedJson = const JsonEncoder.withIndent(
+      '  ',
+    ).convert(item.payload);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -266,7 +270,8 @@ class _DetailPane extends StatelessWidget {
             runSpacing: 4,
             children: [
               Chip(label: Text(item.priorityLabel)),
-              if (item.archetype != null) Chip(label: Text('Archetype ${item.archetype}')),
+              if (item.archetype != null)
+                Chip(label: Text('Archetype ${item.archetype}')),
               if (item.fieldGroup != null) Chip(label: Text(item.fieldGroup!)),
               if (item.isOverdue)
                 Chip(
@@ -359,7 +364,9 @@ class _DetailPane extends StatelessWidget {
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Could not open PDF — no app available to handle the URL.'),
+          content: Text(
+            'Could not open PDF — no app available to handle the URL.',
+          ),
         ),
       );
     }
@@ -499,12 +506,10 @@ class _RejectReasonDialogState extends State<_RejectReasonDialog> {
           child: const Text('Cancel'),
         ),
         FilledButton(
-          onPressed: () => Navigator.of(context).pop(
-            (
-              reason: _reason,
-              detail: _detail.text.trim().isEmpty ? null : _detail.text.trim(),
-            ),
-          ),
+          onPressed: () => Navigator.of(context).pop((
+            reason: _reason,
+            detail: _detail.text.trim().isEmpty ? null : _detail.text.trim(),
+          )),
           child: const Text('Reject'),
         ),
       ],
@@ -515,9 +520,8 @@ class _RejectReasonDialogState extends State<_RejectReasonDialog> {
 class _LoadingScaffold extends StatelessWidget {
   const _LoadingScaffold();
   @override
-  Widget build(BuildContext context) => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+  Widget build(BuildContext context) =>
+      const Scaffold(body: Center(child: CircularProgressIndicator()));
 }
 
 class _ErrorScaffold extends StatelessWidget {
@@ -525,25 +529,25 @@ class _ErrorScaffold extends StatelessWidget {
   final String error;
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Review')),
-        body: Center(child: Text(error)),
-      );
+    appBar: AppBar(title: const Text('Review')),
+    body: Center(child: Text(error)),
+  );
 }
 
 class _ForbiddenScaffold extends StatelessWidget {
   const _ForbiddenScaffold();
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Review')),
-        body: const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'You do not have reviewer access. '
-              'Ask Hanguk admin to set profiles.role = uni_db_reviewer.',
-              textAlign: TextAlign.center,
-            ),
-          ),
+    appBar: AppBar(title: const Text('Review')),
+    body: const Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'You do not have reviewer access. '
+          'Ask Hanguk admin to set profiles.role = uni_db_reviewer.',
+          textAlign: TextAlign.center,
         ),
-      );
+      ),
+    ),
+  );
 }

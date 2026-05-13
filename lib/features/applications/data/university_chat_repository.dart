@@ -7,7 +7,7 @@ class ChannelMessage {
   final String content;
   final String senderId;
   final DateTime createdAt;
-  
+
   // Custom metadata (if we join user table for avatars/names)
   final String? senderName;
   final String? senderAvatar;
@@ -68,7 +68,8 @@ class UniversityChatController extends ChangeNotifier {
   final String universityId;
   RealtimeChannel? _subscription;
 
-  UniversityChatController(this.universityId) : state = const UniversityChatState(isLoading: true) {
+  UniversityChatController(this.universityId)
+    : state = const UniversityChatState(isLoading: true) {
     _initializeChannel(universityId);
   }
 
@@ -95,7 +96,9 @@ class UniversityChatController extends ChangeNotifier {
           .maybeSingle();
 
       if (roomData == null) {
-        _setState(state.copyWith(error: 'University room not found.', isLoading: false));
+        _setState(
+          state.copyWith(error: 'University room not found.', isLoading: false),
+        );
         return;
       }
 
@@ -110,12 +113,17 @@ class UniversityChatController extends ChangeNotifier {
           .maybeSingle();
 
       if (channelData == null) {
-        _setState(state.copyWith(error: 'Discussion channel not found for this room.', isLoading: false));
+        _setState(
+          state.copyWith(
+            error: 'Discussion channel not found for this room.',
+            isLoading: false,
+          ),
+        );
         return;
       }
 
       final channelId = channelData['id'];
-      
+
       // Update state with channel ID
       _setState(state.copyWith(channelId: channelId));
 
@@ -144,17 +152,21 @@ class UniversityChatController extends ChangeNotifier {
               .from('profiles')
               .select('user_id, full_name, avatar_url')
               .filter('user_id', 'in', '(${senderIds.join(',')})');
-          
+
           for (var p in profilesData as List) {
             profilesMap[p['user_id'].toString()] = p;
           }
         } catch (e) {
-          debugPrint('[UniversityChatNotifier] Failed to load profiles manually: $e');
+          debugPrint(
+            '[UniversityChatNotifier] Failed to load profiles manually: $e',
+          );
         }
       }
 
       // We maintain the list reversed so ListView.builder(reverse: true) loads smoothly
-      final List<ChannelMessage> messagesList = (messagesData as List).map((map) {
+      final List<ChannelMessage> messagesList = (messagesData as List).map((
+        map,
+      ) {
         final profile = profilesMap[map['sender_id']?.toString()];
         return ChannelMessage(
           id: map['id'],
@@ -177,26 +189,32 @@ class UniversityChatController extends ChangeNotifier {
             schema: 'public',
             table: 'channel_messages',
             filter: PostgresChangeFilter(
-              type: PostgresChangeFilterType.eq, 
-              column: 'channel_id', 
+              type: PostgresChangeFilterType.eq,
+              column: 'channel_id',
               value: channelId,
             ),
             callback: (payload) {
               final newMsgMap = payload.newRecord;
               final newMessage = ChannelMessage.fromMap(newMsgMap);
-              
+
               // Prepend to messages (since list is reversed)
               // NOTE: Supabase realtime payload does not include joined rows.
               // So senderName/Avatar won't exist directly.
               // To handle this, we just insert the message without profile metadata, or we re-fetch the profile.
-              _setState(state.copyWith(messages: [newMessage, ...state.messages]));
+              _setState(
+                state.copyWith(messages: [newMessage, ...state.messages]),
+              );
             },
           )
           .subscribe();
-
     } catch (e, st) {
       debugPrint('[UniversityChatNotifier] Error: $e\n$st');
-      _setState(state.copyWith(error: 'Failed to connect to discussion: $e', isLoading: false));
+      _setState(
+        state.copyWith(
+          error: 'Failed to connect to discussion: $e',
+          isLoading: false,
+        ),
+      );
     }
   }
 
@@ -222,5 +240,5 @@ class UniversityChatController extends ChangeNotifier {
       debugPrint('[UniversityChatNotifier] Failed to send message: $e\n$st');
       _setState(state.copyWith(error: 'Failed to send message: $e'));
     }
-}
+  }
 }

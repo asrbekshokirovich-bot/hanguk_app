@@ -15,18 +15,18 @@ class RecentChange {
   });
 
   factory RecentChange.fromMap(Map<String, dynamic> map) => RecentChange(
-        changeEventId: map['change_event_id'] as String,
-        detectedAt: DateTime.parse(map['detected_at'].toString()),
-        entityType: map['entity_type'] as String? ?? '',
-        entityId: map['entity_id'] as String? ?? '',
-        institutionId: map['institution_id'] as String? ?? '',
-        nameKo: map['name_ko'] as String? ?? '',
-        nameEn: map['name_en'] as String?,
-        fieldName: map['field_name'] as String?,
-        reason: map['reason'] as String?,
-        oldValue: map['old_value'],
-        newValue: map['new_value'],
-      );
+    changeEventId: map['change_event_id'] as String,
+    detectedAt: DateTime.parse(map['detected_at'].toString()),
+    entityType: map['entity_type'] as String? ?? '',
+    entityId: map['entity_id'] as String? ?? '',
+    institutionId: map['institution_id'] as String? ?? '',
+    nameKo: map['name_ko'] as String? ?? '',
+    nameEn: map['name_en'] as String?,
+    fieldName: map['field_name'] as String?,
+    reason: map['reason'] as String?,
+    oldValue: map['old_value'],
+    newValue: map['new_value'],
+  );
 
   final String changeEventId;
   final DateTime detectedAt;

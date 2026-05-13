@@ -104,18 +104,27 @@ class _CompareGrid extends StatelessWidget {
           ),
           _CompareRow(
             label: 'Hanguk partner',
-            values: institutions.map((i) => i.isPartner ? 'Yes' : 'No').toList(),
+            values: institutions
+                .map((i) => i.isPartner ? 'Yes' : 'No')
+                .toList(),
           ),
           _CompareRow(
             label: 'Last verified',
             values: institutions
-                .map((i) => i.lastVerifiedAt?.toIso8601String().split('T').first ?? '—')
+                .map(
+                  (i) =>
+                      i.lastVerifiedAt?.toIso8601String().split('T').first ??
+                      '—',
+                )
                 .toList(),
           ),
           _CompareRow(
             label: 'Next deadline',
             values: institutions
-                .map((i) => i.nextEventAt?.toIso8601String().split('T').first ?? '—')
+                .map(
+                  (i) =>
+                      i.nextEventAt?.toIso8601String().split('T').first ?? '—',
+                )
                 .toList(),
           ),
         ],
@@ -174,10 +183,7 @@ class _CompareRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 140,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            child: Text(label, style: Theme.of(context).textTheme.labelLarge),
           ),
           ...values.map(
             (v) => Expanded(

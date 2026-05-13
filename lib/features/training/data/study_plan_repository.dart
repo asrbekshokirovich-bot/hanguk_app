@@ -37,9 +37,10 @@ class StudyPlanSession {
       targetUniversityId: json['target_institution_id'],
       currentStep: json['current_step'],
       status: json['status'],
-      universityNameEn: (json['institution'] as Map?)?['name_en']
-          ?? (json['institution'] as Map?)?['name_ko']
-          ?? (json['university'] as Map?)?['name_en'],
+      universityNameEn:
+          (json['institution'] as Map?)?['name_en'] ??
+          (json['institution'] as Map?)?['name_ko'] ??
+          (json['university'] as Map?)?['name_en'],
       selectedTrack: json['selected_track'],
       updatedAt: json['updated_at']?.toString(),
       createdAt: json['created_at']?.toString(),
@@ -77,9 +78,13 @@ class StudyPlanDraft {
   final String id;
   final String content;
   final int version;
-  
-  StudyPlanDraft({required this.id, required this.content, required this.version});
-  
+
+  StudyPlanDraft({
+    required this.id,
+    required this.content,
+    required this.version,
+  });
+
   factory StudyPlanDraft.fromJson(Map<String, dynamic> json) {
     return StudyPlanDraft(
       id: json['id'],
@@ -125,7 +130,7 @@ class ChatMessage {
   final String role;
   final String content;
   ChatMessage({required this.role, required this.content});
-  
+
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(role: json['role'], content: json['content']);
   }
@@ -190,13 +195,15 @@ class StudyPlanSessionState {
   }
 }
 
-class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionState>> {
+class StudyPlanSessionNotifier
+    extends Notifier<Map<String, StudyPlanSessionState>> {
   @override
   Map<String, StudyPlanSessionState> build() {
     return const {};
   }
 
-  StudyPlanSessionState _getState(String type) => state[type] ?? const StudyPlanSessionState();
+  StudyPlanSessionState _getState(String type) =>
+      state[type] ?? const StudyPlanSessionState();
 
   void _setState(String type, StudyPlanSessionState newState) {
     state = {...state, type: newState};
@@ -240,28 +247,45 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
         return aCompleted - bCompleted;
       });
 
-      _setState(type, _getState(type).copyWith(isSessionsLoading: false, sessions: loaded));
+      _setState(
+        type,
+        _getState(type).copyWith(isSessionsLoading: false, sessions: loaded),
+      );
     } on Exception catch (e) {
-      _setState(type, _getState(type).copyWith(isSessionsLoading: false, error: e.toString()));
+      _setState(
+        type,
+        _getState(type).copyWith(isSessionsLoading: false, error: e.toString()),
+      );
     }
   }
 
-  Future<StudyPlanSession?> createSession(String type, {String? targetUniversityId, String? selectedTrack}) async {
+  Future<StudyPlanSession?> createSession(
+    String type, {
+    String? targetUniversityId,
+    String? selectedTrack,
+  }) async {
     final documentType = type;
     final client = Supabase.instance.client;
     final user = client.auth.currentUser;
     if (user == null) return null;
 
-    _setState(type, _getState(type).copyWith(isLoading: true, clearError: true));
+    _setState(
+      type,
+      _getState(type).copyWith(isLoading: true, clearError: true),
+    );
     try {
-      final response = await client.from('study_plan_sessions').insert({
-        'student_id': user.id,
-        'document_type': documentType,
-        'target_institution_id': targetUniversityId,
-        'current_step': 1,
-        'status': 'in_progress',
-        'selected_track': selectedTrack, // audit F2 — was in-memory only
-      }).select('*, institution:target_institution_id(name_en, name_ko)').single();
+      final response = await client
+          .from('study_plan_sessions')
+          .insert({
+            'student_id': user.id,
+            'document_type': documentType,
+            'target_institution_id': targetUniversityId,
+            'current_step': 1,
+            'status': 'in_progress',
+            'selected_track': selectedTrack, // audit F2 — was in-memory only
+          })
+          .select('*, institution:target_institution_id(name_en, name_ko)')
+          .single();
 
       // fromJson now reads selected_track straight from the row; the
       // explicit copyWith is a no-op overwrite that defends against an
@@ -272,19 +296,26 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
           ? session.copyWith(selectedTrack: selectedTrack)
           : session;
 
-      _setState(type, _getState(type).copyWith(
-        isLoading: false,
-        sessions: [sessionWithTrack, ..._getState(type).sessions],
-        currentSession: sessionWithTrack,
-        drafts: [],
-        analyses: [],
-        chatHistory: [],
-        draftContent: '',
-      ));
+      _setState(
+        type,
+        _getState(type).copyWith(
+          isLoading: false,
+          sessions: [sessionWithTrack, ..._getState(type).sessions],
+          currentSession: sessionWithTrack,
+          drafts: [],
+          analyses: [],
+          chatHistory: [],
+          draftContent: '',
+        ),
+      );
       return sessionWithTrack;
     } on Exception catch (e) {
-      _setState(type, _getState(type).copyWith(
-          isLoading: false, error: 'Failed to create session: $e'));
+      _setState(
+        type,
+        _getState(
+          type,
+        ).copyWith(isLoading: false, error: 'Failed to create session: $e'),
+      );
       return null;
     }
   }
@@ -294,7 +325,10 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
     final user = client.auth.currentUser;
     if (user == null) return;
 
-    _setState(type, _getState(type).copyWith(isLoading: true, clearError: true));
+    _setState(
+      type,
+      _getState(type).copyWith(isLoading: true, clearError: true),
+    );
     try {
       final sessionResp = await client
           .from('study_plan_sessions')
@@ -322,21 +356,34 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
           .order('created_at', ascending: true);
 
       final session = StudyPlanSession.fromJson(sessionResp);
-      final drafts = (draftsResp as List).map((j) => StudyPlanDraft.fromJson(j)).toList();
-      final analyses = (analysesResp as List).map((j) => StudyPlanAnalysis.fromJson(j)).toList();
-      final chatHistory = (chatResp as List).map((j) => ChatMessage.fromJson(j)).toList();
+      final drafts = (draftsResp as List)
+          .map((j) => StudyPlanDraft.fromJson(j))
+          .toList();
+      final analyses = (analysesResp as List)
+          .map((j) => StudyPlanAnalysis.fromJson(j))
+          .toList();
+      final chatHistory = (chatResp as List)
+          .map((j) => ChatMessage.fromJson(j))
+          .toList();
 
-      _setState(type, _getState(type).copyWith(
-        isLoading: false,
-        currentSession: session,
-        drafts: drafts,
-        analyses: analyses,
-        chatHistory: chatHistory,
-        draftContent: drafts.isNotEmpty ? drafts.first.content : '',
-      ));
+      _setState(
+        type,
+        _getState(type).copyWith(
+          isLoading: false,
+          currentSession: session,
+          drafts: drafts,
+          analyses: analyses,
+          chatHistory: chatHistory,
+          draftContent: drafts.isNotEmpty ? drafts.first.content : '',
+        ),
+      );
     } on Exception catch (e) {
-      _setState(type, _getState(type).copyWith(
-          isLoading: false, error: 'Failed to load session data: $e'));
+      _setState(
+        type,
+        _getState(
+          type,
+        ).copyWith(isLoading: false, error: 'Failed to load session data: $e'),
+      );
     }
   }
 
@@ -357,17 +404,15 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
         updatedAt: nowIso,
       );
 
-      final updatedSessions = _getState(type)
-          .sessions
+      final updatedSessions = _getState(type).sessions
           .map((s) => s.id == updatedSession.id ? updatedSession : s)
           .toList();
 
       _setState(
         type,
-        _getState(type).copyWith(
-          currentSession: updatedSession,
-          sessions: updatedSessions,
-        ),
+        _getState(
+          type,
+        ).copyWith(currentSession: updatedSession, sessions: updatedSessions),
       );
     } on Exception catch (e) {
       debugPrint('Failed to update session step: $e');
@@ -411,10 +456,9 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
           final remoteVersion = (remote['version'] as num?)?.toInt() ?? 0;
           final localMax = _getState(type).drafts.isEmpty
               ? 0
-              : _getState(type)
-                  .drafts
-                  .map((d) => d.version)
-                  .reduce((a, b) => a > b ? a : b);
+              : _getState(
+                  type,
+                ).drafts.map((d) => d.version).reduce((a, b) => a > b ? a : b);
           if (remoteVersion > localMax) {
             _setState(
               type,
@@ -437,9 +481,9 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
       final localState = _getState(type);
       final nextVersion = localState.drafts.isNotEmpty
           ? localState.drafts
-                  .map((d) => d.version)
-                  .reduce((a, b) => a > b ? a : b) +
-              1
+                    .map((d) => d.version)
+                    .reduce((a, b) => a > b ? a : b) +
+                1
           : 1;
       final wordCount = content
           .split(RegExp(r'\s+'))
@@ -447,21 +491,22 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
           .length;
 
       try {
-        final response = await client.from('study_plan_drafts').insert({
-          'session_id': sessionId,
-          'student_id': user.id,
-          'version': nextVersion,
-          'content': content,
-          'word_count': wordCount,
-          'source': 'typed',
-        }).select().single();
+        final response = await client
+            .from('study_plan_drafts')
+            .insert({
+              'session_id': sessionId,
+              'student_id': user.id,
+              'version': nextVersion,
+              'content': content,
+              'word_count': wordCount,
+              'source': 'typed',
+            })
+            .select()
+            .single();
 
         final draft = StudyPlanDraft.fromJson(response);
         final stateNow = _getState(type);
-        _setState(
-          type,
-          stateNow.copyWith(drafts: [draft, ...stateNow.drafts]),
-        );
+        _setState(type, stateNow.copyWith(drafts: [draft, ...stateNow.drafts]));
         return true;
       } on Exception catch (e) {
         _setState(
@@ -536,7 +581,10 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
       );
       return true;
     } on Exception catch (e) {
-      _setState(type, _getState(type).copyWith(error: 'Failed to update track: $e'));
+      _setState(
+        type,
+        _getState(type).copyWith(error: 'Failed to update track: $e'),
+      );
       return false;
     }
   }
@@ -547,13 +595,20 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
           .from('study_plan_sessions')
           .delete()
           .eq('id', sessionId);
-          
-      final updatedSessions = _getState(type).sessions.where((s) => s.id != sessionId).toList();
-      _setState(type, _getState(type).copyWith(
-        sessions: updatedSessions, 
-        currentSession: _getState(type).currentSession?.id == sessionId ? null : _getState(type).currentSession
-      ));
-    } catch(e) {
+
+      final updatedSessions = _getState(
+        type,
+      ).sessions.where((s) => s.id != sessionId).toList();
+      _setState(
+        type,
+        _getState(type).copyWith(
+          sessions: updatedSessions,
+          currentSession: _getState(type).currentSession?.id == sessionId
+              ? null
+              : _getState(type).currentSession,
+        ),
+      );
+    } catch (e) {
       debugPrint('delete error: $e');
     }
   }
@@ -562,18 +617,15 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
     // Audit D3: preserve the sessions list so the user doesn't see an
     // empty list flash + a re-fetch when they close a session.
     final s = _getState(type);
-    _setState(
-      type,
-      StudyPlanSessionState(
-        sessions: s.sessions,
-      ),
-    );
+    _setState(type, StudyPlanSessionState(sessions: s.sessions));
   }
 
   /// AI Invocation using Edge Functions
   Future<StudyPlanAnalysis?> analyzeCurrentDraft(String type) async {
     final currentState = _getState(type);
-    final draft = currentState.drafts.isNotEmpty ? currentState.drafts.first : null;
+    final draft = currentState.drafts.isNotEmpty
+        ? currentState.drafts.first
+        : null;
     if (draft == null || currentState.currentSession == null) return null;
 
     _setState(type, currentState.copyWith(isAnalyzing: true, clearError: true));
@@ -626,8 +678,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
             'grammar_errors': parsed['grammar_errors'],
           if (parsed['content_feedback'] is String)
             'content_feedback': parsed['content_feedback'],
-          if (parsed['strengths'] is List)
-            'strengths': parsed['strengths'],
+          if (parsed['strengths'] is List) 'strengths': parsed['strengths'],
           if (parsed['improvements'] is List)
             'improvements': parsed['improvements'],
         },
@@ -656,7 +707,10 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
     }
   }
 
-  Future<Map<String, dynamic>?> superviseDraft(String type, String content) async {
+  Future<Map<String, dynamic>?> superviseDraft(
+    String type,
+    String content,
+  ) async {
     final currentState = _getState(type);
     if (currentState.currentSession == null || content.isEmpty) return null;
 
@@ -680,7 +734,7 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
       }
 
       final aiResponseText = data['response'] as String? ?? '{}';
-      
+
       // Parse JSON
       if (aiResponseText.startsWith('{') && aiResponseText.endsWith('}')) {
         return Map<String, dynamic>.from(jsonDecode(aiResponseText));
@@ -693,13 +747,19 @@ class StudyPlanSessionNotifier extends Notifier<Map<String, StudyPlanSessionStat
   }
 }
 
-
-final studyPlanSessionProvider = NotifierProvider<StudyPlanSessionNotifier, Map<String, StudyPlanSessionState>>(() {
-  return StudyPlanSessionNotifier();
-});
+final studyPlanSessionProvider =
+    NotifierProvider<
+      StudyPlanSessionNotifier,
+      Map<String, StudyPlanSessionState>
+    >(() {
+      return StudyPlanSessionNotifier();
+    });
 
 // Helper provider to get state for a specific document type
-final documentSessionProvider = Provider.family<StudyPlanSessionState, String>((ref, type) {
+final documentSessionProvider = Provider.family<StudyPlanSessionState, String>((
+  ref,
+  type,
+) {
   final allStates = ref.watch(studyPlanSessionProvider);
   return allStates[type] ?? const StudyPlanSessionState();
 });
