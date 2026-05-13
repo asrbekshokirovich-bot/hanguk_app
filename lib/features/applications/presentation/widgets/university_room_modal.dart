@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/application.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'process_tracker.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -148,6 +149,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final uniName = widget.application.university?.name ?? 'Unknown University';
     final chatState = _chatController.state;
     final eventsState = _eventsController.state;
@@ -243,7 +245,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                       Icons.close_rounded,
                       color: Colors.white54,
                     ),
-                    tooltip: 'Close',
+                    tooltip: l.a11yTooltipClose,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -410,7 +412,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                     color: AppColors.pureBlack,
                                     size: 20,
                                   ),
-                                  tooltip: 'Send message',
+                                  tooltip: l.a11yTooltipSendMessage,
                                   constraints: const BoxConstraints(
                                     minWidth: 48,
                                     minHeight: 48,

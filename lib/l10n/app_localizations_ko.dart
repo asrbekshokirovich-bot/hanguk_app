@@ -324,8 +324,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get interviewDialogStepPersona => '3. 면접관 성격';
 
   @override
-  String get interviewNoAppsBody =>
-      '먼저 목표 대학을 추가하세요 — 면접 연습은 그 학교에 맞춰 진행됩니다.';
+  String get interviewNoAppsBody => '먼저 목표 대학을 추가하세요 — 면접 연습은 그 학교에 맞춰 진행됩니다.';
 
   @override
   String get trackKorean => '한국어';
@@ -460,8 +459,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get deleteSessionTitle => '세션 삭제';
 
   @override
-  String get deleteSessionBody =>
-      '이 세션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
+  String get deleteSessionBody => '이 세션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
 
   @override
   String get deleteLabel => '삭제';
@@ -547,8 +545,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noPastDraftsYet => '아직 저장된 초안이 없습니다';
 
   @override
-  String get noPastDraftsBody =>
-      '새 세션을 시작하면 가장 최근 편집된 순으로 초안이 여기에 표시됩니다.';
+  String get noPastDraftsBody => '새 세션을 시작하면 가장 최근 편집된 순으로 초안이 여기에 표시됩니다.';
 
   @override
   String get noTargetUniversity => '대상 대학 없음';
@@ -702,12 +699,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get unknownUniversity => '알 수 없는 대학';
 
   @override
-  String get abandonedSessionNote =>
-      '이 세션은 피드백 없이 종료되었습니다 — 재생할 수 없습니다.';
+  String get abandonedSessionNote => '이 세션은 피드백 없이 종료되었습니다 — 재생할 수 없습니다.';
 
   @override
-  String get activeSessionNote =>
-      '이 세션은 아직 진행 중입니다. 끝낸 후 피드백을 확인하세요.';
+  String get activeSessionNote => '이 세션은 아직 진행 중입니다. 끝낸 후 피드백을 확인하세요.';
 
   @override
   String get deleteSessionTooltip => '세션 삭제';
@@ -722,4 +717,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String deleteFailed(Object error) {
     return '삭제 실패: $error';
   }
+
+  @override
+  String get a11yTooltipAskAi => 'Hanguk AI에 질문하기';
+
+  @override
+  String get a11yTooltipClearChat => '채팅 기록 지우기';
+
+  @override
+  String get a11yTooltipSendMessage => '메시지 보내기';
+
+  @override
+  String get a11yTooltipClose => '닫기';
+
+  @override
+  String get a11yTooltipPreviewDocument => '문서 미리보기';
+
+  @override
+  String get a11yTooltipDeleteDocument => '문서 삭제';
+
+  @override
+  String get a11yTooltipInterviewHistory => '면접 기록';
+
+  @override
+  String get a11yTooltipCloseSession => '세션 닫기';
+
+  @override
+  String get a11yTooltipDeleteSession => '세션 삭제';
+
+  @override
+  String get a11yTooltipBack => '뒤로';
+
+  @override
+  String get a11yTooltipPlayRecording => '녹음 재생';
+
+  @override
+  String get a11yTooltipPauseRecording => '녹음 일시정지';
 }

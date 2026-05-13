@@ -1455,6 +1455,92 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete failed: {error}'**
   String deleteFailed(Object error);
+
+  /// Accessibility tooltip on the floating action button in HomeScreen
+  /// that opens the Hanguk AI chat bottom-sheet (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Hanguk AI'**
+  String get a11yTooltipAskAi;
+
+  /// Accessibility tooltip on the trash-can IconButton in ChatTab's
+  /// AppBar that wipes the in-memory chat transcript (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Clear chat history'**
+  String get a11yTooltipClearChat;
+
+  /// Accessibility tooltip on the send IconButton in ChatTab and
+  /// UniversityRoomModal's discussion-tab composer (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get a11yTooltipSendMessage;
+
+  /// Accessibility tooltip on the × IconButton at the top-right of
+  /// UniversityRoomModal's header (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get a11yTooltipClose;
+
+  /// Accessibility tooltip on the eye IconButton inside a DocumentSlot
+  /// row that opens the uploaded file preview (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Preview document'**
+  String get a11yTooltipPreviewDocument;
+
+  /// Accessibility tooltip on the trash IconButton inside a DocumentSlot
+  /// row that removes an uploaded (non-approved) document (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete document'**
+  String get a11yTooltipDeleteDocument;
+
+  /// Accessibility tooltip on the history IconButton in InterviewSetupView
+  /// that opens InterviewHistoryView (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Interview history'**
+  String get a11yTooltipInterviewHistory;
+
+  /// Accessibility tooltip on the × IconButton on StudyPlanScreen's
+  /// AppBar that exits the current drafting session (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Close session'**
+  String get a11yTooltipCloseSession;
+
+  /// Accessibility tooltip on the trash IconButton inside a saved-drafts
+  /// ListTile on StudyPlanScreen (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session'**
+  String get a11yTooltipDeleteSession;
+
+  /// Accessibility tooltip on the back-arrow IconButton in training-flow
+  /// views (InterviewHistoryView, InterviewAnalyticsView) (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get a11yTooltipBack;
+
+  /// Accessibility tooltip on the audio-playback IconButton inside
+  /// InterviewAnalyticsView's session-recording widget when the
+  /// recording is currently paused/stopped (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Play recording'**
+  String get a11yTooltipPlayRecording;
+
+  /// Accessibility tooltip on the audio-playback IconButton inside
+  /// InterviewAnalyticsView's session-recording widget when the
+  /// recording is currently playing (audit P0 #3).
+  ///
+  /// In en, this message translates to:
+  /// **'Pause recording'**
+  String get a11yTooltipPauseRecording;
 }
 
 class _AppLocalizationsDelegate

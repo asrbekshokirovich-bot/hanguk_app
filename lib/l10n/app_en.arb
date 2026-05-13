@@ -564,5 +564,41 @@
   "@deleteFailed": {
     "description": "SnackBar shown when the delete-interview-session RPC throws.",
     "placeholders": { "error": { "type": "Object" } }
-  }
+  },
+
+  "a11yTooltipAskAi": "Ask Hanguk AI",
+  "@a11yTooltipAskAi": { "description": "Accessibility tooltip on the floating action button in HomeScreen that opens the Hanguk AI chat bottom-sheet. Read aloud by screen readers (audit P0 #3)." },
+
+  "a11yTooltipClearChat": "Clear chat history",
+  "@a11yTooltipClearChat": { "description": "Accessibility tooltip on the trash-can IconButton in ChatTab's AppBar that wipes the in-memory chat transcript (audit P0 #3)." },
+
+  "a11yTooltipSendMessage": "Send message",
+  "@a11yTooltipSendMessage": { "description": "Accessibility tooltip on the send IconButton at the bottom of ChatTab and on the UniversityRoomModal discussion-tab composer (audit P0 #3). Shared between two screens — translators may keep one short phrase." },
+
+  "a11yTooltipClose": "Close",
+  "@a11yTooltipClose": { "description": "Accessibility tooltip on the × IconButton at the top-right of the UniversityRoomModal header that dismisses the bottom-sheet (audit P0 #3)." },
+
+  "a11yTooltipPreviewDocument": "Preview document",
+  "@a11yTooltipPreviewDocument": { "description": "Accessibility tooltip on the eye IconButton inside a DocumentSlot row that opens the uploaded file preview (audit P0 #3)." },
+
+  "a11yTooltipDeleteDocument": "Delete document",
+  "@a11yTooltipDeleteDocument": { "description": "Accessibility tooltip on the trash IconButton inside a DocumentSlot row that removes an uploaded (non-approved) document (audit P0 #3)." },
+
+  "a11yTooltipInterviewHistory": "Interview history",
+  "@a11yTooltipInterviewHistory": { "description": "Accessibility tooltip on the history IconButton in InterviewSetupView's top-right that opens InterviewHistoryView (audit P0 #3). Same lemma as interviewHistoryTitle but a tooltip — translators may keep them in sync or differ." },
+
+  "a11yTooltipCloseSession": "Close session",
+  "@a11yTooltipCloseSession": { "description": "Accessibility tooltip on the × IconButton on StudyPlanScreen's AppBar that exits the current drafting session back to the saved-drafts list (audit P0 #3)." },
+
+  "a11yTooltipDeleteSession": "Delete session",
+  "@a11yTooltipDeleteSession": { "description": "Accessibility tooltip on the trash IconButton inside a saved-drafts ListTile on StudyPlanScreen that removes the draft (audit P0 #3). Same lemma as deleteSessionTooltip (used on InterviewHistoryView) — translators may keep them in sync or differ." },
+
+  "a11yTooltipBack": "Back",
+  "@a11yTooltipBack": { "description": "Accessibility tooltip on the back-arrow IconButton in the training-flow views (InterviewHistoryView header, InterviewAnalyticsView header) (audit P0 #3). Same lemma as accountBackTooltip — translators may keep them in sync or differ." },
+
+  "a11yTooltipPlayRecording": "Play recording",
+  "@a11yTooltipPlayRecording": { "description": "Accessibility tooltip on the audio-playback IconButton inside InterviewAnalyticsView's session-recording widget when the recording is currently paused/stopped (audit P0 #3). Paired with a11yTooltipPauseRecording." },
+
+  "a11yTooltipPauseRecording": "Pause recording",
+  "@a11yTooltipPauseRecording": { "description": "Accessibility tooltip on the audio-playback IconButton inside InterviewAnalyticsView's session-recording widget when the recording is currently playing (audit P0 #3). Paired with a11yTooltipPlayRecording." }
 }

@@ -305,5 +305,18 @@
   "deleteFailed": "삭제 실패: {error}",
   "@deleteFailed": {
     "placeholders": { "error": { "type": "Object" } }
-  }
+  },
+
+  "a11yTooltipAskAi": "Hanguk AI에 질문하기",
+  "a11yTooltipClearChat": "채팅 기록 지우기",
+  "a11yTooltipSendMessage": "메시지 보내기",
+  "a11yTooltipClose": "닫기",
+  "a11yTooltipPreviewDocument": "문서 미리보기",
+  "a11yTooltipDeleteDocument": "문서 삭제",
+  "a11yTooltipInterviewHistory": "면접 기록",
+  "a11yTooltipCloseSession": "세션 닫기",
+  "a11yTooltipDeleteSession": "세션 삭제",
+  "a11yTooltipBack": "뒤로",
+  "a11yTooltipPlayRecording": "녹음 재생",
+  "a11yTooltipPauseRecording": "녹음 일시정지"
 }

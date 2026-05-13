@@ -3,6 +3,7 @@ import '../../domain/document_type.dart';
 import '../../domain/document.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class DocumentSlot extends StatelessWidget {
   final int index;
@@ -26,6 +27,7 @@ class DocumentSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final bool isApproved = uploadedDoc?.status == 'approved';
     final bool isUploaded = uploadedDoc != null;
 
@@ -120,14 +122,14 @@ class DocumentSlot extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.visibility_outlined, size: 20),
                   color: AppColors.vibrantLime,
-                  tooltip: 'Preview document',
+                  tooltip: l.a11yTooltipPreviewDocument,
                   onPressed: onPreviewTap,
                 ),
                 if (!isApproved)
                   IconButton(
                     icon: const Icon(Icons.delete_outline, size: 20),
                     color: Colors.redAccent,
-                    tooltip: 'Delete document',
+                    tooltip: l.a11yTooltipDeleteDocument,
                     onPressed: isUploading ? null : onDeleteTap,
                   ),
               ] else

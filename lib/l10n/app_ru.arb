@@ -305,5 +305,18 @@
   "deleteFailed": "Delete failed: {error}",
   "@deleteFailed": {
     "placeholders": { "error": { "type": "Object" } }
-  }
+  },
+
+  "a11yTooltipAskAi": "Ask Hanguk AI",
+  "a11yTooltipClearChat": "Clear chat history",
+  "a11yTooltipSendMessage": "Send message",
+  "a11yTooltipClose": "Close",
+  "a11yTooltipPreviewDocument": "Preview document",
+  "a11yTooltipDeleteDocument": "Delete document",
+  "a11yTooltipInterviewHistory": "Interview history",
+  "a11yTooltipCloseSession": "Close session",
+  "a11yTooltipDeleteSession": "Delete session",
+  "a11yTooltipBack": "Back",
+  "a11yTooltipPlayRecording": "Play recording",
+  "a11yTooltipPauseRecording": "Pause recording"
 }

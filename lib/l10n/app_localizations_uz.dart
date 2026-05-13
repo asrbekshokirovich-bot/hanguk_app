@@ -65,8 +65,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get connecting => 'Ulanmoqda...';
 
   @override
-  String get greetWait =>
-      'Ulanmoqda — intervyuer tez orada salomlashadi...';
+  String get greetWait => 'Ulanmoqda — intervyuer tez orada salomlashadi...';
 
   @override
   String get yourTurn => 'Javob berish navbatingiz';
@@ -369,8 +368,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get personaImpatientCaps => 'Sabri yo\'q viza xodimi';
 
   @override
-  String get micBlockedInSettings =>
-      'Mikrofon tizim sozlamalarida bloklangan.';
+  String get micBlockedInSettings => 'Mikrofon tizim sozlamalarida bloklangan.';
 
   @override
   String get openSettings => 'Sozlamalarni ochish';
@@ -414,8 +412,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get workspaceAnalyzeButton => 'Tahlil';
 
   @override
-  String get aiSupervisionWarningsTitle =>
-      'AI nazorat ogohlantirishlari:';
+  String get aiSupervisionWarningsTitle => 'AI nazorat ogohlantirishlari:';
 
   @override
   String grammarReplaceWith(String original, String suggestion) {
@@ -428,8 +425,7 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get ghostSuggestionSemantics =>
-      'AI taklifi — qo\'yish uchun bosing';
+  String get ghostSuggestionSemantics => 'AI taklifi — qo\'yish uchun bosing';
 
   @override
   String get ghostAccept => 'Qabul qilish';
@@ -515,8 +511,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get newPersonalStatementDialogTitle => 'Yangi Personal Statement';
 
   @override
-  String get selectTargetUniversityStep =>
-      '1. Maqsadli universitetni tanlang';
+  String get selectTargetUniversityStep => '1. Maqsadli universitetni tanlang';
 
   @override
   String get selectLanguageTrackStep => '2. Yozish tilini tanlang';
@@ -533,8 +528,7 @@ class AppLocalizationsUz extends AppLocalizations {
   }
 
   @override
-  String get aiExampleEmbassyLabel =>
-      'Koreya Respublikasi Elchixonasi (Viza)';
+  String get aiExampleEmbassyLabel => 'Koreya Respublikasi Elchixonasi (Viza)';
 
   @override
   String get aiExampleWritingPlaceholder => 'AI namuna yozmoqda...';
@@ -750,4 +744,40 @@ class AppLocalizationsUz extends AppLocalizations {
   String deleteFailed(Object error) {
     return 'O\'chirish amalga oshmadi: $error';
   }
+
+  @override
+  String get a11yTooltipAskAi => 'Hanguk AI dan so\'rash';
+
+  @override
+  String get a11yTooltipClearChat => 'Chat tarixini tozalash';
+
+  @override
+  String get a11yTooltipSendMessage => 'Xabar yuborish';
+
+  @override
+  String get a11yTooltipClose => 'Yopish';
+
+  @override
+  String get a11yTooltipPreviewDocument => 'Hujjatni ko\'rib chiqish';
+
+  @override
+  String get a11yTooltipDeleteDocument => 'Hujjatni o\'chirish';
+
+  @override
+  String get a11yTooltipInterviewHistory => 'Suhbat tarixi';
+
+  @override
+  String get a11yTooltipCloseSession => 'Sessiyani yopish';
+
+  @override
+  String get a11yTooltipDeleteSession => 'Sessiyani o\'chirish';
+
+  @override
+  String get a11yTooltipBack => 'Orqaga';
+
+  @override
+  String get a11yTooltipPlayRecording => 'Yozuvni ijro etish';
+
+  @override
+  String get a11yTooltipPauseRecording => 'Yozuvni to\'xtatish';
 }

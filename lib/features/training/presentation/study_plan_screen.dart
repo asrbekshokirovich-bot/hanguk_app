@@ -121,7 +121,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.white),
-              tooltip: 'Close session',
+              tooltip: l.a11yTooltipCloseSession,
               onPressed: () => ref
                   .read(studyPlanSessionProvider.notifier)
                   .clearCurrentSession(widget.documentType),
@@ -216,7 +216,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                                 Icons.delete,
                                 color: AppColors.error,
                               ),
-                              tooltip: 'Delete session',
+                              tooltip: l.a11yTooltipDeleteSession,
                               onPressed: () {
                                 showDialog(
                                   context: context,

@@ -52,7 +52,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    tooltip: 'Back',
+                    tooltip: l.a11yTooltipBack,
                     onPressed: () => Navigator.pop(context),
                   ),
                   Text(
