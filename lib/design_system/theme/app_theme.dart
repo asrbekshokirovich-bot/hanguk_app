@@ -52,7 +52,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceGlass.withOpacity(0.08),
+        fillColor: AppColors.surfaceGlass.withValues(alpha: 0.08),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.borderGlass),
@@ -85,7 +85,7 @@ class AppTheme {
       // not match the brand palette.
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFF0F213D),
-        indicatorColor: AppColors.vibrantLime.withOpacity(0.18),
+        indicatorColor: AppColors.vibrantLime.withValues(alpha: 0.18),
         elevation: 0,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -115,7 +115,7 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surfaceGlass.withOpacity(0.12),
+        color: AppColors.surfaceGlass.withValues(alpha: 0.12),
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

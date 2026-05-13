@@ -123,7 +123,7 @@ class _UniversitySelectionViewState
               ElevatedButton.icon(
                 onPressed: _openAICompare,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.vibrantLime.withOpacity(0.2),
+                  backgroundColor: AppColors.vibrantLime.withValues(alpha: 0.2),
                   foregroundColor: AppColors.vibrantLime,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -179,7 +179,7 @@ class _UniversitySelectionViewState
                           width: 56,
                           height: 56,
                           decoration: BoxDecoration(
-                            color: AppColors.vibrantLime.withOpacity(0.1),
+                            color: AppColors.vibrantLime.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -241,7 +241,7 @@ class _UniversitySelectionViewState
               color: const Color(0xFF0F213D),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),

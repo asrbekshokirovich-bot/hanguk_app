@@ -136,7 +136,7 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
           if (_failed && l != null)
             Positioned.fill(
               child: Container(
-                color: const Color(0xFF0F1626).withOpacity(0.92),
+                color: const Color(0xFF0F1626).withValues(alpha: 0.92),
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
@@ -183,7 +183,7 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                    color: Colors.black.withValues(alpha: 0.6),
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white24),
                   ),
@@ -204,7 +204,7 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: Colors.white24),
               ),

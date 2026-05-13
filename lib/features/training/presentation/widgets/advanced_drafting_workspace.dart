@@ -314,7 +314,7 @@ class _AdvancedDraftingWorkspaceState
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.royalBlue.withOpacity(0.3),
+                  color: AppColors.royalBlue.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.royalBlue),
                 ),
@@ -374,9 +374,11 @@ class _AdvancedDraftingWorkspaceState
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.redAccent.withOpacity(0.1),
+              color: Colors.redAccent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+              border: Border.all(
+                color: Colors.redAccent.withValues(alpha: 0.3),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -406,7 +408,7 @@ class _AdvancedDraftingWorkspaceState
                     return ActionChip(
                       backgroundColor: AppColors.backgroundNavy,
                       side: BorderSide(
-                        color: Colors.redAccent.withOpacity(0.5),
+                        color: Colors.redAccent.withValues(alpha: 0.5),
                       ),
                       label: Text(
                         l.grammarReplaceWith(
@@ -429,9 +431,9 @@ class _AdvancedDraftingWorkspaceState
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: KeyboardListener(
               focusNode: _keyboardListenerFocus,

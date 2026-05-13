@@ -123,7 +123,7 @@ class _InterviewAnalyticsViewState
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: AppColors.surfaceGlass.withOpacity(0.5),
+            color: AppColors.surfaceGlass.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.borderGlass, width: 1),
           ),
@@ -132,7 +132,7 @@ class _InterviewAnalyticsViewState
               Text(
                 l.overallScoreLabel,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 14,
                 ),
               ),
@@ -176,7 +176,7 @@ class _InterviewAnalyticsViewState
         Text(
           fb['detailed_feedback'] ?? l.detailedFeedbackFallback,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             fontSize: 15,
             height: 1.5,
           ),
@@ -269,7 +269,7 @@ class _InterviewAnalyticsViewState
                       child: Text(
                         e.toString(),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 14,
                         ),
                       ),
@@ -304,7 +304,10 @@ class _Metric extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 11,
+          ),
         ),
       ],
     );
@@ -395,9 +398,9 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
         margin: const EdgeInsets.only(bottom: 24),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.error.withOpacity(0.1),
+          color: AppColors.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.error.withOpacity(0.3)),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -407,7 +410,7 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
               child: Text(
                 errorText,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 13,
                 ),
               ),
@@ -522,14 +525,14 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
                           Text(
                             _formatDuration(_position),
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 12,
                             ),
                           ),
                           Text(
                             _formatDuration(_duration),
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 12,
                             ),
                           ),

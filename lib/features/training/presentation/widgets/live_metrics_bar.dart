@@ -28,7 +28,7 @@ class LiveMetricsBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.02),
+        color: Colors.white.withValues(alpha: 0.02),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -112,20 +112,18 @@ class LiveMetricsBar extends StatelessWidget {
         else
           Icon(icon, color: color, size: 14),
         const SizedBox(width: 6),
-        Text(
-          text,
-          style: TextStyle(color: color, fontSize: 12),
-        ),
+        Text(text, style: TextStyle(color: color, fontSize: 12)),
       ],
     );
   }
+
   Widget _buildTrackIndicator(String track) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.vibrantLime.withOpacity(0.1),
+        color: AppColors.vibrantLime.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppColors.vibrantLime.withOpacity(0.3)),
+        border: Border.all(color: AppColors.vibrantLime.withValues(alpha: 0.3)),
       ),
       child: Text(
         track.toUpperCase(),

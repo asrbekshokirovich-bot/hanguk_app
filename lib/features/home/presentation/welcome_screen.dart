@@ -103,12 +103,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             .white, // Added white background so the JPEG blends in
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: AppColors.vibrantLime.withOpacity(0.3),
+                          color: AppColors.vibrantLime.withValues(alpha: 0.3),
                           width: 4,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -145,7 +145,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       'South Korean University Application Platform',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontSize: 18,
                       ),
                     ),

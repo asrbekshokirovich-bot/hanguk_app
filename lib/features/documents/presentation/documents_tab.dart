@@ -100,10 +100,10 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.vibrantLime.withOpacity(0.08),
+                    color: AppColors.vibrantLime.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.vibrantLime.withOpacity(0.2),
+                      color: AppColors.vibrantLime.withValues(alpha: 0.2),
                     ),
                   ),
                   child: const Row(

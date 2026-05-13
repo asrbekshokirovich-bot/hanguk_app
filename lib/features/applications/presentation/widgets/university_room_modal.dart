@@ -79,7 +79,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.vibrantLime.withOpacity(0.2),
+            backgroundColor: AppColors.vibrantLime.withValues(alpha: 0.2),
             radius: 16,
             backgroundImage: msg.senderAvatar != null
                 ? NetworkImage(msg.senderAvatar!)
@@ -129,7 +129,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(
                       12,
                     ).copyWith(topLeft: const Radius.circular(0)),
@@ -185,7 +185,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -197,7 +197,9 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: AppColors.vibrantLime.withOpacity(0.1),
+                    backgroundColor: AppColors.vibrantLime.withValues(
+                      alpha: 0.1,
+                    ),
                     radius: 20,
                     child: Text(
                       uniName.isNotEmpty ? uniName[0] : 'U',
@@ -327,7 +329,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                 child: Text(
                                   'No messages yet. Start the conversation!',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.5),
+                                    color: Colors.white.withValues(alpha: 0.5),
                                   ),
                                 ),
                               )
@@ -353,7 +355,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                             color: const Color(0xFF132A4D),
                             border: Border(
                               top: BorderSide(
-                                color: Colors.white.withOpacity(0.05),
+                                color: Colors.white.withValues(alpha: 0.05),
                               ),
                             ),
                           ),
@@ -371,7 +373,9 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                       color: Colors.white38,
                                     ),
                                     filled: true,
-                                    fillColor: Colors.white.withOpacity(0.05),
+                                    fillColor: Colors.white.withValues(
+                                      alpha: 0.05,
+                                    ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(24),
                                       borderSide: BorderSide.none,
@@ -443,7 +447,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                         Icon(
                           Icons.campaign_outlined,
                           size: 48,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -482,7 +486,9 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                               color: Colors.white38,
                             ),
                             todayDecoration: BoxDecoration(
-                              color: AppColors.vibrantLime.withOpacity(0.3),
+                              color: AppColors.vibrantLime.withValues(
+                                alpha: 0.3,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             selectedDecoration: const BoxDecoration(
@@ -550,7 +556,9 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                     Icon(
                                       Icons.event_busy,
                                       size: 36,
-                                      color: Colors.white.withOpacity(0.1),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.1,
+                                      ),
                                     ),
                                     const SizedBox(height: 12),
                                     const Text(
@@ -568,7 +576,9 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                   return Container(
                                     margin: const EdgeInsets.only(bottom: 12),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.05),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.05,
+                                      ),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: ListTile(
@@ -576,7 +586,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: AppColors.vibrantLime
-                                              .withOpacity(0.2),
+                                              .withValues(alpha: 0.2),
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(

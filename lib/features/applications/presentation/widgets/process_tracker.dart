@@ -45,23 +45,26 @@ class ProcessTracker extends StatelessWidget {
       'Tuition fee payment',
       'Waiting for admission letter',
       'Preparing for visa application',
-      'Waiting for visa issue'
+      'Waiting for visa issue',
     ];
 
     final isStatusRejected = status == 'rejected';
-    final activeIndex = _currentStep - 1; 
+    final activeIndex = _currentStep - 1;
 
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(), // Since it lives inside a tab view, it's preferable to be sized dynamically or let parent scroll
+      physics:
+          const NeverScrollableScrollPhysics(), // Since it lives inside a tab view, it's preferable to be sized dynamically or let parent scroll
       shrinkWrap: true,
       itemCount: steps.length,
       itemBuilder: (context, index) {
         final isActive = index <= activeIndex;
         final isLast = index == steps.length - 1;
         final isRejectedNode = isStatusRejected && index == activeIndex;
-        final nodeColor = isActive 
-                    ? (isRejectedNode ? Colors.redAccent : Theme.of(context).colorScheme.primary) 
-                    : Colors.grey.withOpacity(0.3);
+        final nodeColor = isActive
+            ? (isRejectedNode
+                  ? Colors.redAccent
+                  : Theme.of(context).colorScheme.primary)
+            : Colors.grey.withValues(alpha: 0.3);
 
         return IntrinsicHeight(
           child: Row(
@@ -81,21 +84,21 @@ class ProcessTracker extends StatelessWidget {
                         width: 2,
                       ),
                     ),
-                    child: isActive 
+                    child: isActive
                         ? Icon(
-                            isRejectedNode ? Icons.close : Icons.check, 
-                            size: 14, 
-                            color: Colors.white
-                          ) 
+                            isRejectedNode ? Icons.close : Icons.check,
+                            size: 14,
+                            color: Colors.white,
+                          )
                         : null,
                   ),
                   if (!isLast)
                     Expanded(
                       child: Container(
                         width: 2,
-                        color: (index < activeIndex) 
-                            ? Theme.of(context).colorScheme.primary 
-                            : Colors.grey.withOpacity(0.2),
+                        color: (index < activeIndex)
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey.withValues(alpha: 0.2),
                       ),
                     ),
                 ],
@@ -109,7 +112,9 @@ class ProcessTracker extends StatelessWidget {
                     steps[index],
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isActive
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       color: isActive ? Colors.white : Colors.white54,
                     ),
                   ),

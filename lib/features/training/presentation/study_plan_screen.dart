@@ -386,7 +386,9 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isActive ? color.withOpacity(0.2) : Colors.transparent,
+              color: isActive
+                  ? color.withValues(alpha: 0.2)
+                  : Colors.transparent,
               border: Border.all(color: color, width: 2),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -516,9 +518,9 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.royalBlue.withOpacity(0.3)),
+        border: Border.all(color: AppColors.royalBlue.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -756,10 +758,10 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.vibrantLime.withOpacity(0.1),
+                color: AppColors.vibrantLime.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: AppColors.vibrantLime.withOpacity(0.3),
+                  color: AppColors.vibrantLime.withValues(alpha: 0.3),
                 ),
               ),
               child: Text(
@@ -908,7 +910,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.white10),
                               borderRadius: BorderRadius.circular(12),
-                              color: Colors.white.withOpacity(0.02),
+                              color: Colors.white.withValues(alpha: 0.02),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1164,7 +1166,7 @@ class _TrackChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? color.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color, width: 2),
         ),
@@ -1313,9 +1315,9 @@ I wish to explicitly state my intention to return to my home country immediately
     final l = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.royalBlue.withOpacity(0.4)),
+        border: Border.all(color: AppColors.royalBlue.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1323,7 +1325,7 @@ I wish to explicitly state my intention to return to my home country immediately
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.royalBlue.withOpacity(0.7),
+              color: AppColors.royalBlue.withValues(alpha: 0.7),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),

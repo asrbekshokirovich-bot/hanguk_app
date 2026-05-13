@@ -3,7 +3,10 @@ import '../../../../design_system/theme/app_colors.dart';
 import '../../domain/university.dart';
 import 'university_detail_sheet.dart';
 
-import 'map_view/map_platform.dart' if (dart.library.html) 'map_view/map_web.dart' if (dart.library.io) 'map_view/map_mobile.dart' as map_impl;
+import 'map_view/map_platform.dart'
+    if (dart.library.html) 'map_view/map_web.dart'
+    if (dart.library.io) 'map_view/map_mobile.dart'
+    as map_impl;
 
 class UniversityMapView extends StatefulWidget {
   final List<University> universities;
@@ -44,18 +47,15 @@ class _UniversityMapViewState extends State<UniversityMapView> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.55),
+                color: Colors.black.withValues(alpha: 0.55),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: AppColors.vibrantLime.withOpacity(0.25),
+                  color: AppColors.vibrantLime.withValues(alpha: 0.25),
                 ),
               ),
               child: Text(
                 '${widget.universities.where((u) => u.latitude != null).length} universities mapped',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ),
           ),
