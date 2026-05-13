@@ -68,6 +68,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
                           excludeFromSemantics: true,
                           errorBuilder: (context, error, stackTrace) =>
                               _fallbackLogo(),
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return _loadingLogo();
+                          },
                         ),
                       )
                     else
@@ -243,6 +247,29 @@ class _ApplicationCardState extends State<ApplicationCard> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime),
+    );
+  }
+
+  // Low-contrast placeholder shown while the logo is still loading so users
+  // see something on slow networks (audit P1).
+  Widget _loadingLogo() {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white24,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -115,7 +115,7 @@ class _UniversitySelectionViewState
                     ),
                     Text(
                       'Select up to 3 universities to begin.',
-                      style: TextStyle(fontSize: 14, color: Colors.white60),
+                      style: TextStyle(fontSize: 14, color: Colors.white70),
                     ),
                   ],
                 ),
@@ -172,21 +172,18 @@ class _UniversitySelectionViewState
                             height: 56,
                             fit: BoxFit.cover,
                             excludeFromSemantics: true,
+                            // Graceful fallback on 404 / decode error so the
+                            // row keeps its visual layout (audit P1).
+                            errorBuilder: (_, __, ___) => _logoFallback(),
+                            // Low-key placeholder during slow networks.
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return _logoLoading();
+                            },
                           ),
                         )
                       else
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: AppColors.vibrantLime.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.school_outlined,
-                            color: AppColors.vibrantLime,
-                          ),
-                        ),
+                        _logoFallback(),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
@@ -282,6 +279,43 @@ class _UniversitySelectionViewState
             ),
           ),
       ],
+    );
+  }
+
+  // Shared 56dp fallback box matching the logo footprint — used for missing
+  // logoUrl, 404s, and decode errors so the row layout stays stable.
+  Widget _logoFallback() {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: AppColors.vibrantLime.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime),
+    );
+  }
+
+  // Low-contrast placeholder shown while the logo is still loading so users
+  // see something on slow networks.
+  Widget _logoLoading() {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white24,
+          ),
+        ),
+      ),
     );
   }
 }
