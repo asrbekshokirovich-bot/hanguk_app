@@ -35,7 +35,8 @@ class _ApplicationCardState extends State<ApplicationCard> {
 
     return HangukCard(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: EdgeInsets.zero, // We remove padding from HangukCard internally if supported, but typically we handle it in children. 
+      padding: EdgeInsets
+          .zero, // We remove padding from HangukCard internally if supported, but typically we handle it in children.
       // Actually HangukCard usually takes `child` directly without overriding internal paddings unless we use it. We'll wrap in Material to give InkWell effect properly.
       child: Material(
         color: Colors.transparent,
@@ -44,7 +45,9 @@ class _ApplicationCardState extends State<ApplicationCard> {
           borderRadius: BorderRadius.circular(16),
           onTap: _toggleExpanded,
           child: Padding(
-            padding: const EdgeInsets.all(16.0), // Standard padding for the card contents
+            padding: const EdgeInsets.all(
+              16.0,
+            ), // Standard padding for the card contents
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -55,12 +58,16 @@ class _ApplicationCardState extends State<ApplicationCard> {
                     if (university?.logoUrl != null)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
+                        // University name appears beside the logo, so the
+                        // logo image is decorative for screen readers.
                         child: Image.network(
                           university!.logoUrl!,
                           width: 48,
                           height: 48,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _fallbackLogo(),
+                          excludeFromSemantics: true,
+                          errorBuilder: (context, error, stackTrace) =>
+                              _fallbackLogo(),
                         ),
                       )
                     else
@@ -72,21 +79,33 @@ class _ApplicationCardState extends State<ApplicationCard> {
                         children: [
                           Text(
                             university?.name ?? 'Unknown University',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Row(
                             children: [
                               Text(
                                 university?.location ?? '',
-                                style: const TextStyle(color: Colors.white54, fontSize: 13),
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 13,
+                                ),
                               ),
                               if (university?.isPartner ?? false) ...[
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.vibrantLime.withOpacity(0.1),
+                                    color: AppColors.vibrantLime.withOpacity(
+                                      0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Text(
@@ -98,7 +117,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                     ),
                                   ),
                                 ),
-                              ]
+                              ],
                             ],
                           ),
                         ],
@@ -110,7 +129,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                     ),
                   ],
                 ),
-                
+
                 // Expandable Body
                 AnimatedSize(
                   duration: const Duration(milliseconds: 300),
@@ -121,24 +140,39 @@ class _ApplicationCardState extends State<ApplicationCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 16),
-                            
+
                             // Status Tracker or Pending Banner
                             if (application.status == 'pending_approval')
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.vibrantLime.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: AppColors.vibrantLime.withOpacity(0.3)),
+                                  border: Border.all(
+                                    color: AppColors.vibrantLime.withOpacity(
+                                      0.3,
+                                    ),
+                                  ),
                                 ),
                                 child: const Row(
                                   children: [
-                                    Icon(Icons.hourglass_empty_rounded, color: AppColors.vibrantLime, size: 20),
+                                    Icon(
+                                      Icons.hourglass_empty_rounded,
+                                      color: AppColors.vibrantLime,
+                                      size: 20,
+                                    ),
                                     SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
                                         'Awaiting Counselor Approval.\nWe will notify you once reviewed.',
-                                        style: TextStyle(color: AppColors.vibrantLime, fontSize: 14, fontWeight: FontWeight.w500),
+                                        style: TextStyle(
+                                          color: AppColors.vibrantLime,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -155,16 +189,32 @@ class _ApplicationCardState extends State<ApplicationCard> {
                               children: [
                                 Expanded(
                                   child: OutlinedButton.icon(
-                                    onPressed: () => UniversityRoomModal.show(context, application, initialTabIndex: 1),
-                                    icon: const Icon(Icons.forum_outlined, size: 16, color: AppColors.vibrantLime),
+                                    onPressed: () => UniversityRoomModal.show(
+                                      context,
+                                      application,
+                                      initialTabIndex: 1,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.forum_outlined,
+                                      size: 16,
+                                      color: AppColors.vibrantLime,
+                                    ),
                                     label: const Text('Discussion'),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: OutlinedButton.icon(
-                                    onPressed: () => UniversityRoomModal.show(context, application, initialTabIndex: 3),
-                                    icon: const Icon(Icons.event_note_outlined, size: 16, color: AppColors.vibrantLime),
+                                    onPressed: () => UniversityRoomModal.show(
+                                      context,
+                                      application,
+                                      initialTabIndex: 3,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.event_note_outlined,
+                                      size: 16,
+                                      color: AppColors.vibrantLime,
+                                    ),
                                     label: const Text('Calendar'),
                                   ),
                                 ),

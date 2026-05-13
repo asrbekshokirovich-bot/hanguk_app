@@ -156,12 +156,16 @@ class _MapTabState extends ConsumerState<MapTab> {
                           borderSide: BorderSide.none,
                         ),
                         suffixIcon: _searchQuery.isNotEmpty
-                            ? GestureDetector(
-                                onTap: () => _searchController.clear(),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.white38,
-                                  size: 18,
+                            ? Semantics(
+                                label: 'Clear search',
+                                button: true,
+                                child: GestureDetector(
+                                  onTap: () => _searchController.clear(),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white38,
+                                    size: 18,
+                                  ),
                                 ),
                               )
                             : null,
