@@ -7,11 +7,7 @@ class UniversityCard extends StatelessWidget {
   final University university;
   final VoidCallback? onTap;
 
-  const UniversityCard({
-    super.key,
-    required this.university,
-    this.onTap,
-  });
+  const UniversityCard({super.key, required this.university, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +35,7 @@ class UniversityCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   university.location,
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 13,
-                  ),
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
                 ),
               ],
             ),
@@ -54,7 +47,11 @@ class UniversityCard extends StatelessWidget {
             _buildPartnerChip(),
           ],
           const SizedBox(width: 4),
-          const Icon(Icons.chevron_right_rounded, color: Colors.white24, size: 20),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: Colors.white24,
+            size: 20,
+          ),
         ],
       ),
     );
@@ -64,11 +61,13 @@ class UniversityCard extends StatelessWidget {
     if (university.logoUrl != null && university.logoUrl!.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
+        // Decorative — the university name sits next to this logo.
         child: Image.network(
           university.logoUrl!,
           width: 48,
           height: 48,
           fit: BoxFit.contain,
+          excludeFromSemantics: true,
           errorBuilder: (_, __, ___) => _fallbackIcon(),
         ),
       );
@@ -85,7 +84,11 @@ class UniversityCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.vibrantLime.withOpacity(0.15)),
       ),
-      child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime, size: 24),
+      child: const Icon(
+        Icons.school_outlined,
+        color: AppColors.vibrantLime,
+        size: 24,
+      ),
     );
   }
 

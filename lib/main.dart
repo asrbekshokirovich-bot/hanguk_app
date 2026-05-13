@@ -8,6 +8,7 @@ import 'design_system/theme/app_theme.dart';
 import 'features/uni_db/data/push_token_bootstrap.dart';
 import 'features/updater/presentation/update_gate.dart';
 import 'l10n/app_localizations.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -54,11 +55,14 @@ class _SplashApp extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.all(Radius.circular(20)),
+                // Splash logo is decorative; the loading indicator below
+                // is what conveys state to assistive tech.
                 child: Image(
                   image: AssetImage('assets/images/logo.jpg'),
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  excludeFromSemantics: true,
                 ),
               ),
               SizedBox(height: 24),
