@@ -121,7 +121,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get virtualWalkaroundTitle => 'Virtual Walkaround';
 
   @override
-  String get navHome => 'Home';
+  String get navApplications => 'Applications';
 
   @override
   String get navMap => 'Map';

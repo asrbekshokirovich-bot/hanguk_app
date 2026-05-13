@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../design_system/adaptive/adaptive_bottom_navigation.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -83,24 +84,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         tooltip: l.a11yTooltipAskAi,
         child: const Icon(Icons.smart_toy, color: Colors.black, size: 28),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      // UI/UX audit P0 #5 (2026-05-12): swapped the legacy Material 2
+      // BottomNavigationBar for the Material 3 NavigationBar via the
+      // already-built AdaptiveBottomNavigation (Cupertino on iOS,
+      // Material on Android/web/desktop). Same audit also flagged the
+      // first label "Home" → Applications tab as a misnomer; renamed
+      // the ARB key navHome → navApplications and the localized
+      // strings now read "Applications" (and locale equivalents).
+      bottomNavigationBar: AdaptiveBottomNavigation(
         currentIndex: currentIndex,
         onTap: (index) {
           ref.read(homeTabProvider.notifier).setTab(index);
         },
         items: [
-          BottomNavigationBarItem(
-            label: l.navHome,
-            icon: const Icon(Icons.school),
-          ),
-          BottomNavigationBarItem(label: l.navMap, icon: const Icon(Icons.map)),
-          BottomNavigationBarItem(
-            label: l.navDocs,
-            icon: const Icon(Icons.description),
-          ),
-          BottomNavigationBarItem(
+          AdaptiveNavigationItem(label: l.navApplications, icon: Icons.school),
+          AdaptiveNavigationItem(label: l.navMap, icon: Icons.map),
+          AdaptiveNavigationItem(label: l.navDocs, icon: Icons.description),
+          AdaptiveNavigationItem(
             label: l.navTraining,
-            icon: const Icon(Icons.model_training_outlined),
+            icon: Icons.model_training_outlined,
           ),
         ],
       ),

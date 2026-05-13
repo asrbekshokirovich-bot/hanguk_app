@@ -121,7 +121,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get virtualWalkaroundTitle => 'Virtual Walkaround';
 
   @override
-  String get navHome => 'Trang chủ';
+  String get navApplications => 'Đơn';
 
   @override
   String get navMap => 'Bản đồ';
