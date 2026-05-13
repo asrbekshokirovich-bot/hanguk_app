@@ -45,9 +45,8 @@ class TrainingTab extends ConsumerWidget {
                   children: [
                     _buildTrainingCard(
                       context,
-                      title: 'Study Plan Builder',
-                      description:
-                          'Craft a compelling roadmap for your academic journey.',
+                      title: l.studyPlanCardTitle,
+                      description: l.studyPlanCardDesc,
                       icon: Icons.edit_document,
                       color: Colors.white,
                       onTap: () => Navigator.push(
@@ -61,9 +60,8 @@ class TrainingTab extends ConsumerWidget {
                     const SizedBox(height: 16),
                     _buildTrainingCard(
                       context,
-                      title: 'Personal Statement',
-                      description:
-                          'Write effective and engaging personal essays.',
+                      title: l.personalStatementCardTitle,
+                      description: l.personalStatementCardDesc,
                       icon: Icons.person_search_rounded,
                       color: Colors.white,
                       onTap: () => Navigator.push(
@@ -78,9 +76,8 @@ class TrainingTab extends ConsumerWidget {
                     const SizedBox(height: 16),
                     _buildTrainingCard(
                       context,
-                      title: 'Interview Preparation',
-                      description:
-                          'Practice mock questions and improve your confidence.',
+                      title: l.interviewCardTitle,
+                      description: l.interviewCardDesc,
                       icon: Icons.mic_rounded,
                       color: AppColors.vibrantLime,
                       isDarkIcon: true,
@@ -205,6 +202,7 @@ class TrainingTab extends ConsumerWidget {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final l = AppLocalizations.of(context)!;
             final applicationsAsync = ref.watch(applicationsProvider);
             final interviewState = ref.watch(interviewProvider);
 
@@ -214,9 +212,9 @@ class TrainingTab extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(24),
                 side: const BorderSide(color: Colors.white10),
               ),
-              title: const Text(
-                'Interview Preparation',
-                style: TextStyle(
+              title: Text(
+                l.interviewCardTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -226,9 +224,12 @@ class TrainingTab extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '1. Select Target University',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    Text(
+                      l.interviewDialogStepUniversity,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     applicationsAsync.when(
@@ -238,7 +239,7 @@ class TrainingTab extends ConsumerWidget {
                         ),
                       ),
                       error: (e, s) => Text(
-                        'Error: $e',
+                        l.genericError(e),
                         style: const TextStyle(color: Colors.red),
                       ),
                       data: (applications) {
@@ -257,19 +258,18 @@ class TrainingTab extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'No applications yet',
-                                  style: TextStyle(
+                                Text(
+                                  l.noApplicationsTitle,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                const Text(
-                                  'Add a target university first — interview '
-                                  'practice tailors questions to that school.',
-                                  style: TextStyle(
+                                Text(
+                                  l.interviewNoAppsBody,
+                                  style: const TextStyle(
                                     color: Colors.white60,
                                     fontSize: 12,
                                     height: 1.35,
@@ -284,9 +284,9 @@ class TrainingTab extends ConsumerWidget {
                                       foregroundColor: Colors.black,
                                     ),
                                     icon: const Icon(Icons.school, size: 18),
-                                    label: const Text(
-                                      'Apply to a university',
-                                      style: TextStyle(
+                                    label: Text(
+                                      l.applyCta,
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -350,16 +350,19 @@ class TrainingTab extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      '2. Select Interview Track',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    Text(
+                      l.interviewDialogStepTrack,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
                           child: _TrackChip(
-                            label: 'Korean',
+                            label: l.trackKorean,
                             isSelected: selectedTrack == 'ko',
                             icon: Icons.translate,
                             onTap: () =>
@@ -369,7 +372,7 @@ class TrainingTab extends ConsumerWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _TrackChip(
-                            label: 'English',
+                            label: l.trackEnglish,
                             isSelected: selectedTrack == 'en',
                             icon: Icons.language,
                             onTap: () =>
@@ -381,9 +384,12 @@ class TrainingTab extends ConsumerWidget {
                     const SizedBox(height: 24),
                     // Audit F12 — persona was previously hardcoded to
                     // 'friendly' on this entry path.
-                    const Text(
-                      '3. Interviewer Persona',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    Text(
+                      l.interviewDialogStepPersona,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Container(
@@ -402,18 +408,18 @@ class TrainingTab extends ConsumerWidget {
                             color: Colors.white,
                             fontSize: 14,
                           ),
-                          items: const [
+                          items: [
                             DropdownMenuItem(
                               value: 'friendly',
-                              child: Text('Friendly admissions officer'),
+                              child: Text(l.personaFriendly),
                             ),
                             DropdownMenuItem(
                               value: 'strict',
-                              child: Text('Strict professor'),
+                              child: Text(l.personaStrict),
                             ),
                             DropdownMenuItem(
                               value: 'impatient',
-                              child: Text('Impatient visa officer'),
+                              child: Text(l.personaImpatient),
                             ),
                           ],
                           onChanged: (val) {
@@ -444,9 +450,9 @@ class TrainingTab extends ConsumerWidget {
                   onPressed: interviewState.isLoading
                       ? null
                       : () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: Colors.white54),
+                  child: Text(
+                    l.cancel,
+                    style: const TextStyle(color: Colors.white54),
                   ),
                 ),
                 ElevatedButton(
@@ -470,11 +476,9 @@ class TrainingTab extends ConsumerWidget {
                               if (status.isPermanentlyDenied) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text(
-                                      'Microphone is blocked in system settings.',
-                                    ),
+                                    content: Text(l.micBlockedInSettings),
                                     action: SnackBarAction(
-                                      label: 'Open settings',
+                                      label: l.openSettings,
                                       onPressed: () => openAppSettings(),
                                     ),
                                     duration: const Duration(seconds: 6),
@@ -482,10 +486,8 @@ class TrainingTab extends ConsumerWidget {
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Microphone access is required for the interview.',
-                                    ),
+                                  SnackBar(
+                                    content: Text(l.micRequired),
                                   ),
                                 );
                               }
@@ -515,9 +517,9 @@ class TrainingTab extends ConsumerWidget {
                             );
                           }
                         },
-                  child: const Text(
-                    'Start Interview',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Text(
+                    l.startInterview,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

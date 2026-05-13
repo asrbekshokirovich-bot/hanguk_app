@@ -16,69 +16,69 @@ class AppLocalizationsUz extends AppLocalizations {
       'Universitet arizalaringizni sun\'iy intellekt yordamida mashq qiling.';
 
   @override
-  String get studyPlanCardTitle => 'Study Plan Builder';
+  String get studyPlanCardTitle => 'Study Plan tuzish';
 
   @override
   String get studyPlanCardDesc =>
-      'Craft a compelling roadmap for your academic journey.';
+      'O\'qish maqsadlaringiz uchun ishonchli reja tuzing.';
 
   @override
   String get personalStatementCardTitle => 'Personal Statement';
 
   @override
   String get personalStatementCardDesc =>
-      'Write effective and engaging personal essays.';
+      'Samarali va jozibali shaxsiy insho yozing.';
 
   @override
-  String get interviewCardTitle => 'Interview Preparation';
+  String get interviewCardTitle => 'Suhbatga tayyorgarlik';
 
   @override
   String get interviewCardDesc =>
-      'Practice mock questions and improve your confidence.';
+      'Sinov savollari bilan mashq qiling va o\'zingizga ishonchni mustahkamlang.';
 
   @override
-  String get applyCta => 'Apply to a university';
+  String get applyCta => 'Universitetga ariza topshirish';
 
   @override
-  String get noApplicationsTitle => 'No applications yet';
+  String get noApplicationsTitle => 'Hozircha arizalar yo\'q';
 
   @override
   String get noApplicationsBody =>
-      'Add a target university first — drafting starts from a target school.';
+      'Avval maqsadli universitetni qo\'shing — insho yozish u yerdan boshlanadi.';
 
   @override
-  String get startInterview => 'Start Interview';
+  String get startInterview => 'Suhbatni boshlash';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'Bekor qilish';
 
   @override
-  String get endInterview => 'End Interview';
+  String get endInterview => 'Suhbatni tugatish';
 
   @override
-  String get endSession => 'End Session';
+  String get endSession => 'Sessiyani tugatish';
 
   @override
-  String get practiceAgain => 'Practice Again';
+  String get practiceAgain => 'Yana mashq qilish';
 
   @override
-  String get connecting => 'Connecting...';
+  String get connecting => 'Ulanmoqda...';
 
   @override
   String get greetWait =>
-      'Connecting — your interviewer will greet you shortly...';
+      'Ulanmoqda — intervyuer tez orada salomlashadi...';
 
   @override
-  String get yourTurn => 'Your turn to speak';
+  String get yourTurn => 'Javob berish navbatingiz';
 
   @override
-  String get aiSpeaking => 'Interviewer is speaking...';
+  String get aiSpeaking => 'Intervyuer gapirmoqda...';
 
   @override
-  String get wrappingUp => 'Wrapping up the interview...';
+  String get wrappingUp => 'Suhbat yakunlanmoqda...';
 
   @override
-  String get micRequired => 'Microphone access is required for the interview.';
+  String get micRequired => 'Suhbat uchun mikrofon ruxsati kerak.';
 
   @override
   String get walkaroundLoadingTitle => 'Loading campus walkaround';
@@ -328,5 +328,426 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String notifSettingsUpdateError(Object error) {
     return 'Sozlamani yangilab bo\'lmadi: $error';
+  }
+
+  @override
+  String get interviewDialogStepUniversity =>
+      '1. Maqsadli universitetni tanlang';
+
+  @override
+  String get interviewDialogStepTrack => '2. Suhbat tilini tanlang';
+
+  @override
+  String get interviewDialogStepPersona => '3. Suhbatdosh tipi';
+
+  @override
+  String get interviewNoAppsBody =>
+      'Avval maqsadli universitetni qo\'shing — suhbat mashqi o\'sha maktabga moslab boriladi.';
+
+  @override
+  String get trackKorean => 'Koreyscha';
+
+  @override
+  String get trackEnglish => 'Inglizcha';
+
+  @override
+  String get personaFriendly => 'Do\'stona qabul xodimi';
+
+  @override
+  String get personaStrict => 'Qattiqqo\'l professor';
+
+  @override
+  String get personaImpatient => 'Sabri yo\'q viza xodimi';
+
+  @override
+  String get personaFriendlyCaps => 'Do\'stona qabul xodimi';
+
+  @override
+  String get personaStrictCaps => 'Qattiqqo\'l professor';
+
+  @override
+  String get personaImpatientCaps => 'Sabri yo\'q viza xodimi';
+
+  @override
+  String get micBlockedInSettings =>
+      'Mikrofon tizim sozlamalarida bloklangan.';
+
+  @override
+  String get openSettings => 'Sozlamalarni ochish';
+
+  @override
+  String genericError(Object error) {
+    return 'Xato: $error';
+  }
+
+  @override
+  String errorLoadingApplications(Object error) {
+    return 'Arizalarni yuklab bo\'lmadi: $error';
+  }
+
+  @override
+  String get noAppsInlineHint =>
+      'Hozircha arizalar yo\'q — Arizalar tabidan qo\'shing.';
+
+  @override
+  String get aiStatusWaiting => 'Kiritishni kutmoqda...';
+
+  @override
+  String get aiStatusCoolingDown => 'AI dam olmoqda…';
+
+  @override
+  String get aiStatusAnalyzing => 'AI tahlil qilmoqda...';
+
+  @override
+  String get aiStatusReady => 'Tayyor';
+
+  @override
+  String get aiStatusPredicting => 'AI taklif bermoqda...';
+
+  @override
+  String get aiStatusSupervisionActive => 'AI nazorati faol';
+
+  @override
+  String get workspaceTitle => 'Ish maydoni';
+
+  @override
+  String get workspaceAnalyzeButton => 'Tahlil';
+
+  @override
+  String get aiSupervisionWarningsTitle =>
+      'AI nazorat ogohlantirishlari:';
+
+  @override
+  String grammarReplaceWith(String original, String suggestion) {
+    return '"$original" o\'rniga "$suggestion" yozing';
+  }
+
+  @override
+  String draftingHint(String documentTitle) {
+    return '$documentTitle matnini shu yerga yozing...';
+  }
+
+  @override
+  String get ghostSuggestionSemantics =>
+      'AI taklifi — qo\'yish uchun bosing';
+
+  @override
+  String get ghostAccept => 'Qabul qilish';
+
+  @override
+  String get ghostDismiss => 'Taklifni yopish';
+
+  @override
+  String get pastDraftsTooltip => 'Avvalgi qoralamalar';
+
+  @override
+  String get sessionSettingsTooltip => 'Sessiya sozlamalari';
+
+  @override
+  String get switchTrackEnglish => 'Til → Inglizcha';
+
+  @override
+  String get switchTrackKorean => 'Til → Koreyscha';
+
+  @override
+  String get createNewSession => 'Yangi sessiya yaratish';
+
+  @override
+  String get yourSavedDrafts => 'Saqlangan qoralamalar';
+
+  @override
+  String get noPreviousDrafts => 'Avvalgi qoralamalar topilmadi.';
+
+  @override
+  String get generalDraftLabel => 'Umumiy';
+
+  @override
+  String get studyPlanDocumentName => 'Study Plan';
+
+  @override
+  String get personalStatementDocumentName => 'Personal Statement';
+
+  @override
+  String savedDraftItemTitle(String universityName, String documentName) {
+    return '$universityName $documentName';
+  }
+
+  @override
+  String sessionStatusLabel(String status) {
+    return 'Holat: $status';
+  }
+
+  @override
+  String get deleteSessionTitle => 'Sessiyani o\'chirish';
+
+  @override
+  String get deleteSessionBody =>
+      'Ushbu sessiyani o\'chirib tashlamoqchimisiz? Bu amalni qaytarib bo\'lmaydi.';
+
+  @override
+  String get deleteLabel => 'O\'chirish';
+
+  @override
+  String get stepperLabelGuide => 'Qo\'llanma';
+
+  @override
+  String get stepperLabelExample => 'Namuna';
+
+  @override
+  String get stepperLabelDraft => 'Qoralama';
+
+  @override
+  String get stepperLabelFeedback => 'Izoh';
+
+  @override
+  String get readExamplesButton => 'Namunalarni ko\'rish';
+
+  @override
+  String get targetUniversityLabel => 'Maqsadli universitet';
+
+  @override
+  String get startDraftingButton => 'Yozishni boshlash';
+
+  @override
+  String get newStudyPlanDialogTitle => 'Yangi Study Plan';
+
+  @override
+  String get newPersonalStatementDialogTitle => 'Yangi Personal Statement';
+
+  @override
+  String get selectTargetUniversityStep =>
+      '1. Maqsadli universitetni tanlang';
+
+  @override
+  String get selectLanguageTrackStep => '2. Yozish tilini tanlang';
+
+  @override
+  String get createSession => 'Sessiya yaratish';
+
+  @override
+  String get aiExampleEmbassyTitle => 'Elchixona uchun namuna';
+
+  @override
+  String aiExampleUniversityTitle(String universityName) {
+    return '$universityName uchun namuna';
+  }
+
+  @override
+  String get aiExampleEmbassyLabel =>
+      'Koreya Respublikasi Elchixonasi (Viza)';
+
+  @override
+  String get aiExampleWritingPlaceholder => 'AI namuna yozmoqda...';
+
+  @override
+  String get copyButton => 'Nusxa olish';
+
+  @override
+  String get copiedSnackbar => 'Matn nusxalandi!';
+
+  @override
+  String get analysisFeedbackTitle => 'Tahlil va izohlar';
+
+  @override
+  String get noAnalysisYet => 'Hozircha tahlil yaratilmagan.';
+
+  @override
+  String get aiReviewedDraft => 'AI qoralamani ko\'rib chiqdi.';
+
+  @override
+  String get returnToDrafting => 'Qoralamaga qaytish';
+
+  @override
+  String get studyPlanHistoryTitle => 'Study Plan tarixi';
+
+  @override
+  String get personalStatementHistoryTitle => 'Personal Statement tarixi';
+
+  @override
+  String get draftingHistoryTitle => 'Qoralamalar tarixi';
+
+  @override
+  String get noPastDraftsYet => 'Hali saqlangan qoralamalar yo\'q';
+
+  @override
+  String get noPastDraftsBody =>
+      'Yangi sessiya boshlang — qoralamalaringiz oxirgi tahrir tartibida shu yerda paydo bo\'ladi.';
+
+  @override
+  String get noTargetUniversity => 'Maqsadli universitet yo\'q';
+
+  @override
+  String sessionStepLabel(int step) {
+    return 'Bosqich $step';
+  }
+
+  @override
+  String get metricWords => 'So\'zlar';
+
+  @override
+  String get metricCharacters => 'Belgilar';
+
+  @override
+  String get saveStatusUnsaved => 'Saqlanmagan';
+
+  @override
+  String get saveStatusSaving => 'Saqlanmoqda...';
+
+  @override
+  String get saveStatusSaved => 'Saqlandi';
+
+  @override
+  String get saveStatusError => 'Saqlash xatosi';
+
+  @override
+  String get interviewPracticeTitle => 'Suhbat mashqi';
+
+  @override
+  String get interviewSettingUp => 'Suhbat tayyorlanmoqda...';
+
+  @override
+  String get interviewSetupTitle => 'AI suhbat sozlamalari';
+
+  @override
+  String get interviewSetupSubtitle =>
+      'Suhbatni boshlashdan oldin AI suhbatdosh sozlamalarini moslang.';
+
+  @override
+  String get interviewTypeLabel => 'Suhbat turi';
+
+  @override
+  String get interviewTypeGeneral => 'Umumiy tanishtiruv';
+
+  @override
+  String get interviewTypeUniversitySpecific => 'Universitetga moslangan';
+
+  @override
+  String get interviewTypeVisa => 'Viza / Elchixona suhbati';
+
+  @override
+  String get targetUniversityFieldLabel => 'Maqsadli universitet';
+
+  @override
+  String get languageLabel => 'Til';
+
+  @override
+  String get interviewerPersonaLabel => 'Suhbatdosh tipi';
+
+  @override
+  String get focusTopicLabel => 'Mavzu (ixtiyoriy)';
+
+  @override
+  String get focusTopicHint =>
+      'masalan, Kompyuter ilmlari mutaxassisligi haqida...';
+
+  @override
+  String get timedModeTitle => 'Vaqt cheklovi';
+
+  @override
+  String get timedModeSubtitle => 'Qattiq 5 daqiqalik cheklov';
+
+  @override
+  String get startPracticeButton => 'Mashqni boshlash';
+
+  @override
+  String get pickUniversityFirstHint =>
+      'Yuqoridan maqsadli universitetni tanlang.';
+
+  @override
+  String get coachingFiller => 'Qo\'shimcha so\'zlardan voz keching!';
+
+  @override
+  String get lifelineHintsTitle => '💡 Yordam maslahatlari:';
+
+  @override
+  String get speakerAi => 'AI';
+
+  @override
+  String get speakerYou => 'Siz';
+
+  @override
+  String connectionInterrupted(String detail) {
+    return 'Aloqa uzildi: $detail';
+  }
+
+  @override
+  String get interviewAnalyticsTitle => 'Suhbat tahlili';
+
+  @override
+  String get analyzingTranscript => 'AI transkripsiyani tahlil qilmoqda...';
+
+  @override
+  String get noFeedbackAvailable => 'Izoh topilmadi.';
+
+  @override
+  String get overallScoreLabel => 'Umumiy ball';
+
+  @override
+  String get metricCommunication => 'Muloqot';
+
+  @override
+  String get metricConfidence => 'Ishonchlilik';
+
+  @override
+  String get metricContent => 'Mazmun';
+
+  @override
+  String get metricLanguage => 'Til';
+
+  @override
+  String get detailedFeedbackTitle => 'Batafsil izoh';
+
+  @override
+  String get detailedFeedbackFallback => 'Yaxshi natija.';
+
+  @override
+  String get strengthsLabel => 'Kuchli tomonlar';
+
+  @override
+  String get areasToImproveLabel => 'Yaxshilash kerak';
+
+  @override
+  String get startAnotherInterview => 'Yangi suhbatni boshlash';
+
+  @override
+  String get sessionRecording => 'Sessiya yozuvi';
+
+  @override
+  String get audioRecordingNotFound => 'Audio yozuv topilmadi.';
+
+  @override
+  String get interviewHistoryTitle => 'Suhbatlar tarixi';
+
+  @override
+  String get noPastInterviews => 'O\'tgan suhbatlar topilmadi.';
+
+  @override
+  String get unknownTarget => 'Noma\'lum maqsad';
+
+  @override
+  String get unknownUniversity => 'Noma\'lum universitet';
+
+  @override
+  String get abandonedSessionNote =>
+      'Bu sessiya izohsiz tugatilgan — qayta tinglash mavjud emas.';
+
+  @override
+  String get activeSessionNote =>
+      'Bu sessiya hali faol. Tugatib izohni ko\'ring.';
+
+  @override
+  String get deleteSessionTooltip => 'Sessiyani o\'chirish';
+
+  @override
+  String get deleteInterviewDialogTitle =>
+      'Bu sessiyani o\'chirib tashlaysizmi?';
+
+  @override
+  String get deleteInterviewDialogBody =>
+      'Izoh va yozuv havolasi butunlay o\'chiriladi.';
+
+  @override
+  String deleteFailed(Object error) {
+    return 'O\'chirish amalga oshmadi: $error';
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math';
@@ -40,17 +41,27 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
     super.dispose();
   }
 
-  String get documentTitle => widget.documentType == 'study_plan' 
-    ? 'Study Plan Builder' 
-    : 'Personal Statement';
+  /// Localized header for the current document type. Uses the card-title
+  /// keys from app_en.arb (studyPlanCardTitle / personalStatementCardTitle).
+  String _documentTitle(AppLocalizations l) =>
+      widget.documentType == 'study_plan'
+          ? l.studyPlanCardTitle
+          : l.personalStatementCardTitle;
+
+  /// Locale-aware short document name used inline (e.g. in saved-drafts list).
+  String _documentName(AppLocalizations l) =>
+      widget.documentType == 'study_plan'
+          ? l.studyPlanDocumentName
+          : l.personalStatementDocumentName;
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final state = ref.watch(documentSessionProvider(widget.documentType));
 
     return HangukScaffold(
       appBar: AppBar(
-        title: Text(documentTitle),
+        title: Text(_documentTitle(l)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -58,7 +69,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
           // inline session list on the wizard's home step).
           if (state.currentSession == null)
             IconButton(
-              tooltip: 'Past drafts',
+              tooltip: l.pastDraftsTooltip,
               icon: const Icon(Icons.history, color: Colors.white),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
@@ -74,7 +85,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
             // need surfaces.
             PopupMenuButton<String>(
               icon: const Icon(Icons.tune, color: Colors.white),
-              tooltip: 'Session settings',
+              tooltip: l.sessionSettingsTooltip,
               color: AppColors.backgroundNavy,
               onSelected: (val) async {
                 final session = state.currentSession;
@@ -90,16 +101,20 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                       );
                 }
               },
-              itemBuilder: (_) => const [
+              itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'track-en',
-                  child: Text('Switch track → English',
-                      style: TextStyle(color: Colors.white)),
+                  child: Text(
+                    l.switchTrackEnglish,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
                 PopupMenuItem(
                   value: 'track-ko',
-                  child: Text('Switch track → Korean',
-                      style: TextStyle(color: Colors.white)),
+                  child: Text(
+                    l.switchTrackKorean,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -127,6 +142,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   }
 
   Widget _buildSessionList(StudyPlanSessionState state) {
+    final l = AppLocalizations.of(context)!;
     final relevantSessions = state.sessions;
 
     return Padding(
@@ -141,77 +157,151 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
             icon: const Icon(Icons.add),
-            label: const Text('Create New Session', style: TextStyle(fontWeight: FontWeight.bold)),
+            label: Text(
+              l.createNewSession,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             onPressed: () {
               _showCreateSessionDialog();
             },
           ),
           const SizedBox(height: 32),
-          const Text('Your Saved Drafts', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            l.yourSavedDrafts,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 16),
           Expanded(
-             child: relevantSessions.isEmpty
-              ? const Center(child: Text('No previous drafts found.', style: TextStyle(color: Colors.white54)))
-              : ListView.builder(
-                 itemCount: relevantSessions.length,
-                 itemBuilder: (context, i) {
-                   final s = relevantSessions[i];
-                   return ListTile(
-                     contentPadding: EdgeInsets.zero,
-                     leading: const Icon(Icons.edit_document, color: AppColors.royalBlue),
-                     title: Text('${s.universityNameEn ?? 'General'} ${widget.documentType == 'study_plan' ? 'Study Plan' : 'Personal Statement'}', style: const TextStyle(color: Colors.white)),
-                     subtitle: Text('Status: ${s.status}', style: const TextStyle(color: Colors.white54)),
-                     trailing: Row(
-                       mainAxisSize: MainAxisSize.min,
-                       children: [
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: AppColors.error),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: AppColors.backgroundNavy,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    side: const BorderSide(color: Colors.white10),
-                                  ),
-                                  title: const Text('Delete Session', style: TextStyle(color: Colors.white)),
-                                  content: const Text('Are you sure you want to delete this session? This action cannot be undone.', style: TextStyle(color: Colors.white70)),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
-                                    ),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.error,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        ref.read(studyPlanSessionProvider.notifier).deleteSession(widget.documentType, s.id);
-                                      },
-                                      child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+            child: relevantSessions.isEmpty
+                ? Center(
+                    child: Text(
+                      l.noPreviousDrafts,
+                      style: const TextStyle(color: Colors.white54),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: relevantSessions.length,
+                    itemBuilder: (context, i) {
+                      final s = relevantSessions[i];
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(
+                          Icons.edit_document,
+                          color: AppColors.royalBlue,
+                        ),
+                        title: Text(
+                          l.savedDraftItemTitle(
+                            s.universityNameEn ?? l.generalDraftLabel,
+                            _documentName(l),
                           ),
-                          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white24),
-                       ]
-                     ),
-                     onTap: () {
-                         ref.read(studyPlanSessionProvider.notifier).loadSession(widget.documentType, s.id).then((_) {
-                             _draftController.text = ref.read(documentSessionProvider(widget.documentType)).draftContent;
-                         });
-                     },
-                   );
-                 },
-              )
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          l.sessionStatusLabel(s.status),
+                          style: const TextStyle(color: Colors.white54),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: AppColors.error,
+                              ),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    final dl = AppLocalizations.of(context)!;
+                                    return AlertDialog(
+                                      backgroundColor: AppColors.backgroundNavy,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: const BorderSide(
+                                          color: Colors.white10,
+                                        ),
+                                      ),
+                                      title: Text(
+                                        dl.deleteSessionTitle,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      content: Text(
+                                        dl.deleteSessionBody,
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: Text(
+                                            dl.cancel,
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                            ),
+                                          ),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.error,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            ref
+                                                .read(
+                                                  studyPlanSessionProvider
+                                                      .notifier,
+                                                )
+                                                .deleteSession(
+                                                  widget.documentType,
+                                                  s.id,
+                                                );
+                                          },
+                                          child: Text(
+                                            dl.deleteLabel,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.white24,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          ref
+                              .read(studyPlanSessionProvider.notifier)
+                              .loadSession(widget.documentType, s.id)
+                              .then((_) {
+                            _draftController.text = ref
+                                .read(documentSessionProvider(
+                                    widget.documentType))
+                                .draftContent;
+                          });
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
-      )
+      ),
     );
   }
 
@@ -229,17 +319,22 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   }
 
   Widget _buildStepper(int currentStep) {
+    final l = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
-          _buildStepIcon(1, currentStep, Icons.info_outline, 'Guide'),
+          _buildStepIcon(
+              1, currentStep, Icons.info_outline, l.stepperLabelGuide),
           _buildConnector(1, currentStep),
-          _buildStepIcon(2, currentStep, Icons.format_quote, 'Example'),
+          _buildStepIcon(
+              2, currentStep, Icons.format_quote, l.stepperLabelExample),
           _buildConnector(2, currentStep),
-          _buildStepIcon(3, currentStep, Icons.edit_document, 'Draft'),
+          _buildStepIcon(
+              3, currentStep, Icons.edit_document, l.stepperLabelDraft),
           _buildConnector(3, currentStep),
-          _buildStepIcon(4, currentStep, Icons.analytics_outlined, 'Feedback'),
+          _buildStepIcon(
+              4, currentStep, Icons.analytics_outlined, l.stepperLabelFeedback),
         ],
       ),
     );
@@ -354,8 +449,13 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: () => ref.read(studyPlanSessionProvider.notifier).updateSessionStep(widget.documentType, 2),
-                child: const Text('Read Examples', style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () => ref
+                    .read(studyPlanSessionProvider.notifier)
+                    .updateSessionStep(widget.documentType, 2),
+                child: Text(
+                  AppLocalizations.of(context)!.readExamplesButton,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             const SizedBox(height: 24), // Bottom padding
@@ -564,8 +664,10 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   }
 
   Widget _buildExampleStep(StudyPlanSessionState state) {
+    final l = AppLocalizations.of(context)!;
     // Automatically use the university selected during session creation
-    final uniName = state.currentSession?.universityNameEn ?? 'Target University';
+    final uniName =
+        state.currentSession?.universityNameEn ?? l.targetUniversityLabel;
 
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -578,13 +680,20 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   const Text(
-                    'Target University',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  Text(
+                    l.targetUniversityLabel,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
                   ),
                   Text(
                     uniName,
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -594,11 +703,17 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
               decoration: BoxDecoration(
                 color: AppColors.vibrantLime.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.vibrantLime.withOpacity(0.3)),
+                border:
+                    Border.all(color: AppColors.vibrantLime.withOpacity(0.3)),
               ),
               child: Text(
-                state.currentSession?.selectedTrack?.toUpperCase() ?? 'GENERAL',
-                style: const TextStyle(color: AppColors.vibrantLime, fontSize: 10, fontWeight: FontWeight.bold),
+                state.currentSession?.selectedTrack?.toUpperCase() ??
+                    l.generalDraftLabel.toUpperCase(),
+                style: const TextStyle(
+                  color: AppColors.vibrantLime,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -612,20 +727,24 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   }
 
   Widget _buildExampleContent(String uniName) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _AiExampleCard(
           key: ValueKey('uni_\${uniName}'),
-          universityName: uniName, 
-          index: 1, 
+          universityName: uniName,
+          index: 1,
           isEmbassy: false,
         ),
         const SizedBox(height: 24),
         _AiExampleCard(
           key: ValueKey('embassy_\${uniName}'),
-          universityName: 'Korea Respublikasi Elchixonasi (Visa)', 
-          index: 2, 
+          // The embassy template uses a fixed addressee label that does
+          // not change between sessions; the localized version is read
+          // by _AiExampleCard via the embassy flag.
+          universityName: l.aiExampleEmbassyLabel,
+          index: 2,
           isEmbassy: true,
         ),
         const SizedBox(height: 32),
@@ -635,8 +754,13 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
             foregroundColor: Colors.black,
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
-          onPressed: () => ref.read(studyPlanSessionProvider.notifier).updateSessionStep(widget.documentType, 3),
-          child: const Text('Start Drafting', style: TextStyle(fontWeight: FontWeight.bold)),
+          onPressed: () => ref
+              .read(studyPlanSessionProvider.notifier)
+              .updateSessionStep(widget.documentType, 3),
+          child: Text(
+            l.startDraftingButton,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(height: 24),
       ],
@@ -659,7 +783,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
         // when switching between sessions of the same documentType.
         key: ValueKey('drafting-${state.currentSession?.id ?? 'new'}'),
         initialText: initial,
-        documentTitle: documentTitle,
+        documentTitle: _documentTitle(AppLocalizations.of(context)!),
         documentType: widget.documentType,
       ),
     );
@@ -677,6 +801,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final l = AppLocalizations.of(context)!;
             final applicationsAsync = ref.watch(applicationsProvider);
 
             return AlertDialog(
@@ -686,19 +811,37 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                 side: const BorderSide(color: Colors.white10),
               ),
               title: Text(
-                'Start New ${widget.documentType == 'study_plan' ? 'Study Plan' : 'Personal Statement'}',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                widget.documentType == 'study_plan'
+                    ? l.newStudyPlanDialogTitle
+                    : l.newPersonalStatementDialogTitle,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('1. Select Target University', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    Text(
+                      l.selectTargetUniversityStep,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     applicationsAsync.when(
-                      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime)),
-                      error: (e, s) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.vibrantLime,
+                        ),
+                      ),
+                      error: (e, s) => Text(
+                        l.genericError(e),
+                        style: const TextStyle(color: Colors.red),
+                      ),
                       data: (applications) {
                         if (applications.isEmpty) {
                           // Audit F4: previous version showed only static
@@ -714,19 +857,18 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'No applications yet',
-                                  style: TextStyle(
+                                Text(
+                                  l.noApplicationsTitle,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                const Text(
-                                  'Add a target university first — drafting '
-                                  'starts from a target school.',
-                                  style: TextStyle(
+                                Text(
+                                  l.noApplicationsBody,
+                                  style: const TextStyle(
                                     color: Colors.white60,
                                     fontSize: 12,
                                     height: 1.35,
@@ -741,12 +883,16 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                                       foregroundColor: Colors.black,
                                     ),
                                     icon: const Icon(Icons.school, size: 18),
-                                    label: const Text(
-                                      'Apply to a university',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    label: Text(
+                                      l.applyCta,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                     onPressed: () {
-                                      ref.read(homeTabProvider.notifier).setTab(0);
+                                      ref
+                                          .read(homeTabProvider.notifier)
+                                          .setTab(0);
                                       Navigator.of(context).pop();
                                       Navigator.of(context).pop();
                                     },
@@ -772,10 +918,28 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                               final isSelected = selectedUniId == uni.id;
                               return ListTile(
                                 dense: true,
-                                title: Text(uni.name, style: TextStyle(color: isSelected ? AppColors.vibrantLime : Colors.white)),
-                                leading: Icon(Icons.school, color: isSelected ? AppColors.vibrantLime : Colors.white24),
-                                trailing: isSelected ? const Icon(Icons.check_circle, color: AppColors.vibrantLime) : null,
-                                onTap: () => setDialogState(() => selectedUniId = uni.id),
+                                title: Text(
+                                  uni.name,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? AppColors.vibrantLime
+                                        : Colors.white,
+                                  ),
+                                ),
+                                leading: Icon(
+                                  Icons.school,
+                                  color: isSelected
+                                      ? AppColors.vibrantLime
+                                      : Colors.white24,
+                                ),
+                                trailing: isSelected
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: AppColors.vibrantLime,
+                                      )
+                                    : null,
+                                onTap: () => setDialogState(
+                                    () => selectedUniId = uni.id),
                               );
                             },
                           ),
@@ -783,25 +947,33 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
-                    const Text('2. Select Language Track', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    Text(
+                      l.selectLanguageTrackStep,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
                           child: _TrackChip(
-                            label: 'English',
+                            label: l.trackEnglish,
                             isSelected: selectedTrack == 'en',
                             icon: Icons.language,
-                            onTap: () => setDialogState(() => selectedTrack = 'en'),
+                            onTap: () =>
+                                setDialogState(() => selectedTrack = 'en'),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _TrackChip(
-                            label: 'Korean',
+                            label: l.trackKorean,
                             isSelected: selectedTrack == 'ko',
                             icon: Icons.translate,
-                            onTap: () => setDialogState(() => selectedTrack = 'ko'),
+                            onTap: () =>
+                                setDialogState(() => selectedTrack = 'ko'),
                           ),
                         ),
                       ],
@@ -810,45 +982,69 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                 ),
               ),
               actions: [
-                if (ref.watch(documentSessionProvider(widget.documentType)).error != null)
+                if (ref
+                        .watch(documentSessionProvider(widget.documentType))
+                        .error !=
+                    null)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      ref.watch(documentSessionProvider(widget.documentType)).error!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                      ref
+                          .watch(documentSessionProvider(widget.documentType))
+                          .error!,
+                      style: const TextStyle(
+                          color: Colors.redAccent, fontSize: 12),
                     ),
                   ),
                 TextButton(
-                  onPressed: ref.watch(documentSessionProvider(widget.documentType)).isLoading 
-                      ? null 
+                  onPressed: ref
+                          .watch(documentSessionProvider(widget.documentType))
+                          .isLoading
+                      ? null
                       : () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                  child: Text(
+                    l.cancel,
+                    style: const TextStyle(color: Colors.white54),
+                  ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.vibrantLime,
                     foregroundColor: Colors.black,
                   ),
-                  onPressed: (selectedUniId == null || ref.watch(documentSessionProvider(widget.documentType)).isLoading) 
-                    ? null 
-                    : () async {
-                      final session = await ref.read(studyPlanSessionProvider.notifier).createSession(
-                        widget.documentType,
-                        targetUniversityId: selectedUniId,
-                        selectedTrack: selectedTrack,
-                      );
-                      
-                      if (session != null && context.mounted) {
-                        Navigator.pop(context);
-                      }
-                    },
-                  child: ref.watch(documentSessionProvider(widget.documentType)).isLoading 
-                    ? const SizedBox(
-                        width: 20, 
-                        height: 20, 
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black)
-                      )
-                    : const Text('Create Session', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onPressed: (selectedUniId == null ||
+                          ref
+                              .watch(documentSessionProvider(
+                                  widget.documentType))
+                              .isLoading)
+                      ? null
+                      : () async {
+                          final session = await ref
+                              .read(studyPlanSessionProvider.notifier)
+                              .createSession(
+                                widget.documentType,
+                                targetUniversityId: selectedUniId,
+                                selectedTrack: selectedTrack,
+                              );
+
+                          if (session != null && context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                  child: ref
+                          .watch(documentSessionProvider(widget.documentType))
+                          .isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.black),
+                        )
+                      : Text(
+                          l.createSession,
+                          style:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                 ),
               ],
             );
@@ -1041,6 +1237,7 @@ I wish to explicitly state my intention to return to my home country immediately
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
@@ -1054,16 +1251,27 @@ I wish to explicitly state my intention to return to my home country immediately
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.royalBlue.withOpacity(0.7),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
-                Icon(widget.isEmbassy ? Icons.account_balance : Icons.school, color: Colors.white, size: 20),
+                Icon(
+                  widget.isEmbassy ? Icons.account_balance : Icons.school,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    widget.isEmbassy ? 'Elchixona uchun Namuna' : '${widget.universityName} uchun Namuna',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    widget.isEmbassy
+                        ? l.aiExampleEmbassyTitle
+                        : l.aiExampleUniversityTitle(widget.universityName),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ],
@@ -1073,22 +1281,30 @@ I wish to explicitly state my intention to return to my home country immediately
             future: _aiFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(32),
+                return Padding(
+                  padding: const EdgeInsets.all(32),
                   child: Column(
                     children: [
-                      CircularProgressIndicator(color: AppColors.vibrantLime),
-                      SizedBox(height: 16),
-                      Text('AI namuna yozmoqda...', style: TextStyle(color: Colors.white54)),
+                      const CircularProgressIndicator(
+                        color: AppColors.vibrantLime,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l.aiExampleWritingPlaceholder,
+                        style: const TextStyle(color: Colors.white54),
+                      ),
                     ],
                   ),
                 );
               }
-              
+
               if (snapshot.hasError) {
                 return Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('Xatolik: ${snapshot.error}', style: const TextStyle(color: Colors.red)),
+                  child: Text(
+                    l.genericError(snapshot.error ?? ''),
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 );
               }
 
@@ -1099,29 +1315,41 @@ I wish to explicitly state my intention to return to my home country immediately
                     padding: const EdgeInsets.all(16),
                     child: Text(
                       snapshot.data!,
-                      style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 15,
+                        height: 1.5,
+                      ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton.icon(
                           icon: const Icon(Icons.copy, size: 18),
-                          label: const Text('Nusxa olish'),
-                          style: TextButton.styleFrom(foregroundColor: AppColors.vibrantLime),
+                          label: Text(l.copyButton),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.vibrantLime,
+                          ),
                           onPressed: () {
-                            Clipboard.setData(ClipboardData(text: snapshot.data!)).then((_) {
-                               if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Matn nusxalandi!'), 
-                                      backgroundColor: Colors.green,
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
-                               }
+                            Clipboard.setData(
+                                    ClipboardData(text: snapshot.data!))
+                                .then((_) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(l.copiedSnackbar),
+                                    backgroundColor: Colors.green,
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
                             });
                           },
                         ),

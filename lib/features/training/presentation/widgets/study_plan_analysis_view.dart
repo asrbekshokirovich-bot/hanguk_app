@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../data/study_plan_repository.dart';
 
 class StudyPlanAnalysisView extends ConsumerWidget {
@@ -9,6 +10,7 @@ class StudyPlanAnalysisView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final state = ref.watch(documentSessionProvider(documentType));
 
     // Audit U6: use the dedicated isAnalyzing flag so we don't show a
@@ -27,44 +29,57 @@ class StudyPlanAnalysisView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Analysis & Feedback',
-            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            l.analysisFeedbackTitle,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           if (analysis == null) ...[
-             const Spacer(),
-             const Center(
-                child: Text('No analysis generated yet.', style: TextStyle(color: Colors.white54)),
-             ),
-             const Spacer(),
+            const Spacer(),
+            Center(
+              child: Text(
+                l.noAnalysisYet,
+                style: const TextStyle(color: Colors.white54),
+              ),
+            ),
+            const Spacer(),
           ] else ...[
-             Expanded(
-               child: Container(
-                 padding: const EdgeInsets.all(16),
-                 decoration: BoxDecoration(
-                   color: AppColors.royalBlue.withOpacity(0.05),
-                   borderRadius: BorderRadius.circular(16),
-                   border: Border.all(color: Colors.white10),
-                 ),
-                 child: SingleChildScrollView(
-                   child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                         if (_detectTrackMismatch(state.draftContent, state.currentSession?.selectedTrack))
-                           _buildTrackWarning(),
-                         if (analysis.aiResponse != null && analysis.aiResponse!.isNotEmpty)
-                           Text(
-                             analysis.aiResponse!,
-                             style: const TextStyle(color: Colors.white70, height: 1.5, fontSize: 14),
-                           )
-                         else
-                           const Text('AI successfully reviewed your draft.', style: TextStyle(color: Colors.white)),
-                      ]
-                   )
-                 ),
-               ),
-             ),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.royalBlue.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_detectTrackMismatch(state.draftContent,
+                          state.currentSession?.selectedTrack))
+                        _buildTrackWarning(),
+                      if (analysis.aiResponse != null &&
+                          analysis.aiResponse!.isNotEmpty)
+                        Text(
+                          analysis.aiResponse!,
+                          style: const TextStyle(
+                              color: Colors.white70, height: 1.5, fontSize: 14),
+                        )
+                      else
+                        Text(
+                          l.aiReviewedDraft,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
           const SizedBox(height: 16),
           ElevatedButton(
@@ -73,8 +88,13 @@ class StudyPlanAnalysisView extends ConsumerWidget {
               foregroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            onPressed: () => ref.read(studyPlanSessionProvider.notifier).updateSessionStep(documentType, 3),
-            child: const Text('Return to Drafting', style: TextStyle(fontWeight: FontWeight.bold)),
+            onPressed: () => ref
+                .read(studyPlanSessionProvider.notifier)
+                .updateSessionStep(documentType, 3),
+            child: Text(
+              l.returnToDrafting,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

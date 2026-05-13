@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../data/interview_repository.dart';
 
 import 'widgets/interview_setup_view.dart';
@@ -55,13 +56,14 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final state = ref.watch(interviewProvider);
 
     return HangukScaffold(
       appBar: AppBar(
-        title: const FittedBox(
+        title: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text('Interview Practice'),
+          child: Text(l.interviewPracticeTitle),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -75,7 +77,10 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
                 // Note: Vapi call cleanup is handled by InterviewActiveView.dispose()
                 // via the centralized _stopCall() method.
               },
-              child: const Text('End Session', style: TextStyle(color: AppColors.error)),
+              child: Text(
+                l.endSession,
+                style: const TextStyle(color: AppColors.error),
+              ),
             ),
         ],
       ),
@@ -86,18 +91,19 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
   }
 
   Widget _buildCurrentView(InterviewSessionState state) {
+    final l = AppLocalizations.of(context)!;
     if (state.status == 'idle') {
       // Loading state while startSession() runs after navigation
       if (state.isLoading) {
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(color: AppColors.vibrantLime),
-              SizedBox(height: 16),
+              const CircularProgressIndicator(color: AppColors.vibrantLime),
+              const SizedBox(height: 16),
               Text(
-                'Setting up your interview...',
-                style: TextStyle(color: Colors.white70),
+                l.interviewSettingUp,
+                style: const TextStyle(color: Colors.white70),
               ),
             ],
           ),

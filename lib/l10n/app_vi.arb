@@ -130,5 +130,180 @@
     "placeholders": {
       "error": { "type": "Object" }
     }
+  },
+
+  "interviewDialogStepUniversity": "1. Select Target University",
+  "interviewDialogStepTrack": "2. Select Interview Track",
+  "interviewDialogStepPersona": "3. Interviewer Persona",
+  "interviewNoAppsBody": "Add a target university first — interview practice tailors questions to that school.",
+  "trackKorean": "Korean",
+  "trackEnglish": "English",
+  "personaFriendly": "Friendly admissions officer",
+  "personaStrict": "Strict professor",
+  "personaImpatient": "Impatient visa officer",
+  "personaFriendlyCaps": "Friendly Admissions Officer",
+  "personaStrictCaps": "Strict Professor",
+  "personaImpatientCaps": "Impatient Visa Officer",
+  "micBlockedInSettings": "Microphone is blocked in system settings.",
+  "openSettings": "Open settings",
+  "genericError": "Error: {error}",
+  "@genericError": {
+    "placeholders": { "error": { "type": "Object" } }
+  },
+  "errorLoadingApplications": "Error loading applications: {error}",
+  "@errorLoadingApplications": {
+    "placeholders": { "error": { "type": "Object" } }
+  },
+  "noAppsInlineHint": "No applications yet — go to the Applications tab to add one.",
+
+  "aiStatusWaiting": "Waiting for input...",
+  "aiStatusCoolingDown": "AI cooling down…",
+  "aiStatusAnalyzing": "AI analyzing...",
+  "aiStatusReady": "Ready",
+  "aiStatusPredicting": "AI Predicting...",
+  "aiStatusSupervisionActive": "AI Supervision Active",
+  "workspaceTitle": "Workspace",
+  "workspaceAnalyzeButton": "Analyze",
+  "aiSupervisionWarningsTitle": "AI Supervision Warnings:",
+  "grammarReplaceWith": "Replace \"{original}\" with \"{suggestion}\"",
+  "@grammarReplaceWith": {
+    "placeholders": {
+      "original": { "type": "String" },
+      "suggestion": { "type": "String" }
+    }
+  },
+  "draftingHint": "Type your {documentTitle} here...",
+  "@draftingHint": {
+    "placeholders": { "documentTitle": { "type": "String" } }
+  },
+  "ghostSuggestionSemantics": "AI suggestion — tap to insert",
+  "ghostAccept": "Accept",
+  "ghostDismiss": "Dismiss suggestion",
+
+  "pastDraftsTooltip": "Past drafts",
+  "sessionSettingsTooltip": "Session settings",
+  "switchTrackEnglish": "Switch track → English",
+  "switchTrackKorean": "Switch track → Korean",
+  "createNewSession": "Create New Session",
+  "yourSavedDrafts": "Your Saved Drafts",
+  "noPreviousDrafts": "No previous drafts found.",
+  "generalDraftLabel": "General",
+  "studyPlanDocumentName": "Study Plan",
+  "personalStatementDocumentName": "Personal Statement",
+  "savedDraftItemTitle": "{universityName} {documentName}",
+  "@savedDraftItemTitle": {
+    "placeholders": {
+      "universityName": { "type": "String" },
+      "documentName": { "type": "String" }
+    }
+  },
+  "sessionStatusLabel": "Status: {status}",
+  "@sessionStatusLabel": {
+    "placeholders": { "status": { "type": "String" } }
+  },
+  "deleteSessionTitle": "Delete Session",
+  "deleteSessionBody": "Are you sure you want to delete this session? This action cannot be undone.",
+  "deleteLabel": "Delete",
+  "stepperLabelGuide": "Guide",
+  "stepperLabelExample": "Example",
+  "stepperLabelDraft": "Draft",
+  "stepperLabelFeedback": "Feedback",
+  "readExamplesButton": "Read Examples",
+  "targetUniversityLabel": "Target University",
+  "startDraftingButton": "Start Drafting",
+  "newStudyPlanDialogTitle": "Start New Study Plan",
+  "newPersonalStatementDialogTitle": "Start New Personal Statement",
+  "selectTargetUniversityStep": "1. Select Target University",
+  "selectLanguageTrackStep": "2. Select Language Track",
+  "createSession": "Create Session",
+  "aiExampleEmbassyTitle": "Embassy Example",
+  "aiExampleUniversityTitle": "Example for {universityName}",
+  "@aiExampleUniversityTitle": {
+    "placeholders": { "universityName": { "type": "String" } }
+  },
+  "aiExampleEmbassyLabel": "Embassy of the Republic of Korea (Visa)",
+  "aiExampleWritingPlaceholder": "AI is writing an example...",
+  "copyButton": "Copy",
+  "copiedSnackbar": "Text copied!",
+
+  "analysisFeedbackTitle": "Analysis & Feedback",
+  "noAnalysisYet": "No analysis generated yet.",
+  "aiReviewedDraft": "AI successfully reviewed your draft.",
+  "returnToDrafting": "Return to Drafting",
+
+  "studyPlanHistoryTitle": "Study Plan history",
+  "personalStatementHistoryTitle": "Personal Statement history",
+  "draftingHistoryTitle": "Drafting history",
+  "noPastDraftsYet": "No past drafts yet",
+  "noPastDraftsBody": "Start a new session and your drafts will appear here, ordered by most recently edited.",
+  "noTargetUniversity": "No target university",
+  "sessionStepLabel": "Step {step}",
+  "@sessionStepLabel": {
+    "placeholders": { "step": { "type": "int" } }
+  },
+
+  "metricWords": "Words",
+  "metricCharacters": "Characters",
+  "saveStatusUnsaved": "Unsaved",
+  "saveStatusSaving": "Saving...",
+  "saveStatusSaved": "Saved",
+  "saveStatusError": "Save failed",
+
+  "interviewPracticeTitle": "Interview Practice",
+  "interviewSettingUp": "Setting up your interview...",
+
+  "interviewSetupTitle": "AI Interview Setup",
+  "interviewSetupSubtitle": "Configure your AI interviewer settings before starting.",
+  "interviewTypeLabel": "Interview Type",
+  "interviewTypeGeneral": "General Introduction",
+  "interviewTypeUniversitySpecific": "University Specific",
+  "interviewTypeVisa": "Visa / Embassy Check",
+  "targetUniversityFieldLabel": "Target university",
+  "languageLabel": "Language",
+  "interviewerPersonaLabel": "Interviewer Persona",
+  "focusTopicLabel": "Focus Topic (Optional)",
+  "focusTopicHint": "e.g. Discussing my computer science major...",
+  "timedModeTitle": "Timed Mode",
+  "timedModeSubtitle": "5 minute strict limit",
+  "startPracticeButton": "Start Practice",
+  "pickUniversityFirstHint": "Pick a target university above to enable.",
+
+  "coachingFiller": "Avoid using filler words!",
+  "lifelineHintsTitle": "💡 Lifeline Hints:",
+  "speakerAi": "AI",
+  "speakerYou": "You",
+  "connectionInterrupted": "Connection interrupted: {detail}",
+  "@connectionInterrupted": {
+    "placeholders": { "detail": { "type": "String" } }
+  },
+
+  "interviewAnalyticsTitle": "Interview Analytics",
+  "analyzingTranscript": "Analyzing transcript with AI...",
+  "noFeedbackAvailable": "No feedback available.",
+  "overallScoreLabel": "Overall Score",
+  "metricCommunication": "Communication",
+  "metricConfidence": "Confidence",
+  "metricContent": "Content",
+  "metricLanguage": "Language",
+  "detailedFeedbackTitle": "Detailed Feedback",
+  "detailedFeedbackFallback": "Great job.",
+  "strengthsLabel": "Strengths",
+  "areasToImproveLabel": "Areas to Improve",
+  "startAnotherInterview": "Start another interview",
+  "sessionRecording": "Session Recording",
+  "audioRecordingNotFound": "Audio recording not found.",
+
+  "interviewHistoryTitle": "Interview History",
+  "noPastInterviews": "No past interviews found.",
+  "unknownTarget": "Unknown Target",
+  "unknownUniversity": "Unknown University",
+  "abandonedSessionNote": "This session ended without feedback — no replay available.",
+  "activeSessionNote": "This session is still active. Finish it to see feedback.",
+  "deleteSessionTooltip": "Delete session",
+  "deleteInterviewDialogTitle": "Delete this session?",
+  "deleteInterviewDialogBody": "The feedback and recording link will be permanently removed.",
+  "deleteFailed": "Delete failed: {error}",
+  "@deleteFailed": {
+    "placeholders": { "error": { "type": "Object" } }
   }
 }
