@@ -458,29 +458,41 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
           const SizedBox(height: 12),
           Row(
             children: [
-              IconButton(
-                icon: Icon(
-                  _isPlaying
-                      ? Icons.pause_circle_filled
-                      : Icons.play_circle_fill,
-                  color: _isLoading || _recordingUrl == null
-                      ? Colors.white24
-                      : AppColors.vibrantLime,
-                  size: 48,
+              // Audit P1: previously `padding: EdgeInsets.zero` with a
+              // 48dp icon left the button visually unbounded — the tap
+              // target met the minimum, but there was no hit-state
+              // padding or static visual region. Wrap in a vibrantLime-
+              // tinted circular surface and give IconButton real padding
+              // so the Material ink ripple has somewhere to land.
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.vibrantLime.withValues(alpha: 0.08),
                 ),
-                tooltip: _isPlaying
-                    ? l.a11yTooltipPauseRecording
-                    : l.a11yTooltipPlayRecording,
-                padding: EdgeInsets.zero,
-                onPressed: _isLoading || _recordingUrl == null
-                    ? null
-                    : () {
-                        if (_isPlaying) {
-                          _audioPlayer.pause();
-                        } else {
-                          _audioPlayer.play(UrlSource(_recordingUrl!));
-                        }
-                      },
+                child: IconButton(
+                  icon: Icon(
+                    _isPlaying
+                        ? Icons.pause_circle_filled
+                        : Icons.play_circle_fill,
+                    color: _isLoading || _recordingUrl == null
+                        ? Colors.white24
+                        : AppColors.vibrantLime,
+                  ),
+                  iconSize: 48,
+                  tooltip: _isPlaying
+                      ? l.a11yTooltipPauseRecording
+                      : l.a11yTooltipPlayRecording,
+                  padding: const EdgeInsets.all(8),
+                  onPressed: _isLoading || _recordingUrl == null
+                      ? null
+                      : () {
+                          if (_isPlaying) {
+                            _audioPlayer.pause();
+                          } else {
+                            _audioPlayer.play(UrlSource(_recordingUrl!));
+                          }
+                        },
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
