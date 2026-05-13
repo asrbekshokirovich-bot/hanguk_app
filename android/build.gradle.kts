@@ -141,6 +141,30 @@ subprojects {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Universal Kotlin language/api version floor.
+//
+// Some plugins (e.g. sentry_flutter at older minor versions) pin their Kotlin
+// language version to 1.6 in their own build.gradle. Kotlin 2.x compiler
+// dropped support for 1.6 entirely:
+//   e: Language version 1.6 is no longer supported; please, use version
+//      1.8 or greater.
+// We bump every subproject's Kotlin language and api version floor to 1.9
+// so legacy plugins compile under modern Kotlin. The setting is additive —
+// plugins that already specify 1.9+ are unaffected; plugins that specify
+// 1.6/1.7 get bumped.
+// ---------------------------------------------------------------------------
+subprojects {
+    tasks.withType(
+        org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java
+    ).configureEach {
+        compilerOptions {
+            languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_9)
+            apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_9)
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
