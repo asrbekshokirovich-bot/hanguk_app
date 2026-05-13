@@ -84,7 +84,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
           const SizedBox(height: 8),
           Text(
             l.interviewSetupSubtitle,
-            style: const TextStyle(color: Colors.white60, fontSize: 16),
+            style: const TextStyle(color: Colors.white70, fontSize: 16),
           ),
           const SizedBox(height: 32),
 
@@ -256,7 +256,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
                       Text(
                         l.timedModeSubtitle,
                         style: const TextStyle(
-                          color: Colors.white60,
+                          color: Colors.white70,
                           fontSize: 13,
                         ),
                       ),
@@ -304,7 +304,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
               padding: const EdgeInsets.only(top: 8),
               child: Text(
                 l.pickUniversityFirstHint,
-                style: const TextStyle(color: Colors.white38, fontSize: 12),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ),
         ],
@@ -429,7 +429,7 @@ class _LanguageOption extends StatelessWidget {
         child: Text(
           title,
           style: TextStyle(
-            color: isSelected ? AppColors.royalBlue : Colors.white60,
+            color: isSelected ? AppColors.royalBlue : Colors.white70,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),

@@ -332,7 +332,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             child: Text(
               l10n.loginAccessCodeHelp,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white60, fontSize: 13),
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
           ),
           const SizedBox(height: 16),
@@ -546,8 +546,8 @@ class _HangukTextField extends StatelessWidget {
       style: style ?? const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white38),
-        prefixIcon: Icon(icon, color: Colors.white38, size: 18),
+        hintStyle: const TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70, size: 18),
         filled: true,
         fillColor: Colors.white.withValues(alpha: 0.06),
         border: OutlineInputBorder(

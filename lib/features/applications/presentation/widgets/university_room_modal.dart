@@ -116,7 +116,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                     Text(
                       '${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}',
                       style: const TextStyle(
-                        color: Colors.white38,
+                        color: Colors.white70,
                         fontSize: 10,
                       ),
                     ),
@@ -370,7 +370,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                   decoration: InputDecoration(
                                     hintText: 'Message room...',
                                     hintStyle: const TextStyle(
-                                      color: Colors.white38,
+                                      color: Colors.white70,
                                     ),
                                     filled: true,
                                     fillColor: Colors.white.withValues(
@@ -452,7 +452,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                         const SizedBox(height: 16),
                         const Text(
                           'No active announcements.',
-                          style: TextStyle(color: Colors.white38),
+                          style: TextStyle(color: Colors.white70),
                         ),
                       ],
                     ),
@@ -563,7 +563,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                     const SizedBox(height: 12),
                                     const Text(
                                       'No events to display on this date.',
-                                      style: TextStyle(color: Colors.white38),
+                                      style: TextStyle(color: Colors.white70),
                                     ),
                                   ],
                                 ),
@@ -626,7 +626,7 @@ class _UniversityRoomModalState extends State<UniversityRoomModal> {
                                               'hh:mm a',
                                             ).format(evt.eventDate),
                                             style: const TextStyle(
-                                              color: Colors.white38,
+                                              color: Colors.white70,
                                               fontSize: 12,
                                             ),
                                           ),

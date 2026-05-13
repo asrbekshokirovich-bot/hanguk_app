@@ -927,7 +927,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                                 Text(
                                   l.noApplicationsBody,
                                   style: const TextStyle(
-                                    color: Colors.white60,
+                                    color: Colors.white70,
                                     fontSize: 12,
                                     height: 1.35,
                                   ),

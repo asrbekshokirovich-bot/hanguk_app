@@ -230,7 +230,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
               tooltip: l.deleteSessionTooltip,
               icon: const Icon(
                 Icons.delete_outline,
-                color: Colors.white38,
+                color: Colors.white70,
                 size: 20,
               ),
               onPressed: () => _confirmDelete(session['id'] as String),

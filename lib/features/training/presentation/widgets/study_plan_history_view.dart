@@ -64,7 +64,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
       case 'in_progress':
         return Colors.amberAccent;
       default:
-        return Colors.white60;
+        return Colors.white70;
     }
   }
 
@@ -130,7 +130,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
               child: Text(
                 l.noPastDraftsBody,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white38, fontSize: 12),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ),
           ),
@@ -209,25 +209,25 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
                   const Icon(
                     Icons.flag_outlined,
                     size: 14,
-                    color: Colors.white38,
+                    color: Colors.white70,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     l.sessionStepLabel(session.currentStep),
-                    style: const TextStyle(color: Colors.white60, fontSize: 12),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                   const SizedBox(width: 14),
                   if (session.selectedTrack != null) ...[
                     const Icon(
                       Icons.translate,
                       size: 14,
-                      color: Colors.white38,
+                      color: Colors.white70,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       session.selectedTrack!,
                       style: const TextStyle(
-                        color: Colors.white60,
+                        color: Colors.white70,
                         fontSize: 12,
                       ),
                     ),
@@ -237,7 +237,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
               const SizedBox(height: 6),
               Text(
                 _formatTimestamp(session.updatedAt),
-                style: const TextStyle(color: Colors.white38, fontSize: 11),
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
               ),
             ],
           ),

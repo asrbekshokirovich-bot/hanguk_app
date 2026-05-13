@@ -74,7 +74,7 @@ class _AvailableView extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 'Size: $sizeMB MB',
-                style: const TextStyle(color: Colors.white38, fontSize: 12),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
             if (info.releaseNotes != null && info.releaseNotes.isNotEmpty) ...[
