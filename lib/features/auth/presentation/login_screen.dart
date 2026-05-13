@@ -12,10 +12,7 @@ import '../data/auth_repository.dart';
 class LoginScreen extends ConsumerStatefulWidget {
   final bool initialMagicCodeMode;
 
-  const LoginScreen({
-    super.key,
-    this.initialMagicCodeMode = false,
-  });
+  const LoginScreen({super.key, this.initialMagicCodeMode = false});
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -36,7 +33,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _signUpPhoneCtrl = TextEditingController();
   final _signUpPasswordCtrl = TextEditingController();
   final _signUpConfirmCtrl = TextEditingController();
-
 
   bool _loading = false;
   String? _error;
@@ -72,14 +68,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   void _setError(String? msg) => setState(() {
-        _error = msg;
-        if (msg != null) _success = null;
-      });
+    _error = msg;
+    if (msg != null) _success = null;
+  });
 
   void _setSuccess(String? msg) => setState(() {
-        _success = msg;
-        if (msg != null) _error = null;
-      });
+    _success = msg;
+    if (msg != null) _error = null;
+  });
 
   void _setLoading(bool v) => setState(() => _loading = v);
 
@@ -101,8 +97,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     _setError(null);
     _setLoading(true);
-    final result =
-        await ref.read(authRepositoryProvider).signInWithPhone(phone, password);
+    final result = await ref
+        .read(authRepositoryProvider)
+        .signInWithPhone(phone, password);
     _setLoading(false);
 
     if (result.error != null) {
@@ -123,8 +120,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     _setError(null);
     _setLoading(true);
-    final result =
-        await ref.read(authRepositoryProvider).signInWithMagicCode(code);
+    final result = await ref
+        .read(authRepositoryProvider)
+        .signInWithMagicCode(code);
     _setLoading(false);
 
     if (result.error != null) {
@@ -197,8 +195,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     }
   }
 
-
-
   // ─── Build ────────────────────────────────────────────────────────────────────
 
   @override
@@ -236,7 +232,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 padding: const EdgeInsets.all(28),
                 child: Column(
                   children: [
-                     _logo(size: 72, radius: 18),
+                    _logo(size: 72, radius: 18),
                     const SizedBox(height: 16),
                     // Brand name — intentionally not localized.
                     const Text(
@@ -257,111 +253,132 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     ),
                     const SizedBox(height: 28),
 
-                  // ── Messages ───────────────────────────────────────────────────
-                  if (_error != null) ...[
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                    // ── Messages ───────────────────────────────────────────────────
+                    if (_error != null) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.red.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          _error!,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 13,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(color: Colors.redAccent, fontSize: 13),
-                        textAlign: TextAlign.center,
+                      const SizedBox(height: 16),
+                    ],
+                    if (_success != null) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.green.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          _success!,
+                          style: const TextStyle(
+                            color: Colors.greenAccent,
+                            fontSize: 13,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  if (_success != null) ...[
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
-                      ),
-                      child: Text(
-                        _success!,
-                        style: const TextStyle(color: Colors.greenAccent, fontSize: 13),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                      const SizedBox(height: 16),
+                    ],
 
-                  // ── Forms ──────────────────────────────────────────────────────
-                  if (_isMagicCodeMode)
-                    _buildMagicCodePortal(scheme)
-                  else
-                    _buildPublicAuthPortal(scheme),
-                ],
+                    // ── Forms ──────────────────────────────────────────────────────
+                    if (_isMagicCodeMode)
+                      _buildMagicCodePortal(scheme)
+                    else
+                      _buildPublicAuthPortal(scheme),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
   Widget _buildMagicCodePortal(ColorScheme scheme) {
     final l10n = AppLocalizations.of(context)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: scheme.primary.withValues(alpha: 0.3)),
+    // AutofillGroup lets iOS surface the OTP autofill chip and Android
+    // group the credential for save-prompt purposes (audit P0 #3).
+    return AutofillGroup(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: scheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: scheme.primary.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              l10n.loginAccessCodeHelp,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white60, fontSize: 13),
+            ),
           ),
-          child: Text(
-            l10n.loginAccessCodeHelp,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white60, fontSize: 13),
+          const SizedBox(height: 16),
+          _HangukTextField(
+            controller: _codeCtrl,
+            // Mask: code shape is enforced by the inputFormatters; not
+            // localized.
+            hint: 'XXXXXXXX',
+            icon: Icons.key,
+            textCapitalization: TextCapitalization.characters,
+            // OTP autofill: surfaces SMS-code suggestions on iOS QuickType
+            // and triggers the Android one-time-code retriever.
+            autofillHints: const [AutofillHints.oneTimeCode],
+            keyboardType: TextInputType.visiblePassword,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _handleStudentLogin(),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9a-z]')),
+              LengthLimitingTextInputFormatter(10),
+            ],
+            style: const TextStyle(
+              letterSpacing: 6,
+              fontFamily: 'monospace',
+              fontSize: 18,
+              color: Colors.white,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _HangukTextField(
-          controller: _codeCtrl,
-          // Mask: code shape is enforced by the inputFormatters; not localized.
-          hint: 'XXXXXXXX',
-          icon: Icons.key,
-          textCapitalization: TextCapitalization.characters,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9a-z]')),
-            LengthLimitingTextInputFormatter(10),
-          ],
-          style: const TextStyle(
-            letterSpacing: 6,
-            fontFamily: 'monospace',
-            fontSize: 18,
-            color: Colors.white,
+          const SizedBox(height: 16),
+          _HangukButton(
+            label: l10n.loginAccessCodeButton,
+            loading: _loading,
+            onPressed: _handleStudentLogin,
           ),
-        ),
-        const SizedBox(height: 16),
-        _HangukButton(
-          label: l10n.loginAccessCodeButton,
-          loading: _loading,
-          onPressed: _handleStudentLogin,
-        ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: () {
-            // Optional fallback if user navigated wrong from Welcome Page
-            setState(() => _isMagicCodeMode = false);
-          },
-          child: Text(
-            l10n.loginSwitchToPhone,
-            style: const TextStyle(color: Colors.white54, fontSize: 13),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () {
+              // Optional fallback if user navigated wrong from Welcome Page
+              setState(() => _isMagicCodeMode = false);
+            },
+            child: Text(
+              l10n.loginSwitchToPhone,
+              style: const TextStyle(color: Colors.white54, fontSize: 13),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -415,7 +432,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 ),
                 style: TextButton.styleFrom(
                   backgroundColor: scheme.primary.withValues(alpha: 0.3),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -429,21 +449,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Widget _logo({required double size, required double radius}) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: Image.asset(
-        'assets/images/logo.jpg',
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
+    // Brand logo is purely decorative — the "Hanguk" wordmark next to it
+    // already conveys the brand to assistive tech, so we exclude the image
+    // to prevent screen readers from announcing the file name.
+    return ExcludeSemantics(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Image.asset(
+          'assets/images/logo.jpg',
           width: size,
           height: size,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
-            borderRadius: BorderRadius.circular(radius),
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(radius),
+            ),
+            child: const Icon(Icons.school, color: Colors.white),
           ),
-          child: const Icon(Icons.school, color: Colors.white),
         ),
       ),
     );
@@ -461,7 +486,9 @@ class _LoadingView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+          CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
           const SizedBox(height: 16),
           const Text('Loading...', style: TextStyle(color: Colors.white54)),
         ],
@@ -469,7 +496,6 @@ class _LoadingView extends StatelessWidget {
     );
   }
 }
-
 
 // ─── Reusable Widgets ─────────────────────────────────────────────────────────
 
@@ -481,6 +507,14 @@ class _HangukTextField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final List<TextInputFormatter>? inputFormatters;
   final TextStyle? style;
+  // Accessibility / autofill plumbing — see WCAG 2.2 + audit P0 #3.
+  // Passing these enables iOS QuickType, Android Autofill, and OTP
+  // surface bar suggestions on the magic-code field.
+  final Iterable<String>? autofillHints;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final FocusNode? focusNode;
+  final ValueChanged<String>? onSubmitted;
 
   const _HangukTextField({
     required this.controller,
@@ -490,15 +524,25 @@ class _HangukTextField extends StatelessWidget {
     this.textCapitalization = TextCapitalization.none,
     this.inputFormatters,
     this.style,
+    this.autofillHints,
+    this.keyboardType,
+    this.textInputAction,
+    this.focusNode,
+    this.onSubmitted,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      focusNode: focusNode,
       obscureText: obscureText,
       textCapitalization: textCapitalization,
       inputFormatters: inputFormatters,
+      autofillHints: autofillHints,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      onSubmitted: onSubmitted,
       style: style ?? const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         hintText: hint,
@@ -543,7 +587,9 @@ class _HangukButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.black, // Dark text on Lime background
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           elevation: 0,
         ),
         child: loading
@@ -555,7 +601,13 @@ class _HangukButton extends StatelessWidget {
                   color: Colors.black,
                 ),
               )
-            : Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            : Text(
+                label,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
       ),
     );
   }
