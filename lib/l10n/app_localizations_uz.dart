@@ -120,7 +120,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get virtualWalkaroundTitle => 'Virtual Walkaround';
 
   @override
-  String get navHome => 'Bosh';
+  String get navApplications => 'Arizalar';
 
   @override
   String get navMap => 'Xarita';

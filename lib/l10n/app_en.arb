@@ -57,8 +57,8 @@
   "virtualWalkaroundTitle": "Virtual Walkaround",
   "@virtualWalkaroundTitle": { "description": "Button label for the Kakao Roadview walkaround." },
 
-  "navHome": "Home",
-  "@navHome": { "description": "Bottom-nav label for the Applications/Home tab." },
+  "navApplications": "Applications",
+  "@navApplications": { "description": "Bottom-nav label for the Applications tab (opens ApplicationsTab with AppBar title 'My Applications'). Renamed from navHome in the 2026-05-12 UI/UX audit P0 #5 — 'Home' was a misnomer because the tab is the Applications screen, not a landing/home screen." },
   "navMap": "Map",
   "@navMap": { "description": "Bottom-nav label for the Map tab." },
   "navDocs": "Docs",

@@ -308,11 +308,14 @@ abstract class AppLocalizations {
   /// **'Virtual Walkaround'**
   String get virtualWalkaroundTitle;
 
-  /// Bottom-nav label for the Applications/Home tab.
+  /// Bottom-nav label for the Applications tab (opens ApplicationsTab
+  /// with AppBar title 'My Applications'). Renamed from navHome in the
+  /// 2026-05-12 UI/UX audit P0 #5 — 'Home' was a misnomer because the
+  /// tab is the Applications screen, not a landing/home screen.
   ///
   /// In en, this message translates to:
-  /// **'Home'**
-  String get navHome;
+  /// **'Applications'**
+  String get navApplications;
 
   /// Bottom-nav label for the Map tab.
   ///

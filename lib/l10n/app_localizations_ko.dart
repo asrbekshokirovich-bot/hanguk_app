@@ -113,7 +113,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get virtualWalkaroundTitle => '가상 워크어라운드';
 
   @override
-  String get navHome => '홈';
+  String get navApplications => '지원서';
 
   @override
   String get navMap => '지도';
