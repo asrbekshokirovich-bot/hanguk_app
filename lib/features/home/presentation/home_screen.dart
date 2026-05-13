@@ -77,6 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onPressed: () => _openAIChat(context),
         backgroundColor: AppColors.vibrantLime,
         elevation: 6,
+        tooltip: 'Ask Hanguk AI',
         child: const Icon(Icons.smart_toy, color: Colors.black, size: 28),
       ),
       bottomNavigationBar: BottomNavigationBar(

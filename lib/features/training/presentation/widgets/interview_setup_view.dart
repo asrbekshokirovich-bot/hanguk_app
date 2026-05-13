@@ -39,16 +39,18 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
   void _start() {
     if (_isUniSpecific && _targetUniversityId == null) return;
     final topic = _focusTopicCtrl.text.trim();
-    ref.read(interviewProvider.notifier).startSession(
-      sessionType: _sessionType,
-      targetUniversityId: _targetUniversityId,
-      targetUniversityName: _targetUniversityName,
-      language: _language,
-      focusTopic: topic.isNotEmpty ? topic : null,
-      persona: _persona,
-      timedMode: _timedMode,
-      timeLimitSeconds: _timedMode ? 300 : null, // 5 min default
-    );
+    ref
+        .read(interviewProvider.notifier)
+        .startSession(
+          sessionType: _sessionType,
+          targetUniversityId: _targetUniversityId,
+          targetUniversityName: _targetUniversityName,
+          language: _language,
+          focusTopic: topic.isNotEmpty ? topic : null,
+          persona: _persona,
+          timedMode: _timedMode,
+          timeLimitSeconds: _timedMode ? 300 : null, // 5 min default
+        );
   }
 
   @override
@@ -74,8 +76,9 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
               ),
               IconButton(
                 icon: const Icon(Icons.history, color: AppColors.royalBlue),
+                tooltip: 'Interview history',
                 onPressed: widget.onHistoryTapped,
-              )
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -262,14 +265,16 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
                   value: _timedMode,
                   activeColor: AppColors.royalBlue,
                   onChanged: (val) => setState(() => _timedMode = val),
-                )
+                ),
               ],
             ),
           ),
           const SizedBox(height: 48),
 
           if (state.isLoading)
-            const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime))
+            const Center(
+              child: CircularProgressIndicator(color: AppColors.vibrantLime),
+            )
           else
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -288,8 +293,9 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
                   fontSize: 16,
                 ),
               ),
-              onPressed:
-                  (_isUniSpecific && _targetUniversityId == null) ? null : _start,
+              onPressed: (_isUniSpecific && _targetUniversityId == null)
+                  ? null
+                  : _start,
             ),
           if (_isUniSpecific && _targetUniversityId == null)
             Padding(
@@ -307,7 +313,11 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+        color: Colors.white70,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 }
@@ -316,10 +326,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
 /// list in `training_tab.dart`'s interview-setup dialog so the two
 /// entry paths share behavior.
 class _UniversityPicker extends ConsumerWidget {
-  const _UniversityPicker({
-    required this.selectedId,
-    required this.onPick,
-  });
+  const _UniversityPicker({required this.selectedId, required this.onPick});
 
   final String? selectedId;
   final void Function(String id, String name) onPick;
@@ -375,7 +382,10 @@ class _UniversityPicker extends ConsumerWidget {
                   ),
                 ),
                 trailing: isSelected
-                    ? const Icon(Icons.check_circle, color: AppColors.vibrantLime)
+                    ? const Icon(
+                        Icons.check_circle,
+                        color: AppColors.vibrantLime,
+                      )
                     : null,
                 onTap: () => onPick(uni.id, uni.name),
               );
@@ -392,7 +402,11 @@ class _LanguageOption extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _LanguageOption({required this.title, required this.isSelected, required this.onTap});
+  const _LanguageOption({
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -401,9 +415,13 @@ class _LanguageOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.royalBlue.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+          color: isSelected
+              ? AppColors.royalBlue.withOpacity(0.2)
+              : Colors.white.withOpacity(0.05),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.royalBlue : Colors.white10),
+          border: Border.all(
+            color: isSelected ? AppColors.royalBlue : Colors.white10,
+          ),
         ),
         alignment: Alignment.center,
         child: Text(

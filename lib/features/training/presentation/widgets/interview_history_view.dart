@@ -11,7 +11,8 @@ class InterviewHistoryView extends ConsumerStatefulWidget {
   const InterviewHistoryView({super.key});
 
   @override
-  ConsumerState<InterviewHistoryView> createState() => _InterviewHistoryViewState();
+  ConsumerState<InterviewHistoryView> createState() =>
+      _InterviewHistoryViewState();
 }
 
 class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
@@ -26,7 +27,9 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
 
   Future<void> _loadHistory() async {
     setState(() => _isLoading = true);
-    final history = await ref.read(interviewProvider.notifier).getSessionHistory();
+    final history = await ref
+        .read(interviewProvider.notifier)
+        .getSessionHistory();
     if (mounted) {
       setState(() {
         _sessions = history;
@@ -49,6 +52,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    tooltip: 'Back',
                     onPressed: () => Navigator.pop(context),
                   ),
                   Text(
@@ -64,35 +68,46 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
             ),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime))
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.vibrantLime,
+                      ),
+                    )
                   : _sessions.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.history, size: 64, color: Colors.white.withOpacity(0.2)),
-                              const SizedBox(height: 16),
-                              Text(
-                                l.noPastInterviews,
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.6),
-                                ),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.history,
+                            size: 64,
+                            color: Colors.white.withOpacity(0.2),
                           ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _loadHistory,
-                          color: AppColors.vibrantLime,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                            itemCount: _sessions.length,
-                            itemBuilder: (context, index) {
-                              final session = _sessions[index];
-                              return _buildSessionCard(session);
-                            },
+                          const SizedBox(height: 16),
+                          Text(
+                            l.noPastInterviews,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.6),
+                            ),
                           ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _loadHistory,
+                      color: AppColors.vibrantLime,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 8,
                         ),
+                        itemCount: _sessions.length,
+                        itemBuilder: (context, index) {
+                          final session = _sessions[index];
+                          return _buildSessionCard(session);
+                        },
+                      ),
+                    ),
             ),
           ],
         ),
@@ -108,8 +123,8 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
     // InterviewNotifier.getSessionHistory() now reads `institution`.
     // Accept either alias for backwards compatibility with any cached
     // responses still in flight.
-    final inst = (session['institution'] as Map?) ??
-        (session['universities'] as Map?);
+    final inst =
+        (session['institution'] as Map?) ?? (session['universities'] as Map?);
     if (inst != null) {
       final en = inst['name_en'] as String?;
       final ko = inst['name_ko'] as String?;
@@ -145,9 +160,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                isAbandoned
-                    ? l.abandonedSessionNote
-                    : l.activeSessionNote,
+                isAbandoned ? l.abandonedSessionNote : l.activeSessionNote,
               ),
             ),
           );
@@ -169,16 +182,16 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                 color: isCompleted
                     ? Colors.greenAccent.withOpacity(0.1)
                     : (isAbandoned
-                        ? Colors.white12
-                        : Colors.orangeAccent.withOpacity(0.1)),
+                          ? Colors.white12
+                          : Colors.orangeAccent.withOpacity(0.1)),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 isCompleted
                     ? Icons.check_circle_outline
                     : (isAbandoned
-                        ? Icons.cancel_outlined
-                        : Icons.pending_outlined),
+                          ? Icons.cancel_outlined
+                          : Icons.pending_outlined),
                 color: isCompleted
                     ? Colors.greenAccent
                     : (isAbandoned ? Colors.white54 : Colors.orangeAccent),
@@ -191,14 +204,21 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                 children: [
                   Text(
                     uniName,
-                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     formattedDate,
-                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
@@ -208,7 +228,11 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
             // for good.
             IconButton(
               tooltip: l.deleteSessionTooltip,
-              icon: const Icon(Icons.delete_outline, color: Colors.white38, size: 20),
+              icon: const Icon(
+                Icons.delete_outline,
+                color: Colors.white38,
+                size: 20,
+              ),
               onPressed: () => _confirmDelete(session['id'] as String),
             ),
             Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3)),
@@ -260,9 +284,9 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
       await _loadHistory();
     } on Exception catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.deleteFailed(e))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.deleteFailed(e))));
     }
   }
 }

@@ -31,7 +31,9 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(studyPlanSessionProvider.notifier).fetchSessions(widget.documentType);
+      ref
+          .read(studyPlanSessionProvider.notifier)
+          .fetchSessions(widget.documentType);
     });
   }
 
@@ -45,14 +47,14 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   /// keys from app_en.arb (studyPlanCardTitle / personalStatementCardTitle).
   String _documentTitle(AppLocalizations l) =>
       widget.documentType == 'study_plan'
-          ? l.studyPlanCardTitle
-          : l.personalStatementCardTitle;
+      ? l.studyPlanCardTitle
+      : l.personalStatementCardTitle;
 
   /// Locale-aware short document name used inline (e.g. in saved-drafts list).
   String _documentName(AppLocalizations l) =>
       widget.documentType == 'study_plan'
-          ? l.studyPlanDocumentName
-          : l.personalStatementDocumentName;
+      ? l.studyPlanDocumentName
+      : l.personalStatementDocumentName;
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +75,8 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
               icon: const Icon(Icons.history, color: Colors.white),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => StudyPlanHistoryView(
-                    documentType: widget.documentType,
-                  ),
+                  builder: (_) =>
+                      StudyPlanHistoryView(documentType: widget.documentType),
                 ),
               ),
             ),
@@ -120,6 +121,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.white),
+              tooltip: 'Close session',
               onPressed: () => ref
                   .read(studyPlanSessionProvider.notifier)
                   .clearCurrentSession(widget.documentType),
@@ -129,10 +131,12 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
       ),
       body: SafeArea(
         child: state.isSessionsLoading && state.currentSession == null
-            ? const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.vibrantLime),
+              )
             : state.currentSession == null
-                ? _buildSessionList(state)
-                : _buildSessionWizard(state),
+            ? _buildSessionList(state)
+            : _buildSessionWizard(state),
       ),
       // The previous floatingActionButton mounted a placeholder
       // StudyPlanChatFab that had no real chat behind it. Removed
@@ -212,6 +216,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                                 Icons.delete,
                                 color: AppColors.error,
                               ),
+                              tooltip: 'Delete session',
                               onPressed: () {
                                 showDialog(
                                   context: context,
@@ -290,11 +295,14 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                               .read(studyPlanSessionProvider.notifier)
                               .loadSession(widget.documentType, s.id)
                               .then((_) {
-                            _draftController.text = ref
-                                .read(documentSessionProvider(
-                                    widget.documentType))
-                                .draftContent;
-                          });
+                                _draftController.text = ref
+                                    .read(
+                                      documentSessionProvider(
+                                        widget.documentType,
+                                      ),
+                                    )
+                                    .draftContent;
+                              });
                         },
                       );
                     },
@@ -306,16 +314,14 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   }
 
   Widget _buildSessionWizard(StudyPlanSessionState state) {
-     final session = state.currentSession!;
-     
-     return Column(
-        children: [
-           _buildStepper(session.currentStep),
-           Expanded(
-              child: _buildCurrentStep(state, session.currentStep)
-           )
-        ]
-     );
+    final session = state.currentSession!;
+
+    return Column(
+      children: [
+        _buildStepper(session.currentStep),
+        Expanded(child: _buildCurrentStep(state, session.currentStep)),
+      ],
+    );
   }
 
   Widget _buildStepper(int currentStep) {
@@ -325,54 +331,77 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
       child: Row(
         children: [
           _buildStepIcon(
-              1, currentStep, Icons.info_outline, l.stepperLabelGuide),
+            1,
+            currentStep,
+            Icons.info_outline,
+            l.stepperLabelGuide,
+          ),
           _buildConnector(1, currentStep),
           _buildStepIcon(
-              2, currentStep, Icons.format_quote, l.stepperLabelExample),
+            2,
+            currentStep,
+            Icons.format_quote,
+            l.stepperLabelExample,
+          ),
           _buildConnector(2, currentStep),
           _buildStepIcon(
-              3, currentStep, Icons.edit_document, l.stepperLabelDraft),
+            3,
+            currentStep,
+            Icons.edit_document,
+            l.stepperLabelDraft,
+          ),
           _buildConnector(3, currentStep),
           _buildStepIcon(
-              4, currentStep, Icons.analytics_outlined, l.stepperLabelFeedback),
+            4,
+            currentStep,
+            Icons.analytics_outlined,
+            l.stepperLabelFeedback,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStepIcon(int step, int currentStep, IconData icon, String label) {
+  Widget _buildStepIcon(
+    int step,
+    int currentStep,
+    IconData icon,
+    String label,
+  ) {
     final isActive = currentStep == step;
     final isPast = currentStep > step;
     final color = isActive || isPast ? AppColors.vibrantLime : Colors.white24;
 
     return GestureDetector(
-       onTap: () {
-          if (isPast || isActive) {
-             ref.read(studyPlanSessionProvider.notifier).updateSessionStep(widget.documentType, step);
-          }
-       },
-       child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isActive ? color.withOpacity(0.2) : Colors.transparent,
-                border: Border.all(color: color, width: 2),
-              ),
-              child: Icon(icon, color: color, size: 20),
+      onTap: () {
+        if (isPast || isActive) {
+          ref
+              .read(studyPlanSessionProvider.notifier)
+              .updateSessionStep(widget.documentType, step);
+        }
+      },
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isActive ? color.withOpacity(0.2) : Colors.transparent,
+              border: Border.all(color: color, width: 2),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
-          ],
-       )
+          ),
+        ],
+      ),
     );
   }
 
@@ -387,17 +416,24 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
   }
 
   Widget _buildCurrentStep(StudyPlanSessionState state, int step) {
-     if (state.isLoading) {
-        return const Center(child: CircularProgressIndicator(color: AppColors.vibrantLime));
-     }
+    if (state.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.vibrantLime),
+      );
+    }
 
-     switch(step) {
-        case 1: return _buildInstructionsStep(state);
-        case 2: return _buildExampleStep(state);
-        case 3: return _buildDraftingStep(state);
-        case 4: return StudyPlanAnalysisView(documentType: widget.documentType);
-        default: return const SizedBox();
-     }
+    switch (step) {
+      case 1:
+        return _buildInstructionsStep(state);
+      case 2:
+        return _buildExampleStep(state);
+      case 3:
+        return _buildDraftingStep(state);
+      case 4:
+        return StudyPlanAnalysisView(documentType: widget.documentType);
+      default:
+        return const SizedBox();
+    }
   }
 
   Widget _buildInstructionsStep(StudyPlanSessionState state) {
@@ -414,57 +450,69 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
-         crossAxisAlignment: CrossAxisAlignment.start,
-         children: [
-            Text(
-              guide.title,
-              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            guide.title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 16),
-            Text(
-              guide.intro,
-              style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            guide.intro,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 16,
+              height: 1.5,
             ),
-            const SizedBox(height: 24),
-            for (var i = 0; i < guide.items.length; i++) ...[
-              _buildGuideItem(
-                icon: guide.items[i].icon,
-                title: guide.items[i].title,
-                description: guide.items[i].description,
+          ),
+          const SizedBox(height: 24),
+          for (var i = 0; i < guide.items.length; i++) ...[
+            _buildGuideItem(
+              icon: guide.items[i].icon,
+              title: guide.items[i].title,
+              description: guide.items[i].description,
+            ),
+            if (i != guide.items.length - 1) const SizedBox(height: 16),
+          ],
+
+          // Dummy "Tavsiya etilgan videolar (CRM)" video tiles
+          // were removed on 2026-05-10 (training audit P0 #8). They
+          // were 3 placeholder cards with no source URLs and no onTap.
+          // Re-add as a real list backed by a training_videos table /
+          // CRM-curated provider when the feature is actually built.
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.vibrantLime,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              if (i != guide.items.length - 1) const SizedBox(height: 16),
-            ],
-            
-            // Dummy "Tavsiya etilgan videolar (CRM)" video tiles
-            // were removed on 2026-05-10 (training audit P0 #8). They
-            // were 3 placeholder cards with no source URLs and no onTap.
-            // Re-add as a real list backed by a training_videos table /
-            // CRM-curated provider when the feature is actually built.
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.vibrantLime,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                onPressed: () => ref
-                    .read(studyPlanSessionProvider.notifier)
-                    .updateSessionStep(widget.documentType, 2),
-                child: Text(
-                  AppLocalizations.of(context)!.readExamplesButton,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+              onPressed: () => ref
+                  .read(studyPlanSessionProvider.notifier)
+                  .updateSessionStep(widget.documentType, 2),
+              child: Text(
+                AppLocalizations.of(context)!.readExamplesButton,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            const SizedBox(height: 24), // Bottom padding
-         ]
-      )
+          ),
+          const SizedBox(height: 24), // Bottom padding
+        ],
+      ),
     );
   }
 
-  Widget _buildGuideItem({required IconData icon, required String title, required String description}) {
+  Widget _buildGuideItem({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -481,12 +529,26 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text(description, style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.4)),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -515,20 +577,17 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                 _GuideItemData(
                   icon: Icons.flag,
                   title: '1. 목적과 동기',
-                  description:
-                      '왜 이 전공을 선택했는가? 한국과 지원 대학교가 그 목표에 어떻게 부합하는가?',
+                  description: '왜 이 전공을 선택했는가? 한국과 지원 대학교가 그 목표에 어떻게 부합하는가?',
                 ),
                 _GuideItemData(
                   icon: Icons.menu_book,
                   title: '2. 학업 계획',
-                  description:
-                      '재학 중 어떤 분야에 집중할 것인가? 한국어 학습 계획은 어떻게 되는가?',
+                  description: '재학 중 어떤 분야에 집중할 것인가? 한국어 학습 계획은 어떻게 되는가?',
                 ),
                 _GuideItemData(
                   icon: Icons.rocket_launch,
                   title: '3. 졸업 후 계획',
-                  description:
-                      '졸업 후 어떤 진로를 그리고 있는가? 모국에 어떻게 기여할 것인가?',
+                  description: '졸업 후 어떤 진로를 그리고 있는가? 모국에 어떻게 기여할 것인가?',
                 ),
               ],
             )
@@ -545,8 +604,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                 _GuideItemData(
                   icon: Icons.psychology,
                   title: '2. 개인적 강점',
-                  description:
-                      '나를 다른 지원자와 구분 짓는 강점은 무엇인가? 어려움을 어떻게 극복했는가?',
+                  description: '나를 다른 지원자와 구분 짓는 강점은 무엇인가? 어려움을 어떻게 극복했는가?',
                 ),
                 _GuideItemData(
                   icon: Icons.stars,
@@ -682,10 +740,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                 children: [
                   Text(
                     l.targetUniversityLabel,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                   Text(
                     uniName,
@@ -703,8 +758,9 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
               decoration: BoxDecoration(
                 color: AppColors.vibrantLime.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
-                border:
-                    Border.all(color: AppColors.vibrantLime.withOpacity(0.3)),
+                border: Border.all(
+                  color: AppColors.vibrantLime.withOpacity(0.3),
+                ),
               ),
               child: Text(
                 state.currentSession?.selectedTrack?.toUpperCase() ??
@@ -939,7 +995,8 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                                       )
                                     : null,
                                 onTap: () => setDialogState(
-                                    () => selectedUniId = uni.id),
+                                  () => selectedUniId = uni.id,
+                                ),
                               );
                             },
                           ),
@@ -993,11 +1050,14 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                           .watch(documentSessionProvider(widget.documentType))
                           .error!,
                       style: const TextStyle(
-                          color: Colors.redAccent, fontSize: 12),
+                        color: Colors.redAccent,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 TextButton(
-                  onPressed: ref
+                  onPressed:
+                      ref
                           .watch(documentSessionProvider(widget.documentType))
                           .isLoading
                       ? null
@@ -1012,10 +1072,12 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                     backgroundColor: AppColors.vibrantLime,
                     foregroundColor: Colors.black,
                   ),
-                  onPressed: (selectedUniId == null ||
+                  onPressed:
+                      (selectedUniId == null ||
                           ref
-                              .watch(documentSessionProvider(
-                                  widget.documentType))
+                              .watch(
+                                documentSessionProvider(widget.documentType),
+                              )
                               .isLoading)
                       ? null
                       : () async {
@@ -1031,19 +1093,21 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                             Navigator.pop(context);
                           }
                         },
-                  child: ref
+                  child:
+                      ref
                           .watch(documentSessionProvider(widget.documentType))
                           .isLoading
                       ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.black),
+                            strokeWidth: 2,
+                            color: Colors.black,
+                          ),
                         )
                       : Text(
                           l.createSession,
-                          style:
-                              const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                 ),
               ],
@@ -1126,7 +1190,12 @@ class _AiExampleCard extends StatefulWidget {
   final String universityName;
   final int index;
   final bool isEmbassy;
-  const _AiExampleCard({super.key, required this.universityName, required this.index, this.isEmbassy = false});
+  const _AiExampleCard({
+    super.key,
+    required this.universityName,
+    required this.index,
+    this.isEmbassy = false,
+  });
 
   @override
   State<_AiExampleCard> createState() => _AiExampleCardState();
@@ -1139,7 +1208,8 @@ class _AiExampleCardState extends State<_AiExampleCard> {
   void initState() {
     super.initState();
     final user = Supabase.instance.client.auth.currentUser;
-    final String studentName = user?.userMetadata?['full_name'] as String? ?? 'A passionate student';
+    final String studentName =
+        user?.userMetadata?['full_name'] as String? ?? 'A passionate student';
 
     final List<String> _uniTemplates = [
       // Template 1: Classic Academic & General Innovation
@@ -1232,7 +1302,10 @@ I wish to explicitly state my intention to return to my home country immediately
     final selectedExample = _templates[random.nextInt(_templates.length)];
 
     // Simulate thinking time dynamically so cards load progressively
-    _aiFuture = Future.delayed(Duration(milliseconds: 1500 + (widget.index * 900)), () => selectedExample);
+    _aiFuture = Future.delayed(
+      Duration(milliseconds: 1500 + (widget.index * 900)),
+      () => selectedExample,
+    );
   }
 
   @override
@@ -1251,8 +1324,9 @@ I wish to explicitly state my intention to return to my home country immediately
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.royalBlue.withOpacity(0.7),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Row(
               children: [
@@ -1339,8 +1413,8 @@ I wish to explicitly state my intention to return to my home country immediately
                           ),
                           onPressed: () {
                             Clipboard.setData(
-                                    ClipboardData(text: snapshot.data!))
-                                .then((_) {
+                              ClipboardData(text: snapshot.data!),
+                            ).then((_) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
