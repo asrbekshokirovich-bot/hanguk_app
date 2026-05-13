@@ -77,6 +77,62 @@ subprojects {
                     "(plugin predates AGP 8 namespace requirement)."
             )
         }
+
+        // ----- compileSdk normalization -----
+        // install_plugin 2.1.0 also hardcodes compileSdkVersion to 28, but
+        // AGP refuses to compile Java 9+ source unless compileSdk >= 30:
+        //   In order to compile Java 9+ source, please set compileSdkVersion
+        //   to 30 or above.
+        // Since we're already forcing Java 17 above, we need compileSdk >= 30.
+        // We bump to 34 (Flutter's current default) to match :app.
+        runCatching {
+            val setCompileSdk = androidExt.javaClass.methods.first {
+                it.name == "setCompileSdkVersion" &&
+                    it.parameterTypes.size == 1 &&
+                    it.parameterTypes[0] == Int::class.javaPrimitiveType
+            }
+            setCompileSdk.invoke(androidExt, 34)
+            logger.lifecycle(
+                "[hanguk] Bumped compileSdk to 34 for ${project.path}."
+            )
+        }
+
+        // ----- JVM target normalization -----
+        // Same legacy plugins (e.g. install_plugin 2.1.0) lock their Java
+        // source/targetCompatibility to 1.8. AGP 8 + Kotlin 1.9 default
+        // Kotlin compile to JVM 21 and Gradle now hard-errors on mismatch:
+        //   Inconsistent JVM-target compatibility detected for tasks
+        //   'compileReleaseJavaWithJavac' (1.8) and 'compileReleaseKotlin' (21).
+        //
+        // We set both sides via reflection on the same `android` extension we
+        // already have. This is more reliable than `tasks.withType.configureEach`
+        // because AGP wires `android.compileOptions.{source,target}Compatibility`
+        // straight into the JavaCompile task at task-creation time — overriding
+        // whatever the plugin's own build.gradle eagerly set.
+        runCatching {
+            val getCompileOptions = androidExt.javaClass.getMethod("getCompileOptions")
+            val compileOptions = getCompileOptions.invoke(androidExt)
+            val setSrc = compileOptions.javaClass.methods.first {
+                it.name == "setSourceCompatibility" && it.parameterTypes.size == 1
+            }
+            val setTgt = compileOptions.javaClass.methods.first {
+                it.name == "setTargetCompatibility" && it.parameterTypes.size == 1
+            }
+            setSrc.invoke(compileOptions, org.gradle.api.JavaVersion.VERSION_17)
+            setTgt.invoke(compileOptions, org.gradle.api.JavaVersion.VERSION_17)
+            logger.lifecycle(
+                "[hanguk] Normalized Java compile to JVM 17 for ${project.path}."
+            )
+        }
+        runCatching {
+            tasks.withType(
+                org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java
+            ).configureEach {
+                compilerOptions {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+                }
+            }
+        }
     }
     if (state.executed) {
         applyNamespaceShim.execute(this)
