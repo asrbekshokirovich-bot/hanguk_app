@@ -80,9 +80,11 @@ class UniversityCard extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: AppColors.vibrantLime.withOpacity(0.08),
+        color: AppColors.vibrantLime.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.vibrantLime.withOpacity(0.15)),
+        border: Border.all(
+          color: AppColors.vibrantLime.withValues(alpha: 0.15),
+        ),
       ),
       child: const Icon(
         Icons.school_outlined,
@@ -108,13 +110,13 @@ class UniversityCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: isTop
-            ? AppColors.vibrantLime.withOpacity(0.15)
-            : Colors.white.withOpacity(0.05),
+            ? AppColors.vibrantLime.withValues(alpha: 0.15)
+            : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isTop
-              ? AppColors.vibrantLime.withOpacity(0.4)
-              : Colors.white.withOpacity(0.08),
+              ? AppColors.vibrantLime.withValues(alpha: 0.4)
+              : Colors.white.withValues(alpha: 0.08),
         ),
       ),
       child: Text(
@@ -132,7 +134,7 @@ class UniversityCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.vibrantLime.withOpacity(0.1),
+        color: AppColors.vibrantLime.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Text(

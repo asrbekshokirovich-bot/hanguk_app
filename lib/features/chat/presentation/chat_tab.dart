@@ -121,7 +121,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
               decoration: BoxDecoration(
                 color: const Color(0xFF0F213D),
                 border: Border(
-                  top: BorderSide(color: Colors.white.withOpacity(0.05)),
+                  top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
                 ),
               ),
               child: Row(
@@ -146,7 +146,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.05),
+                        fillColor: Colors.white.withValues(alpha: 0.05),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 14,

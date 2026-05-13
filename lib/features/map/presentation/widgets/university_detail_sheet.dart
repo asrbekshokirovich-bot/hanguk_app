@@ -40,7 +40,7 @@ class UniversityDetailSheet extends ConsumerWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -96,12 +96,13 @@ class UniversityDetailSheet extends ConsumerWidget {
                                         vertical: 3,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.vibrantLime
-                                            .withOpacity(0.12),
+                                        color: AppColors.vibrantLime.withValues(
+                                          alpha: 0.12,
+                                        ),
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
                                           color: AppColors.vibrantLime
-                                              .withOpacity(0.3),
+                                              .withValues(alpha: 0.3),
                                         ),
                                       ),
                                       child: const Text(
@@ -220,7 +221,9 @@ class UniversityDetailSheet extends ConsumerWidget {
                                   vertical: 14,
                                 ),
                                 side: BorderSide(
-                                  color: AppColors.vibrantLime.withOpacity(0.4),
+                                  color: AppColors.vibrantLime.withValues(
+                                    alpha: 0.4,
+                                  ),
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
@@ -301,7 +304,9 @@ class UniversityDetailSheet extends ConsumerWidget {
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               side: BorderSide(
-                                color: AppColors.vibrantLime.withOpacity(0.4),
+                                color: AppColors.vibrantLime.withValues(
+                                  alpha: 0.4,
+                                ),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -343,9 +348,9 @@ class UniversityDetailSheet extends ConsumerWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.vibrantLime.withOpacity(0.08),
+        color: AppColors.vibrantLime.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.vibrantLime.withOpacity(0.2)),
+        border: Border.all(color: AppColors.vibrantLime.withValues(alpha: 0.2)),
       ),
       child: Icon(
         Icons.school_outlined,
@@ -403,13 +408,13 @@ class UniversityDetailSheet extends ConsumerWidget {
                 ),
                 decoration: BoxDecoration(
                   color: item.highlight
-                      ? AppColors.vibrantLime.withOpacity(0.08)
-                      : Colors.white.withOpacity(0.04),
+                      ? AppColors.vibrantLime.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: item.highlight
-                        ? AppColors.vibrantLime.withOpacity(0.25)
-                        : Colors.white.withOpacity(0.07),
+                        ? AppColors.vibrantLime.withValues(alpha: 0.25)
+                        : Colors.white.withValues(alpha: 0.07),
                   ),
                 ),
                 child: Column(

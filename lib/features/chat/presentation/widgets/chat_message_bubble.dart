@@ -15,7 +15,9 @@ class ChatMessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
@@ -34,19 +36,25 @@ class ChatMessageBubble extends StatelessWidget {
             ),
             const SizedBox(width: 12),
           ],
-          
+
           Flexible(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isUser 
-                    ? AppColors.vibrantLime 
-                    : AppColors.surfaceGlass.withOpacity(0.12),
+                color: isUser
+                    ? AppColors.vibrantLime
+                    : AppColors.surfaceGlass.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20).copyWith(
-                  bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(20),
-                  bottomLeft: isUser ? const Radius.circular(20) : const Radius.circular(4),
+                  bottomRight: isUser
+                      ? const Radius.circular(4)
+                      : const Radius.circular(20),
+                  bottomLeft: isUser
+                      ? const Radius.circular(20)
+                      : const Radius.circular(4),
                 ),
-                border: isUser ? null : Border.all(color: AppColors.borderGlass, width: 0.5),
+                border: isUser
+                    ? null
+                    : Border.all(color: AppColors.borderGlass, width: 0.5),
               ),
               child: Text(
                 message.content,
@@ -58,14 +66,14 @@ class ChatMessageBubble extends StatelessWidget {
               ),
             ),
           ),
-          
+
           if (isUser) ...[
             const SizedBox(width: 12),
             Container(
               height: 32,
               width: 32,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

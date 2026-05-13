@@ -147,7 +147,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                           size: 20,
                         ),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.07),
+                        fillColor: Colors.white.withValues(alpha: 0.07),
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 10,
                         ),
@@ -320,7 +320,7 @@ class _MapTabState extends ConsumerState<MapTab> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.08),
+              color: Colors.red.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -356,7 +356,9 @@ class _MapTabState extends ConsumerState<MapTab> {
               style: TextStyle(color: AppColors.vibrantLime),
             ),
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: AppColors.vibrantLime.withOpacity(0.4)),
+              side: BorderSide(
+                color: AppColors.vibrantLime.withValues(alpha: 0.4),
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -392,13 +394,13 @@ class _ToggleButton extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isMapMode
-                ? AppColors.vibrantLime.withOpacity(0.15)
-                : Colors.white.withOpacity(0.07),
+                ? AppColors.vibrantLime.withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.07),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isMapMode
-                  ? AppColors.vibrantLime.withOpacity(0.4)
-                  : Colors.white.withOpacity(0.08),
+                  ? AppColors.vibrantLime.withValues(alpha: 0.4)
+                  : Colors.white.withValues(alpha: 0.08),
             ),
           ),
           child: Icon(
@@ -442,13 +444,13 @@ class _FilterChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.vibrantLime.withOpacity(0.15)
-                : Colors.white.withOpacity(0.05),
+                ? AppColors.vibrantLime.withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: selected
-                  ? AppColors.vibrantLime.withOpacity(0.5)
-                  : Colors.white.withOpacity(0.08),
+                  ? AppColors.vibrantLime.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.08),
             ),
           ),
           child: Row(
@@ -493,7 +495,7 @@ class _FilterEmptyBadge extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.7),
+            color: Colors.black.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white24),
           ),

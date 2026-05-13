@@ -103,8 +103,8 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.vibrantLime.withOpacity(
-                                      0.1,
+                                    color: AppColors.vibrantLime.withValues(
+                                      alpha: 0.1,
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -149,11 +149,13 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.vibrantLime.withOpacity(0.1),
+                                  color: AppColors.vibrantLime.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: AppColors.vibrantLime.withOpacity(
-                                      0.3,
+                                    color: AppColors.vibrantLime.withValues(
+                                      alpha: 0.3,
                                     ),
                                   ),
                                 ),
@@ -237,7 +239,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: AppColors.vibrantLime.withOpacity(0.1),
+        color: AppColors.vibrantLime.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime),

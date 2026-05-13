@@ -80,7 +80,10 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
         elevation: 0,
         title: Text(
           _localizedTitle(l),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -108,12 +111,16 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           const SizedBox(height: 120),
-          Icon(Icons.history, size: 64, color: Colors.white.withOpacity(0.2)),
+          Icon(
+            Icons.history,
+            size: 64,
+            color: Colors.white.withValues(alpha: 0.2),
+          ),
           const SizedBox(height: 16),
           Center(
             child: Text(
               l.noPastDraftsYet,
-              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
             ),
           ),
           const SizedBox(height: 8),
@@ -141,7 +148,7 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
   Widget _buildSessionCard(StudyPlanSession session) {
     final l = AppLocalizations.of(context)!;
     return Material(
-      color: Colors.white.withOpacity(0.04),
+      color: Colors.white.withValues(alpha: 0.04),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -151,7 +158,8 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
               .loadSession(widget.documentType, session.id);
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => StudyPlanScreen(documentType: widget.documentType),
+              builder: (_) =>
+                  StudyPlanScreen(documentType: widget.documentType),
             ),
           );
         },
@@ -179,7 +187,9 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: _statusColor(session.status).withOpacity(0.15),
+                      color: _statusColor(
+                        session.status,
+                      ).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -196,8 +206,11 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.flag_outlined,
-                      size: 14, color: Colors.white38),
+                  const Icon(
+                    Icons.flag_outlined,
+                    size: 14,
+                    color: Colors.white38,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     l.sessionStepLabel(session.currentStep),
@@ -205,12 +218,18 @@ class _StudyPlanHistoryViewState extends ConsumerState<StudyPlanHistoryView> {
                   ),
                   const SizedBox(width: 14),
                   if (session.selectedTrack != null) ...[
-                    const Icon(Icons.translate, size: 14, color: Colors.white38),
+                    const Icon(
+                      Icons.translate,
+                      size: 14,
+                      color: Colors.white38,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       session.selectedTrack!,
-                      style:
-                          const TextStyle(color: Colors.white60, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ],

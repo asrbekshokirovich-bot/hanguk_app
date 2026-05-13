@@ -81,13 +81,13 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                           Icon(
                             Icons.history,
                             size: 64,
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             l.noPastInterviews,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -180,10 +180,10 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isCompleted
-                    ? Colors.greenAccent.withOpacity(0.1)
+                    ? Colors.greenAccent.withValues(alpha: 0.1)
                     : (isAbandoned
                           ? Colors.white12
-                          : Colors.orangeAccent.withOpacity(0.1)),
+                          : Colors.orangeAccent.withValues(alpha: 0.1)),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -216,7 +216,7 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
                   Text(
                     formattedDate,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 13,
                     ),
                   ),
@@ -235,7 +235,10 @@ class _InterviewHistoryViewState extends ConsumerState<InterviewHistoryView> {
               ),
               onPressed: () => _confirmDelete(session['id'] as String),
             ),
-            Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3)),
+            Icon(
+              Icons.chevron_right,
+              color: Colors.white.withValues(alpha: 0.3),
+            ),
           ],
         ),
       ),

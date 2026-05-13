@@ -108,12 +108,14 @@ class TrainingTab extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F213D).withOpacity(0.6), // deep glassmorphism
+          color: const Color(
+            0xFF0F213D,
+          ).withValues(alpha: 0.6), // deep glassmorphism
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),
@@ -126,15 +128,18 @@ class TrainingTab extends ConsumerWidget {
               width: 64,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [color.withOpacity(0.4), color.withOpacity(0.1)],
+                  colors: [
+                    color.withValues(alpha: 0.4),
+                    color.withValues(alpha: 0.1),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: color.withOpacity(0.5)),
+                border: Border.all(color: color.withValues(alpha: 0.5)),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     blurRadius: 12,
                     spreadRadius: 2,
                   ),
@@ -160,7 +165,7 @@ class TrainingTab extends ConsumerWidget {
                   Text(
                     description,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                       height: 1.3,
                     ),
@@ -171,12 +176,12 @@ class TrainingTab extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: color.withOpacity(0.8),
+                color: color.withValues(alpha: 0.8),
                 size: 16,
               ),
             ),
@@ -253,7 +258,7 @@ class TrainingTab extends ConsumerWidget {
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.white10),
                               borderRadius: BorderRadius.circular(12),
-                              color: Colors.white.withOpacity(0.02),
+                              color: Colors.white.withValues(alpha: 0.02),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,7 +400,7 @@ class TrainingTab extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.white10),
                       ),
@@ -486,9 +491,7 @@ class TrainingTab extends ConsumerWidget {
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(l.micRequired),
-                                  ),
+                                  SnackBar(content: Text(l.micRequired)),
                                 );
                               }
                               return;
@@ -552,7 +555,7 @@ class _TrackChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? color.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color, width: 2),
         ),

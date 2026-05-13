@@ -248,7 +248,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       l10n.loginStudentPortal,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                     ),
                     const SizedBox(height: 28),

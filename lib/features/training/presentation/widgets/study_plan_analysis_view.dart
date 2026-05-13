@@ -52,7 +52,7 @@ class StudyPlanAnalysisView extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.royalBlue.withOpacity(0.05),
+                  color: AppColors.royalBlue.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.white10),
                 ),
@@ -60,15 +60,20 @@ class StudyPlanAnalysisView extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (_detectTrackMismatch(state.draftContent,
-                          state.currentSession?.selectedTrack))
+                      if (_detectTrackMismatch(
+                        state.draftContent,
+                        state.currentSession?.selectedTrack,
+                      ))
                         _buildTrackWarning(),
                       if (analysis.aiResponse != null &&
                           analysis.aiResponse!.isNotEmpty)
                         Text(
                           analysis.aiResponse!,
                           style: const TextStyle(
-                              color: Colors.white70, height: 1.5, fontSize: 14),
+                            color: Colors.white70,
+                            height: 1.5,
+                            fontSize: 14,
+                          ),
                         )
                       else
                         Text(
@@ -103,16 +108,16 @@ class StudyPlanAnalysisView extends ConsumerWidget {
 
   bool _detectTrackMismatch(String content, String? track) {
     if (track == null || content.isEmpty) return false;
-    
+
     final koreanReg = RegExp(r'[가-힣]');
     final latinReg = RegExp(r'[a-zA-Z]');
-    
+
     final hasKorean = koreanReg.hasMatch(content);
     final hasLatin = latinReg.hasMatch(content);
-    
+
     if (track == 'english' && hasKorean && !hasLatin) return true;
     if (track == 'korean' && hasLatin && !hasKorean) return true;
-    
+
     return false;
   }
 
@@ -137,14 +142,19 @@ class StudyPlanAnalysisView extends ConsumerWidget {
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.redAccent.withOpacity(0.1),
+                color: Colors.redAccent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                border: Border.all(
+                  color: Colors.redAccent.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded,
-                      color: Colors.redAccent, size: 20),
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.redAccent,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
