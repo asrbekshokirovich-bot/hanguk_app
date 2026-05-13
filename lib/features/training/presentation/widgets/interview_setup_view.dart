@@ -76,7 +76,7 @@ class _InterviewSetupViewState extends ConsumerState<InterviewSetupView> {
               ),
               IconButton(
                 icon: const Icon(Icons.history, color: AppColors.royalBlue),
-                tooltip: 'Interview history',
+                tooltip: l.a11yTooltipInterviewHistory,
                 onPressed: widget.onHistoryTapped,
               ),
             ],

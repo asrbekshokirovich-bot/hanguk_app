@@ -305,5 +305,18 @@
   "deleteFailed": "O'chirish amalga oshmadi: {error}",
   "@deleteFailed": {
     "placeholders": { "error": { "type": "Object" } }
-  }
+  },
+
+  "a11yTooltipAskAi": "Hanguk AI dan so'rash",
+  "a11yTooltipClearChat": "Chat tarixini tozalash",
+  "a11yTooltipSendMessage": "Xabar yuborish",
+  "a11yTooltipClose": "Yopish",
+  "a11yTooltipPreviewDocument": "Hujjatni ko'rib chiqish",
+  "a11yTooltipDeleteDocument": "Hujjatni o'chirish",
+  "a11yTooltipInterviewHistory": "Suhbat tarixi",
+  "a11yTooltipCloseSession": "Sessiyani yopish",
+  "a11yTooltipDeleteSession": "Sessiyani o'chirish",
+  "a11yTooltipBack": "Orqaga",
+  "a11yTooltipPlayRecording": "Yozuvni ijro etish",
+  "a11yTooltipPauseRecording": "Yozuvni to'xtatish"
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/chat_repository.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'widgets/chat_message_bubble.dart';
 
 class ChatTab extends ConsumerStatefulWidget {
@@ -45,6 +46,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
+    final l = AppLocalizations.of(context)!;
 
     ref.listen(chatProvider, (previous, next) {
       if (previous?.messages.length != next.messages.length ||
@@ -61,7 +63,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
-            tooltip: 'Clear chat history',
+            tooltip: l.a11yTooltipClearChat,
             onPressed: () {
               ref.read(chatProvider.notifier).clearChat();
             },
@@ -163,7 +165,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                         Icons.send_rounded,
                         color: AppColors.pureBlack,
                       ),
-                      tooltip: 'Send message',
+                      tooltip: l.a11yTooltipSendMessage,
                       onPressed: chatState.isLoading ? null : _handleSend,
                     ),
                   ),

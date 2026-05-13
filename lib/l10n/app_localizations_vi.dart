@@ -259,7 +259,8 @@ class AppLocalizationsVi extends AppLocalizations {
       'Password must be at least 6 characters.';
 
   @override
-  String get loginErrorInvalidCredentials => 'Invalid phone number or password.';
+  String get loginErrorInvalidCredentials =>
+      'Invalid phone number or password.';
 
   @override
   String get loginErrorInvalidAccessCode =>
@@ -298,8 +299,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get notifSettingsCorrection => 'Correction notices';
 
   @override
-  String get notifSettingsCorrectionDesc =>
-      '정정공고 published — highest priority';
+  String get notifSettingsCorrectionDesc => '정정공고 published — highest priority';
 
   @override
   String get notifSettingsRequirement => 'Requirement changes';
@@ -742,4 +742,40 @@ class AppLocalizationsVi extends AppLocalizations {
   String deleteFailed(Object error) {
     return 'Delete failed: $error';
   }
+
+  @override
+  String get a11yTooltipAskAi => 'Ask Hanguk AI';
+
+  @override
+  String get a11yTooltipClearChat => 'Clear chat history';
+
+  @override
+  String get a11yTooltipSendMessage => 'Send message';
+
+  @override
+  String get a11yTooltipClose => 'Close';
+
+  @override
+  String get a11yTooltipPreviewDocument => 'Preview document';
+
+  @override
+  String get a11yTooltipDeleteDocument => 'Delete document';
+
+  @override
+  String get a11yTooltipInterviewHistory => 'Interview history';
+
+  @override
+  String get a11yTooltipCloseSession => 'Close session';
+
+  @override
+  String get a11yTooltipDeleteSession => 'Delete session';
+
+  @override
+  String get a11yTooltipBack => 'Back';
+
+  @override
+  String get a11yTooltipPlayRecording => 'Play recording';
+
+  @override
+  String get a11yTooltipPauseRecording => 'Pause recording';
 }

@@ -57,7 +57,7 @@ class _InterviewAnalyticsViewState
                   if (widget.onBackPressed != null)
                     IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      tooltip: 'Back',
+                      tooltip: l.a11yTooltipBack,
                       onPressed: widget.onBackPressed,
                     ),
                   Text(
@@ -465,7 +465,9 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
                       : AppColors.vibrantLime,
                   size: 48,
                 ),
-                tooltip: _isPlaying ? 'Pause recording' : 'Play recording',
+                tooltip: _isPlaying
+                    ? l.a11yTooltipPauseRecording
+                    : l.a11yTooltipPlayRecording,
                 padding: EdgeInsets.zero,
                 onPressed: _isLoading || _recordingUrl == null
                     ? null
