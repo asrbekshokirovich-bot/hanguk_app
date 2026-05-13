@@ -1,4 +1,4 @@
-allprojects {
+﻿allprojects {
     repositories {
         google()
         mavenCentral()
@@ -6,7 +6,7 @@ allprojects {
         // (https://devrepo.kakao.com/nexus/repository/kakaomap-releases/).
         // It was left over from an abandoned `kakao_maps_flutter` SDK
         // attempt. No Gradle dependency in this project pulls from it.
-        // See docs/audits/kakaotalk_audit_2026-05-11.md §3 K3.
+        // See docs/audits/kakaotalk_audit_2026-05-11.md sec 3 K3.
     }
 }
 
@@ -28,45 +28,32 @@ subprojects {
 // AGP-8 namespace shim for legacy plugins.
 //
 // AGP 8 made the `android.namespace` DSL property mandatory and stopped
-// honoring the `package` attribute in AndroidManifest.xml. A handful of
-// pub.dev plugins we depend on still ship with pre-AGP-7.3 build files
-// (e.g. `install_plugin` 2.1.0) and fail to configure with:
+// honoring the `package` attribute in AndroidManifest.xml. Some pub.dev
+// plugins still ship with pre-AGP-7.3 build files (e.g. `install_plugin`
+// 2.1.0) and fail with:
+//   > Namespace not specified.
 //
-//   > Namespace not specified. Specify a namespace in the module's
-//     build file: .../install_plugin-2.1.0/android/build.gradle.
+// We patch each offending subproject by reading the legacy `package` out
+// of its AndroidManifest.xml and feeding it through the DSL setter via
+// reflection (AGP types are not on the root buildscript classpath here).
 //
-// Editing the pub cache is not durable — `flutter pub get` rewrites it on
-// every checkout — so we patch the offending subproject from this root
-// build script instead. For every subproject that exposes an `android`
-// extension without a namespace, we read the legacy `package` attribute
-// out of its AndroidManifest.xml and feed it back through the DSL setter.
-//
-// Reflection is used because AGP types are not on the root buildscript
-// classpath (Flutter applies them in :app via the Flutter Gradle plugin).
-//
-// Scope:
-//   - Only touches subprojects whose `android.namespace` is null/blank.
-//   - Skips :app, which already declares a namespace explicitly.
-//   - Falls back to `project.group` only if the manifest has no package.
-//
-// Safety:
-//   - Namespace must match what R class lookups expect, which historically
-//     equalled the manifest `package`. Reading it back from the same
-//     manifest preserves that identity.
-//   - If neither source yields a value, we leave the project alone so the
-//     original (informative) error is still surfaced rather than masked.
+// Dispatch is dynamic because the `evaluationDependsOn(":app")` block
+// above forces eager evaluation of dependent subprojects. When we reach
+// this hook, some plugins are already in the evaluated state and Gradle
+// rejects a fresh `afterEvaluate` registration. So: if the subproject is
+// already evaluated, apply the shim immediately; otherwise queue it.
 // ---------------------------------------------------------------------------
 subprojects {
-    afterEvaluate {
-        if (project.path == ":app") return@afterEvaluate
+    val applyNamespaceShim = Action<Project> {
+        if (project.path == ":app") return@Action
 
-        val androidExt = extensions.findByName("android") ?: return@afterEvaluate
+        val androidExt = extensions.findByName("android") ?: return@Action
 
         val currentNamespace = runCatching {
             androidExt.javaClass.getMethod("getNamespace").invoke(androidExt) as? String
         }.getOrNull()
 
-        if (!currentNamespace.isNullOrBlank()) return@afterEvaluate
+        if (!currentNamespace.isNullOrBlank()) return@Action
 
         val manifestPackage = runCatching {
             val manifestFile = file("src/main/AndroidManifest.xml")
@@ -79,7 +66,7 @@ subprojects {
 
         val injected = manifestPackage
             ?: project.group.toString().takeIf { it.isNotBlank() }
-            ?: return@afterEvaluate
+            ?: return@Action
 
         runCatching {
             androidExt.javaClass
@@ -90,6 +77,11 @@ subprojects {
                     "(plugin predates AGP 8 namespace requirement)."
             )
         }
+    }
+    if (state.executed) {
+        applyNamespaceShim.execute(this)
+    } else {
+        afterEvaluate(applyNamespaceShim)
     }
 }
 
