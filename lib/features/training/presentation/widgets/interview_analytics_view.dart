@@ -7,8 +7,10 @@ import 'package:audioplayers/audioplayers.dart';
 
 class InterviewAnalyticsView extends ConsumerStatefulWidget {
   final VoidCallback? onBackPressed;
-  final String? overrideSessionId; // Helpful for History View explicitly requesting a session
-  final String? overrideVapiCallId; // Vapi call id for audio playback when viewing a past session
+  final String?
+  overrideSessionId; // Helpful for History View explicitly requesting a session
+  final String?
+  overrideVapiCallId; // Vapi call id for audio playback when viewing a past session
 
   const InterviewAnalyticsView({
     super.key,
@@ -18,15 +20,18 @@ class InterviewAnalyticsView extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<InterviewAnalyticsView> createState() => _InterviewAnalyticsViewState();
+  ConsumerState<InterviewAnalyticsView> createState() =>
+      _InterviewAnalyticsViewState();
 }
 
-class _InterviewAnalyticsViewState extends ConsumerState<InterviewAnalyticsView> {
+class _InterviewAnalyticsViewState
+    extends ConsumerState<InterviewAnalyticsView> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final targetId = widget.overrideSessionId ?? ref.read(interviewProvider).sessionId;
+      final targetId =
+          widget.overrideSessionId ?? ref.read(interviewProvider).sessionId;
       if (targetId != null) {
         ref.read(interviewProvider.notifier).loadFeedback(targetId);
       }
@@ -52,6 +57,7 @@ class _InterviewAnalyticsViewState extends ConsumerState<InterviewAnalyticsView>
                   if (widget.onBackPressed != null)
                     IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      tooltip: 'Back',
                       onPressed: widget.onBackPressed,
                     ),
                   Text(
@@ -85,18 +91,18 @@ class _InterviewAnalyticsViewState extends ConsumerState<InterviewAnalyticsView>
                         ),
                       )
                     : state.feedback == null
-                        ? Center(
-                            child: Text(
-                              state.error ?? l.noFeedbackAvailable,
-                              style: const TextStyle(color: Colors.redAccent),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        : _buildFeedbackContent(
-                            l,
-                            state.feedback!,
-                            widget.overrideVapiCallId ?? state.vapiCallId,
-                          ),
+                    ? Center(
+                        child: Text(
+                          state.error ?? l.noFeedbackAvailable,
+                          style: const TextStyle(color: Colors.redAccent),
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : _buildFeedbackContent(
+                        l,
+                        state.feedback!,
+                        widget.overrideVapiCallId ?? state.vapiCallId,
+                      ),
               ),
             ],
           ),
@@ -148,7 +154,7 @@ class _InterviewAnalyticsViewState extends ConsumerState<InterviewAnalyticsView>
                   _Metric(l.metricContent, fb['content_score']),
                   _Metric(l.metricLanguage, fb['language_score']),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -219,7 +225,12 @@ class _InterviewAnalyticsViewState extends ConsumerState<InterviewAnalyticsView>
     );
   }
 
-  Widget _buildListSection(String title, List<dynamic>? items, IconData icon, Color color) {
+  Widget _buildListSection(
+    String title,
+    List<dynamic>? items,
+    IconData icon,
+    Color color,
+  ) {
     if (items == null || items.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,20 +239,46 @@ class _InterviewAnalyticsViewState extends ConsumerState<InterviewAnalyticsView>
           children: [
             Icon(icon, color: color, size: 20),
             const SizedBox(width: 8),
-            Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 12),
-        ...items.map((e) => Padding(
-          padding: const EdgeInsets.only(bottom: 8.0, left: 28.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('• ', style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16)),
-              Expanded(child: Text(e.toString(), style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14))),
-            ],
-          ),
-        )).toList(),
+        ...items
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0, left: 28.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '• ',
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        e.toString(),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+            .toList(),
       ],
     );
   }
@@ -256,9 +293,19 @@ class _Metric extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text('$score/10', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          '$score/10',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11)),
+        Text(
+          label,
+          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11),
+        ),
       ],
     );
   }
@@ -301,7 +348,9 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
   }
 
   Future<void> _fetchAudioUrl() async {
-    final url = await ref.read(interviewProvider.notifier).fetchRecordingUrl(widget.callId);
+    final url = await ref
+        .read(interviewProvider.notifier)
+        .fetchRecordingUrl(widget.callId);
     if (!mounted) return;
 
     if (url != null) {
@@ -357,7 +406,10 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
             Expanded(
               child: Text(
                 errorText,
-                style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
@@ -390,8 +442,12 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
               if (_isLoading) ...[
                 const Spacer(),
                 const SizedBox(
-                  width: 16, height: 16,
-                  child: CircularProgressIndicator(color: AppColors.vibrantLime, strokeWidth: 2),
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    color: AppColors.vibrantLime,
+                    strokeWidth: 2,
+                  ),
                 ),
               ],
             ],
@@ -401,18 +457,25 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
             children: [
               IconButton(
                 icon: Icon(
-                  _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
-                  color: _isLoading || _recordingUrl == null ? Colors.white24 : AppColors.vibrantLime,
+                  _isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_fill,
+                  color: _isLoading || _recordingUrl == null
+                      ? Colors.white24
+                      : AppColors.vibrantLime,
                   size: 48,
                 ),
+                tooltip: _isPlaying ? 'Pause recording' : 'Play recording',
                 padding: EdgeInsets.zero,
-                onPressed: _isLoading || _recordingUrl == null ? null : () {
-                  if (_isPlaying) {
-                    _audioPlayer.pause();
-                  } else {
-                    _audioPlayer.play(UrlSource(_recordingUrl!));
-                  }
-                },
+                onPressed: _isLoading || _recordingUrl == null
+                    ? null
+                    : () {
+                        if (_isPlaying) {
+                          _audioPlayer.pause();
+                        } else {
+                          _audioPlayer.play(UrlSource(_recordingUrl!));
+                        }
+                      },
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -421,16 +484,27 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
                     SliderTheme(
                       data: SliderTheme.of(context).copyWith(
                         trackHeight: 4,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 6,
+                        ),
+                        overlayShape: const RoundSliderOverlayShape(
+                          overlayRadius: 14,
+                        ),
                         activeTrackColor: AppColors.vibrantLime,
                         inactiveTrackColor: Colors.white24,
                         thumbColor: AppColors.vibrantLime,
                       ),
                       child: Slider(
                         min: 0,
-                        max: _duration.inSeconds.toDouble() > 0 ? _duration.inSeconds.toDouble() : 1.0,
-                        value: _position.inSeconds.toDouble().clamp(0.0, _duration.inSeconds.toDouble() > 0 ? _duration.inSeconds.toDouble() : 1.0),
+                        max: _duration.inSeconds.toDouble() > 0
+                            ? _duration.inSeconds.toDouble()
+                            : 1.0,
+                        value: _position.inSeconds.toDouble().clamp(
+                          0.0,
+                          _duration.inSeconds.toDouble() > 0
+                              ? _duration.inSeconds.toDouble()
+                              : 1.0,
+                        ),
                         onChanged: (value) {
                           if (_recordingUrl != null) {
                             _audioPlayer.seek(Duration(seconds: value.toInt()));
@@ -443,8 +517,20 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(_formatDuration(_position), style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-                          Text(_formatDuration(_duration), style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                          Text(
+                            _formatDuration(_position),
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.5),
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            _formatDuration(_duration),
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.5),
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                     ),
