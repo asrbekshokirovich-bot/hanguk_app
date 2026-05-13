@@ -5,14 +5,17 @@ import 'dart:js' show allowInterop;
 import 'dart:js' show allowInterop;
 
 /// Calls `js.allowInterop` on web platforms.
-dynamic allowInteropIfWeb(dynamic Function() callback) => allowInterop(callback);
+dynamic allowInteropIfWeb(dynamic Function() callback) =>
+    allowInterop(callback);
 
 void playBrowserTts(String text, String language, void Function() onEnd) {
   try {
-    final utterance = js.JsObject(js.context['SpeechSynthesisUtterance'], [text]);
+    final utterance = js.JsObject(js.context['SpeechSynthesisUtterance'], [
+      text,
+    ]);
     utterance['lang'] = language == 'ko' ? 'ko-KR' : 'en-US';
     utterance['rate'] = 1.0;
-    
+
     // Callback to start listening after browser finish speaking
     utterance['onend'] = allowInterop((_) {
       onEnd();

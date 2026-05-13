@@ -66,8 +66,10 @@ class _PrefsCardState extends ConsumerState<_PrefsCard> {
     final l10n = AppLocalizations.of(context)!;
     final calendar = (widget.row['notify_on_calendar_change'] as bool?) ?? true;
     final correction = (widget.row['notify_on_correction'] as bool?) ?? true;
-    final requirement = (widget.row['notify_on_requirement_change'] as bool?) ?? true;
-    final scholarship = (widget.row['notify_on_scholarship_change'] as bool?) ?? false;
+    final requirement =
+        (widget.row['notify_on_requirement_change'] as bool?) ?? true;
+    final scholarship =
+        (widget.row['notify_on_scholarship_change'] as bool?) ?? false;
     final preferredLang = (widget.row['preferred_lang'] as String?) ?? 'en';
 
     return Card(
@@ -95,17 +97,13 @@ class _PrefsCardState extends ConsumerState<_PrefsCard> {
             title: Text(l10n.notifSettingsCalendar),
             subtitle: Text(l10n.notifSettingsCalendarDesc),
             value: calendar,
-            onChanged: _busy
-                ? null
-                : (v) => _update(notifyOnCalendarChange: v),
+            onChanged: _busy ? null : (v) => _update(notifyOnCalendarChange: v),
           ),
           SwitchListTile(
             title: Text(l10n.notifSettingsCorrection),
             subtitle: Text(l10n.notifSettingsCorrectionDesc),
             value: correction,
-            onChanged: _busy
-                ? null
-                : (v) => _update(notifyOnCorrection: v),
+            onChanged: _busy ? null : (v) => _update(notifyOnCorrection: v),
           ),
           SwitchListTile(
             title: Text(l10n.notifSettingsRequirement),

@@ -45,7 +45,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       // printing on disk so the user gets a readable file.
       final pretty = const JsonEncoder.withIndent('  ').convert(res.data);
       final dir = await getApplicationDocumentsDirectory();
-      final stamp = DateTime.now().toUtc().toIso8601String().replaceAll(':', '-');
+      final stamp = DateTime.now().toUtc().toIso8601String().replaceAll(
+        ':',
+        '-',
+      );
       final file = File('${dir.path}/hanguk-data-export-$stamp.json');
       await file.writeAsString(pretty);
 
@@ -69,9 +72,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.accountExportFailed(e),
-            ),
+            content: Text(AppLocalizations.of(context)!.accountExportFailed(e)),
           ),
         );
       }
@@ -239,7 +240,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     ElevatedButton.icon(
                       icon: const Icon(Icons.logout),
                       label: Text(
-                        _signingOut ? l10n.accountSigningOut : l10n.accountSignOut,
+                        _signingOut
+                            ? l10n.accountSigningOut
+                            : l10n.accountSignOut,
                       ),
                       onPressed: _signingOut ? null : _signOut,
                       style: ElevatedButton.styleFrom(
@@ -355,8 +358,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       style: const TextStyle(color: AppColors.vibrantLime),
                     ),
                   ),
-                  const Text(' • ',
-                      style: TextStyle(color: Colors.white38)),
+                  const Text(' • ', style: TextStyle(color: Colors.white38)),
                   TextButton(
                     onPressed: () => _openLegal(AppConfig.termsOfServiceUrl),
                     child: Text(
@@ -443,8 +445,7 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
           child: Text(l10n.cancel),
         ),
         ElevatedButton(
-          onPressed:
-              _canConfirm ? () => Navigator.of(context).pop(true) : null,
+          onPressed: _canConfirm ? () => Navigator.of(context).pop(true) : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.redAccent,
             foregroundColor: Colors.white,

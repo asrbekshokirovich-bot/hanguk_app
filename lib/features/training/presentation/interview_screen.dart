@@ -43,13 +43,15 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
     // start the session immediately so users don't wait in a blocked dialog.
     if (widget.initialUniversityId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(interviewProvider.notifier).startSession(
-          sessionType: widget.initialSessionType ?? 'university_specific',
-          targetUniversityId: widget.initialUniversityId,
-          targetUniversityName: widget.initialUniversityName,
-          language: widget.initialLanguage ?? 'ko',
-          persona: widget.initialPersona ?? 'friendly',
-        );
+        ref
+            .read(interviewProvider.notifier)
+            .startSession(
+              sessionType: widget.initialSessionType ?? 'university_specific',
+              targetUniversityId: widget.initialUniversityId,
+              targetUniversityName: widget.initialUniversityName,
+              language: widget.initialLanguage ?? 'ko',
+              persona: widget.initialPersona ?? 'friendly',
+            );
       });
     }
   }
@@ -71,9 +73,9 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
           if (state.status == 'active')
             TextButton(
               onPressed: () async {
-                await ref.read(interviewProvider.notifier).endSession(
-                  language: state.selectedLanguage,
-                );
+                await ref
+                    .read(interviewProvider.notifier)
+                    .endSession(language: state.selectedLanguage);
                 // Note: Vapi call cleanup is handled by InterviewActiveView.dispose()
                 // via the centralized _stopCall() method.
               },
@@ -84,9 +86,7 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
             ),
         ],
       ),
-      body: SafeArea(
-        child: _buildCurrentView(state),
-      ),
+      body: SafeArea(child: _buildCurrentView(state)),
     );
   }
 

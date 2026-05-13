@@ -77,4 +77,3 @@ class _UpdateGateState extends ConsumerState<UpdateGate>
     );
   }
 }
-

@@ -58,7 +58,8 @@ class InterviewSessionState {
   final List<String> liveHints;
   final String? error;
   final bool isVapiConnected; // true when WebRTC call is live
-  final String? vapiCallId; // Stores the underlying session ID for audio recordings
+  final String?
+  vapiCallId; // Stores the underlying session ID for audio recordings
   final String? focusTopic; // Optional free-text steer for the AI's questions
   final bool timedMode;
   final int? timeLimitSeconds; // Hard cap; null = untimed
@@ -209,15 +210,19 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
       if (user == null) throw Exception('User not authenticated');
 
       // Create Session in DB
-      final response = await client.from('interview_sessions').insert({
-        'student_id': user.id,
-        'session_type': sessionType,
-        'target_institution_id': targetUniversityId,
-        'status': 'active',
-        'focus_topic': focusTopic,
-        'timed_mode': timedMode,
-        'time_limit_seconds': timeLimitSeconds,
-      }).select().single();
+      final response = await client
+          .from('interview_sessions')
+          .insert({
+            'student_id': user.id,
+            'session_type': sessionType,
+            'target_institution_id': targetUniversityId,
+            'status': 'active',
+            'focus_topic': focusTopic,
+            'timed_mode': timedMode,
+            'time_limit_seconds': timeLimitSeconds,
+          })
+          .select()
+          .single();
 
       final newSessionId = response['id'] as String;
 
@@ -295,14 +300,18 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
       }
     }
     state = state.copyWith(
-      error: 'Could not save audio link for this session ($lastError). '
+      error:
+          'Could not save audio link for this session ($lastError). '
           'Replay may be unavailable.',
     );
   }
 
   // ── Text-only interview: full AI round-trip ──────────────────────────────
 
-  Future<String?> sendMessage(String studentText, {String language = 'ko'}) async {
+  Future<String?> sendMessage(
+    String studentText, {
+    String language = 'ko',
+  }) async {
     final sessionId = state.sessionId;
     if (sessionId == null) {
       state = state.copyWith(error: 'No active session');
@@ -360,15 +369,20 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
       state = state.copyWith(messages: [...state.messages, aiMsg]);
       return aiText;
-
     } on FunctionException catch (e) {
-      final errDetail = (e.details is Map) ? (e.details as Map)['error'] : e.details;
+      final errDetail = (e.details is Map)
+          ? (e.details as Map)['error']
+          : e.details;
       _rollbackTempMessage(tempId);
-      state = state.copyWith(error: 'AI Interview error: ${errDetail ?? e.toString()}');
+      state = state.copyWith(
+        error: 'AI Interview error: ${errDetail ?? e.toString()}',
+      );
       return null;
     } on Exception catch (e) {
       _rollbackTempMessage(tempId);
-      state = state.copyWith(error: 'Failed to process answer: ${e.toString()}');
+      state = state.copyWith(
+        error: 'Failed to process answer: ${e.toString()}',
+      );
       return null;
     } finally {
       state = state.copyWith(isProcessing: false);
@@ -377,8 +391,9 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
   void _rollbackTempMessage(String? tempId) {
     if (tempId == null) return;
-    final remaining =
-        state.messages.where((m) => m.id != tempId).toList(growable: false);
+    final remaining = state.messages
+        .where((m) => m.id != tempId)
+        .toList(growable: false);
     if (remaining.length != state.messages.length) {
       state = state.copyWith(messages: remaining);
     }
@@ -441,10 +456,7 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
       final response = await client.functions.invoke(
         'interview-feedback',
-        body: {
-          'sessionId': sessionId,
-          'language': language,
-        },
+        body: {'sessionId': sessionId, 'language': language},
       );
 
       final data = response.data as Map<String, dynamic>?;
@@ -472,18 +484,29 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
           await client.from('interview_feedback').insert({
             'session_id': sessionId,
             if (fb['overall_score'] is num)
-              'overall_score': (fb['overall_score'] as num).round().clamp(1, 10),
+              'overall_score': (fb['overall_score'] as num).round().clamp(
+                1,
+                10,
+              ),
             if (fb['communication_score'] is num)
-              'communication_score':
-                  (fb['communication_score'] as num).round().clamp(1, 10),
+              'communication_score': (fb['communication_score'] as num)
+                  .round()
+                  .clamp(1, 10),
             if (fb['confidence_score'] is num)
-              'confidence_score':
-                  (fb['confidence_score'] as num).round().clamp(1, 10),
+              'confidence_score': (fb['confidence_score'] as num).round().clamp(
+                1,
+                10,
+              ),
             if (fb['content_score'] is num)
-              'content_score': (fb['content_score'] as num).round().clamp(1, 10),
+              'content_score': (fb['content_score'] as num).round().clamp(
+                1,
+                10,
+              ),
             if (fb['language_score'] is num)
-              'language_score':
-                  (fb['language_score'] as num).round().clamp(1, 10),
+              'language_score': (fb['language_score'] as num).round().clamp(
+                1,
+                10,
+              ),
             if (fb['strengths'] is List) 'strengths': fb['strengths'],
             if (fb['improvements'] is List) 'improvements': fb['improvements'],
             if (fb['message_scores'] is List)
@@ -523,9 +546,14 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
       if (token == null) return null;
 
       // Centralized voice selection — no more duplicated voice ID strings here
-      final voiceId = InterviewPersonaConfig.getVoiceId(state.interviewerPersona, language);
+      final voiceId = InterviewPersonaConfig.getVoiceId(
+        state.interviewerPersona,
+        language,
+      );
 
-      final edgeUrl = Uri.parse('${AppConfig.supabaseUrl}/functions/v1/elevenlabs-tts');
+      final edgeUrl = Uri.parse(
+        '${AppConfig.supabaseUrl}/functions/v1/elevenlabs-tts',
+      );
 
       final response = await http.post(
         edgeUrl,
@@ -534,10 +562,7 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
           'Authorization': 'Bearer $token',
           'apikey': AppConfig.supabaseAnonKey,
         },
-        body: jsonEncode({
-          'text': text,
-          'voiceId': voiceId,
-        }),
+        body: jsonEncode({'text': text, 'voiceId': voiceId}),
       );
 
       // Audit B6: rely on the status code only. The previous string
@@ -552,12 +577,16 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
       }
 
       if (response.statusCode != 200) {
-        throw Exception('TTS Request failed with ${response.statusCode}: ${response.body}');
+        throw Exception(
+          'TTS Request failed with ${response.statusCode}: ${response.body}',
+        );
       }
 
       // Save binary to temp local file for playback via just_audio
       final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/tts_${DateTime.now().millisecondsSinceEpoch}.mp3');
+      final file = File(
+        '${tempDir.path}/tts_${DateTime.now().millisecondsSinceEpoch}.mp3',
+      );
       await file.writeAsBytes(response.bodyBytes);
       // Audit D8: register so cleanupTtsFiles can sweep on
       // session-end / resetSession.
@@ -697,6 +726,7 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 // ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
-final interviewProvider = NotifierProvider<InterviewNotifier, InterviewSessionState>(() {
-  return InterviewNotifier();
-});
+final interviewProvider =
+    NotifierProvider<InterviewNotifier, InterviewSessionState>(() {
+      return InterviewNotifier();
+    });

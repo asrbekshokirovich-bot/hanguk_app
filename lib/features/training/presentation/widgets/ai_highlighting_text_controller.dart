@@ -6,7 +6,12 @@ class GrammarIssue {
   final String originalText;
   final String suggestion;
 
-  GrammarIssue({required this.start, required this.end, required this.originalText, required this.suggestion});
+  GrammarIssue({
+    required this.start,
+    required this.end,
+    required this.originalText,
+    required this.suggestion,
+  });
 }
 
 class AiHighlightingTextController extends TextEditingController {
@@ -40,37 +45,43 @@ class AiHighlightingTextController extends TextEditingController {
       children.add(TextSpan(style: style, text: sourceText));
     } else {
       // Sort issues by start index
-      List<GrammarIssue> sortedIssues = List.from(issues)..sort((a, b) => a.start.compareTo(b.start));
+      List<GrammarIssue> sortedIssues = List.from(issues)
+        ..sort((a, b) => a.start.compareTo(b.start));
       int currentPos = 0;
 
       for (final issue in sortedIssues) {
         if (issue.start > currentPos) {
-          children.add(TextSpan(
-            style: style,
-            text: sourceText.substring(currentPos, issue.start),
-          ));
+          children.add(
+            TextSpan(
+              style: style,
+              text: sourceText.substring(currentPos, issue.start),
+            ),
+          );
         }
 
         // Add the squiggly underlined issue
-        int endPos = issue.end > sourceText.length ? sourceText.length : issue.end;
+        int endPos = issue.end > sourceText.length
+            ? sourceText.length
+            : issue.end;
         if (issue.start < endPos) {
-          children.add(TextSpan(
-            style: style?.copyWith(
-              decoration: TextDecoration.underline,
-              decorationStyle: TextDecorationStyle.wavy,
-              decorationColor: Colors.redAccent,
+          children.add(
+            TextSpan(
+              style: style?.copyWith(
+                decoration: TextDecoration.underline,
+                decorationStyle: TextDecorationStyle.wavy,
+                decorationColor: Colors.redAccent,
+              ),
+              text: sourceText.substring(issue.start, endPos),
             ),
-            text: sourceText.substring(issue.start, endPos),
-          ));
+          );
           currentPos = endPos;
         }
       }
 
       if (currentPos < sourceText.length) {
-        children.add(TextSpan(
-          style: style,
-          text: sourceText.substring(currentPos),
-        ));
+        children.add(
+          TextSpan(style: style, text: sourceText.substring(currentPos)),
+        );
       }
     }
 
@@ -93,21 +104,27 @@ class AiHighlightingTextController extends TextEditingController {
           final next = consumed + t.length;
           if (cursor < next && cursor >= consumed) {
             final splitAt = cursor - consumed;
-            rebuilt.add(TextSpan(
-              style: span is TextSpan ? span.style : null,
-              text: t.substring(0, splitAt),
-            ));
-            rebuilt.add(TextSpan(
-              style: style?.copyWith(
-                color: Colors.white24,
-                fontStyle: FontStyle.italic,
+            rebuilt.add(
+              TextSpan(
+                style: span is TextSpan ? span.style : null,
+                text: t.substring(0, splitAt),
               ),
-              text: ghostText,
-            ));
-            rebuilt.add(TextSpan(
-              style: span is TextSpan ? span.style : null,
-              text: t.substring(splitAt),
-            ));
+            );
+            rebuilt.add(
+              TextSpan(
+                style: style?.copyWith(
+                  color: Colors.white24,
+                  fontStyle: FontStyle.italic,
+                ),
+                text: ghostText,
+              ),
+            );
+            rebuilt.add(
+              TextSpan(
+                style: span is TextSpan ? span.style : null,
+                text: t.substring(splitAt),
+              ),
+            );
           } else {
             rebuilt.add(span);
           }
@@ -116,13 +133,15 @@ class AiHighlightingTextController extends TextEditingController {
         return TextSpan(style: style, children: rebuilt);
       }
 
-      children.add(TextSpan(
-        style: style?.copyWith(
-          color: Colors.white24, // Muted color for ghost text
-          fontStyle: FontStyle.italic,
+      children.add(
+        TextSpan(
+          style: style?.copyWith(
+            color: Colors.white24, // Muted color for ghost text
+            fontStyle: FontStyle.italic,
+          ),
+          text: ghostText,
         ),
-        text: ghostText,
-      ));
+      );
     }
 
     return TextSpan(style: style, children: children);

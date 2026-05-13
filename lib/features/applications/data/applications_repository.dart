@@ -6,10 +6,14 @@ import '../../map/domain/university.dart';
 import '../../auth/data/auth_repository.dart';
 
 // Provider to fetch suggested universities for the student
-final suggestedUniversitiesProvider = FutureProvider<List<University>>((ref) async {
+final suggestedUniversitiesProvider = FutureProvider<List<University>>((
+  ref,
+) async {
   // Watch the provider directly (sync) to avoid async stream .future caching bugs
   final authState = ref.watch(authStateProvider);
-  final user = authState.value?.session?.user ?? Supabase.instance.client.auth.currentUser;
+  final user =
+      authState.value?.session?.user ??
+      Supabase.instance.client.auth.currentUser;
   if (user == null) {
     debugPrint('[Suggestions] user is null, returning empty list');
     return [];
@@ -23,34 +27,47 @@ final suggestedUniversitiesProvider = FutureProvider<List<University>>((ref) asy
         .from('student_suggestions')
         .select('university_id, university:universities(*)')
         .eq('student_id', user.id);
-        
-    debugPrint('[Suggestions] student_suggestions query for ${user.id} returned ${(data as List).length} rows');
+
+    debugPrint(
+      '[Suggestions] student_suggestions query for ${user.id} returned ${(data as List).length} rows',
+    );
     final List<University> suggestions = [];
     for (var row in data as List) {
       if (row['university'] != null) {
         final u = row['university'] as Map<String, dynamic>;
-        suggestions.add(University(
-          id: u['id'] as String,
-          name: u['name_en'] as String? ?? u['name_uz'] as String? ?? 'Unknown',
-          location: u['city_en'] as String? ?? '',
-          isPartner: u['is_partner'] as bool? ?? false,
-          latitude: u['latitude'] != null ? (u['latitude'] as num).toDouble() : null,
-          longitude: u['longitude'] != null ? (u['longitude'] as num).toDouble() : null,
-          logoUrl: u['logo_url'] as String?,
-        ));
+        suggestions.add(
+          University(
+            id: u['id'] as String,
+            name:
+                u['name_en'] as String? ?? u['name_uz'] as String? ?? 'Unknown',
+            location: u['city_en'] as String? ?? '',
+            isPartner: u['is_partner'] as bool? ?? false,
+            latitude: u['latitude'] != null
+                ? (u['latitude'] as num).toDouble()
+                : null,
+            longitude: u['longitude'] != null
+                ? (u['longitude'] as num).toDouble()
+                : null,
+            logoUrl: u['logo_url'] as String?,
+          ),
+        );
       }
     }
-    
+
     // If we have explicit CRM suggestions, return those
     if (suggestions.isNotEmpty) {
-      debugPrint('[Suggestions] returning ${suggestions.length} CRM suggestions');
+      debugPrint(
+        '[Suggestions] returning ${suggestions.length} CRM suggestions',
+      );
       return suggestions;
     }
   } catch (e) {
     if (e is PostgrestException && e.code == 'PGRST205') {
-       debugPrint('[Suggestions] student_suggestions table missing, falling back.');
+      debugPrint(
+        '[Suggestions] student_suggestions table missing, falling back.',
+      );
     } else {
-       debugPrint('[Suggestions] Error fetching explicit suggestions: $e');
+      debugPrint('[Suggestions] Error fetching explicit suggestions: $e');
     }
   }
 
@@ -61,21 +78,33 @@ final suggestedUniversitiesProvider = FutureProvider<List<University>>((ref) asy
         .select()
         .eq('is_partner', true)
         .limit(5);
-    debugPrint('[Suggestions] Fallback partner universities returned ${(fallbackData as List).length} rows');
+    debugPrint(
+      '[Suggestions] Fallback partner universities returned ${(fallbackData as List).length} rows',
+    );
     if ((fallbackData as List).isEmpty) {
-      debugPrint('[Suggestions] WARNING: Fallback returned 0 universities. Ensure is_partner=true is set for some universities.');
+      debugPrint(
+        '[Suggestions] WARNING: Fallback returned 0 universities. Ensure is_partner=true is set for some universities.',
+      );
     }
 
-    return fallbackData.map<University>((u) => University(
-      id: u['id'] as String,
-      name: u['name_en'] as String? ?? u['name_uz'] as String? ?? 'Unknown',
-      location: u['city_en'] as String? ?? '',
-      isPartner: u['is_partner'] as bool? ?? false,
-      latitude: u['latitude'] != null ? (u['latitude'] as num).toDouble() : null,
-      longitude: u['longitude'] != null ? (u['longitude'] as num).toDouble() : null,
-      logoUrl: u['logo_url'] as String?,
-    )).toList();
-    
+    return fallbackData
+        .map<University>(
+          (u) => University(
+            id: u['id'] as String,
+            name:
+                u['name_en'] as String? ?? u['name_uz'] as String? ?? 'Unknown',
+            location: u['city_en'] as String? ?? '',
+            isPartner: u['is_partner'] as bool? ?? false,
+            latitude: u['latitude'] != null
+                ? (u['latitude'] as num).toDouble()
+                : null,
+            longitude: u['longitude'] != null
+                ? (u['longitude'] as num).toDouble()
+                : null,
+            logoUrl: u['logo_url'] as String?,
+          ),
+        )
+        .toList();
   } catch (e, st) {
     debugPrint('[Suggestions] Failed to fetch fallback suggestions: $e\n$st');
     throw e;
@@ -88,11 +117,15 @@ Future<void> submitSelectedUniversities(List<String> universityIds) async {
   final user = client.auth.currentUser;
   if (user == null) throw Exception('User not logged in');
 
-  final inserts = universityIds.map((uId) => {
-    'student_id': user.id,
-    'university_id': uId,
-    'status': 'pending_approval',
-  }).toList();
+  final inserts = universityIds
+      .map(
+        (uId) => {
+          'student_id': user.id,
+          'university_id': uId,
+          'status': 'pending_approval',
+        },
+      )
+      .toList();
 
   // 1. Insert into applications
   await client.from('applications').insert(inserts);
@@ -100,21 +133,23 @@ Future<void> submitSelectedUniversities(List<String> universityIds) async {
   // 2. Delete ALL university suggestions for this student
   // since they submitted their chosen batch of universities.
   try {
-    await client
-        .from('student_suggestions')
-        .delete()
-        .eq('student_id', user.id);
+    await client.from('student_suggestions').delete().eq('student_id', user.id);
   } catch (e) {
-    debugPrint('[ApplicationsRepository] Failed to clear remaining suggestions: $e');
+    debugPrint(
+      '[ApplicationsRepository] Failed to clear remaining suggestions: $e',
+    );
     // We swallow this error because the application was successfully submitted
   }
 }
 
-final applicationsProvider =
-    FutureProvider<List<StudentApplication>>((ref) async {
+final applicationsProvider = FutureProvider<List<StudentApplication>>((
+  ref,
+) async {
   // Watch the provider directly (sync) to avoid async stream .future caching bugs
   final authState = ref.watch(authStateProvider);
-  final user = authState.value?.session?.user ?? Supabase.instance.client.auth.currentUser;
+  final user =
+      authState.value?.session?.user ??
+      Supabase.instance.client.auth.currentUser;
   if (user == null) {
     debugPrint('[Applications] user is null, returning empty list');
     return [];
@@ -129,7 +164,9 @@ final applicationsProvider =
         .eq('student_id', user.id)
         .order('created_at', ascending: false);
 
-    debugPrint('[Applications] Query for student ${user.id} returned ${(data as List).length} applications');
+    debugPrint(
+      '[Applications] Query for student ${user.id} returned ${(data as List).length} applications',
+    );
 
     return (data as List).map((row) {
       // Parse the joined university row (may be null if no join match)
@@ -155,7 +192,9 @@ final applicationsProvider =
       );
     }).toList();
   } catch (e, st) {
-    debugPrint('[ApplicationsRepository] Failed to fetch applications: $e\n$st');
+    debugPrint(
+      '[ApplicationsRepository] Failed to fetch applications: $e\n$st',
+    );
     throw e;
   }
 });

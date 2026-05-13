@@ -83,8 +83,9 @@ final updaterRepositoryProvider = Provider<UpdaterRepository>((ref) {
   return UpdaterRepository(Supabase.instance.client);
 });
 
-final updaterProvider =
-    NotifierProvider<UpdaterNotifier, UpdateState>(() => UpdaterNotifier());
+final updaterProvider = NotifierProvider<UpdaterNotifier, UpdateState>(
+  () => UpdaterNotifier(),
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Notifier — drives the UI through UpdateState transitions.
@@ -130,15 +131,21 @@ class UpdaterNotifier extends Notifier<UpdateState> {
       if (Platform.isIOS && info.iosAppStoreUrl != null) {
         final uri = Uri.tryParse(info.iosAppStoreUrl!);
         if (uri == null) {
-          state = UpdateFailed(UpdateErrorCode.unknown,
-              detail: 'Invalid App Store URL', info: info);
+          state = UpdateFailed(
+            UpdateErrorCode.unknown,
+            detail: 'Invalid App Store URL',
+            info: info,
+          );
           return;
         }
         try {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         } catch (e) {
-          state = UpdateFailed(UpdateErrorCode.unknown,
-              detail: e.toString(), info: info);
+          state = UpdateFailed(
+            UpdateErrorCode.unknown,
+            detail: e.toString(),
+            info: info,
+          );
         }
         return;
       }
@@ -165,8 +172,11 @@ class UpdaterNotifier extends Notifier<UpdateState> {
     } on _UpdaterException catch (e) {
       state = UpdateFailed(e.code, detail: e.detail, info: info);
     } catch (e) {
-      state = UpdateFailed(UpdateErrorCode.unknown,
-          detail: e.toString(), info: info);
+      state = UpdateFailed(
+        UpdateErrorCode.unknown,
+        detail: e.toString(),
+        info: info,
+      );
     }
   }
 
@@ -212,11 +222,9 @@ class UpdaterRepository {
     final info = AppVersionInfo.fromMap(response);
 
     // 1. Min-supported floor: if local is below floor, force update.
-    final belowMin = info.minSupportedVersion != null &&
-        isBelowFloor(
-          floor: info.minSupportedVersion!,
-          candidate: localVersion,
-        );
+    final belowMin =
+        info.minSupportedVersion != null &&
+        isBelowFloor(floor: info.minSupportedVersion!, candidate: localVersion);
 
     // 2. Newer-than check: if local already >= latest, nothing to do.
     if (!isNewerVersion(current: localVersion, candidate: info.latestVersion)) {
@@ -226,7 +234,8 @@ class UpdaterRepository {
     // 3. Rollout dice: deterministic per-device. If we're outside the bucket,
     //    pretend the update doesn't exist — UNLESS we're below the min
     //    supported floor (then we always show, regardless of rollout %).
-    if (!belowMin && !_isInRolloutBucket(info, deviceFingerprint: pkg.appName)) {
+    if (!belowMin &&
+        !_isInRolloutBucket(info, deviceFingerprint: pkg.appName)) {
       return const UpdateIdle();
     }
 
@@ -249,7 +258,8 @@ class UpdaterRepository {
 
     // 1. Download to temp dir.
     final tempDir = await getTemporaryDirectory();
-    final filename = 'hanguk_app_${info.latestVersion.replaceAll('+', '_')}.apk';
+    final filename =
+        'hanguk_app_${info.latestVersion.replaceAll('+', '_')}.apk';
     final filePath = '${tempDir.path}/$filename';
 
     try {
@@ -306,10 +316,7 @@ class UpdaterRepository {
         );
       }
     } catch (e) {
-      throw _UpdaterException(
-        UpdateErrorCode.installDenied,
-        e.toString(),
-      );
+      throw _UpdaterException(UpdateErrorCode.installDenied, e.toString());
     }
   }
 
@@ -335,7 +342,8 @@ class UpdaterRepository {
     final input = '$deviceFingerprint:${info.latestVersion}';
     final digest = sha256.convert(input.codeUnits).bytes;
     // Take the first 4 bytes as an unsigned int.
-    final n = (digest[0] << 24) | (digest[1] << 16) | (digest[2] << 8) | digest[3];
+    final n =
+        (digest[0] << 24) | (digest[1] << 16) | (digest[2] << 8) | digest[3];
     final pct = (n.abs() % 100);
     return pct < info.rolloutPercentage;
   }

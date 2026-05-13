@@ -45,8 +45,11 @@ class _WebMapWidgetState extends State<_WebMapWidget> {
     _uniById = {for (final u in widget.universities) u.id: u};
     _viewId = 'kakao-map-${DateTime.now().millisecondsSinceEpoch}';
 
-    final htmlTemplate = generateMapHtml(widget.universities, locale: widget.locale);
-    
+    final htmlTemplate = generateMapHtml(
+      widget.universities,
+      locale: widget.locale,
+    );
+
     final iframe = html.IFrameElement()
       ..style.border = 'none'
       ..style.height = '100%'
