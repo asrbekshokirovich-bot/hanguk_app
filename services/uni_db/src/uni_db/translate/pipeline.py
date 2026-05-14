@@ -154,7 +154,7 @@ def _pick_primary(
     is_label: bool,
 ) -> Callable[[str, TargetLang], TranslationOutput]:
     if target_lang == "en":
-        if is_label:
+        if is_label and settings.deepl_api_key:
             return _wrap(deepl_adapter.translate)
         return _wrap(claude_adapter.translate)
 
@@ -162,10 +162,26 @@ def _pick_primary(
         return _pivoted_via_en
 
     if target_lang in {"vi", "id"}:
-        return _wrap(papago_adapter.translate)
+        # Papago is preferred for vi/id quality, but it requires Naver Cloud
+        # credentials. When they're absent (early Phase 4 ops), fall back
+        # to Claude so the worker stays productive.
+        if settings.naver_papago_client_id and settings.naver_papago_client_secret:
+            return _wrap(papago_adapter.translate)
+        log.info(
+            "translate: Papago credentials missing — falling back to Claude for ko->%s",
+            target_lang,
+        )
+        return _wrap(claude_adapter.translate)
 
     if target_lang == "ru":
-        return _wrap(deepl_adapter.translate)
+        # DeepL is preferred for ru, but falls back to Claude when DeepL
+        # credentials are missing.
+        if settings.deepl_api_key:
+            return _wrap(deepl_adapter.translate)
+        log.info(
+            "translate: DeepL credentials missing — falling back to Claude for ko->ru",
+        )
+        return _wrap(claude_adapter.translate)
 
     raise ValueError(f"unsupported target_lang: {target_lang}")
 
