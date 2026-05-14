@@ -19,7 +19,12 @@ from uuid import UUID
 
 from ..html_list_adapter import HtmlListAdapter, HtmlListSelectors
 from .snu import SNU_SELECTORS
-from .yonsei import YONSEI_SELECTORS, YONSEI_MIRAE_SELECTORS
+from .yonsei import (
+    YONSEI_SELECTORS,
+    YONSEI_MIRAE_SELECTORS,
+    make_yonsei_adapter,
+    make_yonsei_mirae_adapter,
+)
 from .korea_univ import make_korea_univ_adapter
 from .kaist import make_kaist_adapter
 from .konkuk import KONKUK_SELECTORS
@@ -59,7 +64,11 @@ ADAPTER_REGISTRY: dict[str, object] = {
     "https://oku.korea.ac.kr/oku/cms/FR_CON/index.do?MENU_ID=700": make_korea_univ_adapter,
     "https://admission.kaist.ac.kr/intl-undergraduate/notice":      make_kaist_adapter,
 
-    # JS-only — placeholder until Playwright adapter
+    # Playwright-rendered (JS-only sites)
+    "https://admission.yonsei.ac.kr/seoul/admission/html/international/notice.asp": make_yonsei_adapter,
+    "https://admission.yonsei.ac.kr/wonju/admission/html/international/notice.asp": make_yonsei_mirae_adapter,
+
+    # JS-only — placeholder until Playwright config is written
     "https://admission.yonsei.ac.kr/":                   _html(YONSEI_SELECTORS),
     "https://admission.yonsei.ac.kr/mirae":               _html(YONSEI_MIRAE_SELECTORS),
     "https://enter.konkuk.ac.kr/":                        _html(KONKUK_SELECTORS),
