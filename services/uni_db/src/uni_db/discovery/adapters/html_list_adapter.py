@@ -43,11 +43,15 @@ class HtmlListSelectors:
     link: str               # selector inside the row that has the post URL (an `a` tag)
     posted_at: str | None   # optional selector for the posted-at cell
     posted_at_format: str = "%Y.%m.%d"
+    # If set, applied to the posted-at cell text before strptime — group(1)
+    # must capture the date substring. Use when the cell carries trailing
+    # text like view counts or a Korean prefix (e.g. "작성일: 2026/03/04 ㅣ 조회수: 18969").
+    posted_at_regex: str | None = None
     attachments_in_detail: bool = True   # if True, fetch_post_detail() finds attachments
 
     # Each row's `external_post_id` is extracted from the post URL via this
     # regex group. Most egov boards expose `?nttId=12345` or similar.
-    external_id_regex: str = r"(?:nttId|articleNo|seq|bbsSeq)=([0-9]+)"
+    external_id_regex: str = r"(?:nttId|articleNo|seq|bbsSeq|BBS_NO)=([0-9]+)"
 
 
 class HtmlListAdapter(SourceAdapter):
@@ -220,6 +224,15 @@ class HtmlListAdapter(SourceAdapter):
         if cell is None:
             return None
         text = cell.get_text(strip=True)  # type: ignore[union-attr]
+
+        # Optional regex pre-extraction for cells with surrounding chrome
+        # like Korean prefix + view count.
+        if self._selectors.posted_at_regex:
+            m = re.search(self._selectors.posted_at_regex, text)
+            if not m:
+                return None
+            text = m.group(1)
+
         try:
             return datetime.strptime(text, self._selectors.posted_at_format).replace(
                 tzinfo=timezone.utc

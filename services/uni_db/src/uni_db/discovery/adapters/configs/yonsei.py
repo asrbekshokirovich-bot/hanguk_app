@@ -1,32 +1,84 @@
 """Yonsei University — international admissions notice board.
 
-Source (Seoul):  https://admission.yonsei.ac.kr/
-Source (Mirae):  https://admission.yonsei.ac.kr/mirae
+Notice list (Int'l Student tab, Seoul campus):
+    https://admission.yonsei.ac.kr/seoul/admission/html/international/notice.asp
 
-Both Yonsei sites render via client-side JavaScript (meta-refresh to
-/seoul/admission/html/main/main.asp which then uses JS routing). A static
-httpx request returns an empty body.  These sources require a Playwright-based
-adapter to render the JS before scraping.
+The page renders via client-side ASP/JS — a static httpx GET returns
+the loader shell, not the table. Uses PlaywrightListAdapter to render
+Chromium first, then BeautifulSoup over the post-JS HTML.
 
-Status: PENDING Playwright adapter (Phase 4 infrastructure).
-Until then, the selectors below are placeholders and the adapter factory
-raises NotImplementedError so the orchestrator can skip gracefully.
+Row structure (verified live 2026-05-14 via Playwright probe):
+    <tr>
+      <td>{number}</td>
+      <td class="subject lineLeft">
+        <a href="noticeView.asp?BBS_NO={id}&...">
+          <span class="tit"><strong>[Int'l Student]</strong> {title}</span>
+          <span class="date">작성일: 2026/03/04ㅣ 조회수 : 18969</span>
+        </a>
+      </td>
+      <td>{attachment icon or empty}</td>
+    </tr>
+
+The Mirae (Wonju) campus uses the same Yonsei ASP CMS — its int'l notice
+URL is /wonju/admission/html/international/notice.asp.
 """
 
 from __future__ import annotations
 
-from ..html_list_adapter import HtmlListSelectors
+import httpx
+from uuid import UUID
 
-# Placeholder — actual selectors cannot be determined without JS execution.
-# Will be replaced once Playwright adapter is implemented.
+from ..html_list_adapter import HtmlListSelectors
+from ..playwright_list_adapter import PlaywrightListAdapter, PlaywrightRenderOptions
+
+
 YONSEI_SELECTORS = HtmlListSelectors(
-    row="table.board-list tbody tr",
-    title="td.title a",
-    link="td.title a",
-    posted_at="td.date",
-    posted_at_format="%Y.%m.%d",
+    row="table tbody tr",
+    title="td.subject span.tit",
+    link="td.subject a",
+    posted_at="td.subject span.date",
+    posted_at_regex=r"(\d{4}/\d{2}/\d{2})",
+    posted_at_format="%Y/%m/%d",
     attachments_in_detail=True,
-    external_id_regex=r"(?:nttId|articleNo|seq|bbsSeq|idx)=([0-9]+)",
+    external_id_regex=r"BBS_NO=([0-9]+)",
 )
 
 YONSEI_MIRAE_SELECTORS = YONSEI_SELECTORS
+
+_RENDER = PlaywrightRenderOptions(
+    wait_for_selector="table tbody tr",
+    wait_until="networkidle",
+    timeout_ms=30_000,
+)
+
+
+def make_yonsei_adapter(
+    source_id: UUID,
+    institution_id: UUID | None,
+    source_url_ko: str,
+    http_client: httpx.AsyncClient,
+):
+    return PlaywrightListAdapter(
+        source_id=source_id,
+        source_url_ko=source_url_ko,
+        selectors=YONSEI_SELECTORS,
+        render_options=_RENDER,
+        institution_id=institution_id,
+        http_client=http_client,
+    )
+
+
+def make_yonsei_mirae_adapter(
+    source_id: UUID,
+    institution_id: UUID | None,
+    source_url_ko: str,
+    http_client: httpx.AsyncClient,
+):
+    return PlaywrightListAdapter(
+        source_id=source_id,
+        source_url_ko=source_url_ko,
+        selectors=YONSEI_MIRAE_SELECTORS,
+        render_options=_RENDER,
+        institution_id=institution_id,
+        http_client=http_client,
+    )
