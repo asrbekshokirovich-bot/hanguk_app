@@ -54,9 +54,11 @@ def apply_glossary_pre_translate(
     )
     hits: list[GlossaryHit] = []
     out = text
-    for index, (term_ko, hit) in enumerate(candidates):
+    for term_ko, hit in candidates:
         if term_ko in out:
-            out = out.replace(term_ko, f"⟪G:{index}⟫")
+            # Use the post-translate index (== len(hits) at point of match)
+            # so apply_glossary_post_translate's enumerate(hits) lines up.
+            out = out.replace(term_ko, f"⟪G:{len(hits)}⟫")
             hits.append(hit)
     return out, hits
 
