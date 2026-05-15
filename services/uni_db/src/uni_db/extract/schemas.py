@@ -12,7 +12,10 @@ from typing import Any
 
 CALENDAR_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "additionalProperties": False,
+    # Allow Claude to attach top-level meta fields like `is_correction_notice`,
+    # `correction_text_ko` without invalidating the whole extraction. Per-row
+    # strictness is preserved below.
+    "additionalProperties": True,
     "properties": {
         "events": {
             "type": "array",
@@ -24,13 +27,19 @@ CALENDAR_SCHEMA: dict[str, Any] = {
                     "event_type": {
                         "type": "string",
                         "enum": [
-                            "apply_open", "apply_close", "document_submission_deadline",
+                            "apply_open", "apply_close",
+                            "document_submission_deadline",
+                            # Aliases Claude emits for the deadline above.
+                            "documents_deadline", "document_submission_close",
                             "first_stage_results", "interview", "practical_exam",
                             "final_results", "additional_admit",
+                            "offer_confirmation",
                             "registration_open", "registration_close",
                             "registration_withdrawal_open",
                             "registration_withdrawal_close",
                             "orientation", "semester_start",
+                            "scholarship_application_close",
+                            "language_test_deadline",
                         ],
                     },
                     "starts_at":     {"type": "string", "format": "date-time"},
@@ -48,7 +57,7 @@ CALENDAR_SCHEMA: dict[str, Any] = {
 
 TUITION_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "additionalProperties": False,
+    "additionalProperties": True,  # root-level meta fields allowed
     "properties": {
         "rows": {
             "type": "array",
@@ -75,7 +84,7 @@ TUITION_SCHEMA: dict[str, Any] = {
 
 REQUIREMENTS_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "additionalProperties": False,
+    "additionalProperties": True,  # root-level meta fields allowed
     "properties": {
         "applicant_category":      {"type": "string"},
         "topik_min_level":         {"type": ["integer", "null"], "minimum": 1, "maximum": 6},
@@ -93,7 +102,7 @@ REQUIREMENTS_SCHEMA: dict[str, Any] = {
 
 SCHOLARSHIPS_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "additionalProperties": False,
+    "additionalProperties": True,  # root-level meta fields allowed
     "properties": {
         "rows": {
             "type": "array",
@@ -115,6 +124,10 @@ SCHOLARSHIPS_SCHEMA: dict[str, Any] = {
                     "topik_tier_table":      {"type": ["object", "null"]},
                     "eligibility_predicate": {"type": ["object", "null"]},
                     "prose_ko":              {"type": ["string", "null"]},
+                    # Claude frequently adds a short note alongside prose; allow it.
+                    "notes_ko":              {"type": ["string", "null"]},
+                    "correction_text_ko":    {"type": ["string", "null"]},
+                    "is_correction_notice":  {"type": "boolean"},
                     "source_text_ko":        {"type": "string"},
                     "extractor_confidence":  {"type": "number", "minimum": 0, "maximum": 1},
                 },
@@ -126,7 +139,7 @@ SCHOLARSHIPS_SCHEMA: dict[str, Any] = {
 
 DOCUMENTS_REQUIRED_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "additionalProperties": False,
+    "additionalProperties": True,  # root-level meta fields allowed
     "properties": {
         "rows": {
             "type": "array",
@@ -141,6 +154,9 @@ DOCUMENTS_REQUIRED_SCHEMA: dict[str, Any] = {
                     "is_apostille_required":  {"type": "boolean"},
                     "country_specific":       {"type": ["object", "null"]},
                     "notes_ko":               {"type": ["string", "null"]},
+                    # Claude emits these in some shots — accept rather than reject.
+                    "extractor_confidence":   {"type": "number", "minimum": 0, "maximum": 1},
+                    "is_correction_notice":   {"type": "boolean"},
                     "source_text_ko":         {"type": "string"},
                 },
             },
