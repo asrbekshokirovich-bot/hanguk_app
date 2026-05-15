@@ -1,21 +1,55 @@
-"""Chungbuk National University (CBNU) — international admissions notice board.
+"""Chungbuk National University (충북대) — 재외국민 notice board.
 
-Source: https://ipsi.chungbuk.ac.kr/
-Board:  /kor/bbs/BBSMSTR_000000000001/lst.do (standard eGov BBS)
+Source: https://ipsi.chungbuk.ac.kr/kor/bbs/BBSMSTR_000000000017/lst.do
+CMS:    egovframework BBS, rendered as static HTML (no JS required).
 
-The site uses the standard Korean eGov BBS framework.  The list page
-appears to be AJAX-rendered (0 tables on the main page).
-Placeholder selectors for the eGov BBS shape once a static URL is confirmed.
+Row structure (verified live 2026-05-15, 20 rows):
+    <li>
+      <p class="ntt_no">98</p>
+      <div class="ntt_sj left">
+        <a class="no_secret" href="#"
+           onclick="bbsMstrView('20300'); return false;">
+          <strong>{title}</strong>
+        </a>
+      </div>
+      <p class="ntcr_nm">작성자 : 관리자</p>
+      <p class="frst_register_nm">등록일 : 2024-08-21</p>
+      <p class="rdcnt">조회 : 1788</p>
+    </li>
+
+External post id lives in onclick="bbsMstrView('20300')".
 """
 
-from ..html_list_adapter import HtmlListSelectors
+from __future__ import annotations
+
+import httpx
+from uuid import UUID
+
+from ..html_list_adapter import HtmlListAdapter, HtmlListSelectors
+
 
 CBNU_SELECTORS = HtmlListSelectors(
-    row="table.board-list tbody tr",
-    title="td.td-subject a",
-    link="td.td-subject a",
-    posted_at="td.td-date",
-    posted_at_format="%Y.%m.%d",
+    row="div.board ul li",
+    title="div.ntt_sj a strong",
+    link="div.ntt_sj a",
+    posted_at="p.frst_register_nm",
+    posted_at_regex=r"(\d{4}-\d{2}-\d{2})",
+    posted_at_format="%Y-%m-%d",
     attachments_in_detail=True,
-    external_id_regex=r"(?:nttId|articleNo|bbsArticleNo)=([0-9]+)",
+    external_id_regex=r"bbsMstrView\(['\"](\d+)['\"]\)",
 )
+
+
+def make_cbnu_adapter(
+    source_id: UUID,
+    institution_id: UUID | None,
+    source_url_ko: str,
+    http_client: httpx.AsyncClient,
+):
+    return HtmlListAdapter(
+        source_id=source_id,
+        source_url_ko=source_url_ko,
+        selectors=CBNU_SELECTORS,
+        institution_id=institution_id,
+        http_client=http_client,
+    )

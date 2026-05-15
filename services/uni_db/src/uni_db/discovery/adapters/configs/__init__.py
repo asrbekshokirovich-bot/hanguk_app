@@ -29,10 +29,11 @@ from .korea_univ import make_korea_univ_adapter
 from .kaist import make_kaist_adapter
 from .konkuk import KONKUK_SELECTORS
 from .inha import INHA_SELECTORS
-from .cbnu import CBNU_SELECTORS
-from .jbnu import JBNU_SELECTORS
+from .cbnu import CBNU_SELECTORS, make_cbnu_adapter
+from .jbnu import JBNU_SELECTORS, make_jbnu_adapter
 from .kangwon import KANGWON_SELECTORS
 from .jeju import JEJU_SELECTORS
+from .skku import SKKU_SELECTORS, make_skku_adapter
 
 
 def _html(selectors: HtmlListSelectors):
@@ -67,6 +68,11 @@ ADAPTER_REGISTRY: dict[str, object] = {
     # Playwright-rendered (JS-only sites)
     "https://admission.yonsei.ac.kr/seoul/admission/html/international/notice.asp": make_yonsei_adapter,
     "https://admission.yonsei.ac.kr/wonju/admission/html/international/notice.asp": make_yonsei_mirae_adapter,
+    "https://admission.skku.edu/admission/html/abroad/notice.html":                 make_skku_adapter,
+    "https://enter.jbnu.ac.kr/submenu.do?menuurl=rOjsbGuR5i0fqsax24xcPQ%3D%3D&":    make_jbnu_adapter,
+
+    # Static HTML — egovframework boards
+    "https://ipsi.chungbuk.ac.kr/kor/bbs/BBSMSTR_000000000017/lst.do":               make_cbnu_adapter,
 
     # JS-only — placeholder until Playwright config is written
     "https://admission.yonsei.ac.kr/":                   _html(YONSEI_SELECTORS),
