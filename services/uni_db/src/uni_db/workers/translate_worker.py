@@ -47,7 +47,30 @@ select 'institutions'              as entity_type,
    and t.field_name  = 'name_ko'
    and t.lang        = $1::text
  where t.id is null and i.name_ko is not null
- limit $2
+
+union all
+
+-- Phase 4 Track 4 expansion: announcement titles are user-facing in the
+-- app feed, so users see them in their selected UI language. They're
+-- full sentences (not short labels), so is_label=false routes them
+-- through Claude (prose translation) instead of DeepL (label translation).
+select 'announcements'             as entity_type,
+       a.id                        as entity_id,
+       'title_ko'                  as field_name,
+       a.title_ko                  as source_text_ko,
+       $1::text                    as target_lang,
+       false                       as is_label
+  from public.announcements a
+  left join public.translations t
+    on t.entity_type = 'announcements'
+   and t.entity_id   = a.id
+   and t.field_name  = 'title_ko'
+   and t.lang        = $1::text
+ where t.id is null
+   and a.title_ko is not null
+   and length(a.title_ko) > 0
+
+limit $2
 """
 
 
