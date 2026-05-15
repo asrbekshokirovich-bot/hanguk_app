@@ -27,7 +27,7 @@ from .yonsei import (
 )
 from .korea_univ import make_korea_univ_adapter
 from .kaist import make_kaist_adapter
-from .konkuk import KONKUK_SELECTORS
+from .konkuk import KONKUK_SELECTORS, make_konkuk_adapter
 from .inha import INHA_SELECTORS, make_inha_adapter
 from .cbnu import CBNU_SELECTORS, make_cbnu_adapter
 from .jbnu import JBNU_SELECTORS, make_jbnu_adapter
@@ -73,6 +73,7 @@ ADAPTER_REGISTRY: dict[str, object] = {
     "https://enter.jbnu.ac.kr/submenu.do?menuurl=rOjsbGuR5i0fqsax24xcPQ%3D%3D&":    make_jbnu_adapter,
     "https://go.hanyang.ac.kr/web/notice/notice_list.do?m_type=JEOEGUK":             make_hanyang_adapter,
     "https://ibsi.jejunu.ac.kr/10000048":                                            make_jeju_adapter,
+    "http://enter.konkuk.ac.kr/submenu.do?menuurl=k8b%2fCUaWlntKYwhT%2fh%2bKUA%3d%3d&": make_konkuk_adapter,
 
     # JSON API (FR_BBS_SVC) — Inha shares the KU pattern with custom paths
     "https://admission.inha.ac.kr/cms/FR_CON/index.do?MENU_ID=170":                  make_inha_adapter,
