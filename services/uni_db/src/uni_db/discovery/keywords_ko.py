@@ -85,6 +85,14 @@ GUIDELINE_FILE_EXTENSIONS: frozenset[str] = frozenset(
 # ---------------------------------------------------------------------------
 ALLOWED_DOMAIN_SUFFIXES: tuple[str, ...] = (".ac.kr", ".go.kr")
 
+# Korean universities that use non-standard TLDs as their primary domain.
+# SKKU runs admission boards on `.edu` not `.ac.kr`. Curated whitelist —
+# do NOT generalize, this is an exception list, not a default.
+EXTRA_ALLOWED_HOSTS: frozenset[str] = frozenset({
+    "admission.skku.edu",
+    "skku.edu",
+})
+
 # ---------------------------------------------------------------------------
 # URL path segments that mark a page as English-side and out-of-scope (§P-1).
 # ---------------------------------------------------------------------------
@@ -144,6 +152,8 @@ def is_disallowed_url(url: str) -> bool:
     if any(seg in url_l for seg in ENGLISH_PATH_SEGMENTS):
         return True
     host = url_l.split("/")[2] if "//" in url_l else url_l
+    if host in EXTRA_ALLOWED_HOSTS:
+        return False
     if not any(host.endswith(suffix) for suffix in ALLOWED_DOMAIN_SUFFIXES):
         return True
     # Subdomain check — `en.snu.ac.kr` and `english.skku.ac.kr` are the
