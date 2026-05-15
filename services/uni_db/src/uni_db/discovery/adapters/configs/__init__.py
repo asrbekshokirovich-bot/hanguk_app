@@ -28,12 +28,13 @@ from .yonsei import (
 from .korea_univ import make_korea_univ_adapter
 from .kaist import make_kaist_adapter
 from .konkuk import KONKUK_SELECTORS
-from .inha import INHA_SELECTORS
+from .inha import INHA_SELECTORS, make_inha_adapter
 from .cbnu import CBNU_SELECTORS, make_cbnu_adapter
 from .jbnu import JBNU_SELECTORS, make_jbnu_adapter
-from .kangwon import KANGWON_SELECTORS
-from .jeju import JEJU_SELECTORS
+from .kangwon import KANGWON_SELECTORS, make_kangwon_adapter
+from .jeju import JEJU_SELECTORS, make_jeju_adapter
 from .skku import SKKU_SELECTORS, make_skku_adapter
+from .hanyang import HANYANG_SELECTORS, make_hanyang_adapter
 
 
 def _html(selectors: HtmlListSelectors):
@@ -70,9 +71,15 @@ ADAPTER_REGISTRY: dict[str, object] = {
     "https://admission.yonsei.ac.kr/wonju/admission/html/international/notice.asp": make_yonsei_mirae_adapter,
     "https://admission.skku.edu/admission/html/abroad/notice.html":                 make_skku_adapter,
     "https://enter.jbnu.ac.kr/submenu.do?menuurl=rOjsbGuR5i0fqsax24xcPQ%3D%3D&":    make_jbnu_adapter,
+    "https://go.hanyang.ac.kr/web/notice/notice_list.do?m_type=JEOEGUK":             make_hanyang_adapter,
+    "https://ibsi.jejunu.ac.kr/10000048":                                            make_jeju_adapter,
+
+    # JSON API (FR_BBS_SVC) — Inha shares the KU pattern with custom paths
+    "https://admission.inha.ac.kr/cms/FR_CON/index.do?MENU_ID=170":                  make_inha_adapter,
 
     # Static HTML — egovframework boards
     "https://ipsi.chungbuk.ac.kr/kor/bbs/BBSMSTR_000000000017/lst.do":               make_cbnu_adapter,
+    "https://admission.kangwon.ac.kr/admission/selectBbsNttList.do?bbsNo=373":       make_kangwon_adapter,
 
     # JS-only — placeholder until Playwright config is written
     "https://admission.yonsei.ac.kr/":                   _html(YONSEI_SELECTORS),

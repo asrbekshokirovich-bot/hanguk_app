@@ -32,7 +32,13 @@ log = logging.getLogger(__name__)
 
 @dataclass(frozen=True, slots=True)
 class KuBbsConfig:
-    """Korea University FR_BBS_SVC configuration."""
+    """FR_BBS_SVC configuration (Korea University + Inha + clones).
+
+    The same egovframework BBS service is reused by several Korean
+    university admissions sites. KU exposes it at /oku/ajaxf/...;
+    Inha exposes the same service at /ajaxf/... (no /oku/ prefix).
+    The `list_path` field overrides the default KU path.
+    """
 
     cms: Literal["ku"] = field(default="ku", init=False)
     menu_id: str = "1700"
@@ -40,6 +46,12 @@ class KuBbsConfig:
     board_seq: str = "5"
     page_size: int = 20
     base_url: str = "https://oku.korea.ac.kr"
+    list_path: str = "/oku/ajaxf/FR_BBS_SVC/BBSViewList.do"
+    detail_path_template: str = (
+        "/oku/cms/FR_BBS_CON/BoardView.do"
+        "?MENU_ID={menu_id}&BBS_SEQ={bbs_seq}"
+        "&SITE_NO={site_no}&BOARD_SEQ={board_seq}"
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,10 +105,11 @@ class JsonApiAdapter:
     async def fetch_post_detail(self, external_post_id: str) -> PostDetail:
         cfg = self._config
         if isinstance(cfg, KuBbsConfig):
-            detail_url = (
-                f"{cfg.base_url}/oku/cms/FR_BBS_CON/BoardView.do"
-                f"?MENU_ID={cfg.menu_id}&BBS_SEQ={external_post_id}"
-                f"&SITE_NO={cfg.site_no}&BOARD_SEQ={cfg.board_seq}"
+            detail_url = cfg.base_url + cfg.detail_path_template.format(
+                menu_id=cfg.menu_id,
+                bbs_seq=external_post_id,
+                site_no=cfg.site_no,
+                board_seq=cfg.board_seq,
             )
         else:
             detail_url = (
@@ -138,7 +151,7 @@ class JsonApiAdapter:
         assert isinstance(self._config, KuBbsConfig)
         cfg = self._config
         resp = await self._http.post(  # type: ignore[union-attr]
-            f"{cfg.base_url}/oku/ajaxf/FR_BBS_SVC/BBSViewList.do",
+            f"{cfg.base_url}{cfg.list_path}",
             data={
                 "pageNo": "1",
                 "pagePerCnt": str(cfg.page_size),
@@ -167,10 +180,11 @@ class JsonApiAdapter:
             if posted_at and posted_at < since:
                 continue
             bbs_seq = str(rec["BBS_SEQ"])
-            detail_url = (
-                f"{cfg.base_url}/oku/cms/FR_BBS_CON/BoardView.do"
-                f"?MENU_ID={cfg.menu_id}&BBS_SEQ={bbs_seq}"
-                f"&SITE_NO={cfg.site_no}&BOARD_SEQ={cfg.board_seq}"
+            detail_url = cfg.base_url + cfg.detail_path_template.format(
+                menu_id=cfg.menu_id,
+                bbs_seq=bbs_seq,
+                site_no=cfg.site_no,
+                board_seq=cfg.board_seq,
             )
             attachments = []
             if int(rec.get("FILE_CNT", 0)) > 0:

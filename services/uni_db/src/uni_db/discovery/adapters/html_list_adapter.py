@@ -97,7 +97,14 @@ class HtmlListAdapter(SourceAdapter):
             if posted_at is not None and posted_at < since:
                 continue
 
-            external_post_id = self._extract_external_id(url_ko, link_el.get("onclick", ""))
+            # Boards like Hanyang put the onclick on the row <li>, not on
+            # an inner <a>. Concatenate both haystacks so the regex finds
+            # a hit regardless of which element carries the JS handler.
+            row_onclick = row.get("onclick", "") if hasattr(row, "get") else ""
+            link_onclick = link_el.get("onclick", "") if link_el else ""
+            external_post_id = self._extract_external_id(
+                url_ko, f"{link_onclick} {row_onclick}".strip()
+            )
             if external_post_id is None:
                 # Boards without stable IDs hash the URL — not ideal but stable.
                 external_post_id = "h" + hashlib.sha256(url_ko.encode()).hexdigest()[:12]
