@@ -38,12 +38,15 @@ class Settings(BaseSettings):
     # quality risk and authorised Uzbek translation without a native
     # reviewer. Default flipped to "en,uz".
     # ADR-004-amend-2 (2026-05-10): same risk profile accepted for
-    # Vietnamese and Mongolian ahead of cohort growth. Default now
-    # "en,uz,vi,mn". The HITL queue catches gross errors regardless of
-    # the reviewer's native language, and the "View original (한국어)"
-    # toggle remains the safety valve.
+    # Vietnamese and Mongolian ahead of cohort growth. Default was
+    # briefly "en,uz,vi,mn".
+    # ADR-004-amend-3 (2026-05-17): owner reverted vi/mn — the
+    # contracted-student cohort doesn't need either language right now,
+    # and translating prose we won't surface burns Anthropic tokens for
+    # no user value. Default back to "en,uz". Re-add later by setting
+    # UNI_DB_TRANSLATION_LANGUAGES=en,uz,vi,mn at the env layer.
     translation_languages_enabled: str = Field(
-        default="en,uz,vi,mn", alias="UNI_DB_TRANSLATION_LANGUAGES"
+        default="en,uz", alias="UNI_DB_TRANSLATION_LANGUAGES"
     )
 
     # Supabase
