@@ -85,6 +85,11 @@ def _build_registry() -> dict[str, ResolverFn]:
     return {
         "oku.korea.ac.kr": resolve_korea_univ,
         "admission.yonsei.ac.kr": resolve_yonsei,
+        # Inha uses the same FR_BBS_SVC CMS as KU — same fileDown anchors
+        # with data-boardseq/siteno/bbsseq/fileseq attrs. The KU resolver
+        # reads urlsplit(detail_url) so it correctly targets
+        # admission.inha.ac.kr's /ajaxfile/FR_SVC/FileDown.do endpoint.
+        "admission.inha.ac.kr": resolve_korea_univ,
     }
 
 

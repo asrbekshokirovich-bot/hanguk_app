@@ -81,7 +81,7 @@ async def _fetch_candidates(
     # Hosts whose attachments are JS-mediated or hidden behind a detail
     # page handler. ``get_resolver_for_url`` knows the full registry —
     # mirror its keys here so the DB filter stays in lockstep.
-    resolver_hosts = ["oku.korea.ac.kr", "admission.yonsei.ac.kr"]
+    resolver_hosts = ["oku.korea.ac.kr", "admission.yonsei.ac.kr", "admission.inha.ac.kr"]
     host_pattern = "|".join(h.replace(".", r"\.") for h in resolver_hosts)
     # Postgres regex: match either the bare host or a subdomain prefix.
     url_regex = rf"^https?://(?:[^/]+\.)?(?:{host_pattern})/"
