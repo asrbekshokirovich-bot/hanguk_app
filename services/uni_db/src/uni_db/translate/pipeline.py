@@ -48,17 +48,20 @@ from .models import TargetLang, TranslationOutput
 log = logging.getLogger(__name__)
 
 
-PIVOT_VIA_EN: Final[frozenset[TargetLang]] = frozenset({"uz", "mn"})
+PIVOT_VIA_EN: Final[frozenset[TargetLang]] = frozenset({"uz"})  # ADR-004-amend-3: mn dropped
 
 
 # Default-on translation targets.
 # ADR-004-amend-1 (2026-05-08): Uzbek added by owner override despite
 # the absence of a native reviewer.
 # ADR-004-amend-2 (2026-05-10): Vietnamese and Mongolian added under
-# the same risk profile ahead of cohort growth. All four targets go
-# through the HITL queue; flagged-low-confidence rows surface there
-# for correction. Korean is canonical and isn't a "translation target".
-DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en", "uz", "vi", "mn"})
+# the same risk profile ahead of cohort growth.
+# ADR-004-amend-3 (2026-05-17): owner reverted vi/mn — contracted
+# students don't need either right now; translating prose we won't
+# surface burns tokens for no user value. Re-add by setting
+# UNI_DB_TRANSLATION_LANGUAGES=en,uz,vi,mn at the env layer.
+# Korean is canonical and isn't a "translation target".
+DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en", "uz"})
 
 
 class LanguageNotEnabledError(RuntimeError):
