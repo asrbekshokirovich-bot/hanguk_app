@@ -37,7 +37,15 @@ FieldGroup = Literal[
 PROMPT_FILES: dict[FieldGroup, str] = {
     "calendar":            "calendar.md",
     "tuition":             "tuition.md",
-    "basic_requirements":  "basic_requirements.md",
+    # `basic_requirements` and `requirements` both resolve to the same
+    # prompt file — historically there were two divergent versions
+    # (basic_requirements.md had a worked example; requirements.md did
+    # not). The terser file was the one actually invoked by parse_worker
+    # via the `requirements` alias, which is why KAIST `requirements`
+    # extractions hallucinated more than the other field groups. The
+    # files were consolidated into requirements.md (with rows-array
+    # output + 3 few-shots including the empty case).
+    "basic_requirements":  "requirements.md",
     "recruitment_units":   "recruitment_units.md",
     "document_checklist":  "document_checklist.md",
     # Phase 0 aliases:

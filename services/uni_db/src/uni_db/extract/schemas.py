@@ -86,18 +86,56 @@ REQUIREMENTS_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": True,  # root-level meta fields allowed
     "properties": {
-        "applicant_category":      {"type": "string"},
-        "topik_min_level":         {"type": ["integer", "null"], "minimum": 1, "maximum": 6},
-        "topik_deferred":          {"type": "boolean"},
-        "english_test":            {"type": ["object", "null"]},
-        "gpa_floor_pct":           {"type": ["number", "null"], "minimum": 0, "maximum": 100},
-        "interview_required":      {"type": "boolean"},
-        "practical_exam_required": {"type": "boolean"},
-        "prose_ko":                {"type": ["string", "null"]},
-        "source_text_ko":          {"type": "string"},
-        "extractor_confidence":    {"type": "number", "minimum": 0, "maximum": 1},
+        "rows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                # Per-row strictness: reject wrong-group field drift
+                # (`document_type`, `institution`, `program_level`,
+                # `admission_cycles`, etc. — these were the historical
+                # hallucinations on KAIST archetype-G runs).
+                "additionalProperties": False,
+                "required": ["applicant_category", "source_text_ko"],
+                "properties": {
+                    "applicant_category":      {"type": "string"},
+                    "topik_min_level":         {"type": ["integer", "null"], "minimum": 1, "maximum": 6},
+                    "topik_deferred":          {"type": "boolean"},
+                    "english_test": {
+                        # Tightened from `["object", "null"]` to a closed shape.
+                        # Common test scores Claude has emitted historically;
+                        # `other_ko` is the escape hatch for any test outside
+                        # this list (e.g. CEFR, DELE) so we capture the prose
+                        # rather than dropping the signal.
+                        "type": ["object", "null"],
+                        "additionalProperties": False,
+                        "properties": {
+                            "toefl_ibt": {"type": ["integer", "null"], "minimum": 0, "maximum": 120},
+                            "toefl_pbt": {"type": ["integer", "null"], "minimum": 0, "maximum": 700},
+                            "ielts":     {"type": ["number",  "null"], "minimum": 0, "maximum": 9.0},
+                            "teps":      {"type": ["integer", "null"], "minimum": 0, "maximum": 600},
+                            "duolingo":  {"type": ["integer", "null"], "minimum": 0, "maximum": 160},
+                            "cambridge": {"type": ["string",  "null"]},
+                            "other_ko":  {"type": ["string",  "null"]},
+                            "deferred":  {"type": "boolean"},
+                        },
+                    },
+                    "gpa_floor_pct":           {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+                    "interview_required":      {"type": "boolean"},
+                    "practical_exam_required": {"type": "boolean"},
+                    "prose_ko":                {"type": ["string", "null"]},
+                    "notes_ko":                {"type": ["string", "null"]},
+                    "is_correction_notice":    {"type": "boolean"},
+                    "correction_text_ko":      {"type": ["string", "null"]},
+                    "source_text_ko":          {"type": "string"},
+                    "extractor_confidence":    {"type": "number", "minimum": 0, "maximum": 1},
+                },
+            },
+        },
     },
-    "required": ["applicant_category", "source_text_ko"],
+    # Critical: empty case is `{"rows": []}` — no required field rejection
+    # (this fixed the 2/3 KAIST archetype-A failures where the section had
+    # no requirements info but the old schema demanded `applicant_category`).
+    "required": ["rows"],
 }
 
 SCHOLARSHIPS_SCHEMA: dict[str, Any] = {
