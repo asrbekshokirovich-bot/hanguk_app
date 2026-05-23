@@ -90,3 +90,46 @@ class TestScholarshipTiers:
                 "award_type": "other", "source_text_ko": "y",
                 "ielts_tier_table": [{"ielts_min": 6.0, "duration": "forever"}],
             }]})
+
+
+class TestRequirementStatusSentinels:
+    def test_all_statuses_validate(self) -> None:
+        _validate("requirements", {"rows": [{
+            "source_text_ko": "TOPIK 면제",
+            "topik_min_level": None, "topik_status": "not_required",
+            "english_test": None, "english_status": "not_stated",
+            "gpa_floor_pct": None, "gpa_status": "not_stated",
+        }]})
+
+    def test_required_status(self) -> None:
+        _validate("requirements", {"rows": [{
+            "source_text_ko": "TOPIK 4급 이상",
+            "topik_min_level": 4, "topik_status": "required",
+        }]})
+
+    def test_bad_status_rejected(self) -> None:
+        with pytest.raises(jsonschema.ValidationError):
+            _validate("requirements", {"rows": [{
+                "source_text_ko": "x", "topik_status": "maybe",
+            }]})
+
+    def test_status_optional_backward_compat(self) -> None:
+        # Rows without the new sentinels still validate.
+        _validate("requirements", {"rows": [{
+            "source_text_ko": "x", "topik_min_level": 3,
+        }]})
+
+
+class TestDocumentDeadlines:
+    def test_per_document_deadline_validates(self) -> None:
+        _validate("documents_required", {"rows": [{
+            "document_type": "lor", "source_text_ko": "추천서",
+            "is_required": False,
+            "deadline": "2026-10-29", "applies_to_round": "early",
+        }]})
+
+    def test_deadline_nullable(self) -> None:
+        _validate("documents_required", {"rows": [{
+            "document_type": "passport", "source_text_ko": "여권",
+            "deadline": None, "applies_to_round": None,
+        }]})

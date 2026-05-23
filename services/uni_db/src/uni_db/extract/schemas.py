@@ -161,6 +161,17 @@ REQUIREMENTS_SCHEMA: dict[str, Any] = {
                         },
                     },
                     "gpa_floor_pct":           {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+                    # Explicit presence sentinels — distinguish "the source
+                    # explicitly waives this" (not_required, e.g. 재외국민/탈북민
+                    # TOPIK 면제) from "this excerpt is silent" (not_stated).
+                    # Without these, the UI cannot tell "not required" from
+                    # "not specified" — both collapse to a null value field.
+                    "topik_status":   {"type": ["string", "null"],
+                                       "enum": [None, "required", "not_required", "not_stated"]},
+                    "english_status": {"type": ["string", "null"],
+                                       "enum": [None, "required", "not_required", "not_stated"]},
+                    "gpa_status":     {"type": ["string", "null"],
+                                       "enum": [None, "required", "not_required", "not_stated"]},
                     # Majors offered to this track (programs.name_ko on publish).
                     "majors":                  {"type": ["array", "null"], "items": {"type": "string"}},
                     # Per-track tuition (maps to the tuition table on publish).
@@ -276,6 +287,11 @@ DOCUMENTS_REQUIRED_SCHEMA: dict[str, Any] = {
                     "is_required":            {"type": "boolean"},
                     "is_apostille_required":  {"type": "boolean"},
                     "country_specific":       {"type": ["object", "null"]},
+                    # Per-document / per-round deadline when the guideline
+                    # states one (e.g. KAIST's recommendation-letter
+                    # Oct 29 / Jan 21). ISO date/date-time string or null.
+                    "deadline":               {"type": ["string", "null"]},
+                    "applies_to_round":       {"type": ["string", "null"]},
                     "notes_ko":               {"type": ["string", "null"]},
                     # Claude emits these in some shots — accept rather than reject.
                     "extractor_confidence":   {"type": "number", "minimum": 0, "maximum": 1},

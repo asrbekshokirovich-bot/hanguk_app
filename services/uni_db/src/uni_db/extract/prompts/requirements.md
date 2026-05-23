@@ -22,17 +22,30 @@ fields. Do not include fields from other field groups (`document_type`,
 - `applicant_category` is preserved **verbatim in Korean** (e.g.
   `외국인전형`, `외국인특별전형`, `재외국민특별전형`, `정원외 외국인`).
   Do NOT translate. Use the glossary's canonical spelling when ambiguous.
+- **Presence sentinels — `topik_status` / `english_status` / `gpa_status`.**
+  For each, set one of:
+  - `"required"` — the source states this requirement applies (a level,
+    score, or floor is given, even if the value lands in the value field).
+  - `"not_required"` — the source EXPLICITLY waives it for this track
+    (e.g. "TOPIK 면제", "어학성적 불필요", "해당 없음", "not required").
+    This is an ANSWER, not missing data.
+  - `"not_stated"` — the excerpt is silent on it.
+  Never leave the reader guessing: `"not_required"` and `"not_stated"` must
+  be distinguished — do not collapse a waiver into a bare `null` value.
 - `topik_min_level` is integer `1..6` or `null`. If the document says
   "졸업 전 취득 가능" or "to be acquired before graduation", set
   `topik_deferred=true` and leave `topik_min_level` at the *target* level.
-- `english_test` is `null` when no English test is required. Otherwise an
-  object with ONLY these keys (omit any field not mentioned in source):
+  Set `topik_status="not_required"` when TOPIK is explicitly waived/면제.
+- `english_test` is `null` when no English test is required; also set
+  `english_status` accordingly (`not_required` if explicitly waived,
+  `not_stated` if the excerpt is silent). When required, `english_test` is
+  an object with ONLY these keys (omit any field not mentioned in source):
   `toefl_ibt`, `toefl_pbt`, `ielts`, `teps`, `duolingo`, `cambridge`,
   `other_ko` (free-text escape for tests outside the closed list, e.g.
   CEFR, DELE, JLPT), `deferred` (boolean).
 - `gpa_floor_pct` is the **0..100 percentile**. "상위 20%" → `80`.
   Plain GPA ("3.0/4.0") → `null` with a `prose_ko` note explaining the
-  source phrasing; HITL will normalize.
+  source phrasing; HITL will normalize. Set `gpa_status` to match.
 - `interview_required` and `practical_exam_required` are booleans. If the
   requirements section doesn't restate them, check the calendar fragment
   earlier in the document.
@@ -61,8 +74,11 @@ fields. Do not include fields from other field groups (`document_type`,
       "applicant_category": "외국인전형",
       "topik_min_level": 3,
       "topik_deferred": false,
+      "topik_status": "required",
       "english_test": {"toefl_ibt": 80, "ielts": 5.5, "deferred": false},
+      "english_status": "required",
       "gpa_floor_pct": null,
+      "gpa_status": "not_stated",
       "interview_required": true,
       "practical_exam_required": false,
       "prose_ko": "본인 및 부모 모두 외국 국적 소지자. TOPIK 3급 이상(입학 전 4급 취득 권장). 면접은 사범대학, 의예과 등에서 실시.",
@@ -95,8 +111,11 @@ fields. Do not include fields from other field groups (`document_type`,
       "applicant_category": "외국인전형",
       "topik_min_level": 4,
       "topik_deferred": false,
+      "topik_status": "required",
       "english_test": null,
+      "english_status": "not_stated",
       "gpa_floor_pct": null,
+      "gpa_status": "not_stated",
       "interview_required": false,
       "practical_exam_required": false,
       "prose_ko": "본인 및 부모 모두 외국 국적. TOPIK 4급 이상 필수.",
@@ -107,8 +126,11 @@ fields. Do not include fields from other field groups (`document_type`,
       "applicant_category": "재외국민전형",
       "topik_min_level": null,
       "topik_deferred": false,
+      "topik_status": "not_required",
       "english_test": null,
+      "english_status": "not_stated",
       "gpa_floor_pct": null,
+      "gpa_status": "not_stated",
       "interview_required": true,
       "practical_exam_required": false,
       "prose_ko": "한국 국적, 부모 1인 이상 해외 3년 거주. TOPIK 면제. 한국어 면접 실시.",
@@ -142,6 +164,10 @@ Return ONLY the JSON object. No prose, no markdown code fences (` ```json `),
 no commentary. The schema rejects any per-row field outside the closed list
 above — emitting `document_type`, `institution`, `program_level`,
 `admission_cycles`, or other group-bleed fields will fail validation.
+
+`*_ko` fields contain **Korean only** — never append an English translation
+into a `_ko` field (translation happens in a separate layer). Do not repeat
+the same clause or list twice within a single field.
 
 ## Enrichment per row (per applicant_category / track)
 

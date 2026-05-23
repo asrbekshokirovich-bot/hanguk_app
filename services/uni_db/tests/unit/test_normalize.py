@@ -49,3 +49,73 @@ class TestNormalizeOutput:
     def test_already_valid_rows_unchanged(self) -> None:
         payload = {"rows": [{"scope": "university", "name_ko": "x"}]}
         assert normalize_output("scholarships", payload) == payload
+
+
+class TestStripTrailingTranslation:
+    """`*_ko` fields must stay Korean-only — strip an appended English run."""
+
+    def test_strips_appended_english_after_separator(self) -> None:
+        row = {
+            "document_type": "transcript",
+            "source_text_ko": "y",
+            "notes_ko": (
+                "한국인 부모가 있는 지원자는 모든 학교의 졸업증명서를 제출하여 "
+                "학업이 한국 외에서 완료되었음을 증명해야 한다. "
+                "** Applicants of Korean origin with at least one Korean parent "
+                "must submit diplomas from all schools attended."
+            ),
+        }
+        out = normalize_output("documents_required", {"rows": [row]})
+        note = out["rows"][0]["notes_ko"]
+        assert "Applicants of Korean origin" not in note
+        assert "졸업증명서를 제출" in note
+
+    def test_strips_appended_english_without_separator(self) -> None:
+        text = (
+            "마감일 전에 모든 서류를 제출해야 한다. "
+            "The applicant must submit all required documents before the deadline."
+        )
+        out = normalize_output("documents_required", {"rows": [
+            {"document_type": "passport", "source_text_ko": "x", "notes_ko": text}
+        ]})
+        assert "The applicant must submit" not in out["rows"][0]["notes_ko"]
+
+    def test_keeps_short_english_test_names(self) -> None:
+        text = "한국어 능력: TOPIK 4급 또는 TOEFL iBT 80 이상 제출"
+        out = normalize_output("requirements", {"rows": [
+            {"source_text_ko": text}
+        ]})
+        assert out["rows"][0]["source_text_ko"] == text
+
+    def test_keeps_trailing_url(self) -> None:
+        text = "자세한 내용은 다음에서 확인 https://admission.kaist.ac.kr/intl-undergraduate/notice/list/page"
+        out = normalize_output("requirements", {"rows": [
+            {"source_text_ko": text}
+        ]})
+        assert out["rows"][0]["source_text_ko"] == text
+
+    def test_english_only_source_text_untouched(self) -> None:
+        # No Hangul → nothing to strip (must not blank the field).
+        text = "English Proficiency Test scores must be submitted by the deadline."
+        out = normalize_output("requirements", {"rows": [
+            {"source_text_ko": text}
+        ]})
+        assert out["rows"][0]["source_text_ko"] == text
+
+
+class TestCollapseDuplicate:
+    def test_exact_doubled_clause_collapses(self) -> None:
+        text = "KU 외국인 신입생 장학금 KU 외국인 신입생 장학금"
+        out = normalize_output("scholarships", {"rows": [
+            {"scope": "university", "name_ko": "x", "source_text_ko": "y",
+             "prose_ko": text}
+        ]})
+        assert out["rows"][0]["prose_ko"] == "KU 외국인 신입생 장학금"
+
+    def test_non_duplicate_prose_unchanged(self) -> None:
+        text = "TOPIK 3급 30% / TOPIK 4급 50% / TOPIK 5급 이상 70%"
+        out = normalize_output("scholarships", {"rows": [
+            {"scope": "university", "name_ko": "x", "source_text_ko": "y",
+             "prose_ko": text}
+        ]})
+        assert out["rows"][0]["prose_ko"] == text
