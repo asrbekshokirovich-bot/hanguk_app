@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>University Selection — Redesign</title>
+<style>
+  :root {
+    --navy: #0A0A1A;
+    --navy-2: #0F213D;
+    --navy-3: #132A4D;
+    --royal: #1A3A6C;
+    --lime: #D4E94C;
+    --lime-soft: rgba(212, 233, 76, 0.15);
+    --lime-border: rgba(212, 233, 76, 0.4);
+    --white: #FFFFFF;
+    --white-70: rgba(255, 255, 255, 0.7);
+    --white-50: rgba(255, 255, 255, 0.5);
+    --white-25: rgba(255, 255, 255, 0.25);
+    --white-10: rgba(255, 255, 255, 0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--royal) 0%, var(--navy-3) 35%, var(--navy-2) 70%, var(--navy) 100%);
+    color: var(--white);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 48px 64px 96px;
+    opacity: 0; transform: translateX(40px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+
+  h1 { font-size: 44px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
+  h2 { font-size: 32px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.01em; }
+  h3 { font-size: 20px; font-weight: 600; color: var(--lime); margin-bottom: 8px; }
+  p, li { font-size: 17px; line-height: 1.55; color: var(--white-70); }
+  .lead { font-size: 21px; color: var(--white-70); max-width: 760px; text-align: center; }
+  .eyebrow {
+    color: var(--lime); font-size: 12px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed; bottom: 24px; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    z-index: 50;
+  }
+  .nav button {
+    background: var(--lime-soft); border: 1px solid var(--lime-border);
+    color: var(--lime); font-weight: 600; font-size: 14px;
+    padding: 10px 18px; border-radius: 12px; cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .nav button:hover { background: var(--lime); color: #000; }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav .counter {
+    color: var(--white-50); font-size: 13px; min-width: 60px; text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dots {
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 50;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--white-10); border: 1px solid var(--white-25);
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .dot.active { background: var(--lime); border-color: var(--lime); width: 24px; border-radius: 4px; }
+
+  /* Phone mockups */
+  .phone {
+    width: 280px; background: var(--navy-2);
+    border: 2px solid var(--white-10); border-radius: 32px;
+    padding: 16px 14px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    display: flex; flex-direction: column; gap: 10px;
+    position: relative;
+  }
+  .phone.tall { min-height: 520px; }
+  .phone-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 6px 12px; border-bottom: 1px solid var(--white-10);
+  }
+  .phone-bar .title { font-size: 14px; font-weight: 700; }
+  .phone-bar .icon { color: var(--white-50); font-size: 14px; }
+
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--white-10); padding: 9px 12px; border-radius: 20px;
+    font-size: 12px; color: var(--white-50);
+  }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 14px;
+    background: var(--white-10); border: 1px solid var(--white-10);
+    font-size: 11px; color: var(--white-70); font-weight: 500;
+  }
+  .chip.active { background: var(--lime-soft); border-color: var(--lime-border); color: var(--lime); font-weight: 700; }
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .uni-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; background: var(--white-10); border-radius: 12px;
+    border: 1px solid transparent;
+  }
+  .uni-row.selected { border-color: var(--lime); background: var(--lime-soft); }
+  .uni-logo {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--lime-soft); display: flex; align-items: center; justify-content: center;
+    color: var(--lime); font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .uni-info { flex: 1; min-width: 0; }
+  .uni-name { font-size: 12px; font-weight: 700; color: var(--white); }
+  .uni-loc { font-size: 10px; color: var(--white-50); }
+  .checkbox {
+    width: 18px; height: 18px; border: 1.5px solid var(--white-25);
+    border-radius: 4px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .checkbox.checked { background: var(--lime); border-color: var(--lime); color: #000; font-weight: 800; font-size: 11px; }
+
+  .why-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 7px; border-radius: 6px;
+    background: var(--lime-soft); border: 1px solid var(--lime-border);
+    font-size: 9px; color: var(--lime); font-weight: 600; margin-top: 6px; margin-right: 4px;
+  }
+
+  .selection-bar {
+    background: var(--navy-2); border-top: 1px solid var(--lime-border);
+    margin: 0 -14px -16px; padding: 12px 14px; border-radius: 0 0 30px 30px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .progress {
+    display: flex; gap: 4px;
+  }
+  .progress .d { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--white-25); }
+  .progress .d.on { background: var(--lime); border-color: var(--lime); }
+  .selection-text { flex: 1; min-width: 0; }
+  .selection-text .top { font-size: 12px; font-weight: 700; }
+  .selection-text .bot { font-size: 10px; color: var(--white-50); }
+  .ai-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--lime-soft); display: flex; align-items: center; justify-content: center;
+    color: var(--lime); font-size: 14px;
+  }
+  .submit-btn {
+    background: var(--lime); color: #000; font-weight: 700; font-size: 12px;
+    padding: 8px 14px; border-radius: 8px;
+  }
+
+  .cta-btn {
+    background: var(--lime); color: #000; font-weight: 700;
+    padding: 10px 14px; border-radius: 10px; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .cta-btn.outlined { background: transparent; color: var(--lime); border: 1px solid var(--lime-border); }
+
+  .pill-removable {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 4px 4px 10px; border-radius: 14px;
+    background: var(--lime-soft); border: 1px solid var(--lime-border);
+    font-size: 10px; color: var(--lime); font-weight: 700;
+  }
+  .pill-removable .x {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+
+  /* Layouts */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; max-width: 1100px; width: 100%; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; align-items: start; max-width: 1100px; width: 100%; margin-top: 24px; }
+  .row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; max-width: 1200px; width: 100%; margin-top: 24px; }
+
+  .arrow {
+    font-size: 32px; color: var(--lime); text-align: center;
+    align-self: center;
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.04); border: 1px solid var(--white-10);
+    border-radius: 16px; padding: 24px; min-height: 220px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card .num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--lime); color: #000;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; margin-bottom: 8px;
+  }
+
+  .compare-table {
+    width: 100%; max-width: 900px; border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 16px; overflow: hidden; margin-top: 24px;
+  }
+  .compare-table th, .compare-table td {
+    padding: 14px 20px; text-align: left; font-size: 15px;
+    border-bottom: 1px solid var(--white-10);
+  }
+  .compare-table th {
+    background: rgba(0, 0, 0, 0.2); font-weight: 700; font-size: 13px;
+    text-transform: uppercase; letter-spacing: 0.05em; color: var(--white-50);
+  }
+  .compare-table .before { color: var(--white-50); }
+  .compare-table .after { color: var(--lime); font-weight: 600; }
+
+  .badge {
+    display: inline-block; padding: 4px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .badge.lime { background: var(--lime); color: #000; }
+  .badge.dim { background: var(--white-10); color: var(--white-50); }
+
+  /* Quiz mock */
+  .quiz {
+    background: var(--navy-2); border-radius: 24px; padding: 24px;
+    width: 320px; border: 1px solid var(--white-10);
+  }
+  .quiz-step { font-size: 11px; color: var(--white-50); margin-bottom: 16px; display: flex; justify-content: space-between; }
+  .quiz-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .quiz-sub { font-size: 12px; color: var(--white-50); margin-bottom: 18px; }
+  .quiz-opt {
+    padding: 12px 14px; background: var(--white-10); border-radius: 12px;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--white-70); border: 1px solid transparent;
+  }
+  .quiz-opt.selected { background: var(--lime-soft); border-color: var(--lime); color: var(--white); font-weight: 700; }
+  .quiz-opt .check { margin-left: auto; color: var(--lime); }
+
+  .legend-list { list-style: none; max-width: 800px; }
+  .legend-list li { margin-bottom: 14px; padding-left: 24px; position: relative; font-size: 17px; color: var(--white-70); }
+  .legend-list li::before {
+    content: "•"; color: var(--lime); font-weight: 700; font-size: 20px;
+    position: absolute; left: 0; top: -2px;
+  }
+  .legend-list b { color: var(--white); font-weight: 700; }
+
+  .footer-note { position: absolute; bottom: 80px; color: var(--white-50); font-size: 13px; }
+
+  /* Keyboard hint */
+  .kbd {
+    display: inline-block; padding: 2px 6px; border-radius: 4px;
+    background: var(--white-10); border: 1px solid var(--white-25);
+    font-family: monospace; font-size: 12px; color: var(--white-70);
+  }
+</style>
+</head>
+<body>
+
+<div class="dots" id="dots"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ============================================================ -->
+  <!-- Slide 1: Title -->
+  <!-- ============================================================ -->
+  <section class="slide active">
+    <div class="eyebrow">Hanguk App · UX Redesign</div>
+    <h1 style="text-align:center; max-width: 900px;">University selection,<br>now in one simple flow</h1>
+    <p class="lead" style="margin-top:24px;">
+      Discover, pick, compare, and submit — without ever leaving the screen you're on.
+    </p>
+    <div class="footer-note">Use <span class="kbd">←</span> <span class="kbd">→</span> to navigate</div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 2: The problem -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">Before</div>
+    <h2 style="text-align:center;">Two separate paths. The Map was a dead end.</h2>
+    <div class="row-2" style="margin-top:32px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <div class="phone">
+          <div class="phone-bar"><span class="title">Universities</span><span class="icon">≡</span></div>
+          <div class="search">🔍 Search...</div>
+          <div class="chip-row">
+            <span class="chip active">All</span>
+            <span class="chip">Partner</span>
+            <span class="chip">Top</span>
+          </div>
+          <div style="text-align:center; padding: 40px 0; color: var(--white-50); font-size: 12px;">
+            🗺️<br><br>Look but can't touch.<br>No "Add" button anywhere.
+          </div>
+        </div>
+        <span class="badge dim">Map tab</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <div class="phone">
+          <div class="phone-bar"><span class="title">My Applications</span><span class="icon">⏻</span></div>
+          <div style="font-size: 14px; font-weight: 700; padding: 8px 0;">Suggested For You</div>
+          <div class="uni-row"><div class="uni-logo">S</div><div class="uni-info"><div class="uni-name">Seoul Nat'l</div><div class="uni-loc">Seoul</div></div><div class="checkbox"></div></div>
+          <div class="uni-row"><div class="uni-logo">Y</div><div class="uni-info"><div class="uni-name">Yonsei</div><div class="uni-loc">Seoul</div></div><div class="checkbox"></div></div>
+          <div class="uni-row"><div class="uni-logo">K</div><div class="uni-info"><div class="uni-name">KAIST</div><div class="uni-loc">Daejeon</div></div><div class="checkbox"></div></div>
+          <div style="font-size: 11px; color: var(--white-50); text-align:center; padding: 8px 0;">
+            Pick from the static list,<br>or you're stuck.
+          </div>
+        </div>
+        <span class="badge dim">Applications tab</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 3: The fix - one basket -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">Phase 1 · The shared basket</div>
+    <h2 style="text-align:center;">Pick from anywhere. One bar tracks everything.</h2>
+    <div class="row-2" style="margin-top: 24px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div class="phone">
+          <div class="phone-bar"><span class="title">Seoul National</span><span class="icon">×</span></div>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div style="width:50px; height:50px; border-radius:10px; background: var(--lime-soft); display:flex; align-items:center; justify-content:center; color: var(--lime); font-weight:800;">S</div>
+            <div>
+              <div style="font-size:13px; font-weight:700;">Seoul Nat'l</div>
+              <div style="font-size:11px; color: var(--white-50);">📍 Seoul</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <span class="chip active">Top</span>
+            <span class="chip active">Verified</span>
+          </div>
+          <div class="cta-btn" style="margin-top:8px;">+ Add to my list</div>
+          <div class="cta-btn outlined">Virtual Tour</div>
+          <div class="selection-bar">
+            <div class="progress"><span class="d on"></span><span class="d"></span><span class="d"></span></div>
+            <div class="selection-text">
+              <div class="top">1 of 3 selected</div>
+              <div class="bot">Tap to review</div>
+            </div>
+            <div class="submit-btn">Submit</div>
+          </div>
+        </div>
+        <span class="badge lime">Map → detail → add</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <h3>What's new</h3>
+        <ul class="legend-list">
+          <li><b>"Add to my list"</b> on every university page</li>
+          <li><b>Selection bar</b> sticks to the bottom, shows your progress</li>
+          <li><b>One shared draft</b> — pick on Map, see it on Applications</li>
+          <li><b>One Submit button</b> sends the whole batch at once</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 4: Filters -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">Phase 2 · Smarter filters</div>
+    <h2 style="text-align:center;">More ways to narrow down — without the clutter.</h2>
+    <div class="row-2" style="margin-top: 24px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div class="phone">
+          <div class="phone-bar"><span class="title">Universities</span><span class="icon">≡</span></div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <div class="search" style="flex:1;">🔍 Search...</div>
+            <div style="background: var(--lime-soft); border: 1px solid var(--lime-border); padding:6px 8px; border-radius:8px; display:flex; align-items:center; gap:4px;">
+              <span style="font-size:13px; color: var(--lime);">⚙</span>
+              <span style="background: var(--lime); color:#000; padding:1px 5px; border-radius:6px; font-size:9px; font-weight:800;">2</span>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="pill-removable">Seoul <span class="x">×</span></span>
+            <span class="pill-removable">Partner <span class="x">×</span></span>
+          </div>
+          <div class="uni-row"><div class="uni-logo">Y</div><div class="uni-info"><div class="uni-name">Yonsei</div><div class="uni-loc">Seoul</div></div></div>
+          <div class="uni-row"><div class="uni-logo">K</div><div class="uni-info"><div class="uni-name">Korea Univ.</div><div class="uni-loc">Seoul</div></div></div>
+          <div class="uni-row"><div class="uni-logo">H</div><div class="uni-info"><div class="uni-name">Hanyang</div><div class="uni-loc">Seoul</div></div></div>
+        </div>
+        <span class="badge lime">List with active pills</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div class="phone">
+          <div class="phone-bar"><span class="title">Filters</span><span style="font-size:11px; color: var(--lime);">Reset</span></div>
+          <div style="font-size:10px; color: var(--white-50); font-weight:700; letter-spacing: 0.08em; margin-top: 4px;">REGION</div>
+          <div class="chip-row">
+            <span class="chip active">✓ Seoul</span>
+            <span class="chip">Busan</span>
+            <span class="chip">Gyeonggi</span>
+            <span class="chip">Other</span>
+          </div>
+          <div style="font-size:10px; color: var(--white-50); font-weight:700; letter-spacing: 0.08em; margin-top: 10px;">QUALITY</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+            <span>🏆 Top tier only</span>
+            <span style="background: var(--white-10); width: 28px; height: 16px; border-radius: 8px; position: relative;">
+              <span style="position:absolute; left:2px; top:2px; width:12px; height:12px; background:#fff; border-radius:50%;"></span>
+            </span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+            <span style="color: var(--lime); font-weight:700;">🤝 Partner</span>
+            <span style="background: var(--lime); width: 28px; height: 16px; border-radius: 8px; position: relative;">
+              <span style="position:absolute; right:2px; top:2px; width:12px; height:12px; background:#000; border-radius:50%;"></span>
+            </span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+            <span>✓ Verified (IEQAS)</span>
+            <span style="background: var(--white-10); width: 28px; height: 16px; border-radius: 8px; position: relative;">
+              <span style="position:absolute; left:2px; top:2px; width:12px; height:12px; background:#fff; border-radius:50%;"></span>
+            </span>
+          </div>
+          <div style="font-size:10px; color: var(--white-50); font-weight:700; letter-spacing: 0.08em; margin-top: 8px;">SORT BY</div>
+          <div style="font-size:12px; color: var(--lime); font-weight:700;">◉ Recommended</div>
+          <div style="font-size:12px; color: var(--white-50);">○ Tier · ○ Nearest deadline · ○ Name</div>
+          <div class="cta-btn" style="margin-top:8px;">Show 12 universities</div>
+        </div>
+        <span class="badge lime">Filter sheet · live count</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 5: Quiz -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">Phase 3 · 30-second personalization</div>
+    <h2 style="text-align:center;">Answer 3 questions. Get a ranked list.</h2>
+    <div class="row-3" style="margin-top: 24px;">
+
+      <div class="quiz">
+        <div class="quiz-step"><span>Step 1 of 3</span><span style="color: var(--white-50);">Skip</span></div>
+        <div class="quiz-title">Where do you want to study?</div>
+        <div class="quiz-sub">We'll surface universities in the region first.</div>
+        <div class="quiz-opt selected">📍 Seoul <span class="check">✓</span></div>
+        <div class="quiz-opt">🏖 Busan</div>
+        <div class="quiz-opt">🚇 Gyeonggi / Incheon</div>
+        <div class="quiz-opt">🧭 Anywhere else</div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-step"><span>Step 2 of 3</span><span style="color: var(--white-50);">Skip</span></div>
+        <div class="quiz-title">What matters most?</div>
+        <div class="quiz-sub">We'll highlight matching universities.</div>
+        <div class="quiz-opt">🏆 Top-tier</div>
+        <div class="quiz-opt selected">🤝 Partner universities <span class="check">✓</span></div>
+        <div class="quiz-opt">✓ Verified (IEQAS)</div>
+        <div class="quiz-opt">🌐 Show me everything</div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-step"><span>Step 3 of 3</span><span></span></div>
+        <div class="quiz-title">Ready to see matches?</div>
+        <div class="quiz-sub">We'll re-rank using these preferences.</div>
+        <div style="background: var(--white-10); padding: 12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; font-size:13px;">
+          <span style="color: var(--white-50);">Region</span><span style="font-weight:600;">Seoul</span>
+        </div>
+        <div style="background: var(--white-10); padding: 12px; border-radius:10px; display:flex; justify-content:space-between; font-size:13px;">
+          <span style="color: var(--white-50);">Priority</span><span style="font-weight:600;">Partner</span>
+        </div>
+        <div class="cta-btn" style="margin-top:14px;">See my picks</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 6: Why this matches -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">Phase 3 · Why this matches</div>
+    <h2 style="text-align:center;">Every suggestion now explains itself.</h2>
+    <div class="row-2" style="margin-top: 32px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div class="phone">
+          <div class="phone-bar"><span class="title">Suggested for you</span></div>
+          <div style="font-size:11px; color: var(--white-50); padding: 0 4px;">Ranked using your preferences. Tap a card to add it.</div>
+
+          <div class="uni-row selected">
+            <div class="uni-logo">Y</div>
+            <div class="uni-info">
+              <div class="uni-name">Yonsei University</div>
+              <div class="uni-loc">Seoul</div>
+              <div>
+                <span class="why-chip">✓ Region</span>
+                <span class="why-chip">✓ Partner</span>
+              </div>
+            </div>
+            <div class="checkbox checked">✓</div>
+          </div>
+
+          <div class="uni-row">
+            <div class="uni-logo">K</div>
+            <div class="uni-info">
+              <div class="uni-name">Korea University</div>
+              <div class="uni-loc">Seoul</div>
+              <div><span class="why-chip">✓ Region</span></div>
+            </div>
+            <div class="checkbox"></div>
+          </div>
+
+          <div class="uni-row">
+            <div class="uni-logo">H</div>
+            <div class="uni-info">
+              <div class="uni-name">Hanyang University</div>
+              <div class="uni-loc">Seoul</div>
+              <div><span class="why-chip">✓ Region</span><span class="why-chip">✓ Partner</span></div>
+            </div>
+            <div class="checkbox"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>Match reasons</h3>
+        <ul class="legend-list">
+          <li><b>Matches your region</b> — picked Seoul in the quiz</li>
+          <li><b>Top tier</b> — tier 0 or 1 (flagship / top-ranked)</li>
+          <li><b>Partner university</b> — direct Hanguk partnership</li>
+          <li><b>Verified (IEQAS)</b> — Korean Education accreditation</li>
+        </ul>
+        <p style="margin-top: 16px; color: var(--white-50); font-size: 14px;">
+          Cards with more matching reasons float to the top.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 7: AI Compare -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">Phase 4 · AI Compare, when you need it</div>
+    <h2 style="text-align:center;">Pick 2 or more — get a compare button.</h2>
+    <div class="row-2" style="margin-top: 24px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div class="phone">
+          <div class="phone-bar"><span class="title">Universities</span></div>
+          <div class="uni-row selected"><div class="uni-logo">Y</div><div class="uni-info"><div class="uni-name">Yonsei</div><div class="uni-loc">Seoul</div></div><div class="checkbox checked">✓</div></div>
+          <div class="uni-row selected"><div class="uni-logo">K</div><div class="uni-info"><div class="uni-name">KAIST</div><div class="uni-loc">Daejeon</div></div><div class="checkbox checked">✓</div></div>
+          <div class="uni-row"><div class="uni-logo">P</div><div class="uni-info"><div class="uni-name">POSTECH</div><div class="uni-loc">Pohang</div></div><div class="checkbox"></div></div>
+          <div class="selection-bar">
+            <div class="progress"><span class="d on"></span><span class="d on"></span><span class="d"></span></div>
+            <div class="selection-text">
+              <div class="top">2 of 3 selected</div>
+              <div class="bot">Tap to review</div>
+            </div>
+            <div class="ai-btn">⇄</div>
+            <div class="submit-btn">Submit</div>
+          </div>
+        </div>
+        <span class="badge lime">AI button appears at 2+ picks</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div class="phone">
+          <div class="phone-bar"><span class="title">Hanguk AI</span><span class="icon">🗑</span></div>
+          <div style="background: var(--white-10); padding: 14px; border-radius: 14px; font-size: 12px; color: var(--white-70); margin: 16px 0;">
+            Hi! Ask me anything about studying in Korea.
+          </div>
+          <div style="flex:1;"></div>
+          <div style="background: rgba(212, 233, 76, 0.08); padding: 12px; border-radius: 14px; border: 1px solid var(--lime-border); font-size: 12px; color: var(--white);">
+            Compare these universities for me and help me pick: <b>Yonsei, KAIST</b>.
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; background: var(--white-10); padding: 6px 6px 6px 14px; border-radius: 24px; margin-top: 8px;">
+            <span style="flex:1; font-size: 11px; color: var(--white-50);">Pre-filled · edit or send</span>
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--lime); display:flex; align-items:center; justify-content:center; color: #000;">→</div>
+          </div>
+        </div>
+        <span class="badge lime">Prompt is pre-filled · you just hit send</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 8: Before vs After -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">Side by side</div>
+    <h2 style="text-align:center;">Before vs. now</h2>
+    <table class="compare-table">
+      <thead>
+        <tr><th>Aspect</th><th>Before</th><th>Now</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Discovery → selection</b></td>
+          <td class="before">Map = look only. Pick from Applications tab.</td>
+          <td class="after">Pick from anywhere. Shared draft.</td>
+        </tr>
+        <tr>
+          <td><b>Filters</b></td>
+          <td class="before">3 chips: All / Partner / Top.</td>
+          <td class="after">Region, tier, partner, verified + sort. Live count.</td>
+        </tr>
+        <tr>
+          <td><b>Progress feedback</b></td>
+          <td class="before">Snackbar after you exceed 3.</td>
+          <td class="after">Live "2 of 3" bar always visible.</td>
+        </tr>
+        <tr>
+          <td><b>Recommendations</b></td>
+          <td class="before">Static, server-pushed list.</td>
+          <td class="after">3-question quiz · re-ranked · explained.</td>
+        </tr>
+        <tr>
+          <td><b>AI Compare</b></td>
+          <td class="before">Hidden behind a separate button.</td>
+          <td class="after">In the selection bar with a pre-filled prompt.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 9: Full flow -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">The full flow</div>
+    <h2 style="text-align:center;">From sign-in to submitted in 4 taps.</h2>
+    <div class="row-4" style="margin-top: 32px;">
+      <div class="card">
+        <div class="num">1</div>
+        <h3>Land</h3>
+        <p>See suggestions, ranked by your quiz answers (if taken).</p>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <h3>Browse</h3>
+        <p>Search, filter by region/tier, switch map ↔ list.</p>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <h3>Add</h3>
+        <p>Tap "Add to my list" on the detail sheet. Picks show up in the bar.</p>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <h3>Submit</h3>
+        <p>Compare with AI if you want, then one button submits the batch.</p>
+      </div>
+    </div>
+    <p style="margin-top: 40px; color: var(--lime); font-size: 18px; font-weight: 600;">
+      Everything else stays out of your way.
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Slide 10: End -->
+  <!-- ============================================================ -->
+  <section class="slide">
+    <div class="eyebrow">PR #13 · ready for review</div>
+    <h1 style="text-align:center; max-width: 900px;">Shipped on<br><span style="color: var(--lime); font-family: monospace; font-size: 28px;">claude/determined-wright-tKMtk</span></h1>
+    <p class="lead" style="margin-top: 32px;">
+      3 new providers · 3 new widgets · 3 new test files<br>
+      ~2,200 lines added · 435 lines removed
+    </p>
+    <div style="margin-top: 40px; display: flex; gap: 12px;">
+      <span class="badge lime">Phase 1 · Unified picks</span>
+      <span class="badge lime">Phase 2 · Smart filters</span>
+      <span class="badge lime">Phase 3 · Quiz</span>
+      <span class="badge lime">Phase 4 · AI Compare</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prev">← Prev</button>
+  <span class="counter" id="counter">1 / 10</span>
+  <button id="next">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsBox = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  let idx = 0;
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => go(i));
+    dotsBox.appendChild(d);
+  });
+  const dots = document.querySelectorAll('.dot');
+
+  function go(n) {
+    idx = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    counter.textContent = `${idx + 1} / ${slides.length}`;
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === slides.length - 1;
+  }
+
+  prevBtn.addEventListener('click', () => go(idx - 1));
+  nextBtn.addEventListener('click', () => go(idx + 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') go(idx + 1);
+    if (e.key === 'ArrowLeft') go(idx - 1);
+    if (e.key === 'Home') go(0);
+    if (e.key === 'End') go(slides.length - 1);
+  });
+
+  go(0);
+</script>
+
+</body>
+</html>
