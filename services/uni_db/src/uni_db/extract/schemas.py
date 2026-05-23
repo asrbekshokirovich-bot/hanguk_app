@@ -40,6 +40,10 @@ CALENDAR_SCHEMA: dict[str, Any] = {
                             "orientation", "semester_start",
                             "scholarship_application_close",
                             "language_test_deadline",
+                            # Catch-all: normalize_output() maps any event type
+                            # outside this list to "other" so a single odd label
+                            # (e.g. "tuition_payment") never fails the whole extraction.
+                            "other",
                         ],
                     },
                     "starts_at":     {"type": "string", "format": "date-time"},
@@ -95,9 +99,12 @@ REQUIREMENTS_SCHEMA: dict[str, Any] = {
                 # `admission_cycles`, etc. — these were the historical
                 # hallucinations on KAIST archetype-G runs).
                 "additionalProperties": False,
-                "required": ["applicant_category", "source_text_ko"],
+                # applicant_category is often absent on a row (the guideline
+                # states it once at section level); make it optional/nullable
+                # rather than failing the extraction.
+                "required": ["source_text_ko"],
                 "properties": {
-                    "applicant_category":      {"type": "string"},
+                    "applicant_category":      {"type": ["string", "null"]},
                     "topik_min_level":         {"type": ["integer", "null"], "minimum": 1, "maximum": 6},
                     "topik_deferred":          {"type": "boolean"},
                     "english_test": {
@@ -184,9 +191,10 @@ DOCUMENTS_REQUIRED_SCHEMA: dict[str, Any] = {
             "items": {
                 "type": "object",
                 "additionalProperties": False,
-                "required": ["applicant_category", "document_type", "source_text_ko"],
+                # applicant_category often stated once per section, not per row.
+                "required": ["document_type", "source_text_ko"],
                 "properties": {
-                    "applicant_category":     {"type": "string"},
+                    "applicant_category":     {"type": ["string", "null"]},
                     "document_type":          {"type": "string"},
                     "is_required":            {"type": "boolean"},
                     "is_apostille_required":  {"type": "boolean"},

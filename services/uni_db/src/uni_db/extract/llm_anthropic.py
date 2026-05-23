@@ -36,6 +36,7 @@ from tenacity import (
 )
 
 from ..config import settings
+from .normalize import normalize_output
 from .prompt_assembler import GlossaryEntry, assemble_prompt
 from .schemas import FIELD_GROUP_SCHEMAS
 
@@ -186,12 +187,13 @@ def extract_field_group(
         archetype=archetype,
         source_text_ko=source_text_ko,
     )
-    jsonschema.validate(instance=call.parsed, schema=FIELD_GROUP_SCHEMAS[field_group])
+    parsed = normalize_output(field_group, call.parsed)
+    jsonschema.validate(instance=parsed, schema=FIELD_GROUP_SCHEMAS[field_group])
 
     latency_ms = int((time.monotonic() - started) * 1000)
     return ExtractionResult(
         field_group=field_group,
-        parsed_output=call.parsed,
+        parsed_output=parsed,
         raw_output=call.raw,
         llm_provider="anthropic",
         llm_model=call.model,
@@ -199,7 +201,7 @@ def extract_field_group(
         output_tokens=call.output_tokens,
         cost_usd=call.cost_usd,
         latency_ms=latency_ms,
-        accuracy_self_score=_self_score(call.parsed),
+        accuracy_self_score=_self_score(parsed),
     )
 
 
@@ -350,10 +352,22 @@ def _call_anthropic(
     stripped = _strip_fences(raw)
     try:
         parsed = json.loads(stripped)
-    except json.JSONDecodeError as exc:
-        raise AnthropicResponseError(
-            f"Anthropic response was not valid JSON: {exc}; raw={raw[:200]!r}"
-        ) from exc
+    except json.JSONDecodeError:
+        # Fallback: the model occasionally wraps the JSON in prose. Extract the
+        # outermost {...} span and try once more before giving up.
+        start = stripped.find("{")
+        end = stripped.rfind("}")
+        if start != -1 and end > start:
+            try:
+                parsed = json.loads(stripped[start : end + 1])
+            except json.JSONDecodeError as exc:
+                raise AnthropicResponseError(
+                    f"Anthropic response was not valid JSON: {exc}; raw={raw[:200]!r}"
+                ) from exc
+        else:
+            raise AnthropicResponseError(
+                f"Anthropic response was not valid JSON; raw={raw[:200]!r}"
+            )
     if not isinstance(parsed, dict):
         raise AnthropicResponseError(
             f"Anthropic response parsed to {type(parsed).__name__}, expected dict"
