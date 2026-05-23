@@ -138,12 +138,17 @@ class TestFullPipelineIntoReviewQueue:
             "scholarships",
             "documents_required",
         }
-        # D4 groups must enqueue HITL.
+        # Layer 1 queue hygiene: the tuition / scholarships / documents_required
+        # mocks are empty ({"rows": []}) → NOT enqueued. Only content-bearing
+        # difficult fields (requirements) reach the human queue.
         review_groups = {e["field_group"] for e in outcome.review_queue_entries}
-        assert "scholarships" in review_groups
-        assert "documents_required" in review_groups
-        # D1 calendar auto-publishes.
+        assert "scholarships" not in review_groups
+        assert "documents_required" not in review_groups
+        assert "tuition" not in review_groups
+        # D1 calendar auto-publishes (has content, high confidence).
         assert "calendar" not in review_groups
+        # requirements mock has content → it is the one that routes to review.
+        assert "requirements" in review_groups
 
 
 class TestCostBudgetGate:
