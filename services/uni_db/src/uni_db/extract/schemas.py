@@ -55,6 +55,33 @@ CALENDAR_SCHEMA: dict[str, Any] = {
                 },
             },
         },
+        # Per admission cycle & language track — maps to
+        # university_admission_periods. Dates are ISO strings (date or
+        # date-time) or null. Additive: the events[] array above is unchanged.
+        "periods": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "language_track":  {"type": ["string", "null"], "enum": [None, "korean", "english"]},
+                    "program_level":   {"type": ["string", "null"]},
+                    "online_application_start":  {"type": ["string", "null"]},
+                    "online_application_end":    {"type": ["string", "null"]},
+                    "offline_application_start": {"type": ["string", "null"]},
+                    "offline_application_end":   {"type": ["string", "null"]},
+                    "interview_start": {"type": ["string", "null"]},
+                    "interview_end":   {"type": ["string", "null"]},
+                    "application_start":   {"type": ["string", "null"]},
+                    "application_end":     {"type": ["string", "null"]},
+                    "document_deadline":   {"type": ["string", "null"]},
+                    "result_announcement": {"type": ["string", "null"]},
+                    "application_fee_krw": {"type": ["number", "null"]},
+                    "application_fee_usd": {"type": ["number", "null"]},
+                    "source_text_ko":      {"type": ["string", "null"]},
+                },
+            },
+        },
     },
     "required": ["events"],
 }
@@ -123,10 +150,30 @@ REQUIREMENTS_SCHEMA: dict[str, Any] = {
                             "duolingo":  {"type": ["integer", "null"], "minimum": 0, "maximum": 160},
                             "cambridge": {"type": ["string",  "null"]},
                             "other_ko":  {"type": ["string",  "null"]},
+                            # Normalised primary test + its numeric threshold
+                            # (e.g. test="ielts", min_score=6.0). Keep the
+                            # per-test fields above as well.
+                            "test":      {"type": ["string", "null"],
+                                          "enum": [None, "ielts", "toefl_ibt", "toefl_pbt",
+                                                   "teps", "duolingo", "topik", "cambridge", "other"]},
+                            "min_score": {"type": ["number", "null"]},
                             "deferred":  {"type": "boolean"},
                         },
                     },
                     "gpa_floor_pct":           {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+                    # Majors offered to this track (programs.name_ko on publish).
+                    "majors":                  {"type": ["array", "null"], "items": {"type": "string"}},
+                    # Per-track tuition (maps to the tuition table on publish).
+                    "tuition": {
+                        "type": ["object", "null"],
+                        "additionalProperties": False,
+                        "properties": {
+                            "amount_krw":        {"type": ["integer", "null"], "minimum": 0},
+                            "admission_fee_krw": {"type": ["integer", "null"], "minimum": 0},
+                            "academic_year":     {"type": ["integer", "null"]},
+                            "semester_number":   {"type": ["integer", "null"], "minimum": 1, "maximum": 12},
+                        },
+                    },
                     "interview_required":      {"type": "boolean"},
                     "practical_exam_required": {"type": "boolean"},
                     "prose_ko":                {"type": ["string", "null"]},
@@ -166,7 +213,37 @@ SCHOLARSHIPS_SCHEMA: dict[str, Any] = {
                                             "stipend_monthly", "airfare", "other"]},
                     "award_value":{"type": ["number", "null"]},
                     "applicant_categories":  {"type": ["array", "null"], "items": {"type": "string"}},
-                    "topik_tier_table":      {"type": ["object", "null"]},
+                    # Tiered award grids foreign-student scholarships use.
+                    # Preferred form is an array of per-band tiers; object/null
+                    # still accepted for backward-compat.
+                    "topik_tier_table": {
+                        "type": ["array", "object", "null"],
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": True,
+                            "properties": {
+                                "topik_level": {"type": ["integer", "null"], "minimum": 1, "maximum": 6},
+                                "award_type":  {"type": ["string", "null"]},
+                                "award_value": {"type": ["number", "null"]},
+                                "duration":    {"type": ["string", "null"],
+                                                "enum": [None, "first_semester", "full_year", "all_years"]},
+                            },
+                        },
+                    },
+                    "ielts_tier_table": {
+                        "type": ["array", "null"],
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": True,
+                            "properties": {
+                                "ielts_min":   {"type": ["number", "null"], "minimum": 0, "maximum": 9.0},
+                                "award_type":  {"type": ["string", "null"]},
+                                "award_value": {"type": ["number", "null"]},
+                                "duration":    {"type": ["string", "null"],
+                                                "enum": [None, "first_semester", "full_year", "all_years"]},
+                            },
+                        },
+                    },
                     "eligibility_predicate": {"type": ["object", "null"]},
                     "prose_ko":              {"type": ["string", "null"]},
                     # Claude frequently adds a short note alongside prose; allow it.

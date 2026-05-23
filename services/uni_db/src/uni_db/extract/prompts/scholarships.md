@@ -143,3 +143,14 @@ intent (e.g. Central Asia only). HITL must verify the country list
 against the school's published policy. The
 `country_phrasing_in_source` field preserves the Korean wording so
 reviewers can re-derive the list themselves.
+
+## Enrichment: tiered award grids (foreign-student scholarships)
+
+Korean universities award foreign-student scholarships in tiers by language score.
+Capture both grids as arrays (one object per band) when the guideline states them:
+- `topik_tier_table`: [{ `topik_level`: 1..6, `award_type`, `award_value`, `duration` }]
+- `ielts_tier_table`:  [{ `ielts_min`: number, `award_type`, `award_value`, `duration` }]
+`award_type`/`award_value` must reflect the PER-BAND benefit (e.g. award_type
+"tuition_waiver_pct", award_value 100 for full waiver, 50 for half-tuition).
+`duration` is one of: "first_semester" | "full_year" | "all_years".
+Omit a grid (or use null) if that test is not used for tiering.
