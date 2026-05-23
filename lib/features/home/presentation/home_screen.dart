@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../applications/presentation/applications_tab.dart';
+import '../../applications/presentation/university_draft_provider.dart';
 import '../../map/presentation/map_tab.dart';
 import '../../documents/presentation/documents_tab.dart';
 import '../../chat/presentation/chat_tab.dart';
@@ -68,14 +69,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(homeTabProvider);
+    // Hide the global AI chat FAB while the selection bar is visible so
+    // it doesn't overlap the Submit button. The selection bar exposes
+    // its own "Compare with AI" action when ≥2 picks are present, so
+    // the chat surface is still one tap away.
+    final hasDraftPicks = ref.watch(universityDraftProvider).isNotEmpty;
     return HangukScaffold(
       body: _tabs[currentIndex],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openAIChat(context),
-        backgroundColor: AppColors.vibrantLime,
-        elevation: 6,
-        child: const Icon(Icons.smart_toy, color: Colors.black, size: 28),
-      ),
+      floatingActionButton: hasDraftPicks
+          ? null
+          : FloatingActionButton(
+              onPressed: () => _openAIChat(context),
+              backgroundColor: AppColors.vibrantLime,
+              elevation: 6,
+              child: const Icon(Icons.smart_toy, color: Colors.black, size: 28),
+            ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {

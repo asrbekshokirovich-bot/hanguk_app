@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../applications/presentation/applications_view_model.dart';
+import '../../../applications/presentation/university_draft_provider.dart';
 import '../../data/map_analytics.dart';
 import '../../domain/university.dart';
 import 'virtual_tour_screen.dart';
@@ -14,12 +16,52 @@ class UniversityDetailSheet extends ConsumerWidget {
 
   const UniversityDetailSheet({super.key, required this.university});
 
+  void _toggleDraft(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(universityDraftProvider.notifier);
+    final draft = ref.read(universityDraftProvider);
+    final tabState = ref.read(applicationsTabProvider);
+    final remainingSlots = tabState.maybeWhen(
+      data: (s) => s.remainingSlots,
+      orElse: () => kMaxUniversityPicks,
+    );
+
+    if (notifier.contains(university.id)) {
+      notifier.remove(university.id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Removed ${university.name} from your list.')),
+      );
+      return;
+    }
+
+    if (draft.length >= remainingSlots) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            remainingSlots == 0
+                ? 'You\'ve reached the application limit. Remove an existing application first.'
+                : 'You can pick up to $remainingSlots ${remainingSlots == 1 ? "university" : "universities"}.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    notifier.add(university, remainingSlots: remainingSlots);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added ${university.name} to your list.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Audit M20 (2026-05-12): cache the analytics sink up-front so
     // every action callback gets the same instance and doesn't
     // re-read on rebuild.
     final analytics = ref.read(mapAnalyticsProvider);
+    // Phase 1: detail sheet is now a selection surface, not just a
+    // read-only view. Watch the draft so the button reflects the
+    // current state.
+    final inDraft = ref.watch(universityDraftProvider).any((u) => u.id == university.id);
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.4,
@@ -142,6 +184,42 @@ class UniversityDetailSheet extends ConsumerWidget {
                       // look broken.
 
                       const SizedBox(height: 24),
+
+                      // Phase 1 (university-selection UX): primary CTA
+                      // that adds the university to the central draft.
+                      // The selection bar at the bottom of the Map tab
+                      // reflects this change instantly.
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => _toggleDraft(context, ref),
+                          icon: Icon(
+                            inDraft ? Icons.check_circle : Icons.add_circle_outline,
+                            size: 18,
+                            color: inDraft ? AppColors.vibrantLime : AppColors.pureBlack,
+                          ),
+                          label: Text(
+                            inDraft ? 'Added to your list' : 'Add to my list',
+                            style: TextStyle(
+                              color: inDraft ? AppColors.vibrantLime : AppColors.pureBlack,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                inDraft ? Colors.transparent : AppColors.vibrantLime,
+                            side: inDraft
+                                ? BorderSide(color: AppColors.vibrantLime.withOpacity(0.5))
+                                : null,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
 
                       // Audit M17 / M18 (2026-05-12): when this
                       // institution has a curated Pannellum tour

@@ -4,6 +4,7 @@ import '../../auth/data/auth_repository.dart';
 import '../../uni_db/presentation/widgets/home_recent_changes_banner.dart';
 import '../../uni_db/presentation/widgets/verified_deadlines_overlay.dart';
 import 'widgets/application_card.dart';
+import 'widgets/selection_bar.dart';
 import 'widgets/university_selection_view.dart';
 import 'widgets/university_room_modal.dart';
 import 'applications_view_model.dart';
@@ -17,73 +18,81 @@ class ApplicationsTab extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            title: const Text('My Applications'),
-            floating: true,
-            snap: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout),
-                tooltip: 'Sign Out',
-                onPressed: () {
-                  ref.read(authRepositoryProvider).signOut();
-                },
-              ),
-            ],
-          ),
+      body: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  title: const Text('My Applications'),
+                  floating: true,
+                  snap: true,
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.logout),
+                      tooltip: 'Sign Out',
+                      onPressed: () {
+                        ref.read(authRepositoryProvider).signOut();
+                      },
+                    ),
+                  ],
+                ),
 
-          // University DB overlay (gated by --dart-define=UNI_DB_ENABLED=true).
-          // Renders nothing when the flag is off or the user has no
-          // tracked institutions, so production builds are unaffected.
-          const HomeRecentChangesBannerSliver(),
-          const VerifiedDeadlinesOverlaySliver(),
+                // University DB overlay (gated by --dart-define=UNI_DB_ENABLED=true).
+                // Renders nothing when the flag is off or the user has no
+                // tracked institutions, so production builds are unaffected.
+                const HomeRecentChangesBannerSliver(),
+                const VerifiedDeadlinesOverlaySliver(),
 
-          tabStateAsync.when(
-            data: (state) {
-              if (state.isEmpty) {
-                return const SliverFillRemaining(
-                  child: Center(
-                    child: Text('You have no active applications yet.', style: TextStyle(color: Colors.white54)),
+                tabStateAsync.when(
+                  data: (state) {
+                    if (state.isEmpty) {
+                      return const SliverFillRemaining(
+                        child: _EmptyApplicationsState(),
+                      );
+                    }
+
+                    return SliverMainAxisGroup(
+                      slivers: [
+                        // Suggestions Section
+                        if (state.shouldShowSuggestions)
+                          SliverToBoxAdapter(
+                            child: UniversitySelectionView(
+                              suggestions: state.suggestions,
+                              onSubmitted: () {
+                                // The selection bar handles refresh/invalidation
+                              },
+                            ),
+                          )
+                        else
+                          const SliverToBoxAdapter(child: SizedBox.shrink()),
+
+                        // Applications Section
+                        if (state.pendingApps.isNotEmpty)
+                          ..._buildPendingSection(state.pendingApps),
+
+                        if (state.activeApps.isNotEmpty)
+                          ..._buildActiveSection(state.activeApps),
+
+                        if (state.hasActiveApplications)
+                          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                      ],
+                    );
+                  },
+                  loading: () => const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator.adaptive()),
                   ),
-                );
-              }
-
-              return SliverMainAxisGroup(
-                slivers: [
-                  // Suggestions Section
-                  if (state.shouldShowSuggestions)
-                    SliverToBoxAdapter(
-                      child: UniversitySelectionView(
-                        suggestions: state.suggestions,
-                        onSubmitted: () {
-                          // The submit function in the view now handles refresh/invalidation
-                        }, 
-                      ),
-                    )
-                  else
-                    const SliverToBoxAdapter(child: SizedBox.shrink()),
-
-                  // Applications Section
-                  if (state.pendingApps.isNotEmpty)
-                    ..._buildPendingSection(state.pendingApps),
-                    
-                  if (state.activeApps.isNotEmpty)
-                    ..._buildActiveSection(state.activeApps),
-                    
-                  if (state.hasActiveApplications)
-                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                ],
-              );
-            },
-            loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator.adaptive()),
-            ),
-            error: (err, stack) => SliverFillRemaining(
-              child: Center(child: Text('Error loading applications: $err')),
+                  error: (err, stack) => SliverFillRemaining(
+                    child: Center(child: Text('Error loading applications: $err')),
+                  ),
+                ),
+              ],
             ),
           ),
+          // Phase 1: persistent selection bar — shared with the Map tab so
+          // picks made anywhere are reflected here, and a single Submit
+          // button finalises the batch.
+          const SelectionBar(),
         ],
       ),
     );
@@ -143,5 +152,35 @@ class ApplicationsTab extends ConsumerWidget {
         ),
       ),
     ];
+  }
+}
+
+class _EmptyApplicationsState extends StatelessWidget {
+  const _EmptyApplicationsState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.school_outlined, size: 64, color: Colors.white24),
+            const SizedBox(height: 16),
+            const Text(
+              'No applications yet',
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Open the Map tab to browse universities and add them to your list.',
+              style: TextStyle(color: Colors.white54, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

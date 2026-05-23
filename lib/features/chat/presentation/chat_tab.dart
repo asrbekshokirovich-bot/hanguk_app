@@ -5,7 +5,12 @@ import '../../../../design_system/theme/app_colors.dart';
 import 'widgets/chat_message_bubble.dart';
 
 class ChatTab extends ConsumerStatefulWidget {
-  const ChatTab({super.key});
+  /// Pre-populates the text field on first build (e.g. "Compare X and Y"
+  /// when launched from the selection bar's AI Compare button). Does
+  /// not auto-send — the user reviews and edits before submitting.
+  final String? initialPrompt;
+
+  const ChatTab({super.key, this.initialPrompt});
 
   @override
   ConsumerState<ChatTab> createState() => _ChatTabState();
@@ -14,6 +19,14 @@ class ChatTab extends ConsumerStatefulWidget {
 class _ChatTabState extends ConsumerState<ChatTab> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPrompt != null && widget.initialPrompt!.isNotEmpty) {
+      _textController.text = widget.initialPrompt!;
+    }
+  }
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
