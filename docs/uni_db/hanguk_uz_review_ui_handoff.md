@@ -82,30 +82,49 @@ selection, lowest-confidence badge, validated editor with diff, and
 confirmation + reason on Reject / Source is wrong.
 
 BACKEND CONTRACT — fields now available on `v_review_queue_dashboard`
-(confirm exact names against the live view before coding):
-- source_page_url       : text  — the human-readable source page
-- source_pdf_url        : text  — signed URL to the actual PDF, or null
+(actual columns on v_review_queue_dashboard as of the backend changes):
+- source_url_ko         : text  — the human-readable source PAGE
+                                   ("View source page" → this).
+- storage_path          : text  — the stored PDF object path, or null. For
+                                   "Open source PDF", call the `get-pdf-url`
+                                   edge function with this path to mint a
+                                   short-lived signed URL client-side. There
+                                   is NO static `source_pdf_url` column — a
+                                   signed URL can't live in a view. Hide the
+                                   PDF button when storage_path is null.
 - min_row_confidence    : numeric — lowest per-row extractor_confidence
-- accuracy_self_score   : numeric — job-level (now = min of rows)
-- prose_en / translated fields : precomputed translations joined in
-- parsed_output         : jsonb — the structured rows (render, don't re-fetch)
+                                   (null → fall back to accuracy_self_score).
+- accuracy_self_score   : numeric — job-level (now = min of per-row scores).
+- parsed_output         : jsonb — the structured rows (render, don't re-fetch).
 - field_group           : text  — calendar | tuition | requirements |
                                    scholarships | documents_required
-- schema id/version     : to validate edits against the field-group schema
 - requirements rows now carry status enums: topik_status / english_status /
   gpa_status ∈ {required, not_required, not_stated} — render "Not required"
   (not "Not specified") when the value is not_required.
 - documents rows now carry per-document `deadline` / `applies_to_round`.
+- Validate editor changes against the field-group JSON Schema in
+  `services/uni_db/src/uni_db/extract/schemas.py` (FIELD_GROUP_SCHEMAS).
+- prose_en / precomputed translations are NOT yet joined into the view
+  (plan E5 is still pending); until then, render Korean immediately and do
+  not block on a translate call.
 ````
 
 ---
 
 ## Notes for whoever runs the hand-off
 
-- Items 2/3/8 depend on the backend precomputing translations and the view
-  exposing `prose_en` (plan workstreams E5/F3). Confirm those shipped before
-  starting the website work, or the "translate on read" code can't be
-  removed yet.
-- Item 1 depends on the PDF resolvers (plan F1/F2) actually populating
-  `storage_path`; until a university's PDF is resolved, `source_pdf_url`
-  will legitimately be null and the button should stay hidden.
+Backend status (this repo) as of the latest commits:
+- DONE: deterministic translation (`translate-document` now temperature 0),
+  per-row `min_row_confidence` on the view, requirement status enums +
+  document deadline fields in the schemas, KAIST PDF resolver, truncation
+  re-extraction, and `*_ko` text hygiene (no bilingual concat / dup).
+- PENDING: precomputing/joining `prose_en` into the view (plan E5). So
+  items 2/3/8 still require the site to render Korean immediately and NOT
+  block on a translate call; remove "translate on read" only once E5 ships.
+- Item 1 depends on the PDF resolvers actually populating `storage_path`
+  for a given university (KAIST/Inha/KU/Yonsei now have resolvers). Until a
+  university's PDF is resolved+stored, `storage_path` is null and the PDF
+  button should stay hidden — that is correct, not a bug.
+- The `min_row_confidence` column ships via migration
+  `20260523150000_review_dashboard_min_row_confidence.sql` (apply it to the
+  Supabase project before relying on the column).
