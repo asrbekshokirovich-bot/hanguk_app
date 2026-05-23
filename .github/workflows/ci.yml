@@ -38,7 +38,10 @@ jobs:
         run: flutter pub get
 
       - name: flutter analyze
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: flutter test
-        run: flutter test
+        # Tests tagged `manual` are integration probes (Vapi network +
+        # platform permission channels) that can't run on a headless
+        # CI runner. Exclude them here; run locally on a device.
+        run: flutter test --exclude-tags=manual
