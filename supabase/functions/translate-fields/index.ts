@@ -112,6 +112,11 @@ Deno.serve(async (req) => {
       errors.push(String(e).slice(0, 200));
     }
   }
-  console.error("translate-fields error", errors.join(" | "));
-  return json(502, { error: "translation_failed", detail: errors.join(" | ") });
+  const joined = errors.join(" | ");
+  console.error("translate-fields error", joined);
+  try {
+    const svc = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+    await svc.from("uni_db_fn_errors").insert({ fn: "translate-fields", detail: joined.slice(0, 1000) });
+  } catch (_) { /* best-effort diagnostics */ }
+  return json(502, { error: "translation_failed", detail: joined });
 });
