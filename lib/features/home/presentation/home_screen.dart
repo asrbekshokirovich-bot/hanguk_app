@@ -81,13 +81,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         tooltip: l.a11yTooltipAskAi,
         child: const Icon(Icons.smart_toy, color: Colors.black, size: 28),
       ),
-      // UI/UX audit P0 #5 (2026-05-12): swapped the legacy Material 2
-      // BottomNavigationBar for the Material 3 NavigationBar via the
-      // already-built AdaptiveBottomNavigation (Cupertino on iOS,
-      // Material on Android/web/desktop). Same audit also flagged the
-      // first label "Home" → Applications tab as a misnomer; renamed
-      // the ARB key navHome → navApplications and the localized
-      // strings now read "Applications" (and locale equivalents).
       bottomNavigationBar: AdaptiveBottomNavigation(
         currentIndex: currentIndex,
         onTap: (index) {
