@@ -81,3 +81,16 @@ field selection (which event_type) and faithful preservation of source.
   ]
 }
 ```
+
+## Enrichment: periods[] (per admission cycle & language track)
+
+In addition to `events[]`, emit a `periods` array — one object per admission
+cycle / language track in the guideline. Each period (use null for anything not stated):
+- `language_track`: "korean" or "english" (which curriculum track this governs)
+- `program_level`: e.g. "undergraduate" | "master" | "doctoral"
+- `online_application_start` / `online_application_end` (YYYY-MM-DD)
+- `offline_application_start` / `offline_application_end` (null if no offline/visit route)
+- `interview_start` / `interview_end` (null if no interview)
+- `application_start` / `application_end`, `document_deadline`, `result_announcement` (dates)
+- `application_fee_krw` (KRW number), `application_fee_usd` (if stated)
+- `source_text_ko`: the verbatim Korean line(s) these dates/fees came from

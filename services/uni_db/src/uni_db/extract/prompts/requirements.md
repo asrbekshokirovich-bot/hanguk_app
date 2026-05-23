@@ -142,3 +142,17 @@ Return ONLY the JSON object. No prose, no markdown code fences (` ```json `),
 no commentary. The schema rejects any per-row field outside the closed list
 above — emitting `document_type`, `institution`, `program_level`,
 `admission_cycles`, or other group-bleed fields will fail validation.
+
+## Enrichment per row (per applicant_category / track)
+
+For each requirements row, additionally include when present in the guideline:
+- `majors`: string[] — majors / recruitment units open to this track (Korean names).
+- `tuition`: { `amount_krw`, `admission_fee_krw`, `academic_year`, `semester_number` } —
+  per-track tuition for one semester (integers; null if not stated).
+- `english_test`: besides the per-test fields, set the normalised pair:
+    - `test`: the PRIMARY required test ("ielts" | "toefl_ibt" | "toefl_pbt" | "teps" |
+      "duolingo" | "topik" | "cambridge" | "other")
+    - `min_score`: its numeric minimum (IELTS 6.0 -> 6.0; TOEFL iBT 80 -> 80)
+    - `deferred`: true if it may be submitted after admission
+  Always capture the numeric band when a score is stated — never emit just
+  {"deferred": false} when the guideline gives a required score.
