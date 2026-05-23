@@ -1,14 +1,16 @@
 // translate-fields — translate an array of Korean admission-data strings into
 // English (or Uzbek) for the staff review screen. Staff-gated (fn_can_review_uni_db).
-// Anthropic primary, Gemini fallback so it works on whichever key is configured.
-// No VPS involved — runs entirely on Supabase Edge.
+// Anthropic-only: Opus 4.7 primary, Sonnet 4.6 fallback (both Claude). No Gemini.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+
+// Opus first (best quality); Sonnet as a same-provider fallback so the function
+// keeps working even if the account doesn't yet have Opus 4.7 access.
+const MODELS = ["claude-opus-4-7", "claude-sonnet-4-6"];
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -43,7 +45,7 @@ function buildSystem(target: string): string {
   );
 }
 
-async function callAnthropic(system: string, texts: string[]): Promise<string> {
+async function callAnthropic(model: string, system: string, texts: string[]): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -52,41 +54,20 @@ async function callAnthropic(system: string, texts: string[]): Promise<string> {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-6",
+      model,
       max_tokens: 8000,
       temperature: 0,
       system,
       messages: [{ role: "user", content: JSON.stringify({ texts }) }],
     }),
   });
-  if (!resp.ok) throw new Error(`anthropic ${resp.status} ${await resp.text()}`);
+  if (!resp.ok) throw new Error(`anthropic(${model}) ${resp.status} ${(await resp.text()).slice(0, 200)}`);
   const d = await resp.json();
-  return Array.isArray(d.content)
+  const text = Array.isArray(d.content)
     ? d.content.filter((b: any) => b?.type === "text").map((b: any) => b.text).join("")
     : "";
-}
-
-async function callGemini(system: string, texts: string[]): Promise<string> {
-  const resp = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-    {
-      method: "POST",
-      headers: { Authorization: `Bearer ${GEMINI_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        // Google's native OpenAI-compat endpoint expects the bare model id
-        // (no "google/" prefix — that form is for aggregator gateways).
-        model: "gemini-2.5-flash",
-        temperature: 0,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: JSON.stringify({ texts }) },
-        ],
-      }),
-    },
-  );
-  if (!resp.ok) throw new Error(`gemini ${resp.status} ${await resp.text()}`);
-  const d = await resp.json();
-  return d.choices?.[0]?.message?.content ?? "";
+  if (!text) throw new Error(`anthropic(${model}) empty response`);
+  return text;
 }
 
 function parseTranslations(raw: string, n: number): string[] {
@@ -109,7 +90,7 @@ Deno.serve(async (req) => {
 
   const uid = await verifyReviewer(req.headers.get("Authorization"));
   if (!uid) return json(403, { error: "forbidden" });
-  if (!ANTHROPIC_API_KEY && !GEMINI_API_KEY) return json(500, { error: "ai_not_configured" });
+  if (!ANTHROPIC_API_KEY) return json(500, { error: "ai_not_configured" });
 
   let body: any;
   try { body = await req.json(); } catch { return json(400, { error: "invalid_json" }); }
@@ -122,17 +103,15 @@ Deno.serve(async (req) => {
   const target = body.target_lang === "uz" ? "uz" : "en";
   const system = buildSystem(target);
 
-  try {
-    const raw = ANTHROPIC_API_KEY ? await callAnthropic(system, texts) : await callGemini(system, texts);
-    return json(200, { translations: parseTranslations(raw, texts.length), target_lang: target });
-  } catch (e) {
-    if (ANTHROPIC_API_KEY && GEMINI_API_KEY) {
-      try {
-        const raw = await callGemini(system, texts);
-        return json(200, { translations: parseTranslations(raw, texts.length), target_lang: target });
-      } catch { /* fall through */ }
+  const errors: string[] = [];
+  for (const model of MODELS) {
+    try {
+      const raw = await callAnthropic(model, system, texts);
+      return json(200, { translations: parseTranslations(raw, texts.length), target_lang: target, model });
+    } catch (e) {
+      errors.push(String(e).slice(0, 200));
     }
-    console.error("translate-fields error", e);
-    return json(502, { error: "translation_failed", detail: String(e).slice(0, 300) });
   }
+  console.error("translate-fields error", errors.join(" | "));
+  return json(502, { error: "translation_failed", detail: errors.join(" | ") });
 });
