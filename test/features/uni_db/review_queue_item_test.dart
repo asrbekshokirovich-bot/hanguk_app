@@ -3,68 +3,83 @@ import 'package:hanguk_app/features/uni_db/domain/review_queue_item.dart';
 
 void main() {
   group('ReviewQueueItem.fromMap', () {
-    test('parses every field from a fully-populated row', () {
+    test('parses every column from a fully-populated row', () {
       final map = {
         'id': 'q1',
-        'target_table': 'recruitment_units',
-        'target_id': 't1',
         'priority': 1,
-        'queued_at': '2026-05-08T10:00:00Z',
-        'payload': {'foo': 'bar'},
-        'institution_name_ko': '서울대학교',
-        'institution_name_ko_short': 'SNU',
-        'archetype': 'A',
-        'field_group': 'calendar',
-        'document_id': 'd1',
-        'pdf_signed_url': 'https://example/pdf',
-        'sla_deadline': '2026-05-08T14:00:00Z',
-        'assigned_reviewer_id': 'u1',
+        'reason': 'low_confidence',
+        'entity_type': 'extraction_jobs',
+        'entity_id': 't1',
+        'created_at': '2026-05-08T10:00:00Z',
+        'parsed_output': {'foo': 'bar'},
+        'name_ko': '서울대학교',
+        'name_en': 'Seoul National University',
+        'source_url_ko': 'https://admission.snu.ac.kr/notice',
+        'storage_path': 'guideline-blobs/abc',
+        'accuracy_self_score': 0.92,
       };
 
       final item = ReviewQueueItem.fromMap(map);
 
       expect(item.id, 'q1');
-      expect(item.targetTable, 'recruitment_units');
       expect(item.priority, 1);
-      expect(item.queuedAt, DateTime.utc(2026, 5, 8, 10));
-      expect(item.payload, {'foo': 'bar'});
-      expect(item.institutionNameKoShort, 'SNU');
-      expect(item.archetype, 'A');
-      expect(item.fieldGroup, 'calendar');
-      expect(item.pdfSignedUrl, 'https://example/pdf');
-      expect(item.slaDeadline, DateTime.utc(2026, 5, 8, 14));
+      expect(item.reason, 'low_confidence');
+      expect(item.entityType, 'extraction_jobs');
+      expect(item.entityId, 't1');
+      expect(item.createdAt, DateTime.utc(2026, 5, 8, 10));
+      expect(item.parsedOutput, {'foo': 'bar'});
+      expect(item.nameKo, '서울대학교');
+      expect(item.nameEn, 'Seoul National University');
+      expect(item.sourceUrlKo, 'https://admission.snu.ac.kr/notice');
+      expect(item.storagePath, 'guideline-blobs/abc');
+      expect(item.accuracySelfScore, 0.92);
+      expect(item.institutionLabel, '서울대학교');
     });
 
     test('defaults priority to 5 when missing', () {
       final item = ReviewQueueItem.fromMap({
         'id': 'q2',
-        'target_table': 'recruitment_units',
-        'target_id': 't2',
-        'queued_at': '2026-05-08T10:00:00Z',
+        'entity_type': 'extraction_jobs',
+        'created_at': '2026-05-08T10:00:00Z',
       });
       expect(item.priority, 5);
     });
 
-    test('defaults payload to empty map when missing', () {
+    test('defaults parsedOutput to empty map when missing', () {
       final item = ReviewQueueItem.fromMap({
         'id': 'q3',
-        'target_table': 'recruitment_units',
-        'target_id': 't3',
-        'queued_at': '2026-05-08T10:00:00Z',
+        'entity_type': 'extraction_jobs',
+        'created_at': '2026-05-08T10:00:00Z',
       });
-      expect(item.payload, isEmpty);
+      expect(item.parsedOutput, isEmpty);
     });
 
-    test('queuedAt fallback to now() when malformed', () {
+    test('createdAt falls back to now() when malformed', () {
       final before = DateTime.now();
       final item = ReviewQueueItem.fromMap({
         'id': 'q4',
-        'target_table': 'recruitment_units',
-        'target_id': 't4',
-        'queued_at': 'not-a-date',
+        'entity_type': 'extraction_jobs',
+        'created_at': 'not-a-date',
       });
-      // Fallback is DateTime.now(); just confirm it's recent.
-      expect(item.queuedAt.isAfter(before.subtract(const Duration(seconds: 5))), isTrue);
+      expect(
+        item.createdAt.isAfter(before.subtract(const Duration(seconds: 5))),
+        isTrue,
+      );
+    });
+
+    test('institutionLabel falls back name_ko -> name_en -> placeholder', () {
+      final enOnly = ReviewQueueItem.fromMap({
+        'id': 'q5',
+        'name_en': 'KAIST',
+        'created_at': '2026-05-08T10:00:00Z',
+      });
+      expect(enOnly.institutionLabel, 'KAIST');
+
+      final neither = ReviewQueueItem.fromMap({
+        'id': 'q6',
+        'created_at': '2026-05-08T10:00:00Z',
+      });
+      expect(neither.institutionLabel, '(unknown institution)');
     });
   });
 
@@ -93,40 +108,24 @@ void main() {
     });
   });
 
-  group('ReviewQueueItem.isOverdue', () {
-    test('true when sla_deadline is in the past', () {
-      final past = DateTime.now().subtract(const Duration(hours: 1));
+  group('ReviewQueueItem.isOverdue (created_at + priority SLA budget)', () {
+    test('true when created_at is older than the priority budget', () {
+      // P2 budget is 12h; created 20h ago -> overdue.
+      final old = DateTime.now().subtract(const Duration(hours: 20));
       final item = ReviewQueueItem.fromMap({
         'id': 'q1',
-        'target_table': 't',
-        'target_id': 'i',
         'priority': 2,
-        'queued_at': '2026-05-08T10:00:00Z',
-        'sla_deadline': past.toIso8601String(),
+        'created_at': old.toIso8601String(),
       });
       expect(item.isOverdue, isTrue);
     });
 
-    test('false when sla_deadline is in the future', () {
-      final future = DateTime.now().add(const Duration(hours: 1));
+    test('false when created_at is within the priority budget', () {
+      final recent = DateTime.now().subtract(const Duration(hours: 1));
       final item = ReviewQueueItem.fromMap({
         'id': 'q1',
-        'target_table': 't',
-        'target_id': 'i',
         'priority': 2,
-        'queued_at': '2026-05-08T10:00:00Z',
-        'sla_deadline': future.toIso8601String(),
-      });
-      expect(item.isOverdue, isFalse);
-    });
-
-    test('false when sla_deadline is null', () {
-      final item = ReviewQueueItem.fromMap({
-        'id': 'q1',
-        'target_table': 't',
-        'target_id': 'i',
-        'priority': 2,
-        'queued_at': '2026-05-08T10:00:00Z',
+        'created_at': recent.toIso8601String(),
       });
       expect(item.isOverdue, isFalse);
     });
@@ -136,9 +135,8 @@ void main() {
 ReviewQueueItem _itemWithPriority(int p) {
   return ReviewQueueItem.fromMap({
     'id': 'q1',
-    'target_table': 't',
-    'target_id': 'i',
+    'entity_type': 'extraction_jobs',
     'priority': p,
-    'queued_at': '2026-05-08T10:00:00Z',
+    'created_at': '2026-05-08T10:00:00Z',
   });
 }
