@@ -11,9 +11,8 @@ const corsHeaders = {
 // GEMINI_API_KEY is configured, so deploying never breaks the working
 // feature — it switches to Claude automatically once ANTHROPIC_API_KEY is set.
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-const ANTHROPIC_MODEL = "claude-sonnet-4-6";
-const GEMINI_AI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const GEMINI_MODEL = "google/gemini-2.5-flash";
+// Anthropic-only: Opus 4.7 primary, Sonnet 4.6 same-provider fallback.
+const ANTHROPIC_MODELS = ["claude-opus-4-7", "claude-sonnet-4-6"];
 const OUTPUT_BUCKET = "translation-documents";
 
 // Uzbekistan regions and districts for handwriting disambiguation during OCR.
@@ -314,7 +313,7 @@ class AIError extends Error {
 
 // Anthropic Claude (primary). Images go as image blocks, PDFs as document
 // blocks. Returns the raw model text (expected to be the JSON object).
-async function callAnthropic(apiKey: string, systemPrompt: string, files: InputFile[], userText: string): Promise<string> {
+async function callAnthropic(apiKey: string, model: string, systemPrompt: string, files: InputFile[], userText: string): Promise<string> {
   const content: any[] = files.map((f) =>
     f.mediaType === "application/pdf"
       ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: f.base64 } }
@@ -330,7 +329,7 @@ async function callAnthropic(apiKey: string, systemPrompt: string, files: InputF
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: ANTHROPIC_MODEL,
+      model,
       max_tokens: 16000,
       temperature: 0.1,
       system: systemPrompt,
@@ -340,46 +339,15 @@ async function callAnthropic(apiKey: string, systemPrompt: string, files: InputF
 
   if (!resp.ok) {
     const errorText = await resp.text();
-    console.error("Anthropic error:", resp.status, errorText);
-    throw new AIError(resp.status, errorText);
+    console.error(`Anthropic error (${model}):`, resp.status, errorText);
+    throw new AIError(resp.status, `${model}: ${errorText.slice(0, 200)}`);
   }
   const data = await resp.json();
   const text = Array.isArray(data.content)
     ? data.content.filter((b: any) => b?.type === "text").map((b: any) => b.text).join("")
     : "";
-  if (!text) throw new AIError(500, "Empty Anthropic response");
+  if (!text) throw new AIError(500, `Empty Anthropic response (${model})`);
   return text;
-}
-
-// Gemini fallback (OpenAI-compatible endpoint).
-async function callGemini(apiKey: string, systemPrompt: string, files: InputFile[], userText: string): Promise<string> {
-  const userContent = [
-    ...files.map((f) => ({ type: "image_url", image_url: { url: `data:${f.mediaType};base64,${f.base64}` } })),
-    { type: "text", text: userText },
-  ];
-  const resp = await fetch(GEMINI_AI_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: GEMINI_MODEL,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userContent },
-      ],
-      temperature: 0.1,
-      max_tokens: 12000,
-      response_format: { type: "json_object" },
-    }),
-  });
-  if (!resp.ok) {
-    const errorText = await resp.text();
-    console.error("Gemini error:", resp.status, errorText);
-    throw new AIError(resp.status, errorText);
-  }
-  const data = await resp.json();
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new AIError(500, "Empty Gemini response");
-  return content;
 }
 
 serve(async (req) => {
@@ -394,7 +362,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Staff-only gate: this function can read from the student-documents bucket,
@@ -452,7 +419,7 @@ serve(async (req) => {
       });
     }
 
-    if (!anthropicApiKey && !geminiApiKey) return json({ error: "AI service not configured" }, 500);
+    if (!anthropicApiKey) return json({ error: "AI service not configured" }, 500);
     if (!source?.path) return json({ error: "source.path is required" }, 400);
 
     // ---- Download source + supporting files from their respective buckets ----
@@ -534,20 +501,24 @@ Rules for blocks: the first block should be a "title". Reproduce the source's fi
 
     const userText = `Translate the main document (image 1) into English. Identify each supporting identity document and extract names from them. Return the JSON object described in the system prompt.`;
 
-    // ---- Call the AI: Anthropic (primary) → Gemini (fallback) ----
-    let content: string;
-    try {
-      if (anthropicApiKey) {
-        content = await callAnthropic(anthropicApiKey, systemPrompt, files, userText);
-      } else {
-        content = await callGemini(geminiApiKey!, systemPrompt, files, userText);
+    // ---- Call the AI: Anthropic only — Opus 4.7, then Sonnet 4.6 ----
+    let content: string | null = null;
+    const aiErrors: string[] = [];
+    let lastStatus = 500;
+    for (const model of ANTHROPIC_MODELS) {
+      try {
+        content = await callAnthropic(anthropicApiKey, model, systemPrompt, files, userText);
+        break;
+      } catch (e) {
+        lastStatus = e instanceof AIError ? e.status : 500;
+        aiErrors.push(e instanceof Error ? e.message : String(e));
       }
-    } catch (e) {
-      const status = e instanceof AIError ? e.status : 500;
-      if (status === 429) return json({ error: "Tizim band. Keyinroq urinib ko'ring." }, 429);
-      if (status === 402) return json({ error: "AI xizmati uchun kredit tugagan." }, 402);
-      if (status === 401 || status === 403) return json({ error: "AI service not configured" }, 500);
-      return json({ error: "AI xizmatida xatolik" }, 500);
+    }
+    if (content === null) {
+      console.error("translate-document AI error:", aiErrors.join(" | "));
+      if (lastStatus === 429) return json({ error: "Tizim band. Keyinroq urinib ko'ring." }, 429);
+      if (lastStatus === 402) return json({ error: "AI xizmati uchun kredit tugagan." }, 402);
+      return json({ error: "AI xizmatida xatolik", detail: aiErrors.join(" | ").slice(0, 300) }, 502);
     }
 
     const structured = parseStructured(content);
