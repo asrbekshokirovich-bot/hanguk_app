@@ -89,37 +89,30 @@ def parse_one_document(
                 "extract: schema validation failed for %s: %s",
                 group, ve.message[:160],
             )
+            # Failed extraction → recorded as a failed job (error lane),
+            # NOT queued for content review. A human can't review an error;
+            # these need a prompt/schema fix + re-extraction (Layer 2).
             results.append(_failed_result(group, "claude-sonnet-4-6",
                                           violation=ve.message[:500]))
-            review_entries.append({
-                "entity_type": "extraction_jobs",
-                "entity_id": None,
-                "reason": "low_confidence",
-                "priority": 1,
-                "field_group": group,
-                "rationale": f"jsonschema validation failed: {ve.message[:200]}",
-            })
             continue
         except Exception as exc:
             # API timeout, rate limit, network error, malformed JSON, etc.
-            # Don't abort the whole document — log + HITL + next group.
+            # Don't abort the whole document — log + record failure + next group.
             log.warning(
                 "extract: extraction failed for %s: %s: %s",
                 group, type(exc).__name__, str(exc)[:160],
             )
             results.append(_failed_result(group, "claude-sonnet-4-6",
                                           violation=f"{type(exc).__name__}: {exc}"))
-            review_entries.append({
-                "entity_type": "extraction_jobs",
-                "entity_id": None,
-                "reason": "low_confidence",
-                "priority": 1,
-                "field_group": group,
-                "rationale": f"{type(exc).__name__}: {str(exc)[:200]}",
-            })
             continue
 
         results.append(result)
+
+        # Empty extraction (e.g. {"rows": []}) → nothing to review. Don't
+        # queue it; an empty result means a thin/wrong source and is handled
+        # by re-extraction (Layer 2), not a human reviewer.
+        if _is_empty_output(result.parsed_output):
+            continue
 
         verdict = validate_field(
             field_name=_canonical_field_for(group),
@@ -178,6 +171,7 @@ async def persist_outcome(
 ) -> None:
     for result in outcome.extraction_results:
         job_id = uuid4()
+        job_status = "failed" if _is_failed_output(result.parsed_output) else "succeeded"
         await conn.execute(
             """
             insert into public.extraction_jobs (
@@ -187,7 +181,7 @@ async def persist_outcome(
               raw_output, parsed_output, started_at, ended_at
             ) values (
               $1,$2,$3,$4,
-              'succeeded', $5,$6,$7,$8,
+              $16, $5,$6,$7,$8,
               $9,$10,$11,
               $12::jsonb, $13::jsonb, $14, $15
             )
@@ -213,6 +207,7 @@ async def persist_outcome(
             json.dumps(result.parsed_output, ensure_ascii=False),
             datetime.now(tz=timezone.utc),
             datetime.now(tz=timezone.utc),
+            job_status,
         )
 
         # If this group requires HITL, enqueue.
@@ -285,6 +280,33 @@ def _failed_result(group: str, model: str, *, violation: str) -> ExtractionResul
         latency_ms=0,
         accuracy_self_score=0.0,
     )
+
+
+def _is_failed_output(parsed_output: object) -> bool:
+    """An extraction that errored carries an `_extraction_failed` marker."""
+    return isinstance(parsed_output, dict) and "_extraction_failed" in parsed_output
+
+
+def _is_empty_output(parsed_output: object) -> bool:
+    """True when an extraction produced no usable content (e.g. {"rows": []}
+    or {"events": []}). Empty results mean a thin/wrong source rather than
+    something a human can review, so they are not enqueued."""
+    if not isinstance(parsed_output, dict) or not parsed_output:
+        return True
+    if "_extraction_failed" in parsed_output:
+        return False  # failed, handled separately
+    for value in parsed_output.values():
+        if isinstance(value, bool):
+            continue
+        if isinstance(value, list) and len(value) > 0:
+            return False
+        if isinstance(value, dict) and value:
+            return False
+        if isinstance(value, str) and value.strip():
+            return False
+        if isinstance(value, (int, float)):
+            return False
+    return True
 
 
 def _canonical_field_for(group: str) -> str:

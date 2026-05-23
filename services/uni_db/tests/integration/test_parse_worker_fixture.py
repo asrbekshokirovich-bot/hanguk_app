@@ -35,16 +35,19 @@ class TestParseOneDocument:
             "documents_required",
         }
 
-    def test_d4_groups_route_to_hitl(self, korean_guideline_text: str) -> None:
+    def test_empty_extractions_not_queued(self, korean_guideline_text: str) -> None:
         outcome = parse_one_document(
             guideline_document_id=uuid4(),
             pdf_text_first_pages=korean_guideline_text[:1500],
             pdf_text_full=korean_guideline_text,
         )
-        # scholarships + documents_required (both D4) must enqueue HITL.
+        # The tuition / scholarships / documents_required mocks are empty
+        # ({"rows": []}); Layer 1 queue hygiene means empty extractions are
+        # NOT enqueued for human review (nothing to review).
         review_groups = {e["field_group"] for e in outcome.review_queue_entries}
-        assert "scholarships" in review_groups
-        assert "documents_required" in review_groups
+        assert "tuition" not in review_groups
+        assert "scholarships" not in review_groups
+        assert "documents_required" not in review_groups
 
     def test_calendar_d1_field_auto_publishes(
         self, korean_guideline_text: str
