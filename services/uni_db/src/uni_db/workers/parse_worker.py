@@ -30,8 +30,10 @@ from ..extract.archetype import (
     classify_archetype,
     find_section_offsets,
 )
+from ..extract.degree_level import DegreeClassification, classify_degree_level
 from ..extract.llm_anthropic import ExtractionResult, extract_field_group
 from ..extract.validators import evaluate as validate_field
+from ..parse.degree_sections import split_by_degree
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +50,7 @@ FIELD_GROUPS = (
 class ParseOutcome:
     guideline_document_id: UUID
     archetype: ArchetypeFingerprint
+    degree: DegreeClassification
     extraction_results: list[ExtractionResult]
     review_queue_entries: list[dict[str, object]]
 
@@ -64,6 +67,10 @@ def parse_one_document(
     function directly against fixture text.
     """
     archetype = classify_archetype(pdf_text_first_pages)
+    degree = classify_degree_level(
+        first_pages_text=pdf_text_first_pages,
+        full_text=pdf_text_full,
+    )
     offsets = find_section_offsets(pdf_text_full)
 
     results: list[ExtractionResult] = []
@@ -131,9 +138,35 @@ def parse_one_document(
                 }
             )
 
+    # A single PDF that covers BOTH undergraduate and graduate admission is
+    # mis-parsed as one undergraduate document. Flag it (document-level) so a
+    # reviewer splits it into separate admission cycles. The split boundaries
+    # are computed here for the reviewer/publish layer.
+    if degree.is_combined:
+        segments = split_by_degree(pdf_text_full)
+        seg_desc = ", ".join(
+            f"{s.level}@{s.start_offset}" for s in segments
+        )
+        review_entries.append(
+            {
+                "entity_type": "guideline_documents",
+                "entity_id": guideline_document_id,
+                "reason": "high_difficulty_field",
+                "priority": 2,
+                "field_group": "degree_split",
+                "rationale": (
+                    "Combined undergraduate + graduate guideline detected "
+                    f"({degree.rationale}). Split into separate admission "
+                    f"cycles (undergrad → foreign, graduate → grad_foreign). "
+                    f"Segments: {seg_desc}."
+                ),
+            }
+        )
+
     return ParseOutcome(
         guideline_document_id=guideline_document_id,
         archetype=archetype,
+        degree=degree,
         extraction_results=results,
         review_queue_entries=review_entries,
     )
@@ -198,6 +231,24 @@ async def persist_outcome(
                     entry["priority"],
                     entry["rationale"],
                 )
+
+    # Document-level review entries (e.g. the combined undergrad+grad split
+    # flag) reference the guideline document itself, not an extraction job,
+    # so they are inserted once here rather than inside the per-result loop.
+    for entry in outcome.review_queue_entries:
+        if entry.get("entity_type") == "guideline_documents":
+            await conn.execute(
+                """
+                insert into public.review_queue (
+                  entity_type, entity_id, reason, priority, reviewer_notes
+                ) values ($1,$2,$3,$4,$5)
+                """,
+                "guideline_documents",
+                outcome.guideline_document_id,
+                entry["reason"],
+                entry["priority"],
+                entry["rationale"],
+            )
 
     await conn.execute(
         """
