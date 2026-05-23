@@ -48,17 +48,20 @@ from .models import TargetLang, TranslationOutput
 log = logging.getLogger(__name__)
 
 
-PIVOT_VIA_EN: Final[frozenset[TargetLang]] = frozenset({"uz", "mn"})
+PIVOT_VIA_EN: Final[frozenset[TargetLang]] = frozenset({"uz"})  # ADR-004-amend-3: mn dropped
 
 
 # Default-on translation targets.
 # ADR-004-amend-1 (2026-05-08): Uzbek added by owner override despite
 # the absence of a native reviewer.
 # ADR-004-amend-2 (2026-05-10): Vietnamese and Mongolian added under
-# the same risk profile ahead of cohort growth. All four targets go
-# through the HITL queue; flagged-low-confidence rows surface there
-# for correction. Korean is canonical and isn't a "translation target".
-DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en", "uz", "vi", "mn"})
+# the same risk profile ahead of cohort growth.
+# ADR-004-amend-3 (2026-05-17): owner reverted vi/mn — contracted
+# students don't need either right now; translating prose we won't
+# surface burns tokens for no user value. Re-add by setting
+# UNI_DB_TRANSLATION_LANGUAGES=en,uz,vi,mn at the env layer.
+# Korean is canonical and isn't a "translation target".
+DEFAULT_ENABLED_LANGUAGES: Final[frozenset[TargetLang]] = frozenset({"en", "uz"})
 
 
 class LanguageNotEnabledError(RuntimeError):
@@ -154,7 +157,7 @@ def _pick_primary(
     is_label: bool,
 ) -> Callable[[str, TargetLang], TranslationOutput]:
     if target_lang == "en":
-        if is_label:
+        if is_label and settings.deepl_api_key:
             return _wrap(deepl_adapter.translate)
         return _wrap(claude_adapter.translate)
 
@@ -162,10 +165,26 @@ def _pick_primary(
         return _pivoted_via_en
 
     if target_lang in {"vi", "id"}:
-        return _wrap(papago_adapter.translate)
+        # Papago is preferred for vi/id quality, but it requires Naver Cloud
+        # credentials. When they're absent (early Phase 4 ops), fall back
+        # to Claude so the worker stays productive.
+        if settings.naver_papago_client_id and settings.naver_papago_client_secret:
+            return _wrap(papago_adapter.translate)
+        log.info(
+            "translate: Papago credentials missing — falling back to Claude for ko->%s",
+            target_lang,
+        )
+        return _wrap(claude_adapter.translate)
 
     if target_lang == "ru":
-        return _wrap(deepl_adapter.translate)
+        # DeepL is preferred for ru, but falls back to Claude when DeepL
+        # credentials are missing.
+        if settings.deepl_api_key:
+            return _wrap(deepl_adapter.translate)
+        log.info(
+            "translate: DeepL credentials missing — falling back to Claude for ko->ru",
+        )
+        return _wrap(claude_adapter.translate)
 
     raise ValueError(f"unsupported target_lang: {target_lang}")
 

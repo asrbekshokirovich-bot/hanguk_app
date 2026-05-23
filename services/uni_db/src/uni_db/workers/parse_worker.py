@@ -23,6 +23,7 @@ from typing import Iterable
 from uuid import UUID, uuid4
 
 import asyncpg
+import jsonschema
 
 from ..extract.archetype import (
     ArchetypeFingerprint,
@@ -70,11 +71,47 @@ def parse_one_document(
 
     for group in FIELD_GROUPS:
         section_text = _slice_for(pdf_text_full, group, offsets)
-        result = extract_field_group(
-            field_group=group,
-            archetype=archetype.label,
-            source_text_ko=section_text,
-        )
+        try:
+            result = extract_field_group(
+                field_group=group,
+                archetype=archetype.label,
+                source_text_ko=section_text,
+            )
+        except jsonschema.ValidationError as ve:
+            log.warning(
+                "extract: schema validation failed for %s: %s",
+                group, ve.message[:160],
+            )
+            results.append(_failed_result(group, "claude-sonnet-4-6",
+                                          violation=ve.message[:500]))
+            review_entries.append({
+                "entity_type": "extraction_jobs",
+                "entity_id": None,
+                "reason": "low_confidence",
+                "priority": 1,
+                "field_group": group,
+                "rationale": f"jsonschema validation failed: {ve.message[:200]}",
+            })
+            continue
+        except Exception as exc:
+            # API timeout, rate limit, network error, malformed JSON, etc.
+            # Don't abort the whole document — log + HITL + next group.
+            log.warning(
+                "extract: extraction failed for %s: %s: %s",
+                group, type(exc).__name__, str(exc)[:160],
+            )
+            results.append(_failed_result(group, "claude-sonnet-4-6",
+                                          violation=f"{type(exc).__name__}: {exc}"))
+            review_entries.append({
+                "entity_type": "extraction_jobs",
+                "entity_id": None,
+                "reason": "low_confidence",
+                "priority": 1,
+                "field_group": group,
+                "rationale": f"{type(exc).__name__}: {str(exc)[:200]}",
+            })
+            continue
+
         results.append(result)
 
         verdict = validate_field(
@@ -133,8 +170,13 @@ async def persist_outcome(
             result.cost_usd,
             result.latency_ms,
             result.accuracy_self_score,
-            result.raw_output if isinstance(result.raw_output, str)
+            # Wrap raw_output as a JSON-encoded string so the ::jsonb cast
+            # accepts arbitrary text (e.g. ```json fences from Claude).
+            json.dumps(
+                result.raw_output if isinstance(result.raw_output, str)
                 else json.dumps(result.raw_output, ensure_ascii=False),
+                ensure_ascii=False,
+            ),
             json.dumps(result.parsed_output, ensure_ascii=False),
             datetime.now(tz=timezone.utc),
             datetime.now(tz=timezone.utc),
@@ -175,6 +217,23 @@ def _slice_for(full_text: str, group: str, offsets: dict[str, int]) -> str:
         return full_text[:8000]                  # fallback: first 8k chars
     start = offsets[group]
     return full_text[start : start + 12000]
+
+
+def _failed_result(group: str, model: str, *, violation: str) -> ExtractionResult:
+    # raw_output is later inserted into a jsonb column, so it must be a
+    # valid JSON document (not an empty string).
+    return ExtractionResult(
+        field_group=group,
+        parsed_output={"_extraction_failed": violation},
+        raw_output=json.dumps({"_extraction_failed": violation}, ensure_ascii=False),
+        llm_provider="anthropic",
+        llm_model=model,
+        input_tokens=0,
+        output_tokens=0,
+        cost_usd=0.0,
+        latency_ms=0,
+        accuracy_self_score=0.0,
+    )
 
 
 def _canonical_field_for(group: str) -> str:

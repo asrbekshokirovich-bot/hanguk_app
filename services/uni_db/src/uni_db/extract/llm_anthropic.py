@@ -50,9 +50,11 @@ _SONNET_CACHE_WRITE_USD_PER_M = _SONNET_INPUT_USD_PER_M * 1.25
 _SONNET_CACHE_READ_USD_PER_M = _SONNET_INPUT_USD_PER_M * 0.10
 
 # Strip ```json ... ``` and ``` ... ``` fences — Sonnet sometimes wraps
-# JSON output despite the prompt instruction not to.
+# JSON output despite the prompt instruction not to. The closing fence is
+# OPTIONAL because long extractions occasionally hit max_tokens before the
+# closing ``` is emitted; we still want to recover the body in that case.
 _FENCE_RE = re.compile(
-    r"^\s*```(?:json|JSON)?\s*(.*?)\s*```\s*$",
+    r"^\s*```(?:json|JSON)?\s*(.*?)(?:\s*```\s*)?$",
     re.DOTALL,
 )
 
@@ -112,16 +114,20 @@ _MOCK_OUTPUTS: dict[str, dict[str, Any]] = {
     },
     "tuition": {"rows": []},
     "requirements": {
-        "applicant_category": "외국인전형",
-        "topik_min_level": None,
-        "topik_deferred": False,
-        "english_test": None,
-        "gpa_floor_pct": None,
-        "interview_required": False,
-        "practical_exam_required": False,
-        "prose_ko": "<mock requirements>",
-        "source_text_ko": "<mock>",
-        "extractor_confidence": 0.5,
+        "rows": [
+            {
+                "applicant_category": "외국인전형",
+                "topik_min_level": None,
+                "topik_deferred": False,
+                "english_test": None,
+                "gpa_floor_pct": None,
+                "interview_required": False,
+                "practical_exam_required": False,
+                "prose_ko": "<mock requirements>",
+                "source_text_ko": "<mock>",
+                "extractor_confidence": 0.5,
+            },
+        ],
     },
     "scholarships": {"rows": []},
     "documents_required": {"rows": []},
@@ -206,6 +212,14 @@ def _self_score(parsed: object) -> float:
     return 0.85
 
 
+# Anthropic completions can legitimately take 60-90s for long structured
+# extractions. The 30s httpx timeout used for HTML fetches is far too tight
+# for LLM calls — it was the root cause of the `requirements` field group
+# timing out on every parse run. 120s gives Sonnet headroom while still
+# bounding cron worker latency.
+_ANTHROPIC_TIMEOUT_SEC = 120.0
+
+
 def _get_client():  # pragma: no cover — exercised via monkeypatch in tests
     """Lazy-instantiate the Anthropic client.
 
@@ -217,7 +231,7 @@ def _get_client():  # pragma: no cover — exercised via monkeypatch in tests
 
     return Anthropic(
         api_key=settings.anthropic_api_key,
-        timeout=settings.http_request_timeout_sec,
+        timeout=_ANTHROPIC_TIMEOUT_SEC,
     )
 
 
@@ -270,9 +284,13 @@ def _compute_cost_usd(
     return round(cost_input + cost_output + cost_cache_read + cost_cache_write, 6)
 
 
+# 2 attempts (1 retry) at 120s timeout each = max ~240s per field group
+# instead of 4 attempts at 30s = 120s wasted on a hard-failing extraction.
+# Real Anthropic glitches are rare; budget-bound the worst case rather
+# than retrying optimistically into a timeout cliff.
 @retry(
     reraise=True,
-    stop=stop_after_attempt(4),
+    stop=stop_after_attempt(2),
     wait=wait_exponential(multiplier=2, min=2, max=30),
     retry=retry_if_exception_type(_retriable_exception_types()),
 )

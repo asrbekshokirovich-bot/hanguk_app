@@ -40,7 +40,10 @@ def _glossary() -> dict:
 
 
 class TestPipelineRouting:
-    def test_label_to_english_uses_deepl_mock(self) -> None:
+    def test_label_to_english_uses_deepl_mock(self, monkeypatch) -> None:
+        # Phase 4 added a no-DeepL-key fallback to Claude. Set a stub key
+        # so the routing test continues to assert the DeepL-preferred path.
+        monkeypatch.setattr(pipeline.settings, "deepl_api_key", "stub", raising=False)
         out = translate(
             source_text_ko="서울대학교",
             target_lang="en",
@@ -82,6 +85,10 @@ class TestPipelineRouting:
             pipeline.settings, "translation_languages_enabled", "en,vi",
             raising=False,
         )
+        # Phase 4 added a Papago-cred fallback to Claude. Stub the creds
+        # so the routing test continues to assert the Papago-preferred path.
+        monkeypatch.setattr(pipeline.settings, "naver_papago_client_id", "stub", raising=False)
+        monkeypatch.setattr(pipeline.settings, "naver_papago_client_secret", "stub", raising=False)
         out = translate(
             source_text_ko="모집요강",
             target_lang="vi",
@@ -94,6 +101,7 @@ class TestPipelineRouting:
             pipeline.settings, "translation_languages_enabled", "en,ru",
             raising=False,
         )
+        monkeypatch.setattr(pipeline.settings, "deepl_api_key", "stub", raising=False)
         out = translate(
             source_text_ko="모집요강",
             target_lang="ru",
@@ -120,25 +128,27 @@ class TestDefaultLanguageGate:
         assert out.confidence < 0.85       # pivot tax still applied
         assert out.provider == "claude"
 
-    def test_vi_works_by_default(self) -> None:
-        out = translate(
-            source_text_ko="외국인전형",
-            target_lang="vi",
-            glossary={},
-        )
-        # vi uses Papago directly (no pivot)
-        assert out.via_pivot is False
-        assert out.provider == "papago"
+    def test_vi_raises_by_default(self) -> None:
+        # ADR-004-amend-3 (2026-05-17): vi reverted from default-on.
+        # The contracted-student cohort doesn't need Vietnamese right now;
+        # re-enable later by setting UNI_DB_TRANSLATION_LANGUAGES=en,uz,vi
+        # at the env layer.
+        with pytest.raises(LanguageNotEnabledError):
+            translate(
+                source_text_ko="외국인전형",
+                target_lang="vi",
+                glossary={},
+            )
 
-    def test_mn_works_by_default(self) -> None:
-        out = translate(
-            source_text_ko="외국인전형",
-            target_lang="mn",
-            glossary={},
-        )
-        # mn pivots through English (Papago doesn't support mn)
-        assert out.via_pivot is True
-        assert out.provider == "claude"
+    def test_mn_raises_by_default(self) -> None:
+        # ADR-004-amend-3 (2026-05-17): mn reverted from default-on
+        # alongside vi (no Mongolian-speaking cohort currently).
+        with pytest.raises(LanguageNotEnabledError):
+            translate(
+                source_text_ko="외국인전형",
+                target_lang="mn",
+                glossary={},
+            )
 
     def test_ru_raises_by_default(self) -> None:
         with pytest.raises(LanguageNotEnabledError):
