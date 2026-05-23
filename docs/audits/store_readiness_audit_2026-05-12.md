@@ -316,7 +316,7 @@ at `/account` (wired into `lib/core/router/app_router.dart` +
 Type-DELETE-to-confirm dialog → progress dialog → calls
 `supabase.rpc('fn_delete_my_account')` → signs out → router
 redirects to `/welcome`. RPC migration at
-`supabase/migrations/20260512120000_account_deletion_rpc.sql` runs
+`supabase/migrations/20260512120500_account_deletion_rpc.sql` runs
 as SECURITY DEFINER, deletes from every owner-scoped table the audit
 catalogued, and anonymizes the `auth.users` row (PII wiped, banned-
 until set 100y out, deleted_at set). A1 / A2 (data-export) is still
@@ -600,7 +600,7 @@ App Store builds.
 > **All 13 closed in code 2026-05-12.** Status per item below.
 
 1. ✅ **Disable / remove the bundled APK auto-updater for store builds.** (UP1, UP2, UP3) — `kIsStoreBuild` compile-time flag in `lib/core/config/build_config.dart`; `UpdateGate` bypassed in `lib/main.dart`; `UpdaterRepository.downloadAndInstall` throws `UnsupportedError` in store builds. `install_plugin` + `REQUEST_INSTALL_PACKAGES` kept for non-store distribution (per founder direction); Play-flavored manifest may strip the permission later.
-2. ✅ **Implement in-app account deletion and a /account screen reachable from home.** (A1) — `/account` route + `AccountScreen` (sign out, type-DELETE-to-confirm, calls `supabase.rpc('fn_delete_my_account')`). RPC migration `20260512120000_account_deletion_rpc.sql` (SECURITY DEFINER, deletes from every owner-scoped table + anonymizes `auth.users`). AppBar icon on home screen → `/account`.
+2. ✅ **Implement in-app account deletion and a /account screen reachable from home.** (A1) — `/account` route + `AccountScreen` (sign out, type-DELETE-to-confirm, calls `supabase.rpc('fn_delete_my_account')`). RPC migration `20260512120500_account_deletion_rpc.sql` (SECURITY DEFINER, deletes from every owner-scoped table + anonymizes `auth.users`). AppBar icon on home screen → `/account`.
 3. ✅ **Publish Privacy Policy + Terms of Service URLs, link from sign-up and in-app footer, accept them at sign-up.** (P8, C2) — `docs/legal/PRIVACY_POLICY.md` + `TERMS_OF_SERVICE.md` drafted (legal-review markers at top); `legal` Supabase bucket migration `20260512121000_legal_bucket.sql`; URLs in `lib/core/config/app_config.dart`; consent checkbox added to magic-code login (the active sign-in path); Account screen footer.
 4. ✅ **Add Apple Privacy Manifest `PrivacyInfo.xcprivacy`.** (P6, I1) — `ios/Runner/PrivacyInfo.xcprivacy` with the 4 Required Reason API categories (UserDefaults CA92.1, FileTimestamp C617.1, DiskSpace E174.1, SystemBootTime 35F9.1), `NSPrivacyTracking=false`, and `NSPrivacyCollectedDataTypes` covering Email, Phone, Name, UserID, AudioData, Other UGC, Photos.
 5. ✅ **Disable `DevicePreview` in release builds (`enabled: !kReleaseMode`).** (S2) — Removed entirely from `lib/main.dart` and `pubspec.yaml`. Per founder direction (more aggressive than the conditional).

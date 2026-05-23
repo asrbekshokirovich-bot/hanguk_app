@@ -59,7 +59,7 @@ Files touched:
   that `context.push('/account')`.
 
 Migration created:
-- `supabase/migrations/20260512120000_account_deletion_rpc.sql` —
+- `supabase/migrations/20260512120500_account_deletion_rpc.sql` —
   `fn_delete_my_account()` runs as SECURITY DEFINER, validates
   `auth.uid()`, deletes from `applications`, `documents`,
   `student_suggestions`, `study_plan_*`, `interview_*`, `user_roles`,
@@ -332,7 +332,7 @@ Migrations: none.
   `lib/features/auth/presentation/login_screen.dart`,
   `lib/features/home/presentation/home_screen.dart`.
 - **New SQL migrations:** 3 —
-  `supabase/migrations/20260512120000_account_deletion_rpc.sql`,
+  `supabase/migrations/20260512120500_account_deletion_rpc.sql`,
   `supabase/migrations/20260512121000_legal_bucket.sql`,
   `supabase/migrations/20260512122000_enable_rls_audit.sql`.
 - **New manifests / configs:** 4 —
