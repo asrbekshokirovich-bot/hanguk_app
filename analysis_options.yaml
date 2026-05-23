@@ -9,6 +9,15 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    # The vendored vapi package ships an example app whose smoke test
+    # imports `package:example/main.dart` — that package is the example
+    # app's own pubspec name, not visible from the host project. Default
+    # `flutter analyze` scans everything recursively and would flag this
+    # as an unresolved import. Exclude the whole vendored tree.
+    - packages/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
