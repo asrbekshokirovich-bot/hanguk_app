@@ -100,7 +100,14 @@ Deno.serve(async (req) => {
   const uid = await verifyReviewer(req.headers.get("Authorization"));
   if (!uid) return json(403, { error: "forbidden" });
   if (!ANTHROPIC_API_KEY) {
-    await logDiag("ai_not_configured: ANTHROPIC_API_KEY not visible to function");
+    // Diagnostic: report which AI-ish secret NAMES are visible (never values),
+    // to pinpoint a name/project mismatch.
+    const candidates = ["ANTHROPIC_API_KEY", "ANTHROPIC_KEY", "ANTHROPIC", "CLAUDE_API_KEY",
+                        "CLAUDE_KEY", "ANTHROPIC_API", "ANTHROPICAPIKEY", "Anthropic_Api_Key"];
+    const present = candidates.filter((c) => !!Deno.env.get(c));
+    let aiNames: string[] = [];
+    try { aiNames = Object.keys(Deno.env.toObject()).filter((k) => /ANTHROP|CLAUDE|GEMINI/i.test(k)); } catch (_) { /* enum may be restricted */ }
+    await logDiag(`ai_not_configured. exact_name_present=${JSON.stringify(present)} ai_env_names=${JSON.stringify(aiNames)}`);
     return json(500, { error: "ai_not_configured" });
   }
 
