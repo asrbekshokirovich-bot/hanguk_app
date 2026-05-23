@@ -50,14 +50,12 @@ class AuthRepository {
     try {
       String formattedPhone = '+' + phone.replaceAll(RegExp(r'[^0-9]'), '');
 
-      await _auth.signInWithPassword(
-        phone: formattedPhone,
-        password: password,
-      );
+      await _auth.signInWithPassword(phone: formattedPhone, password: password);
       return (error: null);
     } on AuthException catch (e) {
       String msg = e.message;
-      if (msg.toLowerCase().contains('phone') || msg.toLowerCase().contains('credentials')) {
+      if (msg.toLowerCase().contains('phone') ||
+          msg.toLowerCase().contains('credentials')) {
         msg = 'Invalid phone number or password.';
       }
       return (error: msg);
@@ -78,7 +76,10 @@ class AuthRepository {
     String magicCode,
   ) async {
     try {
-      final normalized = magicCode.trim().toUpperCase().replaceAll(RegExp(r'\s+'), '');
+      final normalized = magicCode.trim().toUpperCase().replaceAll(
+        RegExp(r'\s+'),
+        '',
+      );
       final response = await _client.functions.invoke(
         'student-login-v2',
         body: {'magicCode': normalized},
@@ -100,7 +101,10 @@ class AuthRepository {
       final session = data['session'] as Map<String, dynamic>?;
       final user = data['user'] as Map<String, dynamic>?;
       if (session == null || user == null) {
-        return (error: _messageFor('INTERNAL_ERROR', 'session missing'), studentName: null);
+        return (
+          error: _messageFor('INTERNAL_ERROR', 'session missing'),
+          studentName: null,
+        );
       }
 
       // Hand the FULL session to recoverSession() so the SDK doesn't
@@ -133,14 +137,26 @@ class AuthRepository {
       if (e.details is Map) {
         final m = e.details as Map;
         if (m['error'] != null) {
-          return (error: _messageFor(m['error'].toString(), m['detail']?.toString()), studentName: null);
+          return (
+            error: _messageFor(m['error'].toString(), m['detail']?.toString()),
+            studentName: null,
+          );
         }
       }
-      return (error: _messageFor('INTERNAL_ERROR', e.details?.toString()), studentName: null);
+      return (
+        error: _messageFor('INTERNAL_ERROR', e.details?.toString()),
+        studentName: null,
+      );
     } on AuthException catch (e) {
-      return (error: _messageFor('AUTH_SIGNIN_FAILED', e.message), studentName: null);
+      return (
+        error: _messageFor('AUTH_SIGNIN_FAILED', e.message),
+        studentName: null,
+      );
     } catch (e) {
-      return (error: _messageFor('INTERNAL_ERROR', e.toString()), studentName: null);
+      return (
+        error: _messageFor('INTERNAL_ERROR', e.toString()),
+        studentName: null,
+      );
     }
   }
 
@@ -171,11 +187,8 @@ class AuthRepository {
 
   // ─── Public Student Sign Up (Phone) ───────────────────────────────────────
 
-  Future<({String? error, bool isCrmAccount, bool alreadyRegistered})> signUpStudent(
-    String phone,
-    String password,
-    String fullName,
-  ) async {
+  Future<({String? error, bool isCrmAccount, bool alreadyRegistered})>
+  signUpStudent(String phone, String password, String fullName) async {
     try {
       // 1. Guard check: Pre-verify if this phone already exists in the CRM
       try {
@@ -183,9 +196,14 @@ class AuthRepository {
           'check-student-phone',
           body: {'phone': phone.trim()},
         );
-        
+
         if (response.data != null && response.data['exists'] == true) {
-          return (error: 'This account was created by your counselor. Please use the Magic Access Code they provided.', isCrmAccount: true, alreadyRegistered: true);
+          return (
+            error:
+                'This account was created by your counselor. Please use the Magic Access Code they provided.',
+            isCrmAccount: true,
+            alreadyRegistered: true,
+          );
         }
       } catch (e) {
         // Soft fail on check: proceed to attempt signup anyway if edge function fails
@@ -209,9 +227,10 @@ class AuthRepository {
           // If the trigger creates it, this might fail with duplicate key,
           // so we use upsert or just ignore. In Hanguk typically the trigger does it,
           // but we usually also assign user_roles.
-          await _client
-              .from('user_roles')
-              .insert({'user_id': res.user!.id, 'role': 'student'});
+          await _client.from('user_roles').insert({
+            'user_id': res.user!.id,
+            'role': 'student',
+          });
         } catch (_) {}
       }
 
@@ -219,22 +238,32 @@ class AuthRepository {
     } on AuthException catch (e) {
       String msg = e.message;
       bool alreadyRegistered = false;
-      
-      if (msg.toLowerCase().contains('already registered') || 
+
+      if (msg.toLowerCase().contains('already registered') ||
           msg.toLowerCase().contains('user already exists')) {
         msg = 'This phone number is already registered. Please sign in.';
         alreadyRegistered = true;
-      } else if (msg.toLowerCase().contains('phone signups are disabled') || 
-                 msg.toLowerCase().contains('provider')) {
-        msg = 'Registration is currently disabled on the server. Please contact an administrator.';
+      } else if (msg.toLowerCase().contains('phone signups are disabled') ||
+          msg.toLowerCase().contains('provider')) {
+        msg =
+            'Registration is currently disabled on the server. Please contact an administrator.';
       } else if (msg.toLowerCase().contains('phone')) {
-        msg = 'Invalid phone number format. Please ensure you included the country code.';
+        msg =
+            'Invalid phone number format. Please ensure you included the country code.';
       } else if (msg.toLowerCase().contains('credentials')) {
         msg = 'Invalid credentials provided.';
       }
-      return (error: msg, isCrmAccount: false, alreadyRegistered: alreadyRegistered);
+      return (
+        error: msg,
+        isCrmAccount: false,
+        alreadyRegistered: alreadyRegistered,
+      );
     } catch (e) {
-      return (error: e.toString(), isCrmAccount: false, alreadyRegistered: false);
+      return (
+        error: e.toString(),
+        isCrmAccount: false,
+        alreadyRegistered: false,
+      );
     }
   }
 
@@ -265,9 +294,10 @@ class AuthRepository {
             .update({'username': username.toLowerCase().trim()})
             .eq('user_id', userId);
 
-        await _client
-            .from('user_roles')
-            .insert({'user_id': userId, 'role': 'owner'});
+        await _client.from('user_roles').insert({
+          'user_id': userId,
+          'role': 'owner',
+        });
 
         await _client
             .from('system_settings')

@@ -26,12 +26,9 @@ class HangukCard extends StatelessWidget {
       height: height,
       margin: margin,
       decoration: BoxDecoration(
-        color: AppColors.surfaceGlass.withOpacity(0.12),
+        color: AppColors.surfaceGlass.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.borderGlass,
-          width: 0.5,
-        ),
+        border: Border.all(color: AppColors.borderGlass, width: 0.5),
       ),
       child: Material(
         color: Colors.transparent,

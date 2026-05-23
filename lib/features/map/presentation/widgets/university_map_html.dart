@@ -27,29 +27,31 @@ import '../../domain/university.dart';
 /// Audit M22 (2026-05-11): each Kakao marker shows an `InfoWindow`
 /// preview ("name — tap for details") on click; the underlying tap
 /// still raises the bottom sheet via `triggerAppEvent`.
-String generateMapHtml(
-  List<University> universities, {
-  String locale = 'en',
-}) {
+String generateMapHtml(List<University> universities, {String locale = 'en'}) {
   final kakaoJsKey = AppConfig.kakaoJsKey;
-  final validUnis =
-      universities.where((u) => u.latitude != null && u.longitude != null);
+  final validUnis = universities.where(
+    (u) => u.latitude != null && u.longitude != null,
+  );
 
-  final kakaoMarkersJs = validUnis.map((u) {
-    final safeName = u
-        .nameForLocale(locale)
-        .replaceAll("'", "\\'")
-        .replaceAll('"', '\\"');
-    return "addKakaoMarker('${u.id}', ${u.latitude}, ${u.longitude}, '$safeName');";
-  }).join('\n');
+  final kakaoMarkersJs = validUnis
+      .map((u) {
+        final safeName = u
+            .nameForLocale(locale)
+            .replaceAll("'", "\\'")
+            .replaceAll('"', '\\"');
+        return "addKakaoMarker('${u.id}', ${u.latitude}, ${u.longitude}, '$safeName');";
+      })
+      .join('\n');
 
-  final leafletMarkersJs = validUnis.map((u) {
-    final safeName = u
-        .nameForLocale(locale)
-        .replaceAll("'", "\\'")
-        .replaceAll('"', '\\"');
-    return "addLeafletMarker('${u.id}', ${u.latitude}, ${u.longitude}, '$safeName');";
-  }).join('\n');
+  final leafletMarkersJs = validUnis
+      .map((u) {
+        final safeName = u
+            .nameForLocale(locale)
+            .replaceAll("'", "\\'")
+            .replaceAll('"', '\\"');
+        return "addLeafletMarker('${u.id}', ${u.latitude}, ${u.longitude}, '$safeName');";
+      })
+      .join('\n');
 
   return '''
 <!DOCTYPE html>

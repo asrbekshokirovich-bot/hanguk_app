@@ -12,6 +12,7 @@ import '../../../core/config/app_config.dart';
 import '../../../design_system/adaptive/hanguk_card.dart';
 import '../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../design_system/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/data/auth_repository.dart';
 
 /// Account management screen — sign out and (irreversibly) delete the
@@ -44,7 +45,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       // printing on disk so the user gets a readable file.
       final pretty = const JsonEncoder.withIndent('  ').convert(res.data);
       final dir = await getApplicationDocumentsDirectory();
-      final stamp = DateTime.now().toUtc().toIso8601String().replaceAll(':', '-');
+      final stamp = DateTime.now().toUtc().toIso8601String().replaceAll(
+        ':',
+        '-',
+      );
       final file = File('${dir.path}/hanguk-data-export-$stamp.json');
       await file.writeAsString(pretty);
 
@@ -57,13 +61,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     } on FunctionException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: ${e.details}')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.accountExportFailed(e.details),
+            ),
+          ),
         );
       }
     } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.accountExportFailed(e)),
+          ),
         );
       }
     } finally {
@@ -115,24 +125,24 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     Navigator.of(context, rootNavigator: true).pop();
 
     if (error != null) {
+      final l10n = AppLocalizations.of(context)!;
+      final message = error;
       await showDialog<void>(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (ctx) => AlertDialog(
           backgroundColor: const Color(0xFF132A4D),
-          title: const Text(
-            'Could not delete account',
-            style: TextStyle(color: Colors.white),
+          title: Text(
+            l10n.accountDeleteErrorTitle,
+            style: const TextStyle(color: Colors.white),
           ),
           content: Text(
-            'We hit an error while deleting your data:\n\n$error\n\n'
-            'Please email privacy@hanguk.uz so we can finish the deletion '
-            'for you.',
+            l10n.accountDeleteErrorBody(message),
             style: const TextStyle(color: Colors.white70),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.ok),
             ),
           ],
         ),
@@ -153,6 +163,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(authStateProvider).value?.session?.user;
     final email = user?.email;
     final phone = user?.phone;
@@ -169,13 +180,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    tooltip: 'Back', // TODO: localize
+                    tooltip: l10n.accountBackTooltip,
                     onPressed: () => Navigator.of(context).maybePop(),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Account',
-                    style: TextStyle(
+                  Text(
+                    l10n.accountTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -190,13 +201,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Signed in as',
-                      style: TextStyle(color: Colors.white54, fontSize: 13),
+                    Text(
+                      l10n.accountSignedInAs,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      email ?? phone ?? '(unknown account)',
+                      email ?? phone ?? l10n.accountUnknownAccount,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -214,9 +228,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Session',
-                      style: TextStyle(
+                    Text(
+                      l10n.accountSessionLabel,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -225,7 +239,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.logout),
-                      label: Text(_signingOut ? 'Signing out…' : 'Sign out'),
+                      label: Text(
+                        _signingOut
+                            ? l10n.accountSigningOut
+                            : l10n.accountSignOut,
+                      ),
                       onPressed: _signingOut ? null : _signOut,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white.withValues(alpha: 0.08),
@@ -248,26 +266,29 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Your data',
-                      style: TextStyle(
+                    Text(
+                      l10n.accountYourDataLabel,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Download a JSON copy of everything Hanguk holds about '
-                      'your account — profile, applications, study plans, '
-                      'drafts, interview sessions and feedback.',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    Text(
+                      l10n.accountYourDataBody,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.download),
                       label: Text(
-                        _exporting ? 'Preparing export…' : 'Download my data',
+                        _exporting
+                            ? l10n.accountPreparingExport
+                            : l10n.accountDownloadMyData,
                       ),
                       onPressed: _exporting ? null : _exportMyData,
                       style: ElevatedButton.styleFrom(
@@ -290,27 +311,26 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Danger zone',
-                      style: TextStyle(
+                    Text(
+                      l10n.accountDangerZoneLabel,
+                      style: const TextStyle(
                         color: Colors.redAccent,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Deleting your account is permanent. We will erase '
-                      'your profile, applications, study plans, '
-                      'personal-statement drafts, interview sessions, and '
-                      'transcripts. Documents in storage are removed '
-                      'within 30 days; backups age out within 90 days.',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    Text(
+                      l10n.accountDangerZoneBody,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.delete_forever),
-                      label: const Text('Delete account'),
+                      label: Text(l10n.accountDeleteAccount),
                       onPressed: _showDeleteFlow,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
@@ -333,18 +353,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 children: [
                   TextButton(
                     onPressed: () => _openLegal(AppConfig.privacyPolicyUrl),
-                    child: const Text(
-                      'Privacy Policy',
-                      style: TextStyle(color: AppColors.vibrantLime),
+                    child: Text(
+                      l10n.accountPrivacyPolicy,
+                      style: const TextStyle(color: AppColors.vibrantLime),
                     ),
                   ),
-                  const Text(' • ',
-                      style: TextStyle(color: Colors.white38)),
+                  const Text(' • ', style: TextStyle(color: Colors.white70)),
                   TextButton(
                     onPressed: () => _openLegal(AppConfig.termsOfServiceUrl),
-                    child: const Text(
-                      'Terms of Service',
-                      style: TextStyle(color: AppColors.vibrantLime),
+                    child: Text(
+                      l10n.accountTermsOfService,
+                      style: const TextStyle(color: AppColors.vibrantLime),
                     ),
                   ),
                 ],
@@ -385,21 +404,20 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       backgroundColor: const Color(0xFF132A4D),
-      title: const Text(
-        'Delete your account?',
-        style: TextStyle(color: Colors.white),
+      title: Text(
+        l10n.accountDeleteDialogTitle,
+        style: const TextStyle(color: Colors.white),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'This will permanently delete your account, applications, '
-            'study plans, personal-statement drafts, interview sessions, '
-            'and transcripts.\n\nType DELETE to confirm.',
-            style: TextStyle(color: Colors.white70),
+          Text(
+            l10n.accountDeleteDialogBody,
+            style: const TextStyle(color: Colors.white70),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -407,8 +425,10 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
             textCapitalization: TextCapitalization.characters,
             style: const TextStyle(color: Colors.white, letterSpacing: 2),
             decoration: InputDecoration(
+              // Hint is the literal sentinel string the controller compares
+              // against — must NOT be translated.
               hintText: 'DELETE',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: const TextStyle(color: Colors.white70),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.06),
               border: OutlineInputBorder(
@@ -422,17 +442,16 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         ElevatedButton(
-          onPressed:
-              _canConfirm ? () => Navigator.of(context).pop(true) : null,
+          onPressed: _canConfirm ? () => Navigator.of(context).pop(true) : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.redAccent,
             foregroundColor: Colors.white,
             disabledBackgroundColor: Colors.redAccent.withValues(alpha: 0.3),
           ),
-          child: const Text('Delete forever'),
+          child: Text(l10n.accountDeleteDialogConfirm),
         ),
       ],
     );
@@ -444,13 +463,14 @@ class _DeletionProgressDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PopScope(
+    final l10n = AppLocalizations.of(context)!;
+    return PopScope(
       canPop: false,
       child: AlertDialog(
-        backgroundColor: Color(0xFF132A4D),
+        backgroundColor: const Color(0xFF132A4D),
         content: Row(
           children: [
-            SizedBox(
+            const SizedBox(
               width: 28,
               height: 28,
               child: CircularProgressIndicator(
@@ -458,11 +478,11 @@ class _DeletionProgressDialog extends StatelessWidget {
                 color: AppColors.vibrantLime,
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Flexible(
               child: Text(
-                'Deleting your account…',
-                style: TextStyle(color: Colors.white),
+                l10n.accountDeleteProgress,
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ],

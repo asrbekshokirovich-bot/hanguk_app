@@ -18,14 +18,14 @@ class AdaptiveScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     if (Platform.isIOS) {
       return CupertinoPageScaffold(
-        navigationBar: title != null 
-            ? CupertinoNavigationBar(middle: title) 
+        navigationBar: title != null
+            ? CupertinoNavigationBar(middle: title)
             : null,
-        child: bottomNavigationBar != null 
+        child: bottomNavigationBar != null
             ? Column(
                 children: [
                   Expanded(child: SafeArea(child: body)),
-                  bottomNavigationBar!
+                  bottomNavigationBar!,
                 ],
               )
             : SafeArea(child: body),

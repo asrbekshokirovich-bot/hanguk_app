@@ -14,12 +14,17 @@ class UpdateDialog extends ConsumerWidget {
     final state = ref.watch(updaterProvider);
     return switch (state) {
       UpdateIdle() || UpdateChecking() => const SizedBox.shrink(),
-      UpdateAvailable(:final info, :final effectivelyForced) =>
-        _AvailableView(info: info, forced: effectivelyForced),
+      UpdateAvailable(:final info, :final effectivelyForced) => _AvailableView(
+        info: info,
+        forced: effectivelyForced,
+      ),
       UpdateDownloading() => _DownloadingView(state: state),
       UpdateInstalling() => const _InstallingView(),
-      UpdateFailed(:final code, :final detail, :final info) =>
-        _FailedView(code: code, detail: detail, info: info),
+      UpdateFailed(:final code, :final detail, :final info) => _FailedView(
+        code: code,
+        detail: detail,
+        info: info,
+      ),
     };
   }
 }
@@ -50,7 +55,10 @@ class _AvailableView extends ConsumerWidget {
             SizedBox(width: 12),
             Text(
               'Update Available',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -66,7 +74,7 @@ class _AvailableView extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 'Size: $sizeMB MB',
-                style: const TextStyle(color: Colors.white38, fontSize: 12),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
             if (info.releaseNotes != null && info.releaseNotes.isNotEmpty) ...[
@@ -79,8 +87,11 @@ class _AvailableView extends ConsumerWidget {
                 ),
                 child: Text(
                   info.releaseNotes,
-                  style:
-                      const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
@@ -91,7 +102,9 @@ class _AvailableView extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: Colors.orangeAccent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: Colors.orangeAccent.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: const Text(
                   'This update changes the app signing key. After installing you will need to log in again with your magic code.',
@@ -108,7 +121,10 @@ class _AvailableView extends ConsumerWidget {
                 notifier.dismiss();
                 Navigator.of(context, rootNavigator: true).maybePop();
               },
-              child: const Text('Later', style: TextStyle(color: Colors.white54)),
+              child: const Text(
+                'Later',
+                style: TextStyle(color: Colors.white54),
+              ),
             ),
           ElevatedButton(
             onPressed: () => notifier.startUpdate(info),
@@ -133,8 +149,9 @@ class _DownloadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mb = (state.bytesDownloaded / (1024 * 1024)).toStringAsFixed(1);
-    final totalMb =
-        state.totalBytes > 0 ? (state.totalBytes / (1024 * 1024)).toStringAsFixed(1) : '?';
+    final totalMb = state.totalBytes > 0
+        ? (state.totalBytes / (1024 * 1024)).toStringAsFixed(1)
+        : '?';
     return PopScope(
       canPop: false,
       child: AlertDialog(
@@ -189,7 +206,10 @@ class _InstallingView extends StatelessWidget {
             SizedBox(
               width: 24,
               height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.vibrantLime),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.vibrantLime,
+              ),
             ),
             SizedBox(width: 16),
             Flexible(

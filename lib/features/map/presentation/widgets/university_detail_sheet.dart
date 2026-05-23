@@ -40,7 +40,7 @@ class UniversityDetailSheet extends ConsumerWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -75,7 +75,7 @@ class UniversityDetailSheet extends ConsumerWidget {
                                     const Icon(
                                       Icons.location_on_outlined,
                                       size: 14,
-                                      color: Colors.white38,
+                                      color: Colors.white70,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -96,10 +96,13 @@ class UniversityDetailSheet extends ConsumerWidget {
                                         vertical: 3,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.vibrantLime.withOpacity(0.12),
+                                        color: AppColors.vibrantLime.withValues(
+                                          alpha: 0.12,
+                                        ),
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
-                                          color: AppColors.vibrantLime.withOpacity(0.3),
+                                          color: AppColors.vibrantLime
+                                              .withValues(alpha: 0.3),
                                         ),
                                       ),
                                       child: const Text(
@@ -140,7 +143,6 @@ class UniversityDetailSheet extends ConsumerWidget {
                       // when present. Leaving the rows here would
                       // always render them empty and make the sheet
                       // look broken.
-
                       const SizedBox(height: 24),
 
                       // Audit M17 / M18 (2026-05-12): when this
@@ -181,8 +183,9 @@ class UniversityDetailSheet extends ConsumerWidget {
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.vibrantLime,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -214,11 +217,13 @@ class UniversityDetailSheet extends ConsumerWidget {
                                 style: TextStyle(color: AppColors.vibrantLime),
                               ),
                               style: OutlinedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 side: BorderSide(
-                                  color:
-                                      AppColors.vibrantLime.withOpacity(0.4),
+                                  color: AppColors.vibrantLime.withValues(
+                                    alpha: 0.4,
+                                  ),
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
@@ -235,7 +240,8 @@ class UniversityDetailSheet extends ConsumerWidget {
                       // deep-links work. When a curated Virtual Tour
                       // exists, this is the secondary entry point;
                       // otherwise it's the only one.
-                      if (university.latitude != null && university.longitude != null)
+                      if (university.latitude != null &&
+                          university.longitude != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: SizedBox(
@@ -248,14 +254,23 @@ class UniversityDetailSheet extends ConsumerWidget {
                                   extra: university,
                                 );
                               },
-                              icon: const Icon(Icons.threesixty, size: 18, color: AppColors.pureBlack),
+                              icon: const Icon(
+                                Icons.threesixty,
+                                size: 18,
+                                color: AppColors.pureBlack,
+                              ),
                               label: const Text(
                                 'Virtual Walkaround',
-                                style: TextStyle(color: AppColors.pureBlack, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  color: AppColors.pureBlack,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.vibrantLime,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -289,7 +304,9 @@ class UniversityDetailSheet extends ConsumerWidget {
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               side: BorderSide(
-                                color: AppColors.vibrantLime.withOpacity(0.4),
+                                color: AppColors.vibrantLime.withValues(
+                                  alpha: 0.4,
+                                ),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -312,12 +329,18 @@ class UniversityDetailSheet extends ConsumerWidget {
     if (university.logoUrl != null && university.logoUrl!.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(16),
+        // Decorative — the university name appears in the same header.
         child: Image.network(
           university.logoUrl!,
           width: size,
           height: size,
           fit: BoxFit.contain,
+          excludeFromSemantics: true,
           errorBuilder: (_, __, ___) => _fallbackIconBox(size),
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return _loadingBox(size);
+          },
         ),
       );
     }
@@ -329,11 +352,37 @@ class UniversityDetailSheet extends ConsumerWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.vibrantLime.withOpacity(0.08),
+        color: AppColors.vibrantLime.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.vibrantLime.withOpacity(0.2)),
+        border: Border.all(color: AppColors.vibrantLime.withValues(alpha: 0.2)),
       ),
-      child: Icon(Icons.school_outlined, color: AppColors.vibrantLime, size: size * 0.45),
+      child: Icon(
+        Icons.school_outlined,
+        color: AppColors.vibrantLime,
+        size: size * 0.45,
+      ),
+    );
+  }
+
+  // Low-contrast placeholder shown during slow logo loads (audit P1).
+  Widget _loadingBox(double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: size * 0.35,
+          height: size * 0.35,
+          child: const CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white24,
+          ),
+        ),
+      ),
     );
   }
 
@@ -347,26 +396,28 @@ class UniversityDetailSheet extends ConsumerWidget {
 
     if (university.tier != null) {
       final isTop = university.isTopTier;
-      items.add(_StatItem(
-        label: isTop ? 'Top Tier' : 'Tier',
-        value: isTop ? 'Top' : 'T${university.tier}',
-        highlight: isTop,
-      ));
+      items.add(
+        _StatItem(
+          label: isTop ? 'Top Tier' : 'Tier',
+          value: isTop ? 'Top' : 'T${university.tier}',
+          highlight: isTop,
+        ),
+      );
     }
 
     if (university.isAccredited) {
-      items.add(const _StatItem(
-        label: 'Verified',
-        value: 'IEQAS',
-        highlight: true,
-      ));
+      items.add(
+        const _StatItem(label: 'Verified', value: 'IEQAS', highlight: true),
+      );
     }
 
     if (university.nextEventAt != null) {
-      items.add(_StatItem(
-        label: 'Next event',
-        value: DateFormat.MMMd().format(university.nextEventAt!),
-      ));
+      items.add(
+        _StatItem(
+          label: 'Next event',
+          value: DateFormat.MMMd().format(university.nextEventAt!),
+        ),
+      );
     }
 
     if (items.isEmpty) return const SizedBox.shrink();
@@ -377,17 +428,19 @@ class UniversityDetailSheet extends ConsumerWidget {
             (item) => Expanded(
               child: Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 8,
+                ),
                 decoration: BoxDecoration(
                   color: item.highlight
-                      ? AppColors.vibrantLime.withOpacity(0.08)
-                      : Colors.white.withOpacity(0.04),
+                      ? AppColors.vibrantLime.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: item.highlight
-                        ? AppColors.vibrantLime.withOpacity(0.25)
-                        : Colors.white.withOpacity(0.07),
+                        ? AppColors.vibrantLime.withValues(alpha: 0.25)
+                        : Colors.white.withValues(alpha: 0.07),
                   ),
                 ),
                 child: Column(
@@ -405,8 +458,10 @@ class UniversityDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       item.label,
-                      style:
-                          const TextStyle(color: Colors.white38, fontSize: 11),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),

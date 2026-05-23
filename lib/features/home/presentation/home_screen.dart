@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../design_system/adaptive/adaptive_bottom_navigation.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../applications/presentation/applications_tab.dart';
 import '../../map/presentation/map_tab.dart';
 import '../../documents/presentation/documents_tab.dart';
@@ -55,7 +57,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (_) => Container(
         height: MediaQuery.of(context).size.height * 0.9,
         decoration: const BoxDecoration(
-          color: Color(0xFF071221), 
+          color: Color(0xFF071221),
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: ClipRRect(
@@ -69,24 +71,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(homeTabProvider);
+    final l = AppLocalizations.of(context)!;
     return HangukScaffold(
       body: _tabs[currentIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openAIChat(context),
         backgroundColor: AppColors.vibrantLime,
         elevation: 6,
+        tooltip: l.a11yTooltipAskAi,
         child: const Icon(Icons.smart_toy, color: Colors.black, size: 28),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: AdaptiveBottomNavigation(
         currentIndex: currentIndex,
         onTap: (index) {
           ref.read(homeTabProvider.notifier).setTab(index);
         },
-        items: const [
-          BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.school)),
-          BottomNavigationBarItem(label: 'Map', icon: Icon(Icons.map)),
-          BottomNavigationBarItem(label: 'Docs', icon: Icon(Icons.description)),
-          BottomNavigationBarItem(label: 'Training', icon: Icon(Icons.model_training_outlined)),
+        items: [
+          AdaptiveNavigationItem(label: l.navApplications, icon: Icons.school),
+          AdaptiveNavigationItem(label: l.navMap, icon: Icons.map),
+          AdaptiveNavigationItem(label: l.navDocs, icon: Icons.description),
+          AdaptiveNavigationItem(
+            label: l.navTraining,
+            icon: Icons.model_training_outlined,
+          ),
         ],
       ),
     );

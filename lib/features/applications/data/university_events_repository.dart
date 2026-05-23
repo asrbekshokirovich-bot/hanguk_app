@@ -58,7 +58,8 @@ class UniversityEventsController extends ChangeNotifier {
   UniversityEventsState state;
   final String universityId;
 
-  UniversityEventsController(this.universityId) : state = const UniversityEventsState(isLoading: true) {
+  UniversityEventsController(this.universityId)
+    : state = const UniversityEventsState(isLoading: true) {
     _fetchEvents(universityId);
   }
 
@@ -91,12 +92,14 @@ class UniversityEventsController extends ChangeNotifier {
           .eq('room_id', roomId)
           .order('event_date', ascending: true);
 
-      final List<UniversityEvent> eventsList = (eventsData as List).map((e) => UniversityEvent.fromMap(e)).toList();
+      final List<UniversityEvent> eventsList = (eventsData as List)
+          .map((e) => UniversityEvent.fromMap(e))
+          .toList();
 
       _setState(state.copyWith(events: eventsList, isLoading: false));
     } catch (e, st) {
       debugPrint('[UniversityEventsNotifier] Error: $e\n$st');
       _setState(state.copyWith(error: e.toString(), isLoading: false));
     }
-}
+  }
 }

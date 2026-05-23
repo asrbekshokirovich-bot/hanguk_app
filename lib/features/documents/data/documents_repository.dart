@@ -18,17 +18,21 @@ final documentsProvider = FutureProvider<List<AppDocument>>((ref) async {
         .eq('student_id', user.id)
         .order('created_at', ascending: false);
 
-    return (data as List).map((row) => AppDocument(
-      id: row['id'] as String,
-      studentId: row['student_id'] as String,
-      applicationId: row['application_id'] as String?,
-      name: row['name'] as String? ?? '',
-      filePath: row['file_path'] as String? ?? '',
-      fileType: row['file_type'] as String? ?? '',
-      fileSize: (row['file_size'] as int?) ?? 0,
-      status: row['status'] as String? ?? 'uploaded',
-      createdAt: DateTime.parse(row['created_at'] as String),
-    )).toList();
+    return (data as List)
+        .map(
+          (row) => AppDocument(
+            id: row['id'] as String,
+            studentId: row['student_id'] as String,
+            applicationId: row['application_id'] as String?,
+            name: row['name'] as String? ?? '',
+            filePath: row['file_path'] as String? ?? '',
+            fileType: row['file_type'] as String? ?? '',
+            fileSize: (row['file_size'] as int?) ?? 0,
+            status: row['status'] as String? ?? 'uploaded',
+            createdAt: DateTime.parse(row['created_at'] as String),
+          ),
+        )
+        .toList();
   } catch (e) {
     // Network/auth failure — return empty so DocumentSlot shows Upload buttons
     return [];
@@ -49,7 +53,8 @@ class DocumentsRepository {
     }
 
     final fileExt = file.path.split('.').last;
-    final fileName = '${user.id}/${type.id}-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+    final fileName =
+        '${user.id}/${type.id}-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
 
     // Upload to Storage
     await _client.storage

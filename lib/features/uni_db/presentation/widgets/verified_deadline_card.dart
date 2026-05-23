@@ -7,11 +7,7 @@ import '../../domain/upcoming_deadline.dart';
 /// Plan §H.5. The "verified" badge differentiates these from the
 /// user-typed free-text application entries.
 class VerifiedDeadlineCard extends StatelessWidget {
-  const VerifiedDeadlineCard({
-    super.key,
-    required this.deadline,
-    this.onTap,
-  });
+  const VerifiedDeadlineCard({super.key, required this.deadline, this.onTap});
 
   final UpcomingDeadline deadline;
   final VoidCallback? onTap;
@@ -69,10 +65,7 @@ class VerifiedDeadlineCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(_formatDate(deadline.startsAt)),
                   const Spacer(),
-                  Text(
-                    countdown,
-                    style: theme.textTheme.labelMedium,
-                  ),
+                  Text(countdown, style: theme.textTheme.labelMedium),
                 ],
               ),
             ],

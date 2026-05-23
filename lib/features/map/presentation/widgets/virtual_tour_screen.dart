@@ -50,15 +50,15 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
         onMessageReceived: _onChannelMessage,
       )
       ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) => _injectSpec(),
-        ),
+        NavigationDelegate(onPageFinished: (_) => _injectSpec()),
       );
     _loadAsset();
   }
 
   Future<void> _loadAsset() async {
-    final html = await rootBundle.loadString('assets/virtual_tour/pannellum.html');
+    final html = await rootBundle.loadString(
+      'assets/virtual_tour/pannellum.html',
+    );
     // baseUrl gives the WebView a real origin so external panorama
     // URLs (Pannellum CDN, Supabase Storage public bucket) load
     // without mixed-content issues.
@@ -136,13 +136,17 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
           if (_failed && l != null)
             Positioned.fill(
               child: Container(
-                color: const Color(0xFF0F1626).withOpacity(0.92),
+                color: const Color(0xFF0F1626).withValues(alpha: 0.92),
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.threesixty, color: Colors.white70, size: 48),
+                    const Icon(
+                      Icons.threesixty,
+                      color: Colors.white70,
+                      size: 48,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       l.walkaroundInitErrorTitle,
@@ -157,7 +161,10 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
                     Text(
                       l.walkaroundInitErrorSubtitle,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -168,16 +175,24 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             left: 16,
-            child: InkWell(
-              onTap: () => Navigator.of(context).pop(),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white24),
+            child: Semantics(
+              label: 'Back',
+              button: true,
+              child: InkWell(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
               ),
             ),
           ),
@@ -189,7 +204,7 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: Colors.white24),
               ),

@@ -15,4 +15,5 @@ class PendingMapDetailNotifier extends Notifier<String?> {
 
 final pendingMapDetailProvider =
     NotifierProvider<PendingMapDetailNotifier, String?>(
-        PendingMapDetailNotifier.new);
+      PendingMapDetailNotifier.new,
+    );

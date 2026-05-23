@@ -83,5 +83,4 @@ class AppConfig {
     defaultValue:
         'https://lysjdtyanhdfphqyijsr.supabase.co/storage/v1/object/public/legal/TERMS_OF_SERVICE.md',
   );
-
 }

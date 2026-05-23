@@ -18,7 +18,8 @@ class DocumentRequirementRow {
         documentType: (map['document_type'] as String?) ?? '',
         isRequired: (map['is_required'] as bool?) ?? true,
         isApostilleRequired: (map['is_apostille_required'] as bool?) ?? false,
-        countrySpecific: (map['country_specific'] as Map?)?.cast<String, dynamic>(),
+        countrySpecific: (map['country_specific'] as Map?)
+            ?.cast<String, dynamic>(),
         notesKo: map['notes_ko'] as String?,
       );
 

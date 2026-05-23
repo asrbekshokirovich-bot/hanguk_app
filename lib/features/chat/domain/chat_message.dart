@@ -6,9 +6,5 @@ class ChatMessage {
   final String role; // 'user' | 'assistant'
   final String content;
 
-  const ChatMessage({
-    this.id,
-    required this.role,
-    required this.content,
-  });
+  const ChatMessage({this.id, required this.role, required this.content});
 }

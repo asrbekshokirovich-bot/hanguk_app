@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/chat_repository.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'widgets/chat_message_bubble.dart';
 
 class ChatTab extends ConsumerStatefulWidget {
@@ -45,11 +46,13 @@ class _ChatTabState extends ConsumerState<ChatTab> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
+    final l = AppLocalizations.of(context)!;
 
     ref.listen(chatProvider, (previous, next) {
-       if (previous?.messages.length != next.messages.length || (previous?.isLoading == true && next.isLoading == false)) {
-         Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
-       }
+      if (previous?.messages.length != next.messages.length ||
+          (previous?.isLoading == true && next.isLoading == false)) {
+        Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+      }
     });
 
     return Scaffold(
@@ -60,6 +63,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
+            tooltip: l.a11yTooltipClearChat,
             onPressed: () {
               ref.read(chatProvider.notifier).clearChat();
             },
@@ -72,7 +76,8 @@ class _ChatTabState extends ConsumerState<ChatTab> {
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: chatState.messages.length + (chatState.isLoading ? 1 : 0),
+              itemCount:
+                  chatState.messages.length + (chatState.isLoading ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == chatState.messages.length && chatState.isLoading) {
                   return const Padding(
@@ -102,7 +107,10 @@ class _ChatTabState extends ConsumerState<ChatTab> {
               width: double.infinity,
               child: Text(
                 chatState.error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer, fontSize: 13),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                  fontSize: 13,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -113,7 +121,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
               decoration: BoxDecoration(
                 color: const Color(0xFF0F213D),
                 border: Border(
-                  top: BorderSide(color: Colors.white.withOpacity(0.05)),
+                  top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
                 ),
               ),
               child: Row(
@@ -124,7 +132,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: 'Ask anything about South Korea...',
-                        hintStyle: const TextStyle(color: Colors.white38),
+                        hintStyle: const TextStyle(color: Colors.white70),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(28),
                           borderSide: BorderSide.none,
@@ -138,8 +146,11 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.05),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
                       ),
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _handleSend(),
@@ -150,7 +161,11 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                     backgroundColor: AppColors.vibrantLime,
                     radius: 24,
                     child: IconButton(
-                      icon: const Icon(Icons.send_rounded, color: AppColors.pureBlack),
+                      icon: const Icon(
+                        Icons.send_rounded,
+                        color: AppColors.pureBlack,
+                      ),
+                      tooltip: l.a11yTooltipSendMessage,
                       onPressed: chatState.isLoading ? null : _handleSend,
                     ),
                   ),

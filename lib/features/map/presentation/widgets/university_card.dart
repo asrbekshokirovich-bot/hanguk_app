@@ -7,11 +7,7 @@ class UniversityCard extends StatelessWidget {
   final University university;
   final VoidCallback? onTap;
 
-  const UniversityCard({
-    super.key,
-    required this.university,
-    this.onTap,
-  });
+  const UniversityCard({super.key, required this.university, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +35,7 @@ class UniversityCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   university.location,
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 13,
-                  ),
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
                 ),
               ],
             ),
@@ -54,7 +47,11 @@ class UniversityCard extends StatelessWidget {
             _buildPartnerChip(),
           ],
           const SizedBox(width: 4),
-          const Icon(Icons.chevron_right_rounded, color: Colors.white24, size: 20),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: Colors.white24,
+            size: 20,
+          ),
         ],
       ),
     );
@@ -64,12 +61,18 @@ class UniversityCard extends StatelessWidget {
     if (university.logoUrl != null && university.logoUrl!.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
+        // Decorative — the university name sits next to this logo.
         child: Image.network(
           university.logoUrl!,
           width: 48,
           height: 48,
           fit: BoxFit.contain,
+          excludeFromSemantics: true,
           errorBuilder: (_, __, ___) => _fallbackIcon(),
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return _loadingBox();
+          },
         ),
       );
     }
@@ -81,11 +84,39 @@ class UniversityCard extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: AppColors.vibrantLime.withOpacity(0.08),
+        color: AppColors.vibrantLime.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.vibrantLime.withOpacity(0.15)),
+        border: Border.all(
+          color: AppColors.vibrantLime.withValues(alpha: 0.15),
+        ),
       ),
-      child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime, size: 24),
+      child: const Icon(
+        Icons.school_outlined,
+        color: AppColors.vibrantLime,
+        size: 24,
+      ),
+    );
+  }
+
+  // Low-contrast placeholder shown during slow logo loads (audit P1).
+  Widget _loadingBox() {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white24,
+          ),
+        ),
+      ),
     );
   }
 
@@ -105,13 +136,13 @@ class UniversityCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: isTop
-            ? AppColors.vibrantLime.withOpacity(0.15)
-            : Colors.white.withOpacity(0.05),
+            ? AppColors.vibrantLime.withValues(alpha: 0.15)
+            : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isTop
-              ? AppColors.vibrantLime.withOpacity(0.4)
-              : Colors.white.withOpacity(0.08),
+              ? AppColors.vibrantLime.withValues(alpha: 0.4)
+              : Colors.white.withValues(alpha: 0.08),
         ),
       ),
       child: Text(
@@ -119,7 +150,7 @@ class UniversityCard extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: isTop ? AppColors.vibrantLime : Colors.white38,
+          color: isTop ? AppColors.vibrantLime : Colors.white70,
         ),
       ),
     );
@@ -129,7 +160,7 @@ class UniversityCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.vibrantLime.withOpacity(0.1),
+        color: AppColors.vibrantLime.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Text(

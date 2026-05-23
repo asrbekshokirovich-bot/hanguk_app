@@ -62,11 +62,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       color: Colors.white,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
+                        // Decorative — wordmark next to it carries the
+                        // brand for assistive tech.
                         child: Image.asset(
                           'assets/images/logo.jpg',
                           height: 40,
                           width: 40,
-                          fit: BoxFit.contain, // Changed from cover to contain
+                          fit: BoxFit.contain,
+                          excludeFromSemantics: true,
                         ),
                       ),
                     ),
@@ -79,13 +82,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                   ],
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Hero Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -94,15 +96,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: Colors.white, // Added white background so the JPEG blends in
+                        color: Colors
+                            .white, // Added white background so the JPEG blends in
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: AppColors.vibrantLime.withOpacity(0.3),
+                          color: AppColors.vibrantLime.withValues(alpha: 0.3),
                           width: 4,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -110,11 +113,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
+                        // Decorative — the "Hanguk Consulting" headline
+                        // immediately below carries the brand identity.
                         child: Image.asset(
                           'assets/images/logo.jpg',
                           height: 100,
                           width: 100,
-                          fit: BoxFit.contain, // Changed to contain to avoid cropping
+                          fit: BoxFit.contain,
+                          excludeFromSemantics: true,
                         ),
                       ),
                     ),
@@ -136,18 +142,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       'South Korean University Application Platform',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontSize: 18,
                       ),
                     ),
                     const SizedBox(height: 48),
-                    
+
                     // Actions
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () => context.push('/login', extra: {'magic_code': true}),
+                        onPressed: () =>
+                            context.push('/login', extra: {'magic_code': true}),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.vibrantLime,
                           foregroundColor: AppColors.pureBlack,
@@ -159,7 +166,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             SizedBox(width: 8),
                             Text(
                               'I have a Magic Code',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -198,7 +208,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   ],
                 ),
               ),
-              
+
               const Spacer(flex: 2),
             ],
           ),

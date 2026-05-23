@@ -52,7 +52,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceGlass.withOpacity(0.08),
+        fillColor: AppColors.surfaceGlass.withValues(alpha: 0.08),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.borderGlass),
@@ -65,15 +65,44 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.vibrantLime),
         ),
-        hintStyle: const TextStyle(color: Colors.white38),
-        prefixIconColor: Colors.white38,
+        hintStyle: const TextStyle(color: Colors.white70),
+        prefixIconColor: Colors.white70,
       ),
+      // Retained for any incidental M2 BottomNavigationBar usage in
+      // dialogs / pickers; the home shell now uses M3 NavigationBar via
+      // AdaptiveBottomNavigation (UI/UX audit P0 #5, 2026-05-12).
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Color(0xFF0F213D),
         selectedItemColor: AppColors.vibrantLime,
-        unselectedItemColor: Colors.white38,
+        unselectedItemColor: Colors.white70,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
+      ),
+      // Material 3 NavigationBar styling — colour-matched to the legacy
+      // bottomNavigationBarTheme above so the swap is visually
+      // continuous. NavigationBar defaults are otherwise tinted from
+      // ColorScheme.surfaceContainer / .secondaryContainer which would
+      // not match the brand palette.
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: const Color(0xFF0F213D),
+        indicatorColor: AppColors.vibrantLime.withValues(alpha: 0.18),
+        elevation: 0,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppColors.vibrantLime,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return const TextStyle(color: Colors.white70, fontSize: 12);
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: AppColors.vibrantLime);
+          }
+          return const IconThemeData(color: Colors.white70);
+        }),
       ),
       tabBarTheme: TabBarThemeData(
         labelColor: AppColors.pureBlack,
@@ -86,7 +115,7 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surfaceGlass.withOpacity(0.12),
+        color: AppColors.surfaceGlass.withValues(alpha: 0.12),
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

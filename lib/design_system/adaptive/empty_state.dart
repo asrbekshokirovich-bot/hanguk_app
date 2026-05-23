@@ -57,7 +57,7 @@ class EmptyState extends StatelessWidget {
             subhead,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white60,
+              color: Colors.white70,
               fontSize: 13,
               height: 1.4,
             ),
@@ -69,8 +69,10 @@ class EmptyState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.vibrantLime,
                 foregroundColor: Colors.black,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

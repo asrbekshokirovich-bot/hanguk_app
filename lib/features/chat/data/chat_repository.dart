@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/chat_message.dart';
+
 class ChatState {
   final List<ChatMessage> messages;
   final bool isLoading;
@@ -30,13 +31,15 @@ class ChatState {
 class ChatNotifier extends Notifier<ChatState> {
   @override
   ChatState build() {
-    return const ChatState(messages: [
-      ChatMessage(
-        role: 'assistant',
-        content:
-            "Salom! 👋 Men Hanguk AI yordamchisiman. Hujjatlar, universitetlar, ariza jarayoni haqida har qanday savolingizga javob beraman!",
-      )
-    ]);
+    return const ChatState(
+      messages: [
+        ChatMessage(
+          role: 'assistant',
+          content:
+              "Salom! 👋 Men Hanguk AI yordamchisiman. Hujjatlar, universitetlar, ariza jarayoni haqida har qanday savolingizga javob beraman!",
+        ),
+      ],
+    );
   }
 
   Future<void> sendMessage(String text) async {
@@ -58,12 +61,16 @@ class ChatNotifier extends Notifier<ChatState> {
           .toList();
 
       final user = client.auth.currentUser;
-      final language = 'en'; // By default, but the backend detects Uzbek automatically
+      final language =
+          'en'; // By default, but the backend detects Uzbek automatically
 
-      final url = Uri.parse('https://lysjdtyanhdfphqyijsr.supabase.co/functions/v1/hanguk-ai-chat');
+      final url = Uri.parse(
+        'https://lysjdtyanhdfphqyijsr.supabase.co/functions/v1/hanguk-ai-chat',
+      );
       final headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${client.auth.currentSession?.accessToken ?? ''}',
+        'Authorization':
+            'Bearer ${client.auth.currentSession?.accessToken ?? ''}',
       };
 
       final request = http.Request('POST', url);
@@ -87,16 +94,23 @@ class ChatNotifier extends Notifier<ChatState> {
 
       void upsertAssistant(String chunk) {
         assistantSoFar += chunk;
-        
+
         final messagesList = List<ChatMessage>.from(state.messages);
-        
+
         // Ensure we find the specifically added uncompleted assistant message
-        if (messagesList.isNotEmpty && messagesList.last.role == 'assistant' && !state.isLoading) {
+        if (messagesList.isNotEmpty &&
+            messagesList.last.role == 'assistant' &&
+            !state.isLoading) {
           // We already have a streaming assistant message, replace it
-          messagesList[messagesList.length - 1] = ChatMessage(role: 'assistant', content: assistantSoFar);
+          messagesList[messagesList.length - 1] = ChatMessage(
+            role: 'assistant',
+            content: assistantSoFar,
+          );
         } else {
           // This is the first chunk, append the message
-          messagesList.add(ChatMessage(role: 'assistant', content: assistantSoFar));
+          messagesList.add(
+            ChatMessage(role: 'assistant', content: assistantSoFar),
+          );
         }
 
         state = state.copyWith(
@@ -105,10 +119,13 @@ class ChatNotifier extends Notifier<ChatState> {
         );
       }
 
-      await for (final line in response.stream.transform(utf8.decoder).transform(const LineSplitter())) {
+      await for (final line
+          in response.stream
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())) {
         final trimmed = line.trim();
         if (trimmed.isEmpty || !trimmed.startsWith('data: ')) continue;
-        
+
         final jsonStr = trimmed.substring(6).trim();
         if (jsonStr == '[DONE]') break;
 
@@ -136,12 +153,14 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   void clearChat() {
-    state = const ChatState(messages: [
-      ChatMessage(
-        role: 'assistant',
-        content: "Chat cleared. How can I help you?",
-      )
-    ]);
+    state = const ChatState(
+      messages: [
+        ChatMessage(
+          role: 'assistant',
+          content: "Chat cleared. How can I help you?",
+        ),
+      ],
+    );
   }
 }
 

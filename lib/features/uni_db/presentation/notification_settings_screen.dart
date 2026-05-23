@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../data/uni_db_providers.dart';
 import 'widgets/coming_soon_card.dart';
 
@@ -20,20 +21,18 @@ class NotificationSettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final asyncRows = ref.watch(notificationSettingsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Notification settings')),
+      appBar: AppBar(title: Text(l10n.notifSettingsTitle)),
       body: asyncRows.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(l10n.notifSettingsLoadError(e))),
         data: (rows) {
           if (rows.isEmpty) {
-            return const ComingSoonCard(
-              title: 'No tracked universities yet',
-              subtitle:
-                  'Tap "Track this institution" on a university page to '
-                  'follow it. Notification preferences appear here once '
-                  'you have at least one tracked institution.',
+            return ComingSoonCard(
+              title: l10n.notifSettingsEmptyTitle,
+              subtitle: l10n.notifSettingsEmptyBody,
               icon: Icons.notifications_outlined,
             );
           }
@@ -64,10 +63,13 @@ class _PrefsCardState extends ConsumerState<_PrefsCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final calendar = (widget.row['notify_on_calendar_change'] as bool?) ?? true;
     final correction = (widget.row['notify_on_correction'] as bool?) ?? true;
-    final requirement = (widget.row['notify_on_requirement_change'] as bool?) ?? true;
-    final scholarship = (widget.row['notify_on_scholarship_change'] as bool?) ?? false;
+    final requirement =
+        (widget.row['notify_on_requirement_change'] as bool?) ?? true;
+    final scholarship =
+        (widget.row['notify_on_scholarship_change'] as bool?) ?? false;
     final preferredLang = (widget.row['preferred_lang'] as String?) ?? 'en';
 
     return Card(
@@ -85,39 +87,35 @@ class _PrefsCardState extends ConsumerState<_PrefsCard> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Push payload language: $preferredLang',
+                  l10n.notifSettingsPushLanguage(preferredLang),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),
           ),
           SwitchListTile(
-            title: const Text('Calendar changes'),
-            subtitle: const Text('Deadline dates move'),
+            title: Text(l10n.notifSettingsCalendar),
+            subtitle: Text(l10n.notifSettingsCalendarDesc),
             value: calendar,
-            onChanged: _busy
-                ? null
-                : (v) => _update(notifyOnCalendarChange: v),
+            onChanged: _busy ? null : (v) => _update(notifyOnCalendarChange: v),
           ),
           SwitchListTile(
-            title: const Text('Correction notices'),
-            subtitle: const Text('정정공고 published — highest priority'),
+            title: Text(l10n.notifSettingsCorrection),
+            subtitle: Text(l10n.notifSettingsCorrectionDesc),
             value: correction,
-            onChanged: _busy
-                ? null
-                : (v) => _update(notifyOnCorrection: v),
+            onChanged: _busy ? null : (v) => _update(notifyOnCorrection: v),
           ),
           SwitchListTile(
-            title: const Text('Requirement changes'),
-            subtitle: const Text('TOPIK / GPA / language test rules change'),
+            title: Text(l10n.notifSettingsRequirement),
+            subtitle: Text(l10n.notifSettingsRequirementDesc),
             value: requirement,
             onChanged: _busy
                 ? null
                 : (v) => _update(notifyOnRequirementChange: v),
           ),
           SwitchListTile(
-            title: const Text('Scholarship updates'),
-            subtitle: const Text('Off by default — high volume'),
+            title: Text(l10n.notifSettingsScholarship),
+            subtitle: Text(l10n.notifSettingsScholarshipDesc),
             value: scholarship,
             onChanged: _busy
                 ? null
@@ -149,7 +147,11 @@ class _PrefsCardState extends ConsumerState<_PrefsCard> {
     } catch (err) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not update preference: $err')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.notifSettingsUpdateError(err),
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _busy = false);

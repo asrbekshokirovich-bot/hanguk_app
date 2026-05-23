@@ -65,10 +65,7 @@ class UniversitySpecificSetupAddon extends ConsumerWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.message,
-    required this.onFallbackToGeneral,
-  });
+  const _EmptyState({required this.message, required this.onFallbackToGeneral});
 
   final String message;
   final VoidCallback onFallbackToGeneral;
@@ -87,8 +84,10 @@ class _EmptyState extends StatelessWidget {
                 children: [
                   Icon(Icons.info_outline, size: 16),
                   SizedBox(width: 8),
-                  Text('University-specific interview',
-                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    'University-specific interview',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -128,10 +127,7 @@ class _RecruitmentSummary extends StatelessWidget {
               ),
               if (target.nameEn != null) Text(target.nameEn!),
               const SizedBox(height: 8),
-              Text(
-                _cycleLine(target),
-                style: const TextStyle(fontSize: 13),
-              ),
+              Text(_cycleLine(target), style: const TextStyle(fontSize: 13)),
               if (target.applicantCategory != null) ...[
                 const SizedBox(height: 4),
                 Text(
