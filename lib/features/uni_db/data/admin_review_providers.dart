@@ -4,21 +4,29 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/feature_flags/uni_db_flag.dart';
 import '../domain/review_queue_item.dart';
 
-/// Reviewer's role from `public.profiles.role` for the current auth.uid().
+/// True if the current user may review uni_db extractions.
 ///
-/// The /admin/review route only renders if this returns
-/// `uni_db_reviewer` or `uni_db_admin`. Other roles see a redirect.
-final reviewerRoleProvider = FutureProvider<String?>((ref) async {
-  if (!kUniDbEnabled) return null;
+/// Authoritative source is the `fn_can_review_uni_db()` DB function, which
+/// returns true for the legacy reviewer roles OR any non-student staff
+/// member (user_roles app_role). Keeping the gate server-side means the UI
+/// and the RLS/RPC authorization can never drift apart.
+final canReviewUniDbProvider = FutureProvider<bool>((ref) async {
+  if (!kUniDbEnabled) return false;
   final client = Supabase.instance.client;
-  final user = client.auth.currentUser;
-  if (user == null) return null;
-  final row = await client
-      .from('profiles')
-      .select('role')
-      .eq('user_id', user.id)
-      .maybeSingle();
-  return row?['role'] as String?;
+  if (client.auth.currentUser == null) return false;
+  final result = await client.rpc('fn_can_review_uni_db');
+  return result == true;
+});
+
+/// Number of items currently in the HITL queue — drives the staff entry
+/// badge on the home screen. Only queries when the caller can review.
+final reviewQueueCountProvider = FutureProvider<int>((ref) async {
+  if (!kUniDbEnabled) return 0;
+  final canReview = await ref.watch(canReviewUniDbProvider.future);
+  if (!canReview) return 0;
+  final client = Supabase.instance.client;
+  final rows = await client.from('v_review_queue_dashboard').select('id');
+  return (rows as List).length;
 });
 
 /// Pending HITL queue, sorted by priority then queued_at (oldest first

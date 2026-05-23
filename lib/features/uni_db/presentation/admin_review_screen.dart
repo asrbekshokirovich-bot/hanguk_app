@@ -28,14 +28,13 @@ class _AdminReviewScreenState extends ConsumerState<AdminReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final roleAsync = ref.watch(reviewerRoleProvider);
+    final canReviewAsync = ref.watch(canReviewUniDbProvider);
 
-    return roleAsync.when(
+    return canReviewAsync.when(
       loading: () => const _LoadingScaffold(),
       error: (e, _) => _ErrorScaffold(error: '$e'),
-      data: (role) {
-        const reviewerRoles = {'uni_db_reviewer', 'uni_db_admin'};
-        if (role == null || !reviewerRoles.contains(role)) {
+      data: (canReview) {
+        if (!canReview) {
           return const _ForbiddenScaffold();
         }
         return _buildContent(context);
@@ -543,8 +542,9 @@ class _ForbiddenScaffold extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(24),
         child: Text(
-          'You do not have reviewer access. '
-          'Ask Hanguk admin to set profiles.role = uni_db_reviewer.',
+          'This area is for Hanguk staff only. '
+          'If you should have access, ask an admin to add your '
+          'staff role.',
           textAlign: TextAlign.center,
         ),
       ),
