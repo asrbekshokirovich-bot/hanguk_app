@@ -24,16 +24,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Future<void> _checkForUpdates() async {
     final repo = ref.read(updaterRepositoryProvider);
     final versionInfo = await repo.checkForUpdate();
-    if (versionInfo != null && mounted) {
-      // Pattern match the sealed UpdateState — UpdateAvailable
-      // is the only state where we should surface the dialog.
-      if (versionInfo is UpdateAvailable) {
-        showDialog(
-          context: context,
-          barrierDismissible: !versionInfo.effectivelyForced,
-          builder: (context) => const UpdateDialog(),
-        );
-      }
+    if (!mounted) return;
+    if (versionInfo is UpdateAvailable) {
+      showDialog(
+        context: context,
+        barrierDismissible: !versionInfo.effectivelyForced,
+        builder: (context) => const UpdateDialog(),
+      );
     }
   }
 
