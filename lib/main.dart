@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'design_system/theme/app_theme.dart';
 import 'features/uni_db/data/push_token_bootstrap.dart';
 import 'features/updater/presentation/update_gate.dart';
 import 'l10n/app_localizations.dart';
-import 'package:device_preview/device_preview.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Crash reporting (P1 #15 from store_readiness audit). DSN supplied
+  // via --dart-define=SENTRY_DSN=...; if empty the SDK no-ops cleanly.
+  const sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+  if (sentryDsn.isNotEmpty) {
+    await SentryFlutter.init((options) {
+      options.dsn = sentryDsn;
+      options.tracesSampleRate = 0.1;
+    });
+  }
+
   // Show a splash while Supabase initializes — prevents ANR on slow emulators
-  runApp(
-    DevicePreview(
-      enabled: true,
-      builder: (context) => const _SplashApp(),
-    ),
-  );
+  runApp(const _SplashApp());
 
   try {
     await Supabase.initialize(
@@ -29,14 +34,7 @@ Future<void> main() async {
     debugPrint('Supabase init error (offline mode): $e');
   }
 
-  runApp(
-    DevicePreview(
-      enabled: true,
-      builder: (context) => const ProviderScope(
-        child: HangukApp(),
-      ),
-    ),
-  );
+  runApp(const ProviderScope(child: HangukApp()));
 }
 
 /// Lightweight splash shown while Supabase initialises (prevents ANR).
@@ -48,8 +46,6 @@ class _SplashApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.materialTheme,
-      builder: DevicePreview.appBuilder,
-      locale: DevicePreview.locale(context),
       home: const Scaffold(
         backgroundColor: Color(0xFF0A0A1A),
         body: Center(
@@ -97,9 +93,8 @@ class HangukApp extends ConsumerWidget {
         // Auto-update gate runs on launch + every foreground transition,
         // so updates aren't gated behind the login screen anymore.
         final wrapped = UpdateGate(child: child ?? const SizedBox.shrink());
-        return DevicePreview.appBuilder(context, wrapped);
+        return wrapped;
       },
-      locale: DevicePreview.locale(context),
       // Audit L1/L3 closure 2026-05-10: full flutter_localizations wiring.
       // Non-English ARB files seeded with English placeholders + a
       // `TODO: translate` marker so a translator can fill them in

@@ -37,11 +37,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _checkForUpdates() async {
     final repo = ref.read(updaterRepositoryProvider);
     final versionInfo = await repo.checkForUpdate();
-    if (versionInfo != null && mounted) {
+    if (!mounted) return;
+    if (versionInfo is UpdateAvailable) {
       showDialog(
         context: context,
-        barrierDismissible: !versionInfo.forceUpdate,
-        builder: (context) => UpdateDialog(updateInfo: versionInfo),
+        barrierDismissible: !versionInfo.effectivelyForced,
+        builder: (context) => const UpdateDialog(),
       );
     }
   }
@@ -79,7 +80,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
-          ref.read(homeTabProvider.notifier).state = index;
+          ref.read(homeTabProvider.notifier).setTab(index);
         },
         items: const [
           BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.school)),

@@ -6,4 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// institution id into this provider; `MapTab` watches it, raises
 /// the sheet, then clears the provider so the sheet doesn't reopen
 /// on rebuild.
-final pendingMapDetailProvider = StateProvider<String?>((ref) => null);
+class PendingMapDetailNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void set(String? id) => state = id;
+}
+
+final pendingMapDetailProvider =
+    NotifierProvider<PendingMapDetailNotifier, String?>(
+        PendingMapDetailNotifier.new);

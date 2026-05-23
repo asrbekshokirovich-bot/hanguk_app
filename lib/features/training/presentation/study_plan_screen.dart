@@ -746,7 +746,7 @@ class _StudyPlanScreenState extends ConsumerState<StudyPlanScreen> {
                                       style: TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                     onPressed: () {
-                                      ref.read(homeTabProvider.notifier).state = 0;
+                                      ref.read(homeTabProvider.notifier).setTab(0);
                                       Navigator.of(context).pop();
                                       Navigator.of(context).pop();
                                     },

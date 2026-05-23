@@ -100,8 +100,8 @@ class _MapDeepLinkEntry extends ConsumerWidget {
     // providers during the build phase.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 1 = Map tab in the home bottom-nav (per home_screen.dart).
-      ref.read(homeTabProvider.notifier).state = 1;
-      ref.read(pendingMapDetailProvider.notifier).state = institutionId;
+      ref.read(homeTabProvider.notifier).setTab(1);
+      ref.read(pendingMapDetailProvider.notifier).set(institutionId);
     });
     return const HomeScreen();
   }
