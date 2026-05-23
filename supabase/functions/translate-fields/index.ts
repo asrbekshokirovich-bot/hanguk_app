@@ -73,9 +73,10 @@ async function callGemini(system: string, texts: string[]): Promise<string> {
       method: "POST",
       headers: { Authorization: `Bearer ${GEMINI_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        // Google's native OpenAI-compat endpoint expects the bare model id
+        // (no "google/" prefix — that form is for aggregator gateways).
+        model: "gemini-2.5-flash",
         temperature: 0,
-        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
           { role: "user", content: JSON.stringify({ texts }) },
@@ -132,6 +133,6 @@ Deno.serve(async (req) => {
       } catch { /* fall through */ }
     }
     console.error("translate-fields error", e);
-    return json(502, { error: "translation_failed" });
+    return json(502, { error: "translation_failed", detail: String(e).slice(0, 300) });
   }
 });
