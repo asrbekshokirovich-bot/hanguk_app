@@ -85,18 +85,26 @@ CREATE UNIQUE INDEX uniq_op_fund_settings_singleton
 These are idempotent — they will only succeed because we've already
 removed the duplicates.
 
-### Phase 2 — Fix the admin frontend (Lovable)
+### Phase 2 — Idempotency
 
-Until the indexes block re-submits at the DB layer the UI should also
-do its part:
+**Backend (shipped)** — `20260801000400_finance_phase2_idempotent_inserts.sql`.
+Six `BEFORE INSERT` triggers on `payments` (initial_deposit only),
+`expenses`, `income_distribution_settings`,
+`monthly_payment_categories`, `operational_fund_allocations` and
+`operational_fund_settings`. A duplicate insert is silently converted
+into an `UPDATE` of the existing row. The Lovable frontend keeps
+working with no code change — the unique constraints from Phase 1
+never surface as 23505 errors to the user.
+
+**Lovable frontend (still on the website team)** — pure UX polish now,
+no longer correctness-critical:
 
 - **Disable** the "Add payment" button while a save is in flight,
   re-enable on success/error.
-- Send all inserts with `ON CONFLICT … DO UPDATE` (or `upsert: { onConflict: ... }` in supabase-js).
-- The settings pages must `UPDATE` the existing singleton row instead of
-  `INSERT`ing a new one.
-- Show a "Last saved by <user> at <time>" badge so editors stop "re-saving
-  just in case."
+- Show a "Last saved by <user> at <time>" badge so editors stop
+  "re-saving just in case."
+- (Optional) Switch settings pages from `insert` to `upsert` /
+  `update`, mostly for clarity.
 
 ### Phase 3 — Auditability (1 migration)
 
