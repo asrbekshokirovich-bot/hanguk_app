@@ -3,11 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../map/domain/university.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
-import '../../data/applications_repository.dart';
-import '../../../chat/presentation/chat_tab.dart';
 import '../applications_view_model.dart';
+import '../university_draft_provider.dart';
+import '../university_quiz_provider.dart';
+import 'university_quiz_sheet.dart';
 
-class UniversitySelectionView extends ConsumerStatefulWidget {
+class UniversitySelectionView extends ConsumerWidget {
   final List<University> suggestions;
   final VoidCallback onSubmitted;
 
@@ -17,228 +18,263 @@ class UniversitySelectionView extends ConsumerStatefulWidget {
     required this.onSubmitted,
   });
 
-  @override
-  ConsumerState<UniversitySelectionView> createState() => _UniversitySelectionViewState();
-}
-
-class _UniversitySelectionViewState extends ConsumerState<UniversitySelectionView> {
-  final Set<String> _selectedIds = {};
-  bool _isSubmitting = false;
-
-  void _toggleSelection(String id) {
-    setState(() {
-      if (_selectedIds.contains(id)) {
-        _selectedIds.remove(id);
-      } else {
-        if (_selectedIds.length < 3) {
-          _selectedIds.add(id);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You can only apply to up to 3 universities.')),
-          );
-        }
-      }
-    });
-  }
-
-  void _openAICompare() {
-    // Generate an automatic prompt based on the suggestions for the AI
-    final uniNames = widget.suggestions.map((u) => u.name).join(', ');
-    
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        height: MediaQuery.of(context).size.height * 0.9,
-        decoration: const BoxDecoration(
-          color: Color(0xFF071221), 
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: const ChatTab(), // The Chat tab handles its own input/output
-        ),
-      ),
-    );
-  }
-
-  Future<void> _submit() async {
-    if (_selectedIds.isEmpty) return;
-    setState(() { _isSubmitting = true; });
-    try {
-      await submitSelectedUniversities(_selectedIds.toList());
-      // Refresh the view model provider instead of individual data providers
-      ref.invalidate(applicationsTabProvider);
-      widget.onSubmitted();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() { _isSubmitting = false; });
-      }
+  void _toggleSelection(
+    BuildContext context,
+    WidgetRef ref,
+    University uni,
+    int remainingSlots,
+  ) {
+    final notifier = ref.read(universityDraftProvider.notifier);
+    final draft = ref.read(universityDraftProvider);
+    if (notifier.contains(uni.id)) {
+      notifier.remove(uni.id);
+      return;
     }
+    if (draft.length >= remainingSlots) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            remainingSlots == 0
+                ? 'You\'ve reached the application limit. Remove an existing application first.'
+                : 'You can pick up to $remainingSlots ${remainingSlots == 1 ? "university" : "universities"}.',
+          ),
+        ),
+      );
+      return;
+    }
+    notifier.add(uni, remainingSlots: remainingSlots);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final draft = ref.watch(universityDraftProvider);
+    final tabState = ref.watch(applicationsTabProvider);
+    final remainingSlots = tabState.maybeWhen(
+      data: (s) => s.remainingSlots,
+      orElse: () => kMaxUniversityPicks,
+    );
+    final prefs = ref.watch(universityQuizProvider);
+
+    final sortedSuggestions = _sortByQuizFit(suggestions, prefs);
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Suggested For You',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    Text(
-                      'Select up to 3 universities to begin.',
-                      style: TextStyle(fontSize: 14, color: Colors.white60),
-                    ),
-                  ],
-                ),
+              const Text(
+                'Suggested for you',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
               ),
-              ElevatedButton.icon(
-                onPressed: _openAICompare,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.vibrantLime.withOpacity(0.2),
-                  foregroundColor: AppColors.vibrantLime,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                ),
-                icon: const Icon(Icons.compare_arrows_rounded, size: 18),
-                label: const Text('AI Compare'),
+              const SizedBox(height: 2),
+              Text(
+                prefs.hasAnswered
+                    ? 'Ranked using your preferences. Tap a card to add it to your list.'
+                    : 'Tap a card to add it to your list. Pick up to 3.',
+                style: const TextStyle(fontSize: 13, color: Colors.white60),
               ),
             ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: _QuizBanner(
+            answered: prefs.hasAnswered,
+            onTap: () => UniversityQuizSheet.show(context),
           ),
         ),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.only(top: 8, bottom: 16),
-          itemCount: widget.suggestions.length,
+          itemCount: sortedSuggestions.length,
           itemBuilder: (context, index) {
-              final uni = widget.suggestions[index];
-              final isSelected = _selectedIds.contains(uni.id);
+            final uni = sortedSuggestions[index];
+            final isSelected = draft.any((u) => u.id == uni.id);
+            final reasons = prefs.matchReasonsFor(uni);
 
-              return GestureDetector(
-                onTap: () => _toggleSelection(uni.id),
-                child: HangukCard(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: isSelected ? AppColors.vibrantLime : Colors.transparent,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(16),
+            return GestureDetector(
+              onTap: () => _toggleSelection(context, ref, uni, remainingSlots),
+              child: HangukCard(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isSelected ? AppColors.vibrantLime : Colors.transparent,
+                      width: 2,
                     ),
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        if (uni.logoUrl != null)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              uni.logoUrl!,
-                              width: 56,
-                              height: 56,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        else
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: AppColors.vibrantLime.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          if (uni.logoUrl != null)
+                            ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime),
-                          ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                uni.name,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                              child: Image.network(
+                                uni.logoUrl!,
+                                width: 56,
+                                height: 56,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => _fallbackLogo(),
                               ),
-                              Text(
-                                uni.location,
-                                style: const TextStyle(color: Colors.white54, fontSize: 14),
-                              ),
-                              if (uni.acceptanceRate != null) ...[
-                                const SizedBox(height: 4),
+                            )
+                          else
+                            _fallbackLogo(),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  'Acceptance Rate: ${uni.acceptanceRate!.toStringAsFixed(1)}%',
-                                  style: const TextStyle(color: AppColors.vibrantLime, fontSize: 12),
+                                  uni.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ]
-                            ],
+                                Text(
+                                  uni.location,
+                                  style: const TextStyle(color: Colors.white54, fontSize: 14),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Checkbox(
-                          value: isSelected,
-                          onChanged: (val) => _toggleSelection(uni.id),
-                          activeColor: AppColors.vibrantLime,
-                          checkColor: Colors.black,
-                          side: const BorderSide(color: Colors.white54),
+                          Checkbox(
+                            value: isSelected,
+                            onChanged: (_) => _toggleSelection(context, ref, uni, remainingSlots),
+                            activeColor: AppColors.vibrantLime,
+                            checkColor: Colors.black,
+                            side: const BorderSide(color: Colors.white54),
+                          ),
+                        ],
+                      ),
+                      if (reasons.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: reasons
+                              .map((r) => _WhyMatchChip(label: r))
+                              .toList(),
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                ),
-              );
-            },
-          ),
-        if (_selectedIds.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0F213D),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              top: false,
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.vibrantLime,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: _isSubmitting 
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : Text(
-                        'Submit ${_selectedIds.length} Selection${_selectedIds.length > 1 ? 's' : ''} for Approval',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
                 ),
               ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  static Widget _fallbackLogo() => Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: AppColors.vibrantLime.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime),
+      );
+
+  /// Stable sort by number of quiz-match reasons (descending). Cards
+  /// with no match-context preserve their server-provided order.
+  List<University> _sortByQuizFit(List<University> input, QuizPreferences prefs) {
+    if (!prefs.hasAnswered) return input;
+    final indexed = input.asMap().entries.toList();
+    indexed.sort((a, b) {
+      final ra = prefs.matchReasonsFor(a.value).length;
+      final rb = prefs.matchReasonsFor(b.value).length;
+      if (ra != rb) return rb.compareTo(ra);
+      return a.key.compareTo(b.key);
+    });
+    return indexed.map((e) => e.value).toList();
+  }
+}
+
+class _WhyMatchChip extends StatelessWidget {
+  final String label;
+  const _WhyMatchChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.vibrantLime.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.vibrantLime.withOpacity(0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.check_circle_outline, size: 12, color: AppColors.vibrantLime),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.vibrantLime,
+              fontWeight: FontWeight.w500,
             ),
           ),
-      ],
+        ],
+      ),
+    );
+  }
+}
+
+class _QuizBanner extends StatelessWidget {
+  final bool answered;
+  final VoidCallback onTap;
+
+  const _QuizBanner({required this.answered, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.vibrantLime.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.vibrantLime.withOpacity(0.25)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.auto_awesome, color: AppColors.vibrantLime, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    answered ? 'Update your preferences' : 'Find your best fit in 30 seconds',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                  Text(
+                    answered ? 'We use them to rank suggestions.' : 'Answer 3 quick questions to personalize suggestions.',
+                    style: const TextStyle(color: Colors.white60, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.white38),
+          ],
+        ),
+      ),
     );
   }
 }

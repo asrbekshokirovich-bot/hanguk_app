@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../applications/presentation/widgets/selection_bar.dart';
 import '../data/map_analytics.dart';
 import '../data/map_repository.dart';
 import '../domain/university.dart';
 import 'map_deeplink_provider.dart';
+import 'university_filters_provider.dart';
 import 'widgets/university_card.dart';
 import 'widgets/university_detail_sheet.dart';
+import 'widgets/university_filters_sheet.dart';
 import 'widgets/university_map_view.dart';
 
 class MapTab extends ConsumerStatefulWidget {
@@ -19,18 +22,12 @@ class MapTab extends ConsumerStatefulWidget {
 class _MapTabState extends ConsumerState<MapTab> {
   final TextEditingController _searchController = TextEditingController();
   bool _isMapMode = true;
-  // Audit M3 (2026-05-11): replaced the legacy 'top100' filter with
-  // 'top'. The new schema has a `tier` smallint (0–4) instead of an
-  // open-ended `ranking` int — `tier ≤ 1` is the closest equivalent
-  // to "top-100".
-  String _activeFilter = 'all'; // 'all' | 'partner' | 'top'
-  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(() {
-      setState(() => _searchQuery = _searchController.text.toLowerCase().trim());
+      ref.read(universityFiltersProvider.notifier).setQuery(_searchController.text);
     });
   }
 
@@ -38,34 +35,6 @@ class _MapTabState extends ConsumerState<MapTab> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  List<University> _applyFilters(List<University> all) {
-    var filtered = all;
-
-    // Text search
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((u) {
-        return u.name.toLowerCase().contains(_searchQuery) ||
-            u.location.toLowerCase().contains(_searchQuery);
-      }).toList();
-    }
-
-    // Chip filter
-    switch (_activeFilter) {
-      case 'partner':
-        filtered = filtered.where((u) => u.isPartner).toList();
-        break;
-      case 'top':
-        // Audit M3 (2026-05-11): tier-based "top" filter replaces the
-        // legacy `ranking <= 100` check. `tier` is the new 0–4 quality
-        // tier on `institutions`; `isTopTier` returns true for tier
-        // 0 or 1.
-        filtered = filtered.where((u) => u.isTopTier).toList();
-        break;
-    }
-
-    return filtered;
   }
 
   void _showDetail(BuildContext ctx, University u) {
@@ -83,13 +52,13 @@ class _MapTabState extends ConsumerState<MapTab> {
   @override
   Widget build(BuildContext context) {
     final uniAsync = ref.watch(universitiesProvider);
+    final filters = ref.watch(universityFiltersProvider);
 
     // Audit M11 (2026-05-11): deep-link handler. When the router or a
     // push notification writes an institution id into
     // `pendingMapDetailProvider`, raise the detail sheet for that
     // institution and clear the provider so the sheet doesn't reopen
-    // on rebuild. We listen rather than watch+raise-in-build to avoid
-    // showModalBottomSheet during the build phase.
+    // on rebuild.
     ref.listen<String?>(pendingMapDetailProvider, (prev, next) {
       if (next == null || next.isEmpty) return;
       final unis = uniAsync.valueOrNull;
@@ -114,25 +83,13 @@ class _MapTabState extends ConsumerState<MapTab> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: Row(
                 children: [
-                  // Title
-                  const Padding(
-                    padding: EdgeInsets.only(right: 12),
-                    child: Text(
-                      'Universities',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                   // Search field
                   Expanded(
                     child: TextField(
                       controller: _searchController,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
-                        hintText: 'Search...',
+                        hintText: 'Search universities or cities',
                         hintStyle: const TextStyle(color: Colors.white38, fontSize: 14),
                         prefixIcon: const Icon(Icons.search_rounded, color: Colors.white38, size: 20),
                         filled: true,
@@ -142,7 +99,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
                         ),
-                        suffixIcon: _searchQuery.isNotEmpty
+                        suffixIcon: filters.query.isNotEmpty
                             ? GestureDetector(
                                 onTap: () => _searchController.clear(),
                                 child: const Icon(Icons.close, color: Colors.white38, size: 18),
@@ -152,7 +109,11 @@ class _MapTabState extends ConsumerState<MapTab> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // List / Map toggle
+                  _FiltersButton(
+                    activeCount: filters.activeCount,
+                    onTap: () => UniversityFiltersSheet.show(context),
+                  ),
+                  const SizedBox(width: 8),
                   _ToggleButton(
                     isMapMode: _isMapMode,
                     onTap: () => setState(() => _isMapMode = !_isMapMode),
@@ -161,57 +122,21 @@ class _MapTabState extends ConsumerState<MapTab> {
               ),
             ),
 
-            // ── Filter Chips ─────────────────────────────
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  _FilterChip(
-                    label: 'All',
-                    icon: Icons.school_outlined,
-                    selected: _activeFilter == 'all',
-                    onTap: () => setState(() => _activeFilter = 'all'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Partner',
-                    icon: Icons.handshake_outlined,
-                    selected: _activeFilter == 'partner',
-                    onTap: () => setState(() => _activeFilter = 'partner'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    // Audit M3 (2026-05-11): label changed from "Top
-                    // 100" to "Top". The semantics moved from a
-                    // numeric `ranking` cap to the categorical `tier`
-                    // (0 or 1).
-                    label: 'Top',
-                    icon: Icons.workspace_premium_outlined,
-                    selected: _activeFilter == 'top',
-                    onTap: () => setState(() => _activeFilter = 'top'),
-                  ),
-                ],
-              ),
-            ),
+            // ── Active filter pills ─────────────────────
+            _ActiveFiltersBar(filters: filters),
 
             // ── Content ──────────────────────────────────
             Expanded(
               child: uniAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
+                loading: () => const Center(child: CircularProgressIndicator.adaptive()),
                 error: (e, _) => _buildErrorState(),
                 data: (unis) {
-                  final filtered = _applyFilters(unis);
-                  // Audit M25 (2026-05-12): when map mode is active
-                  // and the current filter/search produces 0 results,
-                  // overlay an explanatory badge so the user knows
-                  // the map looks empty because of their filter, not
-                  // because no universities are mapped.
-                  final showEmptyBadge = _isMapMode &&
-                      filtered.isEmpty &&
-                      unis.isNotEmpty;
+                  final filtered = applyUniversityFilters(unis, filters);
+                  // Audit M25 (2026-05-12): when map mode is active and
+                  // current filter/search produces 0 results, overlay an
+                  // explanatory badge so the user knows the map looks
+                  // empty because of their filter, not the data.
+                  final showEmptyBadge = _isMapMode && filtered.isEmpty && unis.isNotEmpty;
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 350),
                     switchInCurve: Curves.easeOut,
@@ -220,66 +145,50 @@ class _MapTabState extends ConsumerState<MapTab> {
                         ? Stack(
                             key: const ValueKey('map'),
                             children: [
-                              UniversityMapView(
-                                universities: filtered,
-                              ),
+                              UniversityMapView(universities: filtered),
                               if (showEmptyBadge)
                                 Positioned(
                                   top: 16,
                                   left: 16,
                                   right: 16,
                                   child: _FilterEmptyBadge(
-                                    onClear: () => setState(() {
-                                      _activeFilter = 'all';
+                                    onClear: () {
                                       _searchController.clear();
-                                      _searchQuery = '';
-                                    }),
+                                      ref.read(universityFiltersProvider.notifier).clearAll();
+                                    },
                                   ),
                                 ),
                             ],
                           )
-                        : _buildList(filtered),
+                        : _buildList(filtered, filters),
                   );
                 },
               ),
             ),
+            // Phase 1: persistent selection bar — picks made from the
+            // detail sheet show up here instantly.
+            const SelectionBar(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildList(List<University> unis) {
+  Widget _buildList(List<University> unis, UniversityFilters filters) {
     if (unis.isEmpty) {
-      return Center(
-        key: const ValueKey('empty'),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.search_off_rounded, color: Colors.white24, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              _searchQuery.isNotEmpty
-                  ? 'No results for "$_searchQuery"'
-                  : 'No universities match this filter',
-              style: const TextStyle(color: Colors.white38, fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () {
-                _searchController.clear();
-                setState(() => _activeFilter = 'all');
-              },
-              child: const Text('Clear filters', style: TextStyle(color: AppColors.vibrantLime)),
-            ),
-          ],
-        ),
+      return _EmptyState(
+        filters: filters,
+        onClearQuery: () => _searchController.clear(),
+        onClearAll: () {
+          _searchController.clear();
+          ref.read(universityFiltersProvider.notifier).clearAll();
+        },
       );
     }
 
     return ListView.builder(
       key: const ValueKey('list'),
-      padding: const EdgeInsets.only(top: 4, bottom: 80),
+      padding: const EdgeInsets.only(top: 4, bottom: 100),
       itemCount: unis.length,
       itemBuilder: (ctx, i) => UniversityCard(
         university: unis[i],
@@ -371,43 +280,31 @@ class _ToggleButton extends StatelessWidget {
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
+class _FiltersButton extends StatelessWidget {
+  final int activeCount;
   final VoidCallback onTap;
 
-  const _FilterChip({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
+  const _FiltersButton({required this.activeCount, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final hasActive = activeCount > 0;
     return Semantics(
-      // Audit M21 (2026-05-12): explicit accessibility labels on the
-      // filter chips and the list/map toggle so screen readers
-      // announce "Top filter, selected" instead of falling back to
-      // the empty Container default.
       button: true,
-      selected: selected,
-      label: '$label filter',
+      label: hasActive ? 'Filters, $activeCount active' : 'Filters',
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           decoration: BoxDecoration(
-            color: selected
+            color: hasActive
                 ? AppColors.vibrantLime.withOpacity(0.15)
-                : Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(20),
+                : Colors.white.withOpacity(0.07),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected
-                  ? AppColors.vibrantLime.withOpacity(0.5)
+              color: hasActive
+                  ? AppColors.vibrantLime.withOpacity(0.4)
                   : Colors.white.withOpacity(0.08),
             ),
           ),
@@ -415,21 +312,163 @@ class _FilterChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                icon,
-                size: 14,
-                color: selected ? AppColors.vibrantLime : Colors.white38,
+                Icons.tune,
+                size: 18,
+                color: hasActive ? AppColors.vibrantLime : Colors.white60,
               ),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  color: selected ? AppColors.vibrantLime : Colors.white54,
+              if (hasActive) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: AppColors.vibrantLime,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '$activeCount',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActiveFiltersBar extends ConsumerWidget {
+  final UniversityFilters filters;
+  const _ActiveFiltersBar({required this.filters});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(universityFiltersProvider.notifier);
+    final chips = <Widget>[];
+
+    for (final r in filters.regions) {
+      chips.add(_ActivePill(
+        label: r.label,
+        onClear: () => notifier.clearRegion(r),
+      ));
+    }
+    if (filters.topTierOnly) {
+      chips.add(_ActivePill(label: 'Top tier', onClear: () => notifier.setTopTier(false)));
+    }
+    if (filters.partnerOnly) {
+      chips.add(_ActivePill(label: 'Partner', onClear: () => notifier.setPartner(false)));
+    }
+    if (filters.verifiedOnly) {
+      chips.add(_ActivePill(label: 'Verified', onClear: () => notifier.setVerified(false)));
+    }
+
+    if (chips.isEmpty) return const SizedBox(height: 8);
+
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: chips.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 6),
+        itemBuilder: (_, i) => chips[i],
+      ),
+    );
+  }
+}
+
+class _ActivePill extends StatelessWidget {
+  final String label;
+  final VoidCallback onClear;
+  const _ActivePill({required this.label, required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(left: 12, right: 4),
+      decoration: BoxDecoration(
+        color: AppColors.vibrantLime.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.vibrantLime.withOpacity(0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.vibrantLime,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          IconButton(
+            onPressed: onClear,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+            iconSize: 14,
+            icon: const Icon(Icons.close, color: AppColors.vibrantLime),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final UniversityFilters filters;
+  final VoidCallback onClearQuery;
+  final VoidCallback onClearAll;
+
+  const _EmptyState({
+    required this.filters,
+    required this.onClearQuery,
+    required this.onClearAll,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      key: const ValueKey('empty'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.search_off_rounded, color: Colors.white24, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              filters.query.isNotEmpty
+                  ? 'No results for "${filters.query}"'
+                  : 'No universities match these filters',
+              style: const TextStyle(color: Colors.white70, fontSize: 15),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Try loosening one of your filters:',
+              style: TextStyle(color: Colors.white38, fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            if (filters.query.isNotEmpty)
+              TextButton.icon(
+                onPressed: onClearQuery,
+                icon: const Icon(Icons.close, color: AppColors.vibrantLime, size: 16),
+                label: const Text('Clear search', style: TextStyle(color: AppColors.vibrantLime)),
+              ),
+            if (filters.activeCount > 0)
+              TextButton.icon(
+                onPressed: onClearAll,
+                icon: const Icon(Icons.refresh, color: AppColors.vibrantLime, size: 16),
+                label: const Text('Reset all filters', style: TextStyle(color: AppColors.vibrantLime)),
+              ),
+          ],
         ),
       ),
     );
@@ -459,12 +498,11 @@ class _FilterEmptyBadge extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.filter_list_off,
-                  color: AppColors.vibrantLime, size: 18),
+              const Icon(Icons.filter_list_off, color: AppColors.vibrantLime, size: 18),
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
-                  'No universities match — adjust your filter or search.',
+                  'No universities match — adjust your filters.',
                   style: TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ),
@@ -483,4 +521,3 @@ class _FilterEmptyBadge extends StatelessWidget {
     );
   }
 }
-
