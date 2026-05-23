@@ -332,7 +332,9 @@ async function callAnthropic(apiKey: string, systemPrompt: string, files: InputF
     body: JSON.stringify({
       model: ANTHROPIC_MODEL,
       max_tokens: 16000,
-      temperature: 0.1,
+      // Deterministic: the same source must always render the same
+      // translation (a review queue compares stored vs displayed text).
+      temperature: 0,
       system: systemPrompt,
       messages: [{ role: "user", content }],
     }),
@@ -366,7 +368,8 @@ async function callGemini(apiKey: string, systemPrompt: string, files: InputFile
         { role: "system", content: systemPrompt },
         { role: "user", content: userContent },
       ],
-      temperature: 0.1,
+      // Deterministic — match the Anthropic path and translate-fields.
+      temperature: 0,
       max_tokens: 12000,
       response_format: { type: "json_object" },
     }),
