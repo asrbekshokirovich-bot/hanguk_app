@@ -38,7 +38,7 @@ final reviewQueueProvider = FutureProvider<List<ReviewQueueItem>>((ref) async {
       .from('v_review_queue_dashboard')
       .select()
       .order('priority')
-      .order('queued_at')
+      .order('created_at')
       .limit(50);
   return (rows as List)
       .map((r) => ReviewQueueItem.fromMap(r as Map<String, dynamic>))

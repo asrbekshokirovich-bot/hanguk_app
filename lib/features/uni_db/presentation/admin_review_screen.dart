@@ -189,13 +189,11 @@ class _QueueList extends StatelessWidget {
             overdue: item.isOverdue,
           ),
           title: Text(
-            item.institutionNameKoShort ??
-                item.institutionNameKo ??
-                '(unknown institution)',
+            item.institutionLabel,
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
-            '${item.targetTable} · ${item.fieldGroup ?? ''}',
+            '${item.entityType} · ${item.reason}',
             overflow: TextOverflow.ellipsis,
           ),
           onTap: () => onSelect(item),
@@ -253,14 +251,14 @@ class _DetailPane extends StatelessWidget {
   Widget build(BuildContext context) {
     final formattedJson = const JsonEncoder.withIndent(
       '  ',
-    ).convert(item.payload);
+    ).convert(item.parsedOutput);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            item.institutionNameKo ?? '',
+            item.institutionLabel,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 4),
@@ -269,9 +267,13 @@ class _DetailPane extends StatelessWidget {
             runSpacing: 4,
             children: [
               Chip(label: Text(item.priorityLabel)),
-              if (item.archetype != null)
-                Chip(label: Text('Archetype ${item.archetype}')),
-              if (item.fieldGroup != null) Chip(label: Text(item.fieldGroup!)),
+              Chip(label: Text(item.reason)),
+              if (item.accuracySelfScore != null)
+                Chip(
+                  label: Text(
+                    'confidence ${(item.accuracySelfScore! * 100).round()}%',
+                  ),
+                ),
               if (item.isOverdue)
                 Chip(
                   label: const Text('OVERDUE'),
@@ -280,13 +282,13 @@ class _DetailPane extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          if (item.pdfSignedUrl != null)
+          if (item.sourceUrlKo != null)
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
-                icon: const Icon(Icons.picture_as_pdf),
-                label: const Text('Open original PDF'),
-                onPressed: () => _launchPdf(context, item.pdfSignedUrl!),
+                icon: const Icon(Icons.open_in_new),
+                label: const Text('Open source page (한국어)'),
+                onPressed: () => _launchPdf(context, item.sourceUrlKo!),
               ),
             ),
           const SizedBox(height: 8),
@@ -328,7 +330,7 @@ class _DetailPane extends StatelessWidget {
   Future<void> _editAccept(BuildContext context) async {
     final corrected = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (_) => _EditPayloadDialog(initial: item.payload),
+      builder: (_) => _EditPayloadDialog(initial: item.parsedOutput),
     );
     if (corrected != null) {
       await onEditAccept(item, corrected);

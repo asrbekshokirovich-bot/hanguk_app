@@ -1,60 +1,60 @@
 /// One pending review-queue row from `v_review_queue_dashboard`.
 ///
-/// Pure data class — no Flutter imports.
+/// Field names mirror the actual view columns (id, priority, reason,
+/// entity_type, entity_id, created_at, name_ko, name_en, source_url_ko,
+/// storage_path, parsed_output, accuracy_self_score). Pure data class —
+/// no Flutter imports.
 class ReviewQueueItem {
   const ReviewQueueItem({
     required this.id,
-    required this.targetTable,
-    required this.targetId,
     required this.priority,
-    required this.queuedAt,
-    required this.payload,
-    this.institutionNameKo,
-    this.institutionNameKoShort,
-    this.archetype,
-    this.fieldGroup,
-    this.documentId,
-    this.pdfSignedUrl,
-    this.slaDeadline,
-    this.assignedReviewerId,
+    required this.reason,
+    required this.entityType,
+    required this.entityId,
+    required this.createdAt,
+    required this.parsedOutput,
+    this.nameKo,
+    this.nameEn,
+    this.sourceUrlKo,
+    this.storagePath,
+    this.accuracySelfScore,
   });
 
   factory ReviewQueueItem.fromMap(Map<String, dynamic> map) => ReviewQueueItem(
     id: map['id'] as String,
-    targetTable: map['target_table'] as String? ?? '',
-    targetId: map['target_id'] as String? ?? '',
     priority: (map['priority'] as num?)?.toInt() ?? 5,
-    queuedAt:
-        DateTime.tryParse(map['queued_at']?.toString() ?? '') ?? DateTime.now(),
-    payload: (map['payload'] as Map?)?.cast<String, dynamic>() ?? const {},
-    institutionNameKo: map['institution_name_ko'] as String?,
-    institutionNameKoShort: map['institution_name_ko_short'] as String?,
-    archetype: map['archetype'] as String?,
-    fieldGroup: map['field_group'] as String?,
-    documentId: map['document_id'] as String?,
-    pdfSignedUrl: map['pdf_signed_url'] as String?,
-    slaDeadline: map['sla_deadline'] != null
-        ? DateTime.tryParse(map['sla_deadline'].toString())
-        : null,
-    assignedReviewerId: map['assigned_reviewer_id'] as String?,
+    reason: map['reason'] as String? ?? '',
+    entityType: map['entity_type'] as String? ?? '',
+    entityId: map['entity_id'] as String? ?? '',
+    createdAt:
+        DateTime.tryParse(map['created_at']?.toString() ?? '') ??
+        DateTime.now(),
+    parsedOutput:
+        (map['parsed_output'] as Map?)?.cast<String, dynamic>() ?? const {},
+    nameKo: map['name_ko'] as String?,
+    nameEn: map['name_en'] as String?,
+    sourceUrlKo: map['source_url_ko'] as String?,
+    storagePath: map['storage_path'] as String?,
+    accuracySelfScore: (map['accuracy_self_score'] as num?)?.toDouble(),
   );
 
   final String id;
-  final String targetTable;
-  final String targetId;
   final int priority; // 1..5; 1 highest
-  final DateTime queuedAt;
-  final Map<String, dynamic> payload;
-  final String? institutionNameKo;
-  final String? institutionNameKoShort;
-  final String? archetype;
-  final String? fieldGroup;
-  final String? documentId;
-  final String? pdfSignedUrl;
-  final DateTime? slaDeadline;
-  final String? assignedReviewerId;
+  final String reason; // why it was queued (e.g. low_confidence)
+  final String entityType;
+  final String entityId;
+  final DateTime createdAt;
+  final Map<String, dynamic> parsedOutput; // the AI's extracted data
+  final String? nameKo;
+  final String? nameEn;
+  final String? sourceUrlKo;
+  final String? storagePath;
+  final double? accuracySelfScore;
 
-  /// Convenience: priority label per ADR-005 SLA grid.
+  /// Best label to show for the institution.
+  String get institutionLabel => nameKo ?? nameEn ?? '(unknown institution)';
+
+  /// Priority label per ADR-005 SLA grid.
   String get priorityLabel => switch (priority) {
     1 => 'P1 — correction notice (4h)',
     2 => 'P2 — attachment change (12h)',
@@ -63,6 +63,14 @@ class ReviewQueueItem {
     _ => 'P5 — D1 trivial (96h)',
   };
 
-  bool get isOverdue =>
-      slaDeadline != null && slaDeadline!.isBefore(DateTime.now());
+  /// SLA budget per priority — mirrors v_review_queue_overdue.
+  Duration get _slaBudget => switch (priority) {
+    1 => const Duration(hours: 4),
+    2 => const Duration(hours: 12),
+    3 => const Duration(hours: 24),
+    4 => const Duration(hours: 48),
+    _ => const Duration(hours: 96),
+  };
+
+  bool get isOverdue => DateTime.now().isAfter(createdAt.add(_slaBudget));
 }
