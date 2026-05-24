@@ -203,7 +203,10 @@ class TestLivePathHappy:
         assert result.llm_model == "claude-sonnet-4-6"
         assert result.input_tokens == 1234
         assert result.output_tokens == 222
-        assert result.parsed_output == _VALID_CALENDAR_PAYLOAD
+        # events pass through unchanged; normalize now also derives periods
+        # from the events (Phase 3), so compare the events and check periods.
+        assert result.parsed_output["events"] == _VALID_CALENDAR_PAYLOAD["events"]
+        assert result.parsed_output["periods"][0]["application_start"].startswith("2026-09-01")
 
     def test_system_message_has_cache_control(
         self,
@@ -252,7 +255,7 @@ class TestLivePathParsing:
             archetype="A",
             source_text_ko="…",
         )
-        assert result.parsed_output == _VALID_CALENDAR_PAYLOAD
+        assert result.parsed_output["events"] == _VALID_CALENDAR_PAYLOAD["events"]
         # raw_output preserves the fence — useful for debugging
         assert "```json" in result.raw_output
 

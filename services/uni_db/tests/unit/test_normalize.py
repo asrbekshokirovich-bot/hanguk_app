@@ -1,6 +1,9 @@
 """Unit tests for extraction output normalization (Layer 2)."""
 
+import jsonschema
+
 from uni_db.extract.normalize import content_key_for, normalize_output
+from uni_db.extract.schemas import FIELD_GROUP_SCHEMAS
 
 
 class TestContentKey:
@@ -119,3 +122,36 @@ class TestCollapseDuplicate:
              "prose_ko": text}
         ]})
         assert out["rows"][0]["prose_ko"] == text
+
+
+class TestDerivePeriodsFromEvents:
+    _EVENTS = {"events": [
+        {"event_type": "apply_open", "starts_at": "2026-09-01T09:00:00+09:00", "source_text_ko": "접수 시작"},
+        {"event_type": "apply_close", "starts_at": "2026-09-30T17:00:00+09:00", "source_text_ko": "접수 마감"},
+        {"event_type": "document_submission_deadline", "starts_at": "2026-10-05T00:00:00+09:00", "source_text_ko": "서류"},
+        {"event_type": "interview", "starts_at": "2026-10-15T09:00:00+09:00", "source_text_ko": "면접"},
+        {"event_type": "final_results", "starts_at": "2026-11-20T00:00:00+09:00", "source_text_ko": "발표"},
+    ]}
+
+    def test_events_become_a_period(self) -> None:
+        out = normalize_output("calendar", dict(self._EVENTS))
+        assert len(out["periods"]) == 1
+        p = out["periods"][0]
+        assert p["application_start"].startswith("2026-09-01")
+        assert p["application_end"].startswith("2026-09-30")
+        assert p["document_deadline"].startswith("2026-10-05")
+        assert p["interview_start"].startswith("2026-10-15")
+        assert p["result_announcement"].startswith("2026-11-20")
+        # derived output must still validate against the calendar schema
+        jsonschema.validate(instance=out, schema=FIELD_GROUP_SCHEMAS["calendar"])
+
+    def test_existing_periods_not_overwritten(self) -> None:
+        out = normalize_output("calendar", {
+            "events": [{"event_type": "apply_open", "starts_at": "2026-09-01T09:00:00+09:00"}],
+            "periods": [{"application_start": "2099-01-01"}],
+        })
+        assert out["periods"] == [{"application_start": "2099-01-01"}]
+
+    def test_empty_events_add_no_period(self) -> None:
+        out = normalize_output("calendar", {"events": []})
+        assert "periods" not in out
