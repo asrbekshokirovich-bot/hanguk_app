@@ -233,9 +233,35 @@ async def persist_outcome(
             job_status,
         )
 
+        # Belt-and-suspenders: never enqueue an empty or failed extraction for
+        # human review (these are handled by the error/refetch lane, not a
+        # reviewer). parse_one_document already skips them, but guard here too.
+        if _is_failed_output(result.parsed_output) or _is_empty_output(result.parsed_output):
+            continue
+
         # If this group requires HITL, enqueue.
         for entry in outcome.review_queue_entries:
             if entry.get("field_group") == result.field_group:
+                # De-dup: supersede any still-open review item for the same
+                # (guideline document, field group) so a re-extraction replaces
+                # the old card instead of stacking a duplicate next to it.
+                await conn.execute(
+                    """
+                    update public.review_queue
+                       set status = 'superseded', resolved_at = now()
+                     where status in ('open', 'in_review')
+                       and entity_type = 'extraction_jobs'
+                       and entity_id in (
+                         select ej.id from public.extraction_jobs ej
+                          where ej.guideline_document_id = $1
+                            and ej.field_group = $2
+                            and ej.id <> $3
+                       )
+                    """,
+                    outcome.guideline_document_id,
+                    result.field_group,
+                    job_id,
+                )
                 await conn.execute(
                     """
                     insert into public.review_queue (
