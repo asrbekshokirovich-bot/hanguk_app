@@ -145,3 +145,17 @@ def create_signed_url(
             f"Supabase signed_url response missing URL: {response!r}"
         )
     return signed
+
+
+def fetch_blob(storage_path: str) -> bytes:
+    """Download a stored blob's bytes by its bucket-internal path.
+
+    Used by the re-parse worker to re-extract an already-downloaded PDF
+    without re-fetching it from the (possibly unreachable) source site. In
+    local-cache mode it reads the filesystem copy.
+    """
+    if not settings.live_apis:
+        return Path(storage_path).read_bytes()
+    client = _client()
+    return client.storage.from_(BUCKET).download(storage_path)
+
