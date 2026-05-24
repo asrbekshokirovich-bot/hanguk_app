@@ -30,6 +30,30 @@ Legend: 🟦 this repo (backend) · 🌐 website (hanguk-uz) · 🔄 you run it.
 
 ---
 
+## Ground rule for the whole system: Korean-first (never lean on English sites)
+
+Always **search in Korean and read the Korean pages**. Searching in English,
+or using a university's English website, fails two ways:
+
+- it **misses parts** — English pages are usually thinner, summarised, or out
+  of date versus the Korean original; and
+- it **sometimes can't reach the site at all** — many English mirrors are
+  broken, partial, or just redirect.
+
+So every step — finding a university, following a link to a scholarship/guide
+page, and showing the reviewer the source — must use **Korean search terms**
+(e.g. `외국인 입학 공지`, `재외국민 모집요강`) and the **Korean source page**,
+even when an English version exists. Treat the Korean page as the single
+source of truth; only fall back to English to *supplement*, never to replace.
+
+The system is already built this way — it rejects `/eng/` `/en/` `/english/`
+URLs and searches Korean keywords — so this plan's job is to **keep and
+enforce** that rule everywhere, especially in discovery, the new-university
+probe, and link-following (Phases 4 and 6). Any new adapter, search, or probe
+that targets an English page should be treated as a bug.
+
+---
+
 ## Phase 1 — Make what the reviewer sees trustworthy & verifiable
 
 _The #1 complaint: a reviewer can't check the data because the source links
@@ -98,10 +122,13 @@ to the visible fields._
 
 _The model under-extracts depth and sometimes files the wrong kind of post._
 
-1. **Follow the one-click link to the real page.** 🟦 KAIST's 350,000 KRW/month
-   stipend, the 8-semester cap, and the 2.7 GPA rule are on the linked
-   scholarship page — the crawler only read the notice excerpt. Teach it to
-   follow to the canonical scholarship/tuition/guide page.
+1. **Follow the one-click link to the real page — the Korean one.** 🟦 KAIST's
+   350,000 KRW/month stipend, the 8-semester cap, and the 2.7 GPA rule are on
+   the linked scholarship page — the crawler only read the notice excerpt.
+   Teach it to follow to the canonical scholarship/tuition/guide page, and per
+   the ground rule **follow the Korean page** (`/intl-undergraduate/...` KO,
+   재외국민/외국인 모집요강), not the English mirror — the English page often
+   omits exactly these numbers.
    (This is the previously-planned "sub-page crawl" — still pending.)
 2. **Capture all of a university's tracks, not just one.** 🟦 Korea/Yonsei
    each have several international tracks; only one was captured.
@@ -131,8 +158,13 @@ _The model under-extracts depth and sometimes files the wrong kind of post._
 1. **Fill the missing sections for everyone.** 🟦🔄 No university yet has a
    full profile (timeline + tracks + tuition + scholarships + documents).
    Combine Phase 4 depth + re-runs so each gets a student-ready profile.
-2. **Keep onboarding universities.** 🟦🔄 Continue the batch work (Chung-Ang +
-   Kookmin are in; Sogang/Sejong/Dongguk/HUFS next via the probe loop).
+2. **Keep onboarding universities — via the Korean board.** 🟦🔄 Continue the
+   batch work (Chung-Ang + Kookmin are in; Sogang/Sejong/Dongguk/HUFS next via
+   the probe loop). Per the ground rule, find each school by **Korean search**
+   (`<학교명> 외국인 입학 공지`) and wire the **Korean** notice board — never
+   the English admissions site, which is often incomplete or unreachable. The
+   probe and discovery should reject English URLs the same way the existing
+   adapters do.
 
 ---
 
