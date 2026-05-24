@@ -35,6 +35,8 @@ from .kangwon import KANGWON_SELECTORS, make_kangwon_adapter
 from .jeju import JEJU_SELECTORS, make_jeju_adapter
 from .skku import SKKU_SELECTORS, make_skku_adapter
 from .hanyang import HANYANG_SELECTORS, make_hanyang_adapter
+from .cau import CAU_SELECTORS
+from .kookmin import KOOKMIN_SELECTORS
 
 
 def _html(selectors: HtmlListSelectors):
@@ -77,6 +79,11 @@ ADAPTER_REGISTRY: dict[str, object] = {
 
     # JSON API (FR_BBS_SVC) — Inha shares the KU pattern with custom paths
     "https://admission.inha.ac.kr/cms/FR_CON/index.do?MENU_ID=170":                  make_inha_adapter,
+
+    # Static HTML — gnuboard / php boards (real GET detail links; generic
+    # attachment resolver fetches the PDF from the detail page)
+    "https://oia.cau.ac.kr/bbs/board.php?tbl=bbs61":                 _html(CAU_SELECTORS),
+    "https://admission.kookmin.ac.kr/foreigner/notice.php":          _html(KOOKMIN_SELECTORS),
 
     # Static HTML — egovframework boards
     "https://ipsi.chungbuk.ac.kr/kor/bbs/BBSMSTR_000000000017/lst.do":               make_cbnu_adapter,
