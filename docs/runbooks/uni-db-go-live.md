@@ -73,46 +73,51 @@ note which ones and we can look.
 
 ---
 
-## Part B — turn on automatic syncing (the permanent fix)
+## Part B (recommended) — turn on automatic syncing with GitHub Actions
 
-This puts the robot on a small always-on server (Hetzner, already decided in
-[ADR-003](../decisions/003-worker-placement.md)) so it runs **every hour by
-itself** — forever. The server's very first run also does the catch-up, so
-if you do Part B you can skip Part A.
+No server to manage. A scheduled workflow (`.github/workflows/uni-db-sync.yml`)
+runs the same three stages every 6 hours on GitHub's runners. **All you do is
+paste 4 secrets into the repo once.**
 
-1. **Create the server.** Follow
-   [`hetzner-provisioning.md`](./hetzner-provisioning.md) sections 1-5
-   (create the CX22 box, run `infra/bootstrap.sh`). This produces a server
-   with the `uni-db` user and the `/opt/uni_db` layout.
+1. **Add the secrets.** In GitHub → your repo → **Settings → Secrets and
+   variables → Actions → New repository secret**, add (values from
+   [`docs/credentials.md`](../credentials.md)):
 
-2. **Put the secrets on the server.** Create `/etc/uni_db/env` from
-   [`infra/env.example`](../../infra/env.example) and fill in the same values
-   as Part A step 2 — and make sure:
-   ```
-   UNI_DB_LIVE_APIS=true
-   UNI_DB_LIVE_CRAWL=true      # <-- must be true, the template ships it false
-   ```
-   ```bash
-   # on the server, as root:
-   install -o root -g uni-db -m 640 /dev/stdin /etc/uni_db/env < your-filled-env
-   ```
+   | Secret name | Value |
+   |---|---|
+   | `UNI_DB_SUPABASE_DB_URL` | the production database URL |
+   | `UNI_DB_SUPABASE_URL` | `https://lysjdtyanhdfphqyijsr.supabase.co` |
+   | `UNI_DB_SUPABASE_SERVICE_ROLE_KEY` | the service-role key (for PDF storage) |
+   | `UNI_DB_ANTHROPIC_API_KEY` | the AI key (the paid part) |
+   | `UNI_DB_DEEPL_API_KEY` *(optional)* | for the translate stage |
 
-3. **Deploy.** From your laptop (repo root):
-   ```bash
-   infra/deploy.sh <server-ip>
-   ```
-   This copies the code, installs dependencies, **enables the hourly sync
-   timer**, and **runs one cycle immediately** (that first cycle is your
-   catch-up).
+2. **Merge this branch to `main`.** GitHub only runs *scheduled* workflows
+   from the default branch, so the timer starts after the PR is merged. (The
+   live flags `UNI_DB_LIVE_CRAWL` / `UNI_DB_LIVE_APIS` are already set to
+   `true` inside the workflow — no env file to edit.)
 
-4. **Confirm it's scheduled and running:**
-   ```bash
-   ssh root@<server-ip> 'systemctl list-timers uni-db-*'        # shows next run time
-   ssh root@<server-ip> 'journalctl -u uni-db-sync -n 50'       # shows the last cycle
-   ```
-   `uni-db-sync` runs discovery → fetch+read → translate, every hour. During
-   the summer off-season it mostly idles (the per-source schedule widens
-   automatically); in admission season new guides appear within ~1 hour.
+3. **Do the one-time catch-up with one click.** GitHub → **Actions** tab →
+   **uni-db sync** → **Run workflow** → set `fetch_limit` to `100` → Run.
+   This processes the backlog so all universities appear. (This replaces
+   Part A — you don't need a laptop run once the workflow is on `main`.)
+
+4. **Confirm.** The **Actions** tab shows each run (scheduled + manual) with
+   green/red status and full logs. After that it runs itself every 6 hours.
+
+Notes: GitHub may start a scheduled run 10–30 min late under load (fine for
+admissions). It also pauses scheduled workflows after **60 days of zero repo
+activity** — this repo is active, so not a concern in practice.
+
+### Alternative — Hetzner server (`infra/`)
+
+If you'd rather run a dedicated always-on box (ADR-003), the systemd units +
+deploy script are in [`infra/`](../../infra/); follow
+[`hetzner-provisioning.md`](./hetzner-provisioning.md) to create the CX22,
+put the secrets in `/etc/uni_db/env` (set `UNI_DB_LIVE_CRAWL=true`), then run
+`infra/deploy.sh <server-ip>` (it enables the hourly `uni-db-sync.timer` and
+runs one cycle immediately). Verify with
+`ssh root@<ip> 'systemctl list-timers uni-db-*'`. This is more setup than
+GitHub Actions; most teams won't need it.
 
 That's it — once Part B is done, the staff queue stays current on its own.
 
@@ -136,8 +141,9 @@ group by 1 order by guides desc;
 
 - **`run-pipeline` says it's refusing:** `UNI_DB_LIVE_CRAWL` and
   `UNI_DB_LIVE_APIS` must both be `true`, and `SUPABASE_DB_URL` must be set.
-- **A stage failed but others ran:** that's by design (best-effort). Re-run
-  the failed stage; check `journalctl -u uni-db-sync` for the reason.
+- **A stage failed but others ran:** that's by design (best-effort). Check
+  the logs for the reason — the **Actions** tab (GitHub Actions) or
+  `journalctl -u uni-db-sync` (Hetzner) — and re-run.
 - **Costs higher than expected:** lower `--limit` on `run-pipeline`, or check
   for a university re-fetching the same PDF (dedup is by file hash, so this
   is rare).
