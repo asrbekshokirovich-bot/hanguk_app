@@ -46,6 +46,15 @@ def _build_parser() -> argparse.ArgumentParser:
     p_pipeline.add_argument("--limit", type=int, default=25,
                             help="Max announcements to fetch+parse this run")
 
+    p_reparse = sub.add_parser(
+        "reparse",
+        help="LIVE: re-extract already-stored guideline documents (apply fixes to existing data)",
+    )
+    p_reparse.add_argument("--limit", type=int, default=25,
+                           help="Max stored documents to re-extract this run")
+    p_reparse.add_argument("--institution", default=None,
+                           help="Limit to one institution by primary_domain (e.g. inha.ac.kr)")
+
     sub.add_parser("schema-check", help="Lint the migrations directory")
     return parser
 
@@ -63,6 +72,8 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_parse_fixture(name=args.fixture))
     if args.cmd == "run-pipeline":
         return asyncio.run(_run_pipeline(limit=args.limit))
+    if args.cmd == "reparse":
+        return asyncio.run(_reparse(limit=args.limit, institution=args.institution))
     if args.cmd == "schema-check":
         return _schema_check()
 
@@ -281,6 +292,49 @@ async def _run_pipeline(*, limit: int) -> int:
         )
     else:
         print(f"run-pipeline: fetched+parsed ok={ok} failed={fail}")
+    return 0
+
+
+async def _reparse(*, limit: int, institution: str | None) -> int:
+    """LIVE: re-extract already-stored guideline documents so the latest
+    extraction/normalization fixes apply to existing data (the old review
+    cards are superseded via dedup). Reads PDFs from storage — does NOT
+    re-fetch from ac.kr — but DOES make paid LLM calls, so it's gated on
+    `UNI_DB_LIVE_APIS` + `SUPABASE_DB_URL`.
+    """
+    if not settings.live_apis:
+        print(
+            "reparse needs UNI_DB_LIVE_APIS=true (it re-runs paid LLM "
+            "extraction). Refusing. See docs/credentials.md.",
+            file=sys.stderr,
+        )
+        return 2
+    if not settings.supabase_db_url:
+        print("SUPABASE_DB_URL is not set; cannot reparse.", file=sys.stderr)
+        return 2
+
+    import asyncpg
+
+    from .workers import reparse_worker
+
+    conn = await asyncpg.connect(settings.supabase_db_url)
+    try:
+        institution_id = None
+        if institution:
+            institution_id = await conn.fetchval(
+                "select id from public.institutions where primary_domain = $1",
+                institution,
+            )
+            if institution_id is None:
+                print(f"No institution with primary_domain={institution!r}.", file=sys.stderr)
+                return 2
+        ok, fail = await reparse_worker.reparse_pending(
+            conn, limit=limit, institution_id=institution_id,
+        )
+    finally:
+        await conn.close()
+
+    print(f"reparse: re-extracted ok={ok} failed={fail}")
     return 0
 
 
