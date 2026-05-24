@@ -127,6 +127,35 @@ def _clean_row(row: Any) -> None:
             row[field] = _clean_ko_text(row[field])
 
 
+# Calendar `events[]` carry the dated milestones; the student-facing form
+# reads the structured `periods[]` fields. When extraction filled events but
+# not periods, derive a period so the labelled fields (application window,
+# interview, results) aren't shown as "Not specified" while the data sits
+# unseen in events. Maps an event_type → the period field it populates.
+_EVENT_TO_PERIOD_FIELD: dict[str, str] = {
+    "apply_open": "application_start",
+    "apply_close": "application_end",
+    "document_submission_deadline": "document_deadline",
+    "documents_deadline": "document_deadline",
+    "document_submission_close": "document_deadline",
+    "interview": "interview_start",
+    "final_results": "result_announcement",
+}
+
+
+def _derive_period_from_events(events: list) -> dict[str, Any]:
+    """Build one `periods[]` row from the dated events (first value wins)."""
+    period: dict[str, Any] = {}
+    for ev in events:
+        if not isinstance(ev, dict):
+            continue
+        field = _EVENT_TO_PERIOD_FIELD.get(ev.get("event_type"))
+        starts = ev.get("starts_at")
+        if field and starts and field not in period:
+            period[field] = starts
+    return period
+
+
 def normalize_output(field_group: str, parsed: Any) -> Any:
     """Repair structural drift so valid-but-oddly-shaped output passes.
 
@@ -162,6 +191,16 @@ def normalize_output(field_group: str, parsed: Any) -> Any:
                 et = row.get("event_type")
                 if isinstance(et, str) and et not in CALENDAR_EVENT_TYPES:
                     row["event_type"] = "other"
+
+    # Calendar: if events were extracted but periods weren't, derive the
+    # structured period so the labelled timeline fields populate (Phase 3 —
+    # stop hiding extracted dates behind "Not specified").
+    if field_group == "calendar" and isinstance(parsed.get(key), list):
+        existing = parsed.get("periods")
+        if not (isinstance(existing, list) and existing):
+            derived = _derive_period_from_events(parsed[key])
+            if derived:
+                parsed["periods"] = [derived]
 
     # Clean per-row Korean free-text: strip an appended English translation
     # and collapse exact duplicate clauses (see module docstring).
