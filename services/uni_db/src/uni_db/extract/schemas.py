@@ -172,6 +172,12 @@ REQUIREMENTS_SCHEMA: dict[str, Any] = {
                                        "enum": [None, "required", "not_required", "not_stated"]},
                     "gpa_status":     {"type": ["string", "null"],
                                        "enum": [None, "required", "not_required", "not_stated"]},
+                    # Whether this row is a complete track definition (eligibility
+                    # + selection) or just a narrow notice that mentions a track
+                    # (e.g. an interview-day announcement). "partial" routes it to
+                    # a softer review state instead of shipping as a full track.
+                    "completeness":   {"type": ["string", "null"],
+                                       "enum": [None, "full", "partial"]},
                     # Majors offered to this track (programs.name_ko on publish).
                     "majors":                  {"type": ["array", "null"], "items": {"type": "string"}},
                     # Per-track tuition (maps to the tuition table on publish).

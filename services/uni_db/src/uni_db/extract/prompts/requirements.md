@@ -7,9 +7,20 @@ practical-exam flags.
 ## Output shape
 
 Return a top-level object with a single key `rows` — an **array** of
-requirement rows. One row per **applicant_category** (e.g. one row for
-외국인전형, a separate row for 재외국민전형 if both appear in the same
-guideline).
+requirement rows. **Emit one row per DISTINCT track** — capture *all* of
+them, not a single bucket. Korean universities publish several
+international/overseas tracks (e.g. 외국인전형 Type 1 vs Type 2, 순수외국인 vs
+재외국민(2%), 전 교육과정 이수자, 북한이탈주민, 정원외 외국인, transfer/편입).
+If the guideline lists 4 tracks, return 4 rows. Do not collapse them into one
+"Special Admission for Foreigners" bucket.
+
+**Completeness — set the `completeness` field on every row:**
+- `"full"` — this row is a real track definition (eligibility + selection
+  method are present).
+- `"partial"` — the source is a narrow notice that only *mentions* a track
+  (e.g. an interview-day procedures notice, a results announcement, a single
+  document reminder) and is NOT the full track. Mark it partial rather than
+  shipping it as a complete track. Do not fabricate the missing parts.
 
 **Critical: when the source span has no requirements information, return
 `{"rows": []}` and stop.** Do not invent a row. Do not emit synthetic

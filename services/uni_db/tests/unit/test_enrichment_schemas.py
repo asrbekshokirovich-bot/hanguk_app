@@ -133,3 +133,18 @@ class TestDocumentDeadlines:
             "document_type": "passport", "source_text_ko": "여권",
             "deadline": None, "applies_to_round": None,
         }]})
+
+
+class TestTrackCompleteness:
+    def test_full_and_partial_validate(self) -> None:
+        for c in ("full", "partial"):
+            _validate("requirements", {"rows": [{
+                "source_text_ko": "x", "applicant_category": "외국인전형",
+                "completeness": c,
+            }]})
+
+    def test_bad_completeness_rejected(self) -> None:
+        with pytest.raises(jsonschema.ValidationError):
+            _validate("requirements", {"rows": [{
+                "source_text_ko": "x", "completeness": "mostly",
+            }]})
