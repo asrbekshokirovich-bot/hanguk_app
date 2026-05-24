@@ -80,6 +80,7 @@ ResolverFn = Callable[
 # the registry fall through to the legacy direct-fetch path.
 
 def _build_registry() -> dict[str, ResolverFn]:
+    from .generic_attachment import resolve as resolve_generic
     from .kaist import resolve as resolve_kaist
     from .korea_univ import resolve as resolve_korea_univ
     from .yonsei import resolve as resolve_yonsei
@@ -95,6 +96,10 @@ def _build_registry() -> dict[str, ResolverFn]:
         # KAIST renders the guideline as an ordinary PDF anchor on the
         # intl-undergraduate notice detail page (not a JS endpoint).
         "admission.kaist.ac.kr": resolve_kaist,
+        # Direct-download boards: detail page carries a plain download anchor
+        # (download.php / file_download.php). Generic resolver handles them.
+        "oia.cau.ac.kr": resolve_generic,
+        "admission.kookmin.ac.kr": resolve_generic,
     }
 
 
