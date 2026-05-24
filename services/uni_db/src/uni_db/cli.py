@@ -39,6 +39,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p_parse.add_argument("--fixture", required=True,
                          help="basename in tests/fixtures (without extension)")
 
+    p_pipeline = sub.add_parser(
+        "run-pipeline",
+        help="LIVE: fetch pending announcements → guideline_documents → extract → enqueue",
+    )
+    p_pipeline.add_argument("--limit", type=int, default=25,
+                            help="Max announcements to fetch+parse this run")
+
     sub.add_parser("schema-check", help="Lint the migrations directory")
     return parser
 
@@ -54,6 +61,8 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_crawl_fixture(source=args.source, fixture=args.fixture))
     if args.cmd == "parse":
         return asyncio.run(_parse_fixture(name=args.fixture))
+    if args.cmd == "run-pipeline":
+        return asyncio.run(_run_pipeline(limit=args.limit))
     if args.cmd == "schema-check":
         return _schema_check()
 
@@ -225,6 +234,44 @@ async def _parse_fixture(*, name: str) -> int:
     if outcome.review_queue_entries:
         print(f"  review_queue: {len(outcome.review_queue_entries)} entries enqueued")
     return 0
+
+
+async def _run_pipeline(*, limit: int) -> int:
+    """LIVE fetch+parse stage: drain pending announcements into review.
+
+    Gated on `UNI_DB_LIVE_CRAWL` + `UNI_DB_LIVE_APIS` (real HTTP + paid LLM)
+    and `SUPABASE_DB_URL`. Refuses (exit 2) with guidance when any is unset,
+    so it can't accidentally fire from a misconfigured scheduler.
+    """
+    if not (settings.live_crawl and settings.live_apis):
+        print(
+            "run-pipeline needs UNI_DB_LIVE_CRAWL=true and UNI_DB_LIVE_APIS=true "
+            "(real ac.kr fetches + paid LLM). Refusing. See docs/credentials.md.",
+            file=sys.stderr,
+        )
+        return 2
+    if not settings.supabase_db_url:
+        print("SUPABASE_DB_URL is not set; cannot run the live pipeline.", file=sys.stderr)
+        return 2
+
+    import asyncpg
+    import httpx
+
+    from .workers import fetch_worker
+
+    conn = await asyncpg.connect(settings.supabase_db_url)
+    try:
+        async with httpx.AsyncClient(
+            headers={"User-Agent": settings.http_user_agent},
+            follow_redirects=True,
+            timeout=settings.http_request_timeout_sec,
+        ) as http:
+            ok, fail = await fetch_worker.fetch_pending(conn, http, limit=limit)
+    finally:
+        await conn.close()
+
+    print(f"run-pipeline: fetched+parsed ok={ok} failed={fail}")
+    return 0 if ok > 0 or fail == 0 else 1
 
 
 def _schema_check() -> int:
