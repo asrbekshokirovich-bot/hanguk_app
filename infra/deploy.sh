@@ -54,31 +54,31 @@ sudo -u uni-db .venv/bin/pip install --quiet --upgrade pip
 sudo -u uni-db .venv/bin/pip install --quiet -e ".[heavy]"
 REMOTE
 
-# 4. Reload systemd, enable + (re)start units
-echo "[deploy] systemd reload + restart"
+# 4. Reload systemd, enable the scheduled cycle, kick one run now
+echo "[deploy] systemd reload + enable sync timer"
 ssh "$SSH_TARGET" 'bash -s' <<'REMOTE'
 set -euo pipefail
 systemctl daemon-reload
-systemctl enable --now \
+# Retire the legacy per-stage units if an earlier deploy enabled them — the
+# unified uni-db-sync cycle replaces discovery-poll/extract/translate.
+systemctl disable --now \
   uni-db-discovery-poll.timer \
   uni-db-extract.service \
-  uni-db-translate.service \
-  uni-db-ocr.service
-systemctl restart \
-  uni-db-extract.service \
-  uni-db-translate.service \
-  uni-db-ocr.service
+  uni-db-translate.service 2>/dev/null || true
+# Enable the hourly sync cycle + the weekly Adiga calendar fetch.
+systemctl enable --now uni-db-sync.timer uni-db-adiga-calendar.timer
+# Run one cycle immediately so the review queue starts filling without
+# waiting for the top of the hour.
+systemctl start uni-db-sync.service || true
 REMOTE
 
-# 5. Smoke check — show the last 20 lines from each unit
-echo "[deploy] post-restart status"
+# 5. Smoke check — show the timer schedule + the first cycle's logs
+echo "[deploy] post-deploy status"
 ssh "$SSH_TARGET" 'bash -s' <<'REMOTE'
-echo "--- uni-db-extract ---"
-journalctl -u uni-db-extract -n 20 --no-pager
-echo "--- uni-db-translate ---"
-journalctl -u uni-db-translate -n 20 --no-pager
-echo "--- uni-db-ocr ---"
-journalctl -u uni-db-ocr -n 20 --no-pager
+echo "--- timers ---"
+systemctl list-timers 'uni-db-*' --no-pager || true
+echo "--- last uni-db-sync run ---"
+journalctl -u uni-db-sync -n 40 --no-pager
 REMOTE
 
 echo "[deploy] done."

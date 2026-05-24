@@ -40,6 +40,7 @@ __all__ = [
     "ResolvedPdf",
     "ResolverFn",
     "get_resolver_for_url",
+    "registered_hosts",
     "resolve_pdf",
 ]
 
@@ -79,6 +80,7 @@ ResolverFn = Callable[
 # the registry fall through to the legacy direct-fetch path.
 
 def _build_registry() -> dict[str, ResolverFn]:
+    from .kaist import resolve as resolve_kaist
     from .korea_univ import resolve as resolve_korea_univ
     from .yonsei import resolve as resolve_yonsei
 
@@ -90,6 +92,9 @@ def _build_registry() -> dict[str, ResolverFn]:
         # reads urlsplit(detail_url) so it correctly targets
         # admission.inha.ac.kr's /ajaxfile/FR_SVC/FileDown.do endpoint.
         "admission.inha.ac.kr": resolve_korea_univ,
+        # KAIST renders the guideline as an ordinary PDF anchor on the
+        # intl-undergraduate notice detail page (not a JS endpoint).
+        "admission.kaist.ac.kr": resolve_kaist,
     }
 
 
@@ -107,6 +112,19 @@ def get_resolver_for_url(url: str) -> ResolverFn | None:
     """Return the resolver bound to the URL's host, or ``None``."""
     host = urlsplit(url).hostname or ""
     return _registry().get(host.lower())
+
+
+def registered_hosts() -> tuple[str, ...]:
+    """Hosts that have a per-source resolver.
+
+    The fetch stage uses this to widen its candidate filter: an
+    announcement whose ``url_ko`` host is in this set is fetchable even
+    when discovery never captured an attachment URL (the resolver follows
+    the detail page to the real PDF). Sourcing it here keeps the fetch
+    filter in lockstep with the registry instead of a drifting hardcoded
+    list.
+    """
+    return tuple(_registry().keys())
 
 
 async def resolve_pdf(

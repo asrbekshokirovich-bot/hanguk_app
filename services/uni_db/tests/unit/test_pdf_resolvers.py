@@ -22,6 +22,7 @@ from uni_db.parse.pdf_resolvers import (
     get_resolver_for_url,
     resolve_pdf,
 )
+from uni_db.parse.pdf_resolvers import kaist as kaist_resolver
 from uni_db.parse.pdf_resolvers import korea_univ as ku_resolver
 from uni_db.parse.pdf_resolvers import yonsei as yonsei_resolver
 
@@ -35,6 +36,10 @@ KU_DETAIL_URL = (
 YONSEI_DETAIL_URL = (
     "https://admission.yonsei.ac.kr/seoul/admission/html/international/"
     "noticeView.asp?BBS_NO=3417"
+)
+
+KAIST_DETAIL_URL = (
+    "https://admission.kaist.ac.kr/intl-undergraduate/notice/?bbs_id=42"
 )
 
 
@@ -63,6 +68,9 @@ class TestRegistryDispatch:
 
     def test_get_resolver_picks_yonsei_by_host(self) -> None:
         assert get_resolver_for_url(YONSEI_DETAIL_URL) is yonsei_resolver.resolve
+
+    def test_get_resolver_picks_kaist_by_host(self) -> None:
+        assert get_resolver_for_url(KAIST_DETAIL_URL) is kaist_resolver.resolve
 
 
 # ---------------------------------------------------------------------------
@@ -219,6 +227,60 @@ class TestYonseiResolver:
         async with httpx.AsyncClient() as client:
             resolved = await yonsei_resolver.resolve(list_url, client, None)
         assert resolved is None
+
+
+# ---------------------------------------------------------------------------
+# KAIST resolver
+# ---------------------------------------------------------------------------
+
+
+class TestKaistResolver:
+    @pytest.fixture
+    def detail_html(self) -> bytes:
+        return _load_fixture_bytes("kaist_detail.html")
+
+    @respx.mock
+    async def test_prefers_guide_pdf_over_other_attachments(self, detail_html: bytes) -> None:
+        respx.get(KAIST_DETAIL_URL).mock(
+            return_value=httpx.Response(200, content=detail_html),
+        )
+        async with httpx.AsyncClient() as client:
+            resolved = await kaist_resolver.resolve(KAIST_DETAIL_URL, client, None)
+
+        assert resolved is not None
+        assert isinstance(resolved, ResolvedPdf)
+        # The "Admissions Guide..." attachment beats campus_map.pdf and the
+        # checklist on guide-keyword score, and the relative href is made
+        # absolute against the detail host.
+        assert resolved.url.startswith("https://admission.kaist.ac.kr/")
+        assert resolved.url.endswith("Admissions Guide for 2027 admission.pdf")
+        assert "Admissions Guide" in resolved.filename
+        assert resolved.headers.get("Referer") == KAIST_DETAIL_URL
+
+    @respx.mock
+    async def test_returns_none_when_no_pdf(self) -> None:
+        html = b"<html><body><a href='/intl-undergraduate/notice'>back</a></body></html>"
+        respx.get(KAIST_DETAIL_URL).mock(return_value=httpx.Response(200, content=html))
+        async with httpx.AsyncClient() as client:
+            resolved = await kaist_resolver.resolve(KAIST_DETAIL_URL, client, None)
+        assert resolved is None
+
+    @respx.mock
+    async def test_returns_none_on_http_error(self) -> None:
+        respx.get(KAIST_DETAIL_URL).mock(return_value=httpx.Response(404))
+        async with httpx.AsyncClient() as client:
+            resolved = await kaist_resolver.resolve(KAIST_DETAIL_URL, client, None)
+        assert resolved is None
+
+    @respx.mock
+    async def test_top_level_dispatcher_routes_to_kaist(self, detail_html: bytes) -> None:
+        respx.get(KAIST_DETAIL_URL).mock(
+            return_value=httpx.Response(200, content=detail_html),
+        )
+        async with httpx.AsyncClient() as client:
+            resolved = await resolve_pdf(KAIST_DETAIL_URL, http_client=client)
+        assert resolved is not None
+        assert resolved.url.endswith(".pdf")
 
 
 # ---------------------------------------------------------------------------

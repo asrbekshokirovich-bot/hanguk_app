@@ -384,3 +384,35 @@ class TestComputeCostHelper:
             cache_write_tokens=0,
         )
         assert cost == pytest.approx(0.30, abs=1e-6)
+
+
+class TestSelfScore:
+    """Job-level confidence is the MIN of per-row confidences."""
+
+    def test_min_over_rows(self) -> None:
+        parsed = {"rows": [
+            {"extractor_confidence": 0.91},
+            {"extractor_confidence": 0.68},
+            {"extractor_confidence": 0.88},
+        ]}
+        assert llm_anthropic._self_score(parsed) == pytest.approx(0.68)
+
+    def test_min_over_calendar_events(self) -> None:
+        parsed = {"events": [
+            {"extractor_confidence": 0.91},
+            {"extractor_confidence": 0.92},
+        ]}
+        assert llm_anthropic._self_score(parsed) == pytest.approx(0.91)
+
+    def test_rows_without_confidence_ignored(self) -> None:
+        parsed = {"rows": [{"name_ko": "x"}, {"extractor_confidence": 0.7}]}
+        assert llm_anthropic._self_score(parsed) == pytest.approx(0.7)
+
+    def test_falls_back_to_root_level(self) -> None:
+        assert llm_anthropic._self_score({"extractor_confidence": 0.5}) == pytest.approx(0.5)
+
+    def test_default_when_no_confidence(self) -> None:
+        assert llm_anthropic._self_score({"rows": []}) == pytest.approx(0.85)
+
+    def test_non_dict_defaults(self) -> None:
+        assert llm_anthropic._self_score("garbage") == pytest.approx(0.85)

@@ -20,6 +20,20 @@ high-stakes for ADR-007's Uzbek user cohort).
   ALWAYS keep `prose_ko` so counselors have the canonical narrative.
 - Mark `extractor_confidence < 0.85` whenever an eligibility window is
   cited (these are difficulty-5 per audit and need HITL).
+- **Capture the full award, not just the headline.** When the source
+  states them, record in `prose_ko` (and the structured fields where they
+  fit): the **monthly stipend / living allowance** amount (set
+  `award_type="stipend_monthly"`, `award_value` = the monthly KRW figure),
+  the **duration cap** (e.g. "8 semesters", encode in `duration`/prose),
+  the **GPA maintenance** requirement (e.g. ≥ 2.7/4.3 → `eligibility_predicate.renewal_gpa_min`/`renewal_gpa_scale`),
+  whether **medical insurance** is included, and the **application
+  procedure** (separate form vs a checkbox on the financial-resources
+  statement).
+- `award_value` is `null` ONLY when the source span genuinely does not
+  state the amount. If the prose says a stipend/amount exists but the
+  number isn't in this span, say so in `notes_ko` ("amount stated on the
+  dedicated scholarship page, not this excerpt") so it is re-fetched —
+  do not silently drop it.
 
 ## TOPIK-tier table extraction (Phase 2)
 
@@ -154,3 +168,7 @@ Capture both grids as arrays (one object per band) when the guideline states the
 "tuition_waiver_pct", award_value 100 for full waiver, 50 for half-tuition).
 `duration` is one of: "first_semester" | "full_year" | "all_years".
 Omit a grid (or use null) if that test is not used for tiering.
+
+`prose_ko` / `notes_ko` are **Korean only** — never append an English
+translation into a `_ko` field, and never repeat the same clause or list
+twice within a single field.

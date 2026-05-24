@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Iterable
@@ -105,6 +106,28 @@ def parse_one_document(
             results.append(_failed_result(group, "claude-sonnet-4-6",
                                           violation=f"{type(exc).__name__}: {exc}"))
             continue
+
+        # If a row's source span was clipped mid-word, the model never saw the
+        # full requirement. Re-extract once against a wider window before
+        # accepting the truncated row.
+        if _looks_truncated(result.parsed_output) and group in offsets:
+            wider = _slice_for(pdf_text_full, group, offsets, length=_WIDE_SLICE_LEN)
+            if len(wider) > len(section_text):
+                try:
+                    retry = extract_field_group(
+                        field_group=group,
+                        archetype=archetype.label,
+                        source_text_ko=wider,
+                    )
+                except Exception as exc:  # keep the original on retry failure
+                    log.warning(
+                        "extract: truncation retry failed for %s: %s",
+                        group, type(exc).__name__,
+                    )
+                else:
+                    if not _looks_truncated(retry.parsed_output):
+                        log.info("extract: truncation retry recovered %s", group)
+                        result = retry
 
         results.append(result)
 
@@ -258,11 +281,57 @@ async def persist_outcome(
     )
 
 
-def _slice_for(full_text: str, group: str, offsets: dict[str, int]) -> str:
+_SLICE_LEN = 12000
+_FALLBACK_LEN = 8000
+# A truncation re-extraction reads a wider window so a clipped span (e.g.
+# "English Proficiency T") can be recovered in full.
+_WIDE_SLICE_LEN = 24000
+# When the hard cut lands mid-token, extend up to this many extra chars to
+# reach the next whitespace/newline boundary instead of clipping a word.
+_BOUNDARY_LOOKAHEAD = 600
+
+# A row's source_text_ko looks truncated when it ends with a short dangling
+# alphabetic token after whitespace (e.g. "... Proficiency T"). Numbers
+# ("TOPIK 4", "iBT 80") and Korean clause-enders ("...제출") don't match, so
+# this is a low-false-positive signal.
+_TRUNCATION_RE = re.compile(r"\s[A-Za-z]{1,2}$")
+
+
+def _slice_for(
+    full_text: str, group: str, offsets: dict[str, int], *, length: int = _SLICE_LEN
+) -> str:
     if group not in offsets:
-        return full_text[:8000]                  # fallback: first 8k chars
+        return _extend_to_boundary(full_text, 0, _FALLBACK_LEN)
     start = offsets[group]
-    return full_text[start : start + 12000]
+    return _extend_to_boundary(full_text, start, length)
+
+
+def _extend_to_boundary(text: str, start: int, length: int) -> str:
+    """Slice ``text[start:start+length]`` but extend the end to the next
+    whitespace/newline so we never hand the model a mid-word cut."""
+    end = start + length
+    if end >= len(text):
+        return text[start:]
+    window = text[end : end + _BOUNDARY_LOOKAHEAD]
+    match = re.search(r"\s", window)
+    if match:
+        return text[start : end + match.start()]
+    return text[start:end]
+
+
+def _looks_truncated(parsed_output: object) -> bool:
+    """True when any row's ``source_text_ko`` ends mid-word (see _TRUNCATION_RE)."""
+    if not isinstance(parsed_output, dict):
+        return False
+    for key in ("rows", "events"):
+        rows = parsed_output.get(key)
+        if isinstance(rows, list):
+            for row in rows:
+                if isinstance(row, dict):
+                    span = row.get("source_text_ko")
+                    if isinstance(span, str) and _TRUNCATION_RE.search(span):
+                        return True
+    return False
 
 
 def _failed_result(group: str, model: str, *, violation: str) -> ExtractionResult:

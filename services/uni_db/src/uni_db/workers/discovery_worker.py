@@ -146,6 +146,11 @@ async def write_run_to_db(
     )
 
     for ann, finding in run.findings:
+        # Persist the actual classifier verdict. Historically this inserted
+        # the literal "unknown", so the fetch stage had no signal for which
+        # posts are admission guidelines. classify() is pure, so recomputing
+        # here (it also runs in run_one_source for logging) is cheap.
+        cls = classify(ann)
         ann_id = await conn.fetchval(
             """
             insert into public.announcements (
@@ -153,10 +158,12 @@ async def write_run_to_db(
               attachments, posted_at, classifier_label, classifier_confidence
             ) values ($1,$2,$3,$4,$5::jsonb,$6,$7,$8)
             on conflict (source_id, external_post_id) do update
-              set title_ko    = excluded.title_ko,
-                  url_ko      = excluded.url_ko,
-                  attachments = excluded.attachments,
-                  posted_at   = excluded.posted_at
+              set title_ko              = excluded.title_ko,
+                  url_ko                = excluded.url_ko,
+                  attachments           = excluded.attachments,
+                  posted_at             = excluded.posted_at,
+                  classifier_label      = excluded.classifier_label,
+                  classifier_confidence = excluded.classifier_confidence
             returning id
             """,
             run.source.id,
@@ -165,8 +172,8 @@ async def write_run_to_db(
             ann.url_ko,
             _attachments_json(ann),
             ann.posted_at,
-            "unknown",
-            None,
+            cls.label,
+            cls.confidence,
         )
         await conn.execute(
             """

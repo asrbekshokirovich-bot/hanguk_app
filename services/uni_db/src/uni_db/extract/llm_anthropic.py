@@ -206,7 +206,31 @@ def extract_field_group(
 
 
 def _self_score(parsed: object) -> float:
-    if isinstance(parsed, dict) and "extractor_confidence" in parsed:
+    """Job-level confidence = the MIN of the per-row confidences.
+
+    A reviewer needs to be alerted to the *weakest* row, not an average or
+    a flat constant. We scan every row (`rows`/`events`) for
+    `extractor_confidence` and return the minimum; falling back to a
+    root-level value, then the neutral 0.85 default, only when no per-row
+    score is present.
+    """
+    if not isinstance(parsed, dict):
+        return 0.85
+
+    row_scores: list[float] = []
+    for key in ("rows", "events"):
+        rows = parsed.get(key)
+        if isinstance(rows, list):
+            for row in rows:
+                if isinstance(row, dict) and "extractor_confidence" in row:
+                    try:
+                        row_scores.append(float(row["extractor_confidence"]))
+                    except (TypeError, ValueError):
+                        continue
+    if row_scores:
+        return min(row_scores)
+
+    if "extractor_confidence" in parsed:
         try:
             return float(parsed["extractor_confidence"])  # type: ignore[arg-type]
         except (TypeError, ValueError):

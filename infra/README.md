@@ -14,12 +14,21 @@ infra/
 ├── deploy.sh            # rsync from local checkout + venv install + restart
 ├── env.example          # /etc/uni_db/env template
 └── systemd/
-    ├── uni-db-discovery-poll.service
-    ├── uni-db-discovery-poll.timer
-    ├── uni-db-extract.service
-    ├── uni-db-translate.service
-    └── uni-db-ocr.service
+    ├── uni-db-sync.service        # one-shot full cycle: discovery -> fetch+parse -> translate
+    ├── uni-db-sync.timer          # fires the cycle hourly (self-throttled by source cadence)
+    ├── uni-db-adiga-calendar.service
+    ├── uni-db-adiga-calendar.timer
+    └── uni-db-ocr.service         # optional EasyOCR tier for image-only PDFs
 ```
+
+`uni-db-sync` is the scheduler that keeps the database fresh. It runs the
+three stages in order via their real entry points
+(`scripts/run_discovery_once.py`, `uni-db run-pipeline`,
+`scripts/run_translate_once.py`); each is best-effort so one bad PDF can't
+stall the cycle. It supersedes the earlier per-stage `discovery-poll` /
+`extract` / `translate` units (those pointed at module paths with no
+runnable entry point); `deploy.sh` disables them if a prior deploy enabled
+them.
 
 ## Conventions
 
