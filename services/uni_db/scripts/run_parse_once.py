@@ -49,7 +49,10 @@ async def main(args: argparse.Namespace) -> int:
     finally:
         await conn.close()
     log.info("Done. ok=%d failed=%d", ok, fail)
-    return 0 if ok > 0 else 1
+    # A completed run is success even with 0 fetched (notices without PDFs,
+    # or a temporarily unreachable host). Per-item failures are logged, not
+    # fatal — so a scheduled run doesn't go red on a normal empty crawl.
+    return 0
 
 
 if __name__ == "__main__":

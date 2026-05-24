@@ -39,7 +39,10 @@ from . import ResolvedPdf
 
 log = logging.getLogger(__name__)
 
-_HTTP_TIMEOUT_SEC: Final[float] = 30.0
+# Short connect/read timeout: admission.kaist.ac.kr frequently refuses /
+# stalls connections from cloud egress IPs, and 30s × many posts blows the
+# run time. Fail fast and skip when it's unreachable.
+_HTTP_TIMEOUT_SEC: Final[float] = 10.0
 _DOWNLOAD_HINTS: Final[tuple[str, ...]] = (
     "download", "filedown", "file/down", "attach", "fileid", "/file",
 )

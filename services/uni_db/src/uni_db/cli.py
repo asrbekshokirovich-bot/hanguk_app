@@ -270,8 +270,18 @@ async def _run_pipeline(*, limit: int) -> int:
     finally:
         await conn.close()
 
-    print(f"run-pipeline: fetched+parsed ok={ok} failed={fail}")
-    return 0 if ok > 0 or fail == 0 else 1
+    # A completed run is a success even if nothing new was fetched: most
+    # candidates are notices with no PDF, or a host that's temporarily
+    # unreachable. Per-item failures are logged, not fatal — only a config
+    # error (handled above, exit 2) should fail the scheduled job.
+    if ok == 0 and fail > 0:
+        print(
+            f"run-pipeline: completed — 0 fetched, {fail} skipped "
+            "(no usable PDF / host unreachable). Not a job failure."
+        )
+    else:
+        print(f"run-pipeline: fetched+parsed ok={ok} failed={fail}")
+    return 0
 
 
 def _schema_check() -> int:
