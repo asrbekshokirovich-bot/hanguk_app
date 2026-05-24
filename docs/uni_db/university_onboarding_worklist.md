@@ -83,3 +83,26 @@ Playwright adapter (heavier).
 
 Recommended: **A or B**. Seed the 20 institution rows first (so they can show
 as "coming soon" in the app), then wire adapters in priority order.
+
+## Path A is now wired up — the probe workflow
+
+`.github/workflows/uni-db-probe.yml` + `scripts/probe_site.py` do the
+live-site inspection on the GitHub runner (real Chrome, bypasses the bot-
+filters/JS that block the dev sandbox). Loop per university:
+
+1. **GitHub → Actions → uni-db probe → Run workflow** → paste the
+   university's notice-board URL → Run.
+2. Open the finished run; the log prints the board's row structure + a
+   ready-to-paste `HtmlListSelectors(...)` snippet (and uploads the rendered
+   HTML as a `probe-html` artifact for deeper looks).
+3. Paste that output back here; it becomes `configs/<uni>.py` + a registry
+   entry + a `live` source row.
+4. The next `uni-db sync` run fetches that university's guides.
+
+Candidate URLs gathered so far (verify on first probe):
+- Gachon: `https://admission.gachon.ac.kr/admission/html/abroad/guide.asp`
+  (admission site, JS) and `http://oia.gachon.ac.kr/international/a/m/foreignNoticeList.do`
+  (intl-office egov board). Gachon bot-filters plain fetches → needs the
+  real-browser probe.
+- Kyung Hee / Chung-Ang: find each university's 외국인/재외국민 admission
+  notice board, then probe it.
