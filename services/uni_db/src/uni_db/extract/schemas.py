@@ -178,6 +178,14 @@ REQUIREMENTS_SCHEMA: dict[str, Any] = {
                     # a softer review state instead of shipping as a full track.
                     "completeness":   {"type": ["string", "null"],
                                        "enum": [None, "full", "partial"]},
+                    # Which applicant audience this track serves, so the UI can
+                    # filter to our cohort. The product serves FOREIGN
+                    # applicants (외국인전형); 재외국민/북한이탈/국외이수/귀화 are
+                    # different audiences and should be tagged, not surfaced as
+                    # the foreign track.
+                    "audience":       {"type": ["string", "null"],
+                                       "enum": [None, "foreign", "overseas_korean",
+                                                "defector", "naturalized", "domestic"]},
                     # Majors offered to this track (programs.name_ko on publish).
                     "majors":                  {"type": ["array", "null"], "items": {"type": "string"}},
                     # Per-track tuition (maps to the tuition table on publish).

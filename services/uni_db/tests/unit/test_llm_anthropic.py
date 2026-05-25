@@ -414,8 +414,14 @@ class TestSelfScore:
     def test_falls_back_to_root_level(self) -> None:
         assert llm_anthropic._self_score({"extractor_confidence": 0.5}) == pytest.approx(0.5)
 
-    def test_default_when_no_confidence(self) -> None:
-        assert llm_anthropic._self_score({"rows": []}) == pytest.approx(0.85)
+    def test_empty_extraction_scores_zero(self) -> None:
+        # Empty extraction must score 0, not the neutral default, so triage
+        # can tell it apart from real content.
+        assert llm_anthropic._self_score({"rows": []}) == pytest.approx(0.0)
+        assert llm_anthropic._self_score({"events": []}) == pytest.approx(0.0)
+
+    def test_default_when_no_content_key(self) -> None:
+        assert llm_anthropic._self_score({"note": "x"}) == pytest.approx(0.85)
 
     def test_non_dict_defaults(self) -> None:
         assert llm_anthropic._self_score("garbage") == pytest.approx(0.85)

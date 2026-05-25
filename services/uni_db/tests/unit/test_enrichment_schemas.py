@@ -148,3 +148,13 @@ class TestTrackCompleteness:
             _validate("requirements", {"rows": [{
                 "source_text_ko": "x", "completeness": "mostly",
             }]})
+
+
+class TestAudienceTag:
+    def test_audience_values_validate(self) -> None:
+        for a in ("foreign", "overseas_korean", "defector", "naturalized", "domestic"):
+            _validate("requirements", {"rows": [{"source_text_ko": "x", "audience": a}]})
+
+    def test_bad_audience_rejected(self) -> None:
+        with pytest.raises(jsonschema.ValidationError):
+            _validate("requirements", {"rows": [{"source_text_ko": "x", "audience": "alien"}]})

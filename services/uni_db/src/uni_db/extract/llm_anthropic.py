@@ -219,9 +219,14 @@ def _self_score(parsed: object) -> float:
         return 0.85
 
     row_scores: list[float] = []
+    saw_content = False
+    has_content_key = False
     for key in ("rows", "events"):
         rows = parsed.get(key)
         if isinstance(rows, list):
+            has_content_key = True
+            if rows:
+                saw_content = True
             for row in rows:
                 if isinstance(row, dict) and "extractor_confidence" in row:
                     try:
@@ -230,6 +235,12 @@ def _self_score(parsed: object) -> float:
                         continue
     if row_scores:
         return min(row_scores)
+
+    # Empty extraction ({"rows": []}) → 0 confidence, not the neutral default.
+    # The score must mean something for triage: empty jobs were averaging
+    # ~0.77, indistinguishable from real content.
+    if has_content_key and not saw_content:
+        return 0.0
 
     if "extractor_confidence" in parsed:
         try:

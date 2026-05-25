@@ -14,6 +14,17 @@ international/overseas tracks (e.g. 외국인전형 Type 1 vs Type 2, 순수외�
 If the guideline lists 4 tracks, return 4 rows. Do not collapse them into one
 "Special Admission for Foreigners" bucket.
 
+**Audience — set the `audience` field on every row.** This product serves
+**foreign applicants**, so always extract the **외국인전형 (foreign)** track
+when it exists, and tag each track:
+- `"foreign"` — 외국인전형 / 외국인특별전형 / 순수외국인 (본인·부모 모두 외국인).
+- `"overseas_korean"` — 재외국민(2%) / 재외국민·외국인 / 국외 전 교육과정 이수자.
+- `"defector"` — 북한이탈주민.
+- `"naturalized"` — 귀화(국적법 §6) 대상.
+- `"domestic"` — 정원내 일반전형 (not for our cohort).
+Never label a 재외국민/북한이탈/국외이수 track as `"foreign"`. If the guideline
+has a 외국인전형 track, it MUST appear as a row tagged `audience:"foreign"`.
+
 **Completeness — set the `completeness` field on every row:**
 - `"full"` — this row is a real track definition (eligibility + selection
   method are present).
