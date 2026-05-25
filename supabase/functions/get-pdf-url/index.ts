@@ -17,6 +17,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
 interface RequestBody {
   document_id?: string;
+  // The review view exposes `storage_path` directly, so accept it too — the
+  // staff site has it without a separate document_id lookup.
+  storage_path?: string;
   reason?: string;
 }
 
@@ -40,10 +43,19 @@ const serviceClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
+// CORS so the browser-based staff review site can call this. Without these
+// (and OPTIONS handling) the preflight 405'd and every browser POST was
+// blocked — mirrors translate-fields, which works.
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8' },
+    headers: { ...CORS, 'content-type': 'application/json; charset=utf-8' },
   });
 }
 
@@ -75,6 +87,10 @@ async function verifyCaller(authHeader: string | null): Promise<{ userId: string
 }
 
 Deno.serve(async (req) => {
+  // Browser preflight — must answer 200 with CORS headers, not 405.
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS });
+  }
   if (req.method !== 'POST') {
     return jsonResponse(405, { error: 'method_not_allowed' });
   }
@@ -89,19 +105,18 @@ Deno.serve(async (req) => {
   } catch {
     return jsonResponse(400, { error: 'invalid_json' });
   }
-  const documentId = body.document_id;
-  if (!documentId || typeof documentId !== 'string') {
-    return jsonResponse(400, { error: 'missing_document_id' });
+  const documentId = typeof body.document_id === 'string' ? body.document_id : null;
+  const storagePath = typeof body.storage_path === 'string' ? body.storage_path : null;
+  if (!documentId && !storagePath) {
+    return jsonResponse(400, { error: 'missing_document_id_or_storage_path' });
   }
 
-  // Look up the uni_db guideline blob. The uni_db v1 table is
-  // guideline_documents (different from prod's documents table). Service
-  // role bypasses RLS so we can read across all institutions.
-  const { data: doc, error: docErr } = await serviceClient
-    .from('guideline_documents')
-    .select('id, storage_path')
-    .eq('id', documentId)
-    .maybeSingle<DocumentRow>();
+  // Resolve to a real guideline_documents row either way (so we never sign an
+  // arbitrary path). Service role bypasses RLS to read across institutions.
+  const query = serviceClient.from('guideline_documents').select('id, storage_path');
+  const { data: doc, error: docErr } = await (
+    documentId ? query.eq('id', documentId) : query.eq('storage_path', storagePath)
+  ).maybeSingle<DocumentRow>();
   if (docErr) {
     console.error('guideline_documents lookup failed', docErr);
     return jsonResponse(500, { error: 'lookup_failed' });

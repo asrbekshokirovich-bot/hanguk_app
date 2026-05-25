@@ -20,6 +20,7 @@ materially lower with cache hits.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import re
@@ -288,6 +289,58 @@ def _strip_fences(text: str) -> str:
     return text.strip()
 
 
+def _salvage_partial_json(text: str) -> dict[str, Any] | None:
+    """Recover complete row/event objects from JSON truncated mid-array.
+
+    When the model hits max_tokens it stops mid-object, so `json.loads` throws
+    and the whole extraction was being discarded — even though the rows before
+    the cut are perfectly good. This walks the `rows`/`events` array with
+    brace+string matching, keeps every COMPLETE `{...}` object, and drops the
+    incomplete trailing one. Returns `{"rows": [...]}` / `{"events": [...]}`
+    or None if nothing usable is found.
+    """
+    for key in ("rows", "events"):
+        marker = f'"{key}"'
+        ki = text.find(marker)
+        if ki == -1:
+            continue
+        lb = text.find("[", ki)
+        if lb == -1:
+            continue
+        objs: list[Any] = []
+        depth = 0
+        obj_start: int | None = None
+        in_str = False
+        esc = False
+        for j in range(lb + 1, len(text)):
+            c = text[j]
+            if in_str:
+                if esc:
+                    esc = False
+                elif c == "\\":
+                    esc = True
+                elif c == '"':
+                    in_str = False
+                continue
+            if c == '"':
+                in_str = True
+            elif c == "{":
+                if depth == 0:
+                    obj_start = j
+                depth += 1
+            elif c == "}":
+                depth -= 1
+                if depth == 0 and obj_start is not None:
+                    with contextlib.suppress(json.JSONDecodeError):
+                        objs.append(json.loads(text[obj_start : j + 1]))
+                    obj_start = None
+            elif c == "]" and depth == 0:
+                break
+        if objs:
+            return {key: objs}
+    return None
+
+
 def _compute_cost_usd(
     *,
     input_tokens: int,
@@ -358,7 +411,11 @@ def _call_anthropic(
 
     response = client.messages.create(
         model=settings.anthropic_model_extract,
-        max_tokens=4096,
+        # 4096 truncated many-row extractions mid-JSON (scholarships/calendar),
+        # which were then discarded as "invalid JSON" → data loss. 8192 fits
+        # the large field groups; the salvage pass below recovers anything that
+        # still truncates instead of dropping the whole job.
+        max_tokens=8192,
         # Mark the system block as cacheable. The system prompt is the
         # glossary + field-group + archetype few-shots — large and stable
         # per archetype, so cache hits are common across a crawl batch.
@@ -377,21 +434,33 @@ def _call_anthropic(
     try:
         parsed = json.loads(stripped)
     except json.JSONDecodeError:
-        # Fallback: the model occasionally wraps the JSON in prose. Extract the
-        # outermost {...} span and try once more before giving up.
+        # Fallback 1: the model occasionally wraps the JSON in prose. Extract
+        # the outermost {...} span and try once more.
+        parsed = None
         start = stripped.find("{")
         end = stripped.rfind("}")
         if start != -1 and end > start:
             try:
                 parsed = json.loads(stripped[start : end + 1])
-            except json.JSONDecodeError as exc:
+            except json.JSONDecodeError:
+                parsed = None
+        # Fallback 2: the response truncated mid-array at max_tokens. Salvage
+        # the complete row/event objects instead of discarding the whole job
+        # (this is what was losing real data — "Expecting ',' delimiter").
+        if parsed is None:
+            salvaged = _salvage_partial_json(stripped)
+            if salvaged is not None:
+                log.warning(
+                    "extract: %s/%s response truncated; salvaged %d %s rows",
+                    archetype, field_group,
+                    len(next(iter(salvaged.values()))),
+                    next(iter(salvaged.keys())),
+                )
+                parsed = salvaged
+            else:
                 raise AnthropicResponseError(
-                    f"Anthropic response was not valid JSON: {exc}; raw={raw[:200]!r}"
-                ) from exc
-        else:
-            raise AnthropicResponseError(
-                f"Anthropic response was not valid JSON; raw={raw[:200]!r}"
-            )
+                    f"Anthropic response was not valid JSON; raw={raw[:200]!r}"
+                ) from None
     if not isinstance(parsed, dict):
         raise AnthropicResponseError(
             f"Anthropic response parsed to {type(parsed).__name__}, expected dict"
