@@ -70,3 +70,28 @@ async def test_failed_extraction_not_enqueued() -> None:
     conn = _FakeConn()
     await persist_outcome(conn, _outcome([result], [entry]))
     assert not any("insert into public.review_queue" in s for s in conn.sql)
+
+
+class _ArgConn:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, tuple]] = []
+
+    async def execute(self, sql: str, *args: object) -> str:
+        self.calls.append((" ".join(sql.split()), args))
+        return "OK"
+
+
+async def test_failed_job_records_error_text_not_raw_output() -> None:
+    from uni_db.workers.parse_worker import _failed_result
+
+    failed = _failed_result("requirements", "claude-sonnet-4-6",
+                            violation="AnthropicResponseError: boom", latency_ms=123)
+    assert failed.error_text == "AnthropicResponseError: boom"
+    assert failed.raw_output == "{}"          # error not buried in raw_output
+    assert failed.latency_ms == 123           # real elapsed, not 0
+
+    conn = _ArgConn()
+    await persist_outcome(conn, _outcome([failed], []))
+    ins = next(args for sql, args in conn.calls if "insert into public.extraction_jobs" in sql)
+    assert ins[-1] == "AnthropicResponseError: boom"   # error_text column ($17)
+    assert "boom" not in ins[11]                        # raw_output ($12) is clean

@@ -73,6 +73,10 @@ class ExtractionResult:
     cost_usd: float
     latency_ms: int
     accuracy_self_score: float
+    # On a failed extraction, the human-readable error (goes to the
+    # extraction_jobs.error_text column, not buried in raw_output). None on
+    # success.
+    error_text: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
