@@ -18,15 +18,19 @@ class _Conn:
     def __init__(self, records: list[dict]) -> None:
         self._records = records
         self.executes: list[tuple[str, tuple]] = []
-        self.cycle_id = uuid4()
         self.fetchvals = 0
+        self.cycle_tracks: list[str | None] = []
+        self._cycle_ids: dict[tuple, object] = {}
 
     async def fetch(self, sql: str, *args: object) -> list[dict]:
         return self._records
 
     async def fetchval(self, sql: str, *args: object):
-        self.fetchvals += 1          # get_or_create_cycle
-        return self.cycle_id
+        # get_or_create_cycle(institution, year, term, track, category, gd)
+        self.fetchvals += 1
+        track = args[3] if len(args) > 3 else None
+        self.cycle_tracks.append(track)
+        return self._cycle_ids.setdefault((track, args[4] if len(args) > 4 else None), uuid4())
 
     async def execute(self, sql: str, *args: object) -> str:
         self.executes.append((" ".join(sql.split()), args))
@@ -83,6 +87,35 @@ class TestHelpers:
         assert pw._payload(rec) == {"rows": [{"e": 1}]}
         rec2 = {"reviewer_decision": None, "parsed_output": {"rows": [{"r": 1}]}}
         assert pw._payload(rec2) == {"rows": [{"r": 1}]}
+
+
+class TestCycleResolution:
+    def test_track_from_audience(self) -> None:
+        assert pw.track_for("foreign", "외국인전형") == "foreign"
+        assert pw.track_for("overseas_korean", None) == "overseas_korean_full"
+
+    def test_track_from_category_text_when_no_audience(self) -> None:
+        assert pw.track_for(None, "재외국민 특별전형") == "overseas_korean_full"
+        assert pw.track_for(None, "편입학 모집") == "transfer"
+        assert pw.track_for(None, "대학원 외국인전형") == "grad_foreign"
+        assert pw.track_for(None, "외국인전형") == "foreign"
+        assert pw.track_for(None, None) == "foreign"
+
+    def test_category_for(self) -> None:
+        assert pw.category_for({"applicant_category": "재외국민전형"}) == "재외국민전형"
+        assert pw.category_for({}) == "외국인전형"
+
+
+async def test_requirements_resolves_a_cycle_per_audience() -> None:
+    rec = _rec("requirements", {"rows": [
+        {"audience": "foreign", "applicant_category": "외국인전형", "source_text_ko": "x"},
+        {"audience": "overseas_korean", "applicant_category": "재외국민전형", "source_text_ko": "y"},
+    ]})
+    conn = _Conn([rec])
+    run = await pw.publish_pending(conn)
+    assert run.rows_written == 2
+    assert conn.fetchvals == 2                                   # one cycle per row
+    assert set(conn.cycle_tracks) == {"foreign", "overseas_korean_full"}
 
 
 # --------------------------------------------------------------------------- #
