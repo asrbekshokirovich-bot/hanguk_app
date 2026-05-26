@@ -63,6 +63,14 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ingest.add_argument("--limit", type=int, default=60,
                           help="Max promoted sources to ingest this run")
 
+    p_publish = sub.add_parser(
+        "publish",
+        help="Normalize approved review items into the public tables the app reads "
+             "(requirements/tuition/scholarships/periods/documents). DB-only, no LLM.",
+    )
+    p_publish.add_argument("--limit", type=int, default=200,
+                           help="Max approved-unpublished review items this run")
+
     p_propose = sub.add_parser(
         "propose-sources",
         help="LIVE: Naver-discover unknown ac.kr admission boards → proposed_sources (HITL review)",
@@ -96,6 +104,8 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_reparse(limit=args.limit, institution=args.institution))
     if args.cmd == "ingest-direct":
         return asyncio.run(_ingest_direct(limit=args.limit))
+    if args.cmd == "publish":
+        return asyncio.run(_publish(limit=args.limit))
     if args.cmd == "propose-sources":
         return asyncio.run(_propose_sources(days=args.days, mode=args.mode))
     if args.cmd == "schema-check":
@@ -359,6 +369,31 @@ async def _reparse(*, limit: int, institution: str | None) -> int:
         await conn.close()
 
     print(f"reparse: re-extracted ok={ok} failed={fail}")
+    return 0
+
+
+async def _publish(*, limit: int) -> int:
+    """Normalize approved review items into the public tables the app reads.
+    DB-only (no LLM/HTTP), so it just needs `SUPABASE_DB_URL`.
+    """
+    if not settings.supabase_db_url:
+        print("SUPABASE_DB_URL is not set; cannot publish.", file=sys.stderr)
+        return 2
+
+    import asyncpg
+
+    from .workers import publish_worker
+
+    conn = await asyncpg.connect(settings.supabase_db_url)
+    try:
+        run = await publish_worker.publish_pending(conn, limit=limit)
+    finally:
+        await conn.close()
+
+    print(
+        f"publish: approved_seen={run.approved_seen} published={run.published} "
+        f"rows_written={run.rows_written} skipped={run.skipped} errors={run.errors}"
+    )
     return 0
 
 

@@ -97,3 +97,10 @@ jobs:
       - name: Translate
         continue-on-error: true
         run: python scripts/run_translate_once.py --limit 100
+
+      # 5) Publish reviewer-approved items into the public tables the app reads
+      #    (requirements/tuition/scholarships/periods/documents). DB-only + idempotent,
+      #    so it just normalizes whatever was approved since the last run. Best-effort.
+      - name: Publish approved items
+        continue-on-error: true
+        run: uni-db publish --limit 500
