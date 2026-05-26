@@ -41,9 +41,22 @@ log = logging.getLogger(__name__)
 # Yields the announcements for one keyword. NaverSearchAdapter satisfies the
 # default; tests pass a fake to avoid live HTTP.
 SearchFn = Callable[[str], Awaitable[list[Announcement]]]
+# Yields announcements for one (domain, keyword) pair — used by the targeted
+# per-university foreign-page search.
+SearchSiteFn = Callable[[str, str], Awaitable[list[Announcement]]]
 ProposeFn = Callable[
     [asyncpg.Connection, Iterable[Candidate]], Awaitable[list[ProposeOutcome]]
 ]
+
+# Foreign / overseas-Korean admission anchors used to find each university's
+# international-applicant page when we search inside its own domain. Kept tight
+# so the per-university search returns the admission page, not student-life or
+# news pages that merely mention 외국인.
+TARGETED_FOREIGN_KEYWORDS: tuple[str, ...] = (
+    "외국인전형",
+    "외국인특별전형",
+    "재외국민",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -123,6 +136,126 @@ def _default_search(
     async def search(keyword: str) -> list[Announcement]:
         adapter = NaverSearchAdapter(
             source_id=uuid4(), keyword=keyword, http_client=http_client
+        )
+        return await adapter.list_recent_posts(since=since)
+
+    return search
+
+
+# ---------------------------------------------------------------------------
+# Targeted per-university foreign-page search.
+#
+# Broad `.ac.kr` discovery only keeps the ~50 most recent hits per keyword, so
+# a given university's foreign-admission page often never surfaces — we just
+# happen to catch one of its domestic pages. Searching INSIDE each known
+# university domain (site:inha.ac.kr 외국인전형) reliably turns up that
+# university's 외국인/재외국민 page. Run this over every domain we already know
+# to fill in the foreign pages systematically.
+# ---------------------------------------------------------------------------
+
+
+def registrable_domain(url_or_host: str) -> str:
+    """`https://admission.inha.ac.kr/x` -> `inha.ac.kr` (last 3 labels for the
+    .ac.kr / .go.kr space). Used to group pages by university and to verify a
+    search hit really belongs to the university we searched."""
+    host = url_or_host
+    if "//" in host:
+        host = host.split("//", 1)[1]
+    host = host.split("/", 1)[0].split("?", 1)[0].lower().strip()
+    parts = [p for p in host.split(".") if p]
+    if len(parts) >= 3:
+        return ".".join(parts[-3:])
+    return ".".join(parts)
+
+
+async def fetch_known_domains(
+    conn: asyncpg.Connection,
+    *,
+    statuses: Sequence[str] = ("pending_review",),
+) -> list[str]:
+    """Distinct university domains already sitting in proposed_sources."""
+    rows = await conn.fetch(
+        "select distinct url_ko from public.proposed_sources "
+        "where status = any($1::text[])",
+        list(statuses),
+    )
+    domains = {registrable_domain(r["url_ko"]) for r in rows if r["url_ko"]}
+    return sorted(d for d in domains if d)
+
+
+async def discover_targeted(
+    conn: asyncpg.Connection,
+    *,
+    domains: Sequence[str],
+    since: datetime,
+    keywords: Sequence[str] = TARGETED_FOREIGN_KEYWORDS,
+    http_client: httpx.AsyncClient | None = None,
+    search_site: SearchSiteFn | None = None,
+    propose: ProposeFn = propose_batch,
+) -> ProposeRun:
+    """Search each university's own domain for its foreign-applicant page.
+
+    `search_site(domain, keyword)` returns the hits for one (domain, keyword);
+    the default restricts a NaverSearchAdapter to that domain. A result whose
+    host doesn't actually belong to the searched university is dropped, so a
+    loose `site:` match can't mis-attribute a page to the wrong school.
+    """
+    search_fn = search_site or _default_search_site(http_client, since)
+
+    seen: dict[str, Candidate] = {}
+    searches = 0
+    search_errors = 0
+    for domain in domains:
+        for kw in keywords:
+            searches += 1
+            try:
+                posts = await search_fn(domain, kw)
+            except Exception as exc:  # one (domain, keyword) failing isn't fatal
+                search_errors += 1
+                log.warning(
+                    "propose_worker[targeted]: %s %r failed: %s: %s",
+                    domain, kw, type(exc).__name__, str(exc)[:160],
+                )
+                continue
+            for ann in posts:
+                if registrable_domain(ann.url_ko) != domain:
+                    continue  # hit belongs to another university — skip
+                if ann.url_ko in seen:
+                    continue
+                seen[ann.url_ko] = Candidate(
+                    url_ko=ann.url_ko,
+                    proposed_by="naver_search",
+                    candidate_title=ann.title_ko,
+                )
+
+    outcomes = await propose(conn, list(seen.values()))
+    proposed = sum(1 for o in outcomes if o.inserted)
+    skipped = len(outcomes) - proposed
+    log.info(
+        "propose_worker[targeted]: domains=%d searches=%d candidates=%d "
+        "proposed=%d skipped=%d search_errors=%d",
+        len(domains), searches, len(seen), proposed, skipped, search_errors,
+    )
+    return ProposeRun(
+        keywords_searched=searches,
+        candidates_seen=len(seen),
+        proposed=proposed,
+        skipped=skipped,
+        search_errors=search_errors,
+    )
+
+
+def _default_search_site(
+    http_client: httpx.AsyncClient | None, since: datetime
+) -> SearchSiteFn:
+    if http_client is None:
+        raise RuntimeError(
+            "discover_targeted needs an http_client (or an injected search_site fn)"
+        )
+
+    async def search(domain: str, keyword: str) -> list[Announcement]:
+        adapter = NaverSearchAdapter(
+            source_id=uuid4(), keyword=keyword, site=domain, http_client=http_client
         )
         return await adapter.list_recent_posts(since=since)
 

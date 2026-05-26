@@ -59,8 +59,13 @@ def _build_parser() -> argparse.ArgumentParser:
         "propose-sources",
         help="LIVE: Naver-discover unknown ac.kr admission boards → proposed_sources (HITL review)",
     )
-    p_propose.add_argument("--days", type=int, default=7,
-                           help="Only consider posts from the last N days (default 7)")
+    p_propose.add_argument("--days", type=int, default=150,
+                           help="broad mode: only consider posts from the last N days "
+                                "(default 150 — universities post 모집요강 months ahead)")
+    p_propose.add_argument("--mode", choices=["broad", "targeted"], default="broad",
+                           help="broad: search all of .ac.kr for new boards; "
+                                "targeted: search inside each known university domain "
+                                "for its foreign-applicant (외국인/재외국민) page")
 
     sub.add_parser("schema-check", help="Lint the migrations directory")
     return parser
@@ -82,7 +87,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "reparse":
         return asyncio.run(_reparse(limit=args.limit, institution=args.institution))
     if args.cmd == "propose-sources":
-        return asyncio.run(_propose_sources(days=args.days))
+        return asyncio.run(_propose_sources(days=args.days, mode=args.mode))
     if args.cmd == "schema-check":
         return _schema_check()
 
@@ -347,10 +352,16 @@ async def _reparse(*, limit: int, institution: str | None) -> int:
     return 0
 
 
-async def _propose_sources(*, days: int) -> int:
-    """LIVE: discover unknown ac.kr admission boards via the Naver web-search
-    API and write the survivors to `proposed_sources` for HITL review. Free
-    (no LLM, no fetch) but it does call a live API and write to prod, so it's
+async def _propose_sources(*, days: int, mode: str) -> int:
+    """LIVE: discover ac.kr admission pages via the Naver web-search API and
+    write the survivors to `proposed_sources` for HITL review.
+
+    `broad`    — search all of .ac.kr for newly-posted admission boards.
+    `targeted` — search inside each university domain we already know for its
+                 foreign-applicant (외국인/재외국민) page, so universities we only
+                 found a domestic page for get their foreign page filled in.
+
+    Free (no LLM, no fetch) but it calls a live API and writes to prod, so it's
     gated on `UNI_DB_LIVE_APIS` + Naver keys + `SUPABASE_DB_URL`. Nothing goes
     live without a reviewer approving in v_proposed_sources_queue.
     """
@@ -378,7 +389,6 @@ async def _propose_sources(*, days: int) -> int:
 
     from .workers import propose_worker
 
-    since = datetime.now(timezone.utc) - timedelta(days=days)
     conn = await asyncpg.connect(settings.supabase_db_url)
     try:
         async with httpx.AsyncClient(
@@ -386,12 +396,33 @@ async def _propose_sources(*, days: int) -> int:
             follow_redirects=True,
             timeout=settings.http_request_timeout_sec,
         ) as http:
-            run = await propose_worker.discover_sources(conn, since=since, http_client=http)
+            if mode == "targeted":
+                domains = await propose_worker.fetch_known_domains(conn)
+                if not domains:
+                    print(
+                        "propose-sources --mode targeted: no known university domains "
+                        "in proposed_sources yet. Run broad discovery first."
+                    )
+                    return 0
+                # Foreign-admission pages are stable pages, not recent posts —
+                # don't date-filter them.
+                run = await propose_worker.discover_targeted(
+                    conn,
+                    domains=domains,
+                    since=datetime(2000, 1, 1, tzinfo=timezone.utc),
+                    http_client=http,
+                )
+            else:
+                since = datetime.now(timezone.utc) - timedelta(days=days)
+                run = await propose_worker.discover_sources(
+                    conn, since=since, http_client=http
+                )
     finally:
         await conn.close()
 
+    label = "searches" if mode == "targeted" else "keywords"
     print(
-        f"propose-sources: keywords={run.keywords_searched} "
+        f"propose-sources[{mode}]: {label}={run.keywords_searched} "
         f"candidates={run.candidates_seen} proposed={run.proposed} "
         f"skipped={run.skipped} search_errors={run.search_errors}"
     )

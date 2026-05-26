@@ -112,3 +112,81 @@ async def test_default_search_requires_http_client() -> None:
 def _conn() -> object:
     """The injected propose fn ignores the connection, so a sentinel is fine."""
     return object()
+
+
+class TestRegistrableDomain:
+    def test_strips_subdomain_and_path(self) -> None:
+        assert propose_worker.registrable_domain(
+            "https://admission.inha.ac.kr/cms/x?MENU_ID=160"
+        ) == "inha.ac.kr"
+
+    def test_www_and_uppercase(self) -> None:
+        assert propose_worker.registrable_domain("https://WWW.Korea.AC.KR/a") == "korea.ac.kr"
+
+    def test_bare_host(self) -> None:
+        assert propose_worker.registrable_domain("yonsei.ac.kr") == "yonsei.ac.kr"
+
+
+async def test_targeted_searches_each_domain_and_keyword() -> None:
+    calls: list[tuple[str, str]] = []
+
+    async def search_site(domain: str, keyword: str) -> list[Announcement]:
+        calls.append((domain, keyword))
+        return [_ann(f"https://admission.{domain}/foreign")]
+
+    propose = _RecordingPropose()
+    run = await propose_worker.discover_targeted(
+        _conn(),
+        domains=("inha.ac.kr", "korea.ac.kr"),
+        since=_SINCE,
+        keywords=("외국인전형", "재외국민"),
+        search_site=search_site,
+        propose=propose,
+    )
+    assert run.keywords_searched == 4          # 2 domains x 2 keywords
+    assert (("inha.ac.kr", "재외국민") in calls)
+    # both universities' foreign pages proposed (deduped per url)
+    assert run.candidates_seen == 2
+    assert run.proposed == 2
+
+
+async def test_targeted_drops_off_domain_hits() -> None:
+    async def search_site(domain: str, keyword: str) -> list[Announcement]:
+        # Naver returned a hit from a DIFFERENT university — must be dropped so
+        # it isn't mis-attributed to the searched school.
+        return [
+            _ann(f"https://admission.{domain}/foreign"),
+            _ann("https://admission.someoneelse.ac.kr/foreign"),
+        ]
+
+    propose = _RecordingPropose()
+    run = await propose_worker.discover_targeted(
+        _conn(), domains=("inha.ac.kr",), since=_SINCE,
+        keywords=("외국인전형",), search_site=search_site, propose=propose,
+    )
+    assert run.candidates_seen == 1
+    assert propose.seen[0].url_ko == "https://admission.inha.ac.kr/foreign"
+
+
+async def test_targeted_one_search_error_does_not_abort() -> None:
+    async def search_site(domain: str, keyword: str) -> list[Announcement]:
+        if keyword == "재외국민":
+            raise RuntimeError("naver 5xx")
+        return [_ann(f"https://admission.{domain}/foreign")]
+
+    run = await propose_worker.discover_targeted(
+        _conn(), domains=("inha.ac.kr",), since=_SINCE,
+        keywords=("외국인전형", "재외국민"), search_site=search_site,
+        propose=_RecordingPropose(),
+    )
+    assert run.search_errors == 1
+    assert run.proposed == 1
+
+
+async def test_targeted_requires_http_client() -> None:
+    import pytest
+
+    with pytest.raises(RuntimeError, match="http_client"):
+        await propose_worker.discover_targeted(
+            _conn(), domains=("inha.ac.kr",), since=_SINCE,
+        )
