@@ -184,3 +184,18 @@ class TestBackTranslationHook:
         assert called, "back-translate fn should be invoked"
         assert out.back_trans_distance is not None
         assert out.back_trans_distance < 1.0
+
+
+class TestPendingSqlCoverage:
+    """Phase 5: the translate worker must also queue the published admission
+    content (not just institution names + announcement titles), so applicants
+    read the actual data in EN/UZ."""
+
+    def test_pending_sql_includes_published_content(self) -> None:
+        from uni_db.workers.translate_worker import PENDING_SQL
+
+        for entity_type in ("institutions", "announcements", "requirements",
+                             "scholarships", "documents_required"):
+            assert f"'{entity_type}'" in PENDING_SQL, entity_type
+        for field in ("prose_ko", "name_ko", "document_type", "notes_ko"):
+            assert field in PENDING_SQL, field
