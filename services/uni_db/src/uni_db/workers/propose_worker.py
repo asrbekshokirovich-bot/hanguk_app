@@ -18,6 +18,7 @@ without live HTTP or a database.
 from __future__ import annotations
 
 import logging
+import re
 from collections.abc import Awaitable, Callable, Iterable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
@@ -57,6 +58,15 @@ TARGETED_FOREIGN_KEYWORDS: tuple[str, ...] = (
     "외국인특별전형",
     "재외국민",
 )
+
+# Procurement / tender titles that share the 외국인 keyword (e.g. "외국인 모집요강
+# 제작업체 선정입찰") but aren't admission pages. Ranked last so a real guide wins.
+_PROCUREMENT_NOISE_RE = re.compile(r"(입찰|용역|구매|업체|공사|납품|임차|제작|선정)")
+
+# How many foreign pages to keep per university. A university publishes the same
+# 모집요강 across many years / sub-pages / file links; without a cap one weekly
+# run floods the review queue with hundreds of near-duplicates.
+DEFAULT_MAX_PER_UNIVERSITY = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -168,6 +178,31 @@ def registrable_domain(url_or_host: str) -> str:
     return ".".join(parts)
 
 
+def _candidate_rank_key(c: Candidate) -> tuple[bool, bool, bool, int]:
+    """Sort key (ascending = best first): real admission guide before procurement
+    noise, 모집요강 before not, 전형 before not, then shorter URL."""
+    title = c.candidate_title or ""
+    return (
+        bool(_PROCUREMENT_NOISE_RE.search(title)),
+        "모집요강" not in title,
+        "전형" not in title,
+        len(c.url_ko),
+    )
+
+
+def cap_per_university(
+    candidates: Iterable[Candidate], max_per_university: int
+) -> list[Candidate]:
+    """Keep only the best `max_per_university` candidates for each university."""
+    by_domain: dict[str, list[Candidate]] = {}
+    for c in candidates:
+        by_domain.setdefault(registrable_domain(c.url_ko), []).append(c)
+    kept: list[Candidate] = []
+    for cands in by_domain.values():
+        kept.extend(sorted(cands, key=_candidate_rank_key)[:max_per_university])
+    return kept
+
+
 async def fetch_known_domains(
     conn: asyncpg.Connection,
     *,
@@ -189,6 +224,7 @@ async def discover_targeted(
     domains: Sequence[str],
     since: datetime,
     keywords: Sequence[str] = TARGETED_FOREIGN_KEYWORDS,
+    max_per_university: int = DEFAULT_MAX_PER_UNIVERSITY,
     http_client: httpx.AsyncClient | None = None,
     search_site: SearchSiteFn | None = None,
     propose: ProposeFn = propose_batch,
@@ -198,7 +234,9 @@ async def discover_targeted(
     `search_site(domain, keyword)` returns the hits for one (domain, keyword);
     the default restricts a NaverSearchAdapter to that domain. A result whose
     host doesn't actually belong to the searched university is dropped, so a
-    loose `site:` match can't mis-attribute a page to the wrong school.
+    loose `site:` match can't mis-attribute a page to the wrong school. Only the
+    best `max_per_university` pages per school are proposed, so the review queue
+    isn't flooded with near-duplicate copies of the same guide.
     """
     search_fn = search_site or _default_search_site(http_client, since)
 
@@ -228,13 +266,15 @@ async def discover_targeted(
                     candidate_title=ann.title_ko,
                 )
 
-    outcomes = await propose(conn, list(seen.values()))
+    candidates = cap_per_university(seen.values(), max_per_university)
+    outcomes = await propose(conn, candidates)
     proposed = sum(1 for o in outcomes if o.inserted)
     skipped = len(outcomes) - proposed
     log.info(
-        "propose_worker[targeted]: domains=%d searches=%d candidates=%d "
+        "propose_worker[targeted]: domains=%d searches=%d found=%d kept=%d "
         "proposed=%d skipped=%d search_errors=%d",
-        len(domains), searches, len(seen), proposed, skipped, search_errors,
+        len(domains), searches, len(seen), len(candidates),
+        proposed, skipped, search_errors,
     )
     return ProposeRun(
         keywords_searched=searches,
