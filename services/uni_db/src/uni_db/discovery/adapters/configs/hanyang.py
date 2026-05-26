@@ -20,12 +20,12 @@ external_id regex, so the absence of an inner <a> is not a problem.
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
+
+import httpx
 
 from ..html_list_adapter import HtmlListSelectors
 from ..playwright_list_adapter import PlaywrightListAdapter, PlaywrightRenderOptions
-
 
 HANYANG_SELECTORS = HtmlListSelectors(
     row="li[onclick*='notice_view']",

@@ -20,4 +20,4 @@ Public API:
 
 from .common import StoredBlob, backend_name, create_signed_url, store_blob
 
-__all__ = ["StoredBlob", "store_blob", "create_signed_url", "backend_name"]
+__all__ = ["StoredBlob", "backend_name", "create_signed_url", "store_blob"]

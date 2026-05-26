@@ -24,8 +24,8 @@ from uuid import UUID
 
 import httpx
 
-from ..models import Announcement, Attachment, AttachmentBlob, PostDetail
 from ...config import settings
+from ..models import Announcement, Attachment, AttachmentBlob, PostDetail
 
 log = logging.getLogger(__name__)
 

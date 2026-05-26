@@ -28,12 +28,12 @@ External post id is the first argument to pop_pass_open() (same pattern as JBNU)
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
+
+import httpx
 
 from ..html_list_adapter import HtmlListSelectors
 from ..playwright_list_adapter import PlaywrightListAdapter, PlaywrightRenderOptions
-
 
 KONKUK_SELECTORS = HtmlListSelectors(
     row="ul.list li",

@@ -10,7 +10,6 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 import httpx
-import pytest
 import respx
 
 from uni_db.workers import fetch_worker

@@ -15,6 +15,8 @@ registry can point unrelated universities at one shared implementation.
 from __future__ import annotations
 
 import logging
+import re
+from datetime import date
 from typing import Final
 from urllib.parse import urljoin, urlsplit
 
@@ -42,6 +44,15 @@ _STRONG_GUIDE_HINTS: Final[tuple[str, ...]] = (
 )
 # Guideline file types (audit §5.1: 95% PDF, some HWP/HWPX/DOCX).
 _GUIDELINE_EXTS: Final[tuple[str, ...]] = (".pdf", ".hwp", ".hwpx", ".docx")
+
+# A 4-digit cycle year in a filename / anchor text (2020–2039), used to prefer
+# the newest guideline when a board lists several cycles side by side.
+_CYCLE_YEAR_RE: Final = re.compile(r"(?<!\d)(20[2-3][0-9])(?!\d)")
+
+
+def _detect_year(text: str, href: str) -> int | None:
+    matches = _CYCLE_YEAR_RE.findall(f"{text} {href}")
+    return max(int(m) for m in matches) if matches else None
 
 
 def _is_pdf_href(href: str) -> bool:
@@ -81,9 +92,16 @@ def _extract_pdf_link(html: str, base_url: str) -> tuple[str, str] | None:
             continue
         absolute = urljoin(base_url, href)
         filename = text if text_ext else (urlsplit(absolute).path.rsplit("/", 1)[-1] or text)
-        # Prefer a PDF (parseable today) over HWP/other; then more guide hints.
+        # Prefer the newest *recent* cycle when a board lists several side by
+        # side (e.g. 2025 vs 2026 모집요강); only boost plausibly-current years so
+        # an old dated file never outranks an undated current one — downstream
+        # publish still holds anything past-cycle. Then prefer a PDF (parseable
+        # today) over HWP/other, then more guide hints.
+        current = date.today().year
+        year = _detect_year(text, href)
+        year_boost = year * 1000 if (year is not None and current - 1 <= year <= current + 2) else 0
         is_pdf = href_ext == ".pdf" or ".pdf" in text.lower()
-        score = (10 if is_pdf else 0) + _score(filename, absolute)
+        score = year_boost + (10 if is_pdf else 0) + _score(filename, absolute)
         candidates.append((score, absolute, filename or "attachment"))
     if not candidates:
         return None

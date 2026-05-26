@@ -10,8 +10,9 @@ Verified 2026-05-14 against live API.
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
+
+import httpx
 
 from ..json_api_adapter import JsonApiAdapter, WzBoardConfig
 

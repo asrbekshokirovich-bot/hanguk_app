@@ -21,12 +21,12 @@ The "date" cell is the 4th div.td child (after icon, title, attachment).
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
+
+import httpx
 
 from ..html_list_adapter import HtmlListSelectors
 from ..playwright_list_adapter import PlaywrightListAdapter, PlaywrightRenderOptions
-
 
 JBNU_SELECTORS = HtmlListSelectors(
     row="div.bbs_list div.tr",

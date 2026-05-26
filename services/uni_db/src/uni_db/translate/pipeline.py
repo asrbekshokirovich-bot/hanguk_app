@@ -28,6 +28,7 @@ Phase 2 (per ADR-004 + ADR-007):
 from __future__ import annotations
 
 import logging
+import re
 from typing import Callable, Final
 
 from ..config import settings
@@ -42,6 +43,7 @@ from .glossary import (
     GlossaryCache,
     apply_glossary_post_translate,
     apply_glossary_pre_translate,
+    contains_placeholder_residue,
 )
 from .models import TargetLang, TranslationOutput
 
@@ -83,6 +85,35 @@ def enabled_languages() -> frozenset[TargetLang]:
         parsed = {item.strip() for item in raw.split(",") if item.strip()}
         return frozenset(parsed)  # type: ignore[arg-type]
     return frozenset(raw)
+
+
+# --- output sanity guard --------------------------------------------------- #
+# Provider error strings and leaked model reasoning have been observed stored as
+# translations (audit: an English institution name became the model's
+# "...Wait — I need to reconsider..." deliberation; a Korean
+# "트러스트 토큰... 입력되었습니다" error was prepended to another). Drop these
+# before they reach a user — the worker keeps the Korean original instead.
+_SUSPECT_MARKERS = re.compile(r"(트러스트 토큰|입력되었습니다|I need to reconsider)")
+# Any target-language letter — Latin (covers en/uz/vi base letters) or Cyrillic
+# (ru). Korean-only output for these targets means MT echoed the source.
+_TARGET_SCRIPT = re.compile(r"[A-Za-zЀ-ӿ]")
+_HANGUL = re.compile(r"[가-힣]")
+
+
+def is_suspect_translation(text: str, target_lang: TargetLang) -> bool:
+    """True when MT output looks like garbage we must not persist: empty, a
+    provider/error or model-reasoning leak, a surviving glossary placeholder, or
+    a no-op echo (Korean returned unchanged for a non-Korean target)."""
+    t = (text or "").strip()
+    if not t:
+        return True
+    if _SUSPECT_MARKERS.search(t):
+        return True
+    if contains_placeholder_residue(t):
+        return True
+    if target_lang != "ko" and _HANGUL.search(t) and not _TARGET_SCRIPT.search(t):
+        return True
+    return False
 
 
 def translate(

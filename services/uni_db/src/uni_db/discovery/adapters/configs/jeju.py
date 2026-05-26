@@ -29,12 +29,12 @@ Row structure (verified live 2026-05-15, 10 rows):
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
+
+import httpx
 
 from ..html_list_adapter import HtmlListSelectors
 from ..playwright_list_adapter import PlaywrightListAdapter, PlaywrightRenderOptions
-
 
 JEJU_SELECTORS = HtmlListSelectors(
     row="div.bbs_list div.tr",

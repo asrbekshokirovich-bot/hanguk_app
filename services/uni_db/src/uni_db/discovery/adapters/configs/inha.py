@@ -16,12 +16,12 @@ HTML-based configs; not actually used (JsonApiAdapter ignores them).
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
+
+import httpx
 
 from ..html_list_adapter import HtmlListSelectors
 from ..json_api_adapter import JsonApiAdapter, KuBbsConfig
-
 
 # Placeholder for backwards-compat import in __init__.py.
 INHA_SELECTORS = HtmlListSelectors(

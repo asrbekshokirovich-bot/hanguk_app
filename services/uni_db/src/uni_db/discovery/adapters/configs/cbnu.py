@@ -22,11 +22,11 @@ External post id lives in onclick="bbsMstrView('20300')".
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
 
-from ..html_list_adapter import HtmlListAdapter, HtmlListSelectors
+import httpx
 
+from ..html_list_adapter import HtmlListAdapter, HtmlListSelectors
 
 CBNU_SELECTORS = HtmlListSelectors(
     row="div.board ul li",

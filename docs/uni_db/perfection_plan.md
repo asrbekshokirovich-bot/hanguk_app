@@ -74,3 +74,34 @@ human-approved, and **auto-refreshed when the source changes**.
 **Sequence:** 0 first (turns latent extraction into visible value + unblocks all
 later phases) → 1–2 make it trustworthy/filterable → 3–4 make it complete → 5–8
 keep it current, clean, and safe.
+
+## Build progress — 2026-05-26
+
+**Shipped (backend, merged to main):**
+- **Phase 0** — publish worker: approved review item JSON → public tables
+  (requirements/tuition/scholarships/periods/documents), cycle-scoped + provenance,
+  idempotent; wired into sync. Live smoke-tested (rollback) against real data.
+- **Phase 1** — audience-aware cycle model: each row resolves its own cycle by
+  audience (foreign vs 재외국민 vs transfer vs grad).
+- **Phase 2** — `documents_required` recovery: wrapper-key normalization + salvage
+  for the field-group-named array (was failing ~60%).
+- **Phase 3** — broadened attachment resolver: accepts Korean "…모집요강" download
+  links + .hwp, prefers PDF (the biggest ingest skip bucket).
+- **Phase 5** — translate published content (eligibility/scholarship/doc names) to
+  EN/UZ via the existing sync Translate step.
+- **Phase 8** — Python CI (ruff + pytest, paths-filtered); ops dashboard
+  `v_uni_db_health`.
+
+**Remaining — needs a human, the app/reviewer repo, or a deliberate decision:**
+- **Review/accept (you):** the HITL step. 0 approved today; accepting items is what
+  makes publish→translate→app produce visible data.
+- **Cross-repo (hanguk.uz frontend):** fix "Open source PDF" (post-`await`
+  `window.open` popup-block); build the EN/UZ content viewer; Phase 7 trust signals
+  (per-fact source + "verified on" + report-error). Specs handed off.
+- **Phase 6 (institution metadata):** backfill real KO/EN names + type for the
+  ~auto-created placeholders, then reveal on the map — needs human verification.
+- **Phase 8 security:** lock anon EXECUTE on the uni_db SECURITY DEFINER review
+  funcs + enable leaked-password protection — operator-reviewable (deferred to not
+  risk the live reviewer mid-use).
+- **Deferred:** Phase 2 golden eval set (ongoing QA); Phase 3 OCR/HWP text
+  extraction (heavy `torch`/HWP deps — decide before adding).
