@@ -28,15 +28,29 @@ log = logging.getLogger(__name__)
 _HTTP_TIMEOUT_SEC: Final[float] = 30.0
 _DOWNLOAD_HINTS: Final[tuple[str, ...]] = (
     "download", "filedown", "file_down", "file/down", "filedownload",
-    "attach", "fileid", "/file", "down.asp", "down.do",
+    "attach", "fileid", "/file", "down.asp", "down.do", "readfile",
+    "resourcedown", "bbsfiledown", "nttfiledownload",
 )
 _GUIDE_HINTS: Final[tuple[str, ...]] = (
     "guide", "admission", "모집요강", "요강", "전형", "모집", "안내",
 )
+# Strong markers that an anchor IS the guideline doc (used to accept a
+# download-endpoint link even when the anchor text has no file extension —
+# Korean boards link the guide as "…모집요강" / "…전형 안내" with no ".pdf").
+_STRONG_GUIDE_HINTS: Final[tuple[str, ...]] = (
+    "모집요강", "요강", "전형", "모집", "admission", "guide",
+)
+# Guideline file types (audit §5.1: 95% PDF, some HWP/HWPX/DOCX).
+_GUIDELINE_EXTS: Final[tuple[str, ...]] = (".pdf", ".hwp", ".hwpx", ".docx")
 
 
 def _is_pdf_href(href: str) -> bool:
     return urlsplit(href).path.lower().endswith(".pdf")
+
+
+def _href_ext(href: str) -> str | None:
+    path = urlsplit(href).path.lower()
+    return next((e for e in _GUIDELINE_EXTS if path.endswith(e)), None)
 
 
 def _looks_like_download(href: str) -> bool:
@@ -57,12 +71,20 @@ def _extract_pdf_link(html: str, base_url: str) -> tuple[str, str] | None:
         if not href or href.startswith("#") or href.lower().startswith("javascript:"):
             continue
         text = anchor.get_text(strip=True)
-        names_pdf = ".pdf" in text.lower()
-        if not (_is_pdf_href(href) or (_looks_like_download(href) and names_pdf)):
+        blob = f"{text} {href}".lower()
+        href_ext = _href_ext(href)
+        text_ext = next((e for e in _GUIDELINE_EXTS if e in text.lower()), None)
+        guideish = any(h in blob for h in _STRONG_GUIDE_HINTS)
+        # Accept a direct guideline-file href, OR a download-endpoint link that
+        # either names a guideline file or carries a strong guideline keyword.
+        if not (href_ext or (_looks_like_download(href) and (text_ext or guideish))):
             continue
         absolute = urljoin(base_url, href)
-        filename = text if names_pdf else (urlsplit(absolute).path.rsplit("/", 1)[-1] or text)
-        candidates.append((_score(filename, absolute), absolute, filename or "attachment.pdf"))
+        filename = text if text_ext else (urlsplit(absolute).path.rsplit("/", 1)[-1] or text)
+        # Prefer a PDF (parseable today) over HWP/other; then more guide hints.
+        is_pdf = href_ext == ".pdf" or ".pdf" in text.lower()
+        score = (10 if is_pdf else 0) + _score(filename, absolute)
+        candidates.append((score, absolute, filename or "attachment"))
     if not candidates:
         return None
     candidates.sort(key=lambda c: c[0], reverse=True)

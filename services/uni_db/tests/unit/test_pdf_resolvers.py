@@ -22,9 +22,49 @@ from uni_db.parse.pdf_resolvers import (
     get_resolver_for_url,
     resolve_pdf,
 )
+from uni_db.parse.pdf_resolvers import generic_attachment as generic
 from uni_db.parse.pdf_resolvers import kaist as kaist_resolver
 from uni_db.parse.pdf_resolvers import korea_univ as ku_resolver
 from uni_db.parse.pdf_resolvers import yonsei as yonsei_resolver
+
+
+class TestGenericAttachmentLinkDetection:
+    """Phase 3: Korean boards link the guide as text '…모집요강' (no .pdf) or as
+    .hwp — broadened detection must catch those, not just literal .pdf."""
+
+    def test_direct_pdf_href(self) -> None:
+        out = generic._extract_pdf_link(
+            '<a href="/files/2026_guide.pdf">2026 모집요강</a>', "https://x.ac.kr/n/1")
+        assert out is not None and out[0].endswith("/files/2026_guide.pdf")
+
+    def test_download_endpoint_with_korean_guide_text_no_pdf(self) -> None:
+        # the common case the old resolver MISSED
+        out = generic._extract_pdf_link(
+            '<a href="/board/fileDown.do?fileId=abc">2026학년도 외국인전형 모집요강</a>',
+            "https://x.ac.kr/n/1")
+        assert out is not None and "fileDown.do" in out[0]
+
+    def test_prefers_pdf_over_hwp(self) -> None:
+        out = generic._extract_pdf_link(
+            '<a href="/d/guide.hwp">모집요강 서식</a><a href="/d/guide.pdf">모집요강</a>',
+            "https://x.ac.kr/")
+        assert out is not None and out[0].endswith("guide.pdf")
+
+    def test_accepts_hwp_when_only_option(self) -> None:
+        out = generic._extract_pdf_link(
+            '<a href="/d/2026_foreign_moejip.hwp">붙임. 모집요강</a>', "https://x.ac.kr/")
+        assert out is not None and out[0].endswith(".hwp")
+
+    def test_ignores_navigation_and_js(self) -> None:
+        html = ('<a href="#">top</a><a href="javascript:void(0)">x</a>'
+                '<a href="/about">학교소개</a>')
+        assert generic._extract_pdf_link(html, "https://x.ac.kr/") is None
+
+    def test_plain_attachment_without_guide_signal_ignored(self) -> None:
+        # download link with no guideline keyword and no file ext → skip (avoid
+        # grabbing unrelated forms); reviewer-found misses are acceptable
+        assert generic._extract_pdf_link(
+            '<a href="/board/fileDown.do?id=1">첨부파일</a>', "https://x.ac.kr/") is None
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
 
