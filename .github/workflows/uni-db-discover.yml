@@ -17,14 +17,25 @@ name: uni-db discover
 
 on:
   schedule:
-    # Once a day at 20:00 UTC (05:00 KST). Discovery is cheap and the HITL
-    # queue, not the crawler, is the bottleneck — daily is plenty.
+    # Daily 20:00 UTC (05:00 KST) — BROAD: scan all of .ac.kr for newly-posted
+    # admission boards. Discovery is cheap and the HITL queue, not the crawler,
+    # is the bottleneck.
     - cron: "0 20 * * *"
+    # Weekly Monday 18:00 UTC — TARGETED: search inside each known university
+    # domain for its foreign-applicant (외국인/재외국민) page, so coverage of
+    # foreign pages becomes systematic instead of luck-of-the-draw.
+    - cron: "0 18 * * 1"
   workflow_dispatch:
     inputs:
+      mode:
+        description: "broad (scan all .ac.kr) or targeted (per-university foreign page)"
+        type: choice
+        options: ["broad", "targeted"]
+        default: "broad"
+        required: false
       days:
-        description: "Only consider posts from the last N days"
-        default: "7"
+        description: "broad mode only: consider posts from the last N days"
+        default: "150"
         required: false
 
 concurrency:
@@ -68,5 +79,17 @@ jobs:
             exit 1
           fi
 
-      - name: Discover unknown admission boards
-        run: uni-db propose-sources --days "${{ github.event.inputs.days || '7' }}"
+      - name: Discover admission pages
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          if [ -z "$MODE" ]; then
+            # Scheduled run: the weekly cron does the targeted foreign-page pass;
+            # everything else (the daily cron) does the broad scan.
+            if [ "${{ github.event.schedule }}" = "0 18 * * 1" ]; then
+              MODE="targeted"
+            else
+              MODE="broad"
+            fi
+          fi
+          echo "Running discovery: mode=$MODE"
+          uni-db propose-sources --mode "$MODE" --days "${{ github.event.inputs.days || '150' }}"

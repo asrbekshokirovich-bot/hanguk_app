@@ -42,12 +42,17 @@ class NaverSearchAdapter(SourceAdapter):
         *,
         source_id: UUID,
         keyword: str = "외국인전형",
+        site: str = ".ac.kr",
         http_client: httpx.AsyncClient | None = None,
         fixture_path: Path | None = None,
     ) -> None:
         self.source_id = source_id
-        self.source_url_ko = f"naver-search://{keyword}"
+        self.source_url_ko = f"naver-search://{site}/{keyword}"
         self._keyword = keyword
+        # `.ac.kr` searches every Korean university at once (broad discovery);
+        # a specific domain (e.g. `inha.ac.kr`) restricts the search to one
+        # university so its foreign-admission page actually surfaces.
+        self._site = site
         self._http = http_client
         self._fixture_path = fixture_path
 
@@ -99,7 +104,7 @@ class NaverSearchAdapter(SourceAdapter):
         resp = await self._http.get(
             NAVER_BLOG_API,
             params={
-                "query": f"site:.ac.kr {self._keyword}",
+                "query": f"site:{self._site} {self._keyword}",
                 "display": 50,
                 "sort": "date",
             },
