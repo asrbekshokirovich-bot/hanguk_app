@@ -190,3 +190,46 @@ async def test_targeted_requires_http_client() -> None:
         await propose_worker.discover_targeted(
             _conn(), domains=("inha.ac.kr",), since=_SINCE,
         )
+
+
+class TestCapPerUniversity:
+    def test_keeps_best_n_and_drops_noise(self) -> None:
+        titles = [
+            "외국인 모집요강 제작업체 선정입찰",   # procurement noise
+            "2025 외국인전형 모집요강",            # clean guide
+            "재외국민 안내",                       # clean, no 모집요강
+            "외국인 특별전형 모집요강",            # clean guide
+        ]
+        cands = [
+            Candidate(url_ko=f"https://x.inha.ac.kr/p{i}",
+                      proposed_by="naver_search", candidate_title=t)
+            for i, t in enumerate(titles)
+        ]
+        kept = propose_worker.cap_per_university(cands, 2)
+        kept_titles = [c.candidate_title for c in kept]
+        assert len(kept) == 2
+        assert all("선정입찰" not in t for t in kept_titles)   # noise ranked out
+        assert all("모집요강" in t for t in kept_titles)       # real guides win
+
+    def test_independent_per_domain(self) -> None:
+        cands = [
+            Candidate(url_ko=f"https://x.{d}/p{i}", proposed_by="naver_search",
+                      candidate_title="외국인전형 모집요강")
+            for d in ("inha.ac.kr", "korea.ac.kr") for i in range(4)
+        ]
+        kept = propose_worker.cap_per_university(cands, 3)
+        assert len(kept) == 6  # 3 per domain, 2 domains
+
+
+async def test_targeted_caps_results_per_university() -> None:
+    async def search_site(domain: str, keyword: str) -> list[Announcement]:
+        return [_ann(f"https://admission.{domain}/g{i}", "외국인전형 모집요강")
+                for i in range(5)]
+
+    propose = _RecordingPropose()
+    run = await propose_worker.discover_targeted(
+        _conn(), domains=("inha.ac.kr",), since=_SINCE, keywords=("외국인전형",),
+        max_per_university=3, search_site=search_site, propose=propose,
+    )
+    assert len(propose.seen) == 3   # 5 found, capped to 3
+    assert run.proposed == 3
