@@ -21,7 +21,10 @@ CALENDAR_SCHEMA: dict[str, Any] = {
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": False,
+                # Accept extra per-event fields (e.g. cycle_label,
+                # is_correction_notice) instead of discarding the whole calendar
+                # — a single unmodelled field used to fail the entire group.
+                "additionalProperties": True,
                 "required": ["event_type", "starts_at", "source_text_ko"],
                 "properties": {
                     "event_type": {
@@ -62,7 +65,7 @@ CALENDAR_SCHEMA: dict[str, Any] = {
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": False,
+                "additionalProperties": True,
                 "properties": {
                     "language_track":  {"type": ["string", "null"], "enum": [None, "korean", "english"]},
                     "program_level":   {"type": ["string", "null"]},
@@ -94,7 +97,9 @@ TUITION_SCHEMA: dict[str, Any] = {
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": False,
+                # Extra per-row fields (notes_ko, is_correction_notice, …) are
+                # kept rather than failing the whole tuition group.
+                "additionalProperties": True,
                 "required": ["faculty_group", "academic_year",
                              "semester_number", "amount_krw", "source_text_ko"],
                 "properties": {
@@ -225,7 +230,9 @@ SCHOLARSHIPS_SCHEMA: dict[str, Any] = {
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": False,
+                # Extra per-row fields (duration, …) are kept rather than
+                # failing the whole scholarships group.
+                "additionalProperties": True,
                 "required": ["scope", "name_ko", "award_type", "source_text_ko"],
                 "properties": {
                     "scope":      {"type": "string",
@@ -292,9 +299,14 @@ DOCUMENTS_REQUIRED_SCHEMA: dict[str, Any] = {
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": False,
-                # applicant_category often stated once per section, not per row.
-                "required": ["document_type", "source_text_ko"],
+                # The model names the document field many ways (document_name_ko,
+                # name_ko, label_ko) and adds is_mandatory / is_notarization_required
+                # / translation_required / copies … — accept them all instead of
+                # discarding the whole group, and require only source_text_ko so a
+                # naming variant on the doc field never fails the row. This was
+                # dropping documents_required on ~every document.
+                "additionalProperties": True,
+                "required": ["source_text_ko"],
                 "properties": {
                     "applicant_category":     {"type": ["string", "null"]},
                     "document_type":          {"type": "string"},

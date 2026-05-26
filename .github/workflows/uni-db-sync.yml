@@ -38,7 +38,7 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
     defaults:
       run:
         working-directory: services/uni_db
@@ -85,11 +85,13 @@ jobs:
         run: uni-db run-pipeline --limit "${{ github.event.inputs.fetch_limit || '50' }}"
 
       # 3) Ingest auto-discovered (promoted) sources that have no board adapter
-      #    — direct PDF/guide-page URLs from the discovery → approve flow. Picks
-      #    up any newly-approved university automatically. Best-effort.
+      #    — direct PDF/guide-page URLs from the discovery → approve flow. Small
+      #    chunk so the whole sync stays inside the time budget; it's idempotent,
+      #    so successive runs work through the backlog. Use the dedicated
+      #    `uni-db ingest` workflow for a large one-off catch-up. Best-effort.
       - name: Ingest auto-discovered sources
         continue-on-error: true
-        run: uni-db ingest-direct --limit 60
+        run: uni-db ingest-direct --limit 12
 
       # 4) Fill EN/UZ translations for the review screen. Best-effort.
       - name: Translate

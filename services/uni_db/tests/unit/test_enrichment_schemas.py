@@ -158,3 +158,50 @@ class TestAudienceTag:
     def test_bad_audience_rejected(self) -> None:
         with pytest.raises(jsonschema.ValidationError):
             _validate("requirements", {"rows": [{"source_text_ko": "x", "audience": "alien"}]})
+
+
+class TestExtraRowFieldsAccepted:
+    """Regression: the model emits sensible extra per-row fields the schema
+    didn't model; we must KEEP the group, not discard it (parse_worker treats a
+    schema-validation error as a failed job → total data loss). These payloads
+    used to fail and drop documents_required on ~every document."""
+
+    def test_documents_required_extra_fields(self) -> None:
+        _validate("documents_required", {"rows": [{
+            "source_text_ko": "졸업증명서 1부 (공증 필요)",
+            "document_name_ko": "졸업증명서",
+            "name_ko": "졸업증명서",
+            "label_ko": "졸업증명서",
+            "is_mandatory": True,
+            "is_notarization_required": True,
+            "translation_required": True,
+            "copies": 1,
+            "format": "원본",
+        }]})
+
+    def test_documents_required_without_document_type(self) -> None:
+        # doc field named only document_name_ko (no document_type) must still pass
+        _validate("documents_required", {"rows": [{
+            "source_text_ko": "여권 사본", "document_name_ko": "여권 사본",
+        }]})
+
+    def test_calendar_event_extra_fields(self) -> None:
+        _validate("calendar", {"events": [{
+            "event_type": "apply_open", "starts_at": "2026-09-01T00:00:00Z",
+            "source_text_ko": "원서접수 시작",
+            "cycle_label": "수시", "is_correction_notice": False,
+        }]})
+
+    def test_tuition_row_extra_fields(self) -> None:
+        _validate("tuition", {"rows": [{
+            "faculty_group": "humanities", "academic_year": 2026,
+            "semester_number": 1, "amount_krw": 4800000, "source_text_ko": "x",
+            "notes_ko": "입학금 포함", "is_correction_notice": False,
+        }]})
+
+    def test_scholarships_row_extra_fields(self) -> None:
+        _validate("scholarships", {"rows": [{
+            "scope": "university", "name_ko": "성적우수 장학금",
+            "award_type": "tuition_waiver_pct", "source_text_ko": "x",
+            "duration": "all_years",
+        }]})
