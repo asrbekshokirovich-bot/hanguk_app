@@ -84,7 +84,14 @@ jobs:
       - name: Fetch + parse
         run: uni-db run-pipeline --limit "${{ github.event.inputs.fetch_limit || '50' }}"
 
-      # 3) Fill EN/UZ translations for the review screen. Best-effort.
+      # 3) Ingest auto-discovered (promoted) sources that have no board adapter
+      #    — direct PDF/guide-page URLs from the discovery → approve flow. Picks
+      #    up any newly-approved university automatically. Best-effort.
+      - name: Ingest auto-discovered sources
+        continue-on-error: true
+        run: uni-db ingest-direct --limit 60
+
+      # 4) Fill EN/UZ translations for the review screen. Best-effort.
       - name: Translate
         continue-on-error: true
         run: python scripts/run_translate_once.py --limit 100
