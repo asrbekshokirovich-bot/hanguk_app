@@ -7,6 +7,7 @@ authoritative=true and we look them up before any LLM/Papago/DeepL call.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Mapping
 
@@ -67,7 +68,26 @@ def apply_glossary_post_translate(
     text: str,
     hits: list[GlossaryHit],
 ) -> str:
-    out = text
-    for index, hit in enumerate(hits):
-        out = out.replace(f"⟪G:{index}⟫", hit.term_value)
-    return out
+    """Restore pinned glossary terms after MT.
+
+    The placeholder is `⟪G:N⟫`, but MT — especially the ko→en→uz two-hop —
+    mangles it: swapping ⟪⟫→⟨⟩, adding spaces, even emitting a literal "N". An
+    exact `str.replace` then misses and the token leaks into titles (the
+    ⟨G:0⟩ / ⟨G:N⟩ artefacts seen in stored Uzbek/English titles). So match the
+    index tolerantly across bracket/space variants, then strip any residual or
+    lost-index placeholder so it can never surface to a user.
+    """
+    def _restore(match: re.Match[str]) -> str:
+        index = int(match.group(1))
+        return hits[index].term_value if 0 <= index < len(hits) else ""
+
+    out = _PLACEHOLDER_INDEXED.sub(_restore, text)
+    out = _PLACEHOLDER_RESIDUAL.sub("", out)         # garbled / lost-index → drop
+    return re.sub(r"[ \t]{2,}", " ", out).strip()
+
+
+# ⟪G:0⟫ and its MT-mangled forms (single brackets ⟨⟩, guillemets «», stray
+# spaces, full-width colon). _INDEXED captures a real index; _RESIDUAL clears
+# anything placeholder-shaped left over (e.g. a literal "N").
+_PLACEHOLDER_INDEXED = re.compile(r"[⟪⟨«]\s*[Gg]\s*[:：]?\s*(\d+)\s*[⟫⟩»]")
+_PLACEHOLDER_RESIDUAL = re.compile(r"[⟪⟨«]\s*[Gg]\s*[:：]?\s*[A-Za-z0-9]*\s*[⟫⟩»]")
