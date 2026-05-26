@@ -9,7 +9,6 @@ Phase 0: code is wired but the live HTTP call site is gated behind
 
 from __future__ import annotations
 
-import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,13 +17,13 @@ from uuid import UUID, uuid5
 import httpx
 
 from ...config import settings
+from .._adapter_base import SourceAdapter
 from ..keywords_ko import (
     PRIMARY_KEYWORDS_KO,
     is_disallowed_url,
     matches_admission_signal,
 )
 from ..models import Announcement
-from .._adapter_base import SourceAdapter
 
 NAVER_SEARCH_NAMESPACE = UUID("c3a4d4dc-9b7a-4f9e-9ad3-1f5b8a2e2a01")
 NAVER_BLOG_API = "https://openapi.naver.com/v1/search/webkr.json"

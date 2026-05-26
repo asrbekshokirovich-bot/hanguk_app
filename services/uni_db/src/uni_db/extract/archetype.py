@@ -247,12 +247,12 @@ def find_section_offsets(text: str) -> dict[str, int]:
 
 # Re-export from signals module so existing imports keep working.
 __all__ = [
-    "ArchetypeFingerprint",
-    "ArchetypeLabel",
     "ALL_LABELS",
     "CONFIDENCE_HITL_THRESHOLD",
+    "ArchetypeFingerprint",
+    "ArchetypeLabel",
     "classify_archetype",
     "classify_from_signals",
-    "find_section_offsets",
     "estimate_table_density",
+    "find_section_offsets",
 ]

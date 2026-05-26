@@ -86,7 +86,23 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "ASYNC", "SIM", "RUF"]
-ignore = ["E501"]
+ignore = [
+  "E501",            # line length — handled by formatter judgement
+  # Project conventions (kept consistent across the codebase):
+  "UP017",           # `timezone.utc` over `datetime.UTC`
+  "UP035",           # `typing.Mapping` etc. over `collections.abc`
+  # CJK false-positives: Korean text + full-width punctuation trip the
+  # ambiguous-unicode lints constantly. The Korean IS the content.
+  "RUF001", "RUF002", "RUF003",
+  # Intentional: workers `except Exception` to isolate one bad item from the
+  # batch (documented per worker); plus low-value style nits.
+  "BLE001", "SIM102", "SIM103", "E741",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test-code conventions: unused unpacks/locals in arrange-only tests, mutable
+# class attrs in fixtures, implicit Optional in fakes.
+"tests/**" = ["RUF012", "RUF013", "RUF059", "F841"]
 
 [tool.mypy]
 python_version = "3.12"

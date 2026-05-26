@@ -214,9 +214,10 @@ async def _crawl_fixture(*, source: str, fixture: bool) -> int:
         return 2
 
     from uuid import uuid4
+
     from .discovery.adapters.html_list_adapter import HtmlListAdapter, HtmlListSelectors
-    from .workers.discovery_worker import run_one_source
     from .discovery.registry import RegistrySource
+    from .workers.discovery_worker import run_one_source
 
     fixture_root = Path(__file__).parent.parent.parent / "tests" / "fixtures"
     candidate = fixture_root / f"{source}_list.html"
@@ -262,6 +263,7 @@ async def _parse_fixture(*, name: str) -> int:
         return 2
 
     from uuid import uuid4
+
     from .parse.pdf_text import extract_text_from_path
     from .workers.parse_worker import parse_one_document
 
@@ -518,7 +520,6 @@ def _schema_check() -> int:
     repo_root = Path(__file__).parent.parent.parent.parent.parent
     migrations = sorted((repo_root / "supabase" / "migrations").glob("*.sql"))
     table_names: set[str] = set()
-    view_refs: list[tuple[str, str]] = []   # (view_name, referenced_table)
     for path in migrations:
         text = path.read_text(encoding="utf-8")
         for line in text.splitlines():

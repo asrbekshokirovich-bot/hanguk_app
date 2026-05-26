@@ -27,12 +27,12 @@ Posted-at is embedded as "작성일 : 2026-03-27" inside <div class="reg">.
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
+
+import httpx
 
 from ..html_list_adapter import HtmlListSelectors
 from ..playwright_list_adapter import PlaywrightListAdapter, PlaywrightRenderOptions
-
 
 SKKU_SELECTORS = HtmlListSelectors(
     row="table tbody tr",

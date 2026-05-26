@@ -191,11 +191,11 @@ def candidate_to_jsonable(c: Candidate) -> dict[str, object]:
 __all__ = [
     "Candidate",
     "ProposeOutcome",
+    "candidate_to_jsonable",
     "evaluate_candidate",
     "matched_keywords_for",
     "propose",
     "propose_batch",
-    "candidate_to_jsonable",
 ]
 
 

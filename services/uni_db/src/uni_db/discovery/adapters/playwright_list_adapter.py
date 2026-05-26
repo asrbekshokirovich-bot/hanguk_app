@@ -126,12 +126,12 @@ class PlaywrightListAdapter(HtmlListAdapter):
                         try:
                             await page.click(target, timeout=5000)
                             log.info("playwright: clicked %s", target)
-                        except Exception as e:  # noqa: BLE001
+                        except Exception as e:
                             log.warning("playwright: pre_action click(%s) failed: %s", target, e)
                     elif action == "wait":
                         try:
                             await page.wait_for_selector(target, timeout=opts.timeout_ms)
-                        except Exception as e:  # noqa: BLE001
+                        except Exception as e:
                             log.warning("playwright: pre_action wait(%s) failed: %s", target, e)
 
                 if opts.wait_for_selector:
@@ -139,7 +139,7 @@ class PlaywrightListAdapter(HtmlListAdapter):
                         await page.wait_for_selector(
                             opts.wait_for_selector, timeout=opts.timeout_ms
                         )
-                    except Exception as e:  # noqa: BLE001
+                    except Exception as e:
                         log.warning(
                             "playwright: wait_for_selector(%s) timed out: %s",
                             opts.wait_for_selector, e,

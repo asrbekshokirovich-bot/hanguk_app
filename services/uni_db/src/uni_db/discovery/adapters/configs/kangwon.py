@@ -10,11 +10,11 @@ filter by title keywords post-fetch via matches_admission_signal().
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
 
-from ..html_list_adapter import HtmlListAdapter, HtmlListSelectors
+import httpx
 
+from ..html_list_adapter import HtmlListAdapter, HtmlListSelectors
 
 KANGWON_SELECTORS = HtmlListSelectors(
     row="table tbody tr",

@@ -17,9 +17,9 @@ import feedparser
 import httpx
 
 from ...config import settings
+from .._adapter_base import SourceAdapter
 from ..keywords_ko import is_disallowed_url, matches_admission_signal
 from ..models import Announcement, Attachment, AttachmentBlob, PostDetail
-from .._adapter_base import SourceAdapter
 
 
 class RssAdapter(SourceAdapter):

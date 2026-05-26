@@ -13,8 +13,9 @@ The adapter uses the correct notice board endpoint regardless of the source URL.
 
 from __future__ import annotations
 
-import httpx
 from uuid import UUID
+
+import httpx
 
 from ..json_api_adapter import JsonApiAdapter, KuBbsConfig
 

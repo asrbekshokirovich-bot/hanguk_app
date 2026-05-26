@@ -19,6 +19,7 @@ from uuid import UUID, uuid4
 
 import asyncpg
 
+from .._adapter_base_alias import SourceAdapter  # type: ignore[attr-defined]
 from ..discovery.change_detection import (
     ChangeFinding,
     PriorAnnouncementSnapshot,
@@ -32,7 +33,6 @@ from ..discovery.registry import (
     next_interval_minutes,
     reschedule,
 )
-from .._adapter_base_alias import SourceAdapter  # type: ignore[attr-defined]
 
 log = logging.getLogger(__name__)
 

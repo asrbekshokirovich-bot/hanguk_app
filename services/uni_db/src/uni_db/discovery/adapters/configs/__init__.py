@@ -14,29 +14,34 @@ Sources marked ``# JSON API`` call a REST endpoint instead of scraping HTML.
 
 from __future__ import annotations
 
-import httpx
+from typing import TYPE_CHECKING
 from uuid import UUID
 
+import httpx
+
 from ..html_list_adapter import HtmlListAdapter, HtmlListSelectors
+from .cau import CAU_SELECTORS
+from .cbnu import CBNU_SELECTORS, make_cbnu_adapter
+from .hanyang import make_hanyang_adapter
+from .inha import INHA_SELECTORS, make_inha_adapter
+from .jbnu import JBNU_SELECTORS, make_jbnu_adapter
+from .jeju import JEJU_SELECTORS, make_jeju_adapter
+from .kaist import make_kaist_adapter
+from .kangwon import KANGWON_SELECTORS, make_kangwon_adapter
+from .konkuk import KONKUK_SELECTORS, make_konkuk_adapter
+from .kookmin import KOOKMIN_SELECTORS
+from .korea_univ import make_korea_univ_adapter
+from .skku import make_skku_adapter
 from .snu import SNU_SELECTORS
 from .yonsei import (
-    YONSEI_SELECTORS,
     YONSEI_MIRAE_SELECTORS,
+    YONSEI_SELECTORS,
     make_yonsei_adapter,
     make_yonsei_mirae_adapter,
 )
-from .korea_univ import make_korea_univ_adapter
-from .kaist import make_kaist_adapter
-from .konkuk import KONKUK_SELECTORS, make_konkuk_adapter
-from .inha import INHA_SELECTORS, make_inha_adapter
-from .cbnu import CBNU_SELECTORS, make_cbnu_adapter
-from .jbnu import JBNU_SELECTORS, make_jbnu_adapter
-from .kangwon import KANGWON_SELECTORS, make_kangwon_adapter
-from .jeju import JEJU_SELECTORS, make_jeju_adapter
-from .skku import SKKU_SELECTORS, make_skku_adapter
-from .hanyang import HANYANG_SELECTORS, make_hanyang_adapter
-from .cau import CAU_SELECTORS
-from .kookmin import KOOKMIN_SELECTORS
+
+if TYPE_CHECKING:
+    from .._adapter_base import SourceAdapter
 
 
 def _html(selectors: HtmlListSelectors):
