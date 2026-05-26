@@ -414,8 +414,56 @@ class TestSelfScore:
     def test_falls_back_to_root_level(self) -> None:
         assert llm_anthropic._self_score({"extractor_confidence": 0.5}) == pytest.approx(0.5)
 
-    def test_default_when_no_confidence(self) -> None:
-        assert llm_anthropic._self_score({"rows": []}) == pytest.approx(0.85)
+    def test_empty_extraction_scores_zero(self) -> None:
+        # Empty extraction must score 0, not the neutral default, so triage
+        # can tell it apart from real content.
+        assert llm_anthropic._self_score({"rows": []}) == pytest.approx(0.0)
+        assert llm_anthropic._self_score({"events": []}) == pytest.approx(0.0)
+
+    def test_default_when_no_content_key(self) -> None:
+        assert llm_anthropic._self_score({"note": "x"}) == pytest.approx(0.85)
 
     def test_non_dict_defaults(self) -> None:
         assert llm_anthropic._self_score("garbage") == pytest.approx(0.85)
+
+
+class TestSalvagePartialJson:
+    def test_salvages_complete_rows_before_truncation(self) -> None:
+        text = ('{"rows": [{"name_ko":"안암장학금","faculty_ko":"경영대학"},'
+                '{"name_ko":"두번째"},{"name_ko":"불완전한')
+        out = llm_anthropic._salvage_partial_json(text)
+        assert out == {"rows": [
+            {"name_ko": "안암장학금", "faculty_ko": "경영대학"},
+            {"name_ko": "두번째"},
+        ]}
+
+    def test_salvages_events(self) -> None:
+        text = '{"events": [{"event_type":"apply_open"},{"event_type":'
+        out = llm_anthropic._salvage_partial_json(text)
+        assert out == {"events": [{"event_type": "apply_open"}]}
+
+    def test_braces_inside_strings_dont_break_it(self) -> None:
+        text = '{"rows": [{"note":"a } b { c"},{"x":'
+        out = llm_anthropic._salvage_partial_json(text)
+        assert out == {"rows": [{"note": "a } b { c"}]}
+
+    def test_none_when_no_array(self) -> None:
+        assert llm_anthropic._salvage_partial_json("totally broken {oops") is None
+
+
+class TestTruncatedResponseSalvaged:
+    def test_truncated_requirements_is_salvaged_not_dropped(
+        self, live_settings, monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        truncated = (
+            '{"rows": [{"applicant_category":"외국인전형","source_text_ko":"x",'
+            '"topik_min_level":4},{"applicant_category":"재외국민","source_text_ko":'
+        )
+        client = _FakeClient(_ok_response(raw_text=truncated))
+        monkeypatch.setattr(llm_anthropic, "_get_client", lambda: client)
+        result = llm_anthropic.extract_field_group(
+            field_group="requirements", archetype="A", source_text_ko="x",
+        )
+        # the one complete row survives instead of the whole job being discarded
+        assert len(result.parsed_output["rows"]) == 1
+        assert result.parsed_output["rows"][0]["applicant_category"] == "외국인전형"

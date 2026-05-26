@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Iterable
@@ -79,6 +80,7 @@ def parse_one_document(
 
     for group in FIELD_GROUPS:
         section_text = _slice_for(pdf_text_full, group, offsets)
+        started = time.monotonic()
         try:
             result = extract_field_group(
                 field_group=group,
@@ -93,8 +95,9 @@ def parse_one_document(
             # Failed extraction → recorded as a failed job (error lane),
             # NOT queued for content review. A human can't review an error;
             # these need a prompt/schema fix + re-extraction (Layer 2).
-            results.append(_failed_result(group, "claude-sonnet-4-6",
-                                          violation=ve.message[:500]))
+            results.append(_failed_result(
+                group, "claude-sonnet-4-6", violation=ve.message[:500],
+                latency_ms=int((time.monotonic() - started) * 1000)))
             continue
         except Exception as exc:
             # API timeout, rate limit, network error, malformed JSON, etc.
@@ -103,8 +106,10 @@ def parse_one_document(
                 "extract: extraction failed for %s: %s: %s",
                 group, type(exc).__name__, str(exc)[:160],
             )
-            results.append(_failed_result(group, "claude-sonnet-4-6",
-                                          violation=f"{type(exc).__name__}: {exc}"))
+            results.append(_failed_result(
+                group, "claude-sonnet-4-6",
+                violation=f"{type(exc).__name__}: {exc}",
+                latency_ms=int((time.monotonic() - started) * 1000)))
             continue
 
         # If a row's source span was clipped mid-word, the model never saw the
@@ -201,12 +206,12 @@ async def persist_outcome(
               id, guideline_document_id, archetype, field_group,
               status, llm_provider, llm_model, input_tokens, output_tokens,
               cost_usd, latency_ms, accuracy_self_score,
-              raw_output, parsed_output, started_at, ended_at
+              raw_output, parsed_output, started_at, ended_at, error_text
             ) values (
               $1,$2,$3,$4,
               $16, $5,$6,$7,$8,
               $9,$10,$11,
-              $12::jsonb, $13::jsonb, $14, $15
+              $12::jsonb, $13::jsonb, $14, $15, $17
             )
             """,
             job_id,
@@ -231,6 +236,7 @@ async def persist_outcome(
             datetime.now(tz=timezone.utc),
             datetime.now(tz=timezone.utc),
             job_status,
+            result.error_text,
         )
 
         # Belt-and-suspenders: never enqueue an empty or failed extraction for
@@ -360,19 +366,24 @@ def _looks_truncated(parsed_output: object) -> bool:
     return False
 
 
-def _failed_result(group: str, model: str, *, violation: str) -> ExtractionResult:
-    # raw_output is later inserted into a jsonb column, so it must be a
-    # valid JSON document (not an empty string).
+def _failed_result(
+    group: str, model: str, *, violation: str, latency_ms: int = 0
+) -> ExtractionResult:
+    # The error goes in error_text (the dedicated column), NOT buried in
+    # raw_output. parsed_output keeps a minimal marker so status detection
+    # (_is_failed_output) still routes it to the error lane. raw_output is a
+    # valid-but-empty jsonb doc. latency_ms is the real elapsed time.
     return ExtractionResult(
         field_group=group,
         parsed_output={"_extraction_failed": violation},
-        raw_output=json.dumps({"_extraction_failed": violation}, ensure_ascii=False),
+        raw_output="{}",
+        error_text=violation,
         llm_provider="anthropic",
         llm_model=model,
         input_tokens=0,
         output_tokens=0,
         cost_usd=0.0,
-        latency_ms=0,
+        latency_ms=latency_ms,
         accuracy_self_score=0.0,
     )
 

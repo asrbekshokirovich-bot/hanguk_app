@@ -155,3 +155,20 @@ class TestDerivePeriodsFromEvents:
     def test_empty_events_add_no_period(self) -> None:
         out = normalize_output("calendar", {"events": []})
         assert "periods" not in out
+
+
+class TestCalendarEventSynonyms:
+    def test_document_submission_deadline_mapped(self) -> None:
+        out = normalize_output("calendar", {"events": [
+            {"event_type": "document_submission_deadline", "starts_at": "2026-10-05T00:00:00+09:00"}]})
+        assert out["events"][0]["event_type"] == "documents_deadline"
+
+    def test_result_announcement_mapped_to_final(self) -> None:
+        out = normalize_output("calendar", {"events": [
+            {"event_type": "result_announcement", "starts_at": "2026-11-20T00:00:00+09:00"}]})
+        assert out["events"][0]["event_type"] == "final_results"
+
+    def test_truly_unknown_still_other(self) -> None:
+        out = normalize_output("calendar", {"events": [
+            {"event_type": "made_up_label", "starts_at": "2026-01-01T00:00:00+09:00"}]})
+        assert out["events"][0]["event_type"] == "other"

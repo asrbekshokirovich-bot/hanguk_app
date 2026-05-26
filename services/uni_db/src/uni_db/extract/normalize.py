@@ -58,6 +58,27 @@ CALENDAR_EVENT_TYPES: frozenset[str] = frozenset({
 })
 
 
+# Map event_type variants (schema-valid but unmapped by the review UI, or
+# common model paraphrases) onto the canonical types the frontend renders, so
+# they stop landing under "Other dates". Targets the high-volume cases.
+_CALENDAR_EVENT_SYNONYMS: dict[str, str] = {
+    "document_submission_deadline": "documents_deadline",
+    "documents_submission_deadline": "documents_deadline",
+    "document_deadline": "documents_deadline",
+    "result_announcement": "final_results",
+    "results_announcement": "final_results",
+    "final_announcement": "final_results",
+    "first_round_results": "first_stage_results",
+    "first_stage_announcement": "first_stage_results",
+    "application_open": "apply_open",
+    "application_start": "apply_open",
+    "application_close": "apply_close",
+    "application_end": "apply_close",
+    "registration_start": "registration_open",
+    "registration_end": "registration_close",
+}
+
+
 def content_key_for(field_group: str) -> str:
     return _CONTENT_KEY.get(field_group, "rows")
 
@@ -189,8 +210,9 @@ def normalize_output(field_group: str, parsed: Any) -> Any:
         for row in parsed[key]:
             if isinstance(row, dict):
                 et = row.get("event_type")
-                if isinstance(et, str) and et not in CALENDAR_EVENT_TYPES:
-                    row["event_type"] = "other"
+                if isinstance(et, str):
+                    et = _CALENDAR_EVENT_SYNONYMS.get(et, et)
+                    row["event_type"] = et if et in CALENDAR_EVENT_TYPES else "other"
 
     # Calendar: if events were extracted but periods weren't, derive the
     # structured period so the labelled timeline fields populate (Phase 3 —
