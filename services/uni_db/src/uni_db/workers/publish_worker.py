@@ -39,13 +39,12 @@ import asyncpg
 
 log = logging.getLogger(__name__)
 
-# admission_cycles.cycle_track CHECK values.
+# Map the extracted `audience` to an admission_cycles.cycle_track CHECK value.
+# Only the confident mappings live here; everything else falls through to the
+# category-text heuristic in track_for() and finally the foreign default.
 _AUDIENCE_TO_TRACK: dict[str, str] = {
     "foreign": "foreign",
     "overseas_korean": "overseas_korean_full",
-    "defector": "foreign",
-    "naturalized": "foreign",
-    "domestic": "foreign",  # a foreign-source doc mislabelled; keep in foreign track
 }
 _DEFAULT_TRACK = "foreign"
 _DEFAULT_CATEGORY = "외국인전형"
@@ -122,6 +121,29 @@ def first_doc_name(row: dict) -> str:
         if isinstance(v, str) and v.strip():
             return v.strip()
     return "서류"
+
+
+def track_for(audience: object, category_text: object) -> str:
+    """Resolve a row to an admission_cycles.cycle_track. Prefer the extracted
+    `audience`; otherwise read the applicant-category text; else foreign. This is
+    what keeps 재외국민 / 편입학 / 대학원 rows out of the plain foreign track so the
+    app never shows another audience's rules to a foreign applicant."""
+    a = audience.strip().lower() if isinstance(audience, str) else ""
+    if a in _AUDIENCE_TO_TRACK:
+        return _AUDIENCE_TO_TRACK[a]
+    cat = category_text if isinstance(category_text, str) else ""
+    if "재외국민" in cat:
+        return "overseas_korean_full"
+    if "편입" in cat:
+        return "transfer"
+    if "대학원" in cat or "대학원" in a:
+        return "grad_foreign"
+    return _DEFAULT_TRACK
+
+
+def category_for(row: dict) -> str:
+    cat = row.get("applicant_category")
+    return cat.strip() if isinstance(cat, str) and cat.strip() else _DEFAULT_CATEGORY
 
 
 # --------------------------------------------------------------------------- #
@@ -217,17 +239,33 @@ async def _publish_scholarships(conn, rec, payload) -> int:
     return n
 
 
+async def _row_cycle(conn, rec, row: dict) -> UUID:
+    """Resolve the admission cycle for one row by its audience/category, so a
+    foreign requirement and a 재외국민 requirement in the same document land in
+    different cycles (and the app can filter correctly)."""
+    category = category_for(row)
+    return await get_or_create_cycle(
+        conn,
+        institution_id=rec["institution_id"],
+        guideline_document_id=rec["guideline_document_id"],
+        intake_year=rec["_year"],
+        intake_term=rec["_term"],
+        cycle_track=track_for(row.get("audience"), category),
+        applicant_category=category,
+    )
+
+
 async def _publish_requirements(conn, rec, payload) -> int:
-    cycle_id = await _cycle_for(conn, rec, payload)
     n = 0
     for r in _rows(payload):
+        cycle_id = await _row_cycle(conn, rec, r)
         await conn.execute(
             """insert into public.requirements (cycle_id, applicant_category,
                  topik_min_level, topik_deferred, english_test, gpa_floor_pct,
                  interview_required, practical_exam_required, prose_ko,
                  source_text_ko, extractor_confidence)
                values ($1,$2,$3,$4,$5::jsonb,$6,$7,$8,$9,$10,$11)""",
-            cycle_id, r.get("applicant_category") or _DEFAULT_CATEGORY,
+            cycle_id, category_for(r),
             r.get("topik_min_level"), bool(r.get("topik_deferred", False)),
             _j(r.get("english_test")), r.get("gpa_floor_pct"),
             bool(r.get("interview_required", False)),
@@ -239,15 +277,15 @@ async def _publish_requirements(conn, rec, payload) -> int:
 
 
 async def _publish_documents(conn, rec, payload) -> int:
-    cycle_id = await _cycle_for(conn, rec, payload)
     n = 0
     for r in _rows(payload):
+        cycle_id = await _row_cycle(conn, rec, r)
         await conn.execute(
             """insert into public.documents_required (cycle_id, applicant_category,
                  document_type, is_required, is_apostille_required, country_specific,
                  notes_ko, source_text_ko)
                values ($1,$2,$3,$4,$5,$6::jsonb,$7,$8)""",
-            cycle_id, r.get("applicant_category") or _DEFAULT_CATEGORY,
+            cycle_id, category_for(r),
             first_doc_name(r), bool(r.get("is_required", True)),
             bool(r.get("is_apostille_required") or r.get("is_notarization_required") or False),
             _j(r.get("country_specific")), r.get("notes_ko"), r.get("source_text_ko"),
@@ -298,18 +336,6 @@ async def _publish_calendar(conn, rec, payload) -> int:
         )
         n += 1
     return n
-
-
-async def _cycle_for(conn, rec, payload) -> UUID:
-    return await get_or_create_cycle(
-        conn,
-        institution_id=rec["institution_id"],
-        guideline_document_id=rec["guideline_document_id"],
-        intake_year=rec["_year"],
-        intake_term=rec["_term"],
-        cycle_track=_DEFAULT_TRACK,
-        applicant_category=_DEFAULT_CATEGORY,
-    )
 
 
 _PUBLISHERS = {
