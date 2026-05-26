@@ -70,6 +70,51 @@ select 'announcements'             as entity_type,
    and a.title_ko is not null
    and length(a.title_ko) > 0
 
+union all
+
+-- Phase 5: the published admission CONTENT the app shows. Once review→publish
+-- writes these rows, translate their Korean fields so applicants read them in
+-- EN/UZ. Short labels (scholarship/document names) → is_label=true (DeepL);
+-- prose (eligibility / notes) → false (Claude).
+select 'requirements', r.id, 'prose_ko', r.prose_ko, $1::text, false
+  from public.requirements r
+  left join public.translations t
+    on t.entity_type='requirements' and t.entity_id=r.id
+   and t.field_name='prose_ko' and t.lang=$1::text
+ where t.id is null and r.prose_ko is not null and length(r.prose_ko) > 0
+
+union all
+select 'scholarships', s.id, 'name_ko', s.name_ko, $1::text, true
+  from public.scholarships s
+  left join public.translations t
+    on t.entity_type='scholarships' and t.entity_id=s.id
+   and t.field_name='name_ko' and t.lang=$1::text
+ where t.id is null and s.name_ko is not null and length(s.name_ko) > 0
+
+union all
+select 'scholarships', s.id, 'prose_ko', s.prose_ko, $1::text, false
+  from public.scholarships s
+  left join public.translations t
+    on t.entity_type='scholarships' and t.entity_id=s.id
+   and t.field_name='prose_ko' and t.lang=$1::text
+ where t.id is null and s.prose_ko is not null and length(s.prose_ko) > 0
+
+union all
+select 'documents_required', d.id, 'document_type', d.document_type, $1::text, true
+  from public.documents_required d
+  left join public.translations t
+    on t.entity_type='documents_required' and t.entity_id=d.id
+   and t.field_name='document_type' and t.lang=$1::text
+ where t.id is null and d.document_type is not null and length(d.document_type) > 0
+
+union all
+select 'documents_required', d.id, 'notes_ko', d.notes_ko, $1::text, false
+  from public.documents_required d
+  left join public.translations t
+    on t.entity_type='documents_required' and t.entity_id=d.id
+   and t.field_name='notes_ko' and t.lang=$1::text
+ where t.id is null and d.notes_ko is not null and length(d.notes_ko) > 0
+
 limit $2
 """
 
