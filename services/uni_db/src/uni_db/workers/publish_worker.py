@@ -1,0 +1,349 @@
+"""Publish worker — approved review items → the public tables the app reads.
+
+The pipeline extracts admission data into `extraction_jobs.parsed_output` and a
+reviewer approves it in `review_queue`, but `fn_review_accept` only flips the
+status — nothing was ever written to the normalized public tables
+(`requirements`, `tuition`, `scholarships`, `university_admission_periods`,
+`documents_required`). So applicants saw nothing. This worker closes that gap:
+for each **approved, not-yet-published** review item it normalizes the (possibly
+reviewer-edited) JSON into the matching public table.
+
+Design (per the comparative study of UCAS / Common App / uni-assist / Common Data
+Set):
+  * Cycle-scoped: `requirements` and `documents_required` hang off an
+    `admission_cycles` row (year + term + track + audience). The worker
+    get-or-creates that cycle, links it to the source `guideline_document`
+    (provenance), and leaves it `status='unverified'` so the inferred
+    year/term/track gets a human check.
+  * Provenance: every published row keeps its Korean `source_text_ko`; the cycle
+    carries `guideline_document_id` → the original 모집요강.
+  * Idempotent: `review_queue.published_at` marks done, so re-runs are safe and
+    each newly-approved item is picked up automatically.
+
+Inference is deterministic and conservative so all field groups of one document
+converge on a single cycle. The DB connection is injectable so the mapping
+unit-tests without a database.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import re
+from dataclasses import dataclass
+from datetime import date, datetime, timezone
+from typing import Any
+from uuid import UUID
+
+import asyncpg
+
+log = logging.getLogger(__name__)
+
+# admission_cycles.cycle_track CHECK values.
+_AUDIENCE_TO_TRACK: dict[str, str] = {
+    "foreign": "foreign",
+    "overseas_korean": "overseas_korean_full",
+    "defector": "foreign",
+    "naturalized": "foreign",
+    "domestic": "foreign",  # a foreign-source doc mislabelled; keep in foreign track
+}
+_DEFAULT_TRACK = "foreign"
+_DEFAULT_CATEGORY = "외국인전형"
+_YEAR_RE = re.compile(r"(?<!\d)(20[2-3][0-9])(?!\d)")
+_FALL_HINTS = ("후기", "9월", "가을", "fall", "9 월")
+
+
+@dataclass(frozen=True, slots=True)
+class PublishRun:
+    approved_seen: int
+    published: int          # review items normalized into a public table
+    rows_written: int       # individual rows inserted across all tables
+    skipped: int            # empty/failed payloads, or unknown field group
+    errors: int
+
+
+# --------------------------------------------------------------------------- #
+# pure helpers (no DB)
+# --------------------------------------------------------------------------- #
+
+def _payload(record: Any) -> dict:
+    """The data to publish: reviewer's edited version if present, else the raw
+    extraction. Both are jsonb (asyncpg returns them as str or dict)."""
+    raw = record["reviewer_decision"] or record["parsed_output"]
+    if isinstance(raw, str):
+        raw = json.loads(raw or "{}")
+    return raw if isinstance(raw, dict) else {}
+
+
+def _rows(payload: dict) -> list[dict]:
+    rows = payload.get("rows")
+    return [r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else []
+
+
+def _is_unpublishable(payload: dict) -> bool:
+    return "_extraction_failed" in payload or (not _rows(payload)
+                                               and not payload.get("events")
+                                               and not payload.get("periods"))
+
+
+def _as_date(value: object) -> date | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        return date.fromisoformat(value[:10])
+    except ValueError:
+        return None
+
+
+def _j(value: object) -> str | None:
+    """JSON-encode for a `$n::jsonb` param (asyncpg has no jsonb codec here)."""
+    return json.dumps(value, ensure_ascii=False) if value not in (None, {}, []) else None
+
+
+def _arr(value: object) -> list | None:
+    return value if isinstance(value, list) else None
+
+
+def infer_year(payload: dict, *, default: int) -> int:
+    blob = json.dumps(payload, ensure_ascii=False)
+    years = [int(y) for y in _YEAR_RE.findall(blob)]
+    years = [y for y in years if 2024 <= y <= 2031]
+    return max(years) if years else default
+
+
+def infer_term(payload: dict) -> str:
+    blob = json.dumps(payload, ensure_ascii=False).lower()
+    return "fall" if any(h in blob for h in _FALL_HINTS) else "spring"
+
+
+def first_doc_name(row: dict) -> str:
+    for k in ("document_type", "document_name_ko", "name_ko", "label_ko", "name_en"):
+        v = row.get(k)
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    return "서류"
+
+
+# --------------------------------------------------------------------------- #
+# DB ops
+# --------------------------------------------------------------------------- #
+
+_FETCH_SQL = """
+select rq.id            as queue_id,
+       rq.reviewer_decision,
+       ej.field_group,
+       ej.parsed_output,
+       ej.accuracy_self_score,
+       ej.guideline_document_id,
+       gd.institution_id
+  from public.review_queue rq
+  join public.extraction_jobs ej     on ej.id = rq.entity_id
+  join public.guideline_documents gd on gd.id = ej.guideline_document_id
+ where rq.status = 'approved'
+   and rq.published_at is null
+   and rq.entity_type = 'extraction_jobs'
+   and gd.institution_id is not null
+ order by rq.resolved_at asc nulls last
+ limit $1
+"""
+
+
+async def get_or_create_cycle(
+    conn: asyncpg.Connection,
+    *,
+    institution_id: UUID,
+    guideline_document_id: UUID,
+    intake_year: int,
+    intake_term: str,
+    cycle_track: str,
+    applicant_category: str,
+) -> UUID:
+    return await conn.fetchval(
+        """
+        insert into public.admission_cycles
+          (institution_id, intake_year, intake_term, cycle_track, round_number,
+           applicant_category, guideline_document_id, status)
+        values ($1,$2,$3,$4,1,$5,$6,'unverified')
+        on conflict (institution_id, intake_year, intake_term, cycle_track,
+                     round_number, applicant_category)
+          do update set guideline_document_id = excluded.guideline_document_id,
+                        updated_at = now()
+        returning id
+        """,
+        institution_id, intake_year, intake_term, cycle_track,
+        applicant_category, guideline_document_id,
+    )
+
+
+async def _publish_tuition(conn, rec, payload) -> int:
+    n = 0
+    for r in _rows(payload):
+        amount = r.get("amount_krw")
+        if amount is None:
+            continue
+        sem = r.get("semester_number") or 1
+        await conn.execute(
+            """insert into public.tuition (institution_id, faculty_group, academic_year,
+                 semester_number, amount_krw, admission_fee_krw, is_first_semester,
+                 source_text_ko, extractor_confidence)
+               values ($1,$2,$3,$4,$5,$6,$7,$8,$9)""",
+            rec["institution_id"], r.get("faculty_group") or "전체",
+            r.get("academic_year") or rec["_year"], sem, amount,
+            r.get("admission_fee_krw"), bool(r.get("is_first_semester", sem == 1)),
+            r.get("source_text_ko"), r.get("extractor_confidence"),
+        )
+        n += 1
+    return n
+
+
+async def _publish_scholarships(conn, rec, payload) -> int:
+    n = 0
+    for r in _rows(payload):
+        if not (r.get("scope") and r.get("name_ko") and r.get("award_type")):
+            continue
+        await conn.execute(
+            """insert into public.scholarships (institution_id, scope, name_ko, name_en,
+                 award_type, award_value, applicant_categories, topik_tier_table,
+                 ielts_tier_table, eligibility_predicate, prose_ko, source_text_ko,
+                 extractor_confidence)
+               values ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9::jsonb,$10::jsonb,$11,$12,$13)""",
+            rec["institution_id"], r["scope"], r["name_ko"], r.get("name_en"),
+            r["award_type"], r.get("award_value"),
+            _arr(r.get("applicant_categories")), _j(r.get("topik_tier_table")),
+            _j(r.get("ielts_tier_table")), _j(r.get("eligibility_predicate")),
+            r.get("prose_ko"), r.get("source_text_ko"), r.get("extractor_confidence"),
+        )
+        n += 1
+    return n
+
+
+async def _publish_requirements(conn, rec, payload) -> int:
+    cycle_id = await _cycle_for(conn, rec, payload)
+    n = 0
+    for r in _rows(payload):
+        await conn.execute(
+            """insert into public.requirements (cycle_id, applicant_category,
+                 topik_min_level, topik_deferred, english_test, gpa_floor_pct,
+                 interview_required, practical_exam_required, prose_ko,
+                 source_text_ko, extractor_confidence)
+               values ($1,$2,$3,$4,$5::jsonb,$6,$7,$8,$9,$10,$11)""",
+            cycle_id, r.get("applicant_category") or _DEFAULT_CATEGORY,
+            r.get("topik_min_level"), bool(r.get("topik_deferred", False)),
+            _j(r.get("english_test")), r.get("gpa_floor_pct"),
+            bool(r.get("interview_required", False)),
+            bool(r.get("practical_exam_required", False)),
+            r.get("prose_ko"), r.get("source_text_ko"), r.get("extractor_confidence"),
+        )
+        n += 1
+    return n
+
+
+async def _publish_documents(conn, rec, payload) -> int:
+    cycle_id = await _cycle_for(conn, rec, payload)
+    n = 0
+    for r in _rows(payload):
+        await conn.execute(
+            """insert into public.documents_required (cycle_id, applicant_category,
+                 document_type, is_required, is_apostille_required, country_specific,
+                 notes_ko, source_text_ko)
+               values ($1,$2,$3,$4,$5,$6::jsonb,$7,$8)""",
+            cycle_id, r.get("applicant_category") or _DEFAULT_CATEGORY,
+            first_doc_name(r), bool(r.get("is_required", True)),
+            bool(r.get("is_apostille_required") or r.get("is_notarization_required") or False),
+            _j(r.get("country_specific")), r.get("notes_ko"), r.get("source_text_ko"),
+        )
+        n += 1
+    return n
+
+
+async def _publish_calendar(conn, rec, payload) -> int:
+    periods = payload.get("periods")
+    periods = periods if isinstance(periods, list) else []
+    semester = rec["_term"]
+    n = 0
+    for p in periods:
+        if not isinstance(p, dict):
+            continue
+        await conn.execute(
+            """insert into public.university_admission_periods (institution_id,
+                 semester, year, program_level, language_track,
+                 application_start, application_end, document_deadline,
+                 result_announcement, online_application_start, online_application_end,
+                 offline_application_start, offline_application_end,
+                 interview_start, interview_end, application_fee_krw, application_fee_usd)
+               values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)""",
+            rec["institution_id"], semester, rec["_year"],
+            p.get("program_level") or "undergraduate", p.get("language_track"),
+            _as_date(p.get("application_start")), _as_date(p.get("application_end")),
+            _as_date(p.get("document_deadline")), _as_date(p.get("result_announcement")),
+            _as_date(p.get("online_application_start")), _as_date(p.get("online_application_end")),
+            _as_date(p.get("offline_application_start")), _as_date(p.get("offline_application_end")),
+            _as_date(p.get("interview_start")), _as_date(p.get("interview_end")),
+            p.get("application_fee_krw"), p.get("application_fee_usd"),
+        )
+        n += 1
+    return n
+
+
+async def _cycle_for(conn, rec, payload) -> UUID:
+    return await get_or_create_cycle(
+        conn,
+        institution_id=rec["institution_id"],
+        guideline_document_id=rec["guideline_document_id"],
+        intake_year=rec["_year"],
+        intake_term=rec["_term"],
+        cycle_track=_DEFAULT_TRACK,
+        applicant_category=_DEFAULT_CATEGORY,
+    )
+
+
+_PUBLISHERS = {
+    "tuition": _publish_tuition,
+    "scholarships": _publish_scholarships,
+    "requirements": _publish_requirements,
+    "basic_requirements": _publish_requirements,
+    "documents_required": _publish_documents,
+    "document_checklist": _publish_documents,
+    "calendar": _publish_calendar,
+}
+
+
+async def publish_pending(conn: asyncpg.Connection, *, limit: int = 200) -> PublishRun:
+    """Normalize approved, not-yet-published review items into the public tables."""
+    records = await conn.fetch(_FETCH_SQL, limit)
+    log.info("publish_worker: %d approved item(s) to publish", len(records))
+    published = rows_written = skipped = errors = 0
+    default_year = datetime.now(tz=timezone.utc).year + 1
+    for rec in records:
+        rec = dict(rec)
+        payload = _payload(rec)
+        publisher = _PUBLISHERS.get(rec["field_group"])
+        if publisher is None or _is_unpublishable(payload):
+            skipped += 1
+            await _mark_published(conn, rec["queue_id"])  # nothing to do, don't re-scan
+            continue
+        rec["_year"] = infer_year(payload, default=default_year)
+        rec["_term"] = infer_term(payload)
+        try:
+            n = await publisher(conn, rec, payload)
+        except Exception as exc:  # one bad item must not abort the batch
+            errors += 1
+            log.warning("publish_worker: %s (%s) failed: %s: %s",
+                        str(rec["queue_id"])[:8], rec["field_group"],
+                        type(exc).__name__, str(exc)[:160])
+            continue
+        await _mark_published(conn, rec["queue_id"])
+        published += 1
+        rows_written += n
+        log.info("publish_worker: %s %s → %d row(s)",
+                 str(rec["queue_id"])[:8], rec["field_group"], n)
+    return PublishRun(
+        approved_seen=len(records), published=published,
+        rows_written=rows_written, skipped=skipped, errors=errors,
+    )
+
+
+async def _mark_published(conn: asyncpg.Connection, queue_id: UUID) -> None:
+    await conn.execute(
+        "update public.review_queue set published_at = now() where id = $1", queue_id
+    )
