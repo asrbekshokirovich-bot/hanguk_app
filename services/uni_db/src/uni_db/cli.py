@@ -55,6 +55,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p_reparse.add_argument("--institution", default=None,
                            help="Limit to one institution by primary_domain (e.g. inha.ac.kr)")
 
+    p_propose = sub.add_parser(
+        "propose-sources",
+        help="LIVE: Naver-discover unknown ac.kr admission boards → proposed_sources (HITL review)",
+    )
+    p_propose.add_argument("--days", type=int, default=7,
+                           help="Only consider posts from the last N days (default 7)")
+
     sub.add_parser("schema-check", help="Lint the migrations directory")
     return parser
 
@@ -74,6 +81,8 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_run_pipeline(limit=args.limit))
     if args.cmd == "reparse":
         return asyncio.run(_reparse(limit=args.limit, institution=args.institution))
+    if args.cmd == "propose-sources":
+        return asyncio.run(_propose_sources(days=args.days))
     if args.cmd == "schema-check":
         return _schema_check()
 
@@ -335,6 +344,57 @@ async def _reparse(*, limit: int, institution: str | None) -> int:
         await conn.close()
 
     print(f"reparse: re-extracted ok={ok} failed={fail}")
+    return 0
+
+
+async def _propose_sources(*, days: int) -> int:
+    """LIVE: discover unknown ac.kr admission boards via the Naver web-search
+    API and write the survivors to `proposed_sources` for HITL review. Free
+    (no LLM, no fetch) but it does call a live API and write to prod, so it's
+    gated on `UNI_DB_LIVE_APIS` + Naver keys + `SUPABASE_DB_URL`. Nothing goes
+    live without a reviewer approving in v_proposed_sources_queue.
+    """
+    if not settings.live_apis:
+        print(
+            "propose-sources needs UNI_DB_LIVE_APIS=true (it calls the live "
+            "Naver search API). Refusing. See docs/credentials.md.",
+            file=sys.stderr,
+        )
+        return 2
+    if not (settings.naver_search_client_id and settings.naver_search_client_secret):
+        print(
+            "NAVER_SEARCH_CLIENT_ID/SECRET not set; cannot run Naver discovery.",
+            file=sys.stderr,
+        )
+        return 2
+    if not settings.supabase_db_url:
+        print("SUPABASE_DB_URL is not set; cannot write proposed_sources.", file=sys.stderr)
+        return 2
+
+    from datetime import datetime, timedelta, timezone
+
+    import asyncpg
+    import httpx
+
+    from .workers import propose_worker
+
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    conn = await asyncpg.connect(settings.supabase_db_url)
+    try:
+        async with httpx.AsyncClient(
+            headers={"User-Agent": settings.http_user_agent},
+            follow_redirects=True,
+            timeout=settings.http_request_timeout_sec,
+        ) as http:
+            run = await propose_worker.discover_sources(conn, since=since, http_client=http)
+    finally:
+        await conn.close()
+
+    print(
+        f"propose-sources: keywords={run.keywords_searched} "
+        f"candidates={run.candidates_seen} proposed={run.proposed} "
+        f"skipped={run.skipped} search_errors={run.search_errors}"
+    )
     return 0
 
 
