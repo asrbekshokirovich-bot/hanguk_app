@@ -271,7 +271,22 @@ async def _publish_calendar(conn, rec, payload) -> int:
                  result_announcement, online_application_start, online_application_end,
                  offline_application_start, offline_application_end,
                  interview_start, interview_end, application_fee_krw, application_fee_usd)
-               values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)""",
+               values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+               on conflict (institution_id, semester, year, program_level, language_track)
+               do update set
+                 application_start = excluded.application_start,
+                 application_end = excluded.application_end,
+                 document_deadline = excluded.document_deadline,
+                 result_announcement = excluded.result_announcement,
+                 online_application_start = excluded.online_application_start,
+                 online_application_end = excluded.online_application_end,
+                 offline_application_start = excluded.offline_application_start,
+                 offline_application_end = excluded.offline_application_end,
+                 interview_start = excluded.interview_start,
+                 interview_end = excluded.interview_end,
+                 application_fee_krw = excluded.application_fee_krw,
+                 application_fee_usd = excluded.application_fee_usd,
+                 updated_at = now()""",
             rec["institution_id"], semester, rec["_year"],
             p.get("program_level") or "undergraduate", p.get("language_track"),
             _as_date(p.get("application_start")), _as_date(p.get("application_end")),
