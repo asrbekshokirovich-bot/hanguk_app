@@ -55,6 +55,14 @@ def _build_parser() -> argparse.ArgumentParser:
     p_reparse.add_argument("--institution", default=None,
                            help="Limit to one institution by primary_domain (e.g. inha.ac.kr)")
 
+    p_ingest = sub.add_parser(
+        "ingest-direct",
+        help="LIVE: fetch+extract guides from auto-discovered (promoted) sources "
+             "that have no board adapter",
+    )
+    p_ingest.add_argument("--limit", type=int, default=60,
+                          help="Max promoted sources to ingest this run")
+
     p_propose = sub.add_parser(
         "propose-sources",
         help="LIVE: Naver-discover unknown ac.kr admission boards → proposed_sources (HITL review)",
@@ -86,6 +94,8 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_run_pipeline(limit=args.limit))
     if args.cmd == "reparse":
         return asyncio.run(_reparse(limit=args.limit, institution=args.institution))
+    if args.cmd == "ingest-direct":
+        return asyncio.run(_ingest_direct(limit=args.limit))
     if args.cmd == "propose-sources":
         return asyncio.run(_propose_sources(days=args.days, mode=args.mode))
     if args.cmd == "schema-check":
@@ -349,6 +359,44 @@ async def _reparse(*, limit: int, institution: str | None) -> int:
         await conn.close()
 
     print(f"reparse: re-extracted ok={ok} failed={fail}")
+    return 0
+
+
+async def _ingest_direct(*, limit: int) -> int:
+    """LIVE: fetch + extract guides from auto-discovered (promoted) sources that
+    have no board adapter — direct PDF links and plain guide pages. Real ac.kr
+    fetches + paid LLM, and it auto-creates a hidden placeholder institution for
+    any school not yet tracked, so it's gated on `UNI_DB_LIVE_CRAWL` +
+    `UNI_DB_LIVE_APIS` + `SUPABASE_DB_URL`.
+    """
+    if not (settings.live_crawl and settings.live_apis):
+        print(
+            "ingest-direct needs UNI_DB_LIVE_CRAWL=true and UNI_DB_LIVE_APIS=true "
+            "(real ac.kr fetches + paid LLM). Refusing. See docs/credentials.md.",
+            file=sys.stderr,
+        )
+        return 2
+    if not settings.supabase_db_url:
+        print("SUPABASE_DB_URL is not set; cannot ingest.", file=sys.stderr)
+        return 2
+
+    import asyncpg
+    import httpx
+
+    from .workers import direct_ingest_worker
+
+    conn = await asyncpg.connect(settings.supabase_db_url)
+    try:
+        async with httpx.AsyncClient(
+            headers={"User-Agent": settings.http_user_agent},
+            follow_redirects=True,
+            timeout=settings.http_request_timeout_sec,
+        ) as http:
+            ok, fail = await direct_ingest_worker.ingest_pending(conn, http, limit=limit)
+    finally:
+        await conn.close()
+
+    print(f"ingest-direct: ingested ok={ok} failed={fail}")
     return 0
 
 
