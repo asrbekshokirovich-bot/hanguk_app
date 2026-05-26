@@ -5,6 +5,7 @@ from uni_db.translate.glossary import (
     GlossaryHit,
     apply_glossary_post_translate,
     apply_glossary_pre_translate,
+    contains_placeholder_residue,
     lookup,
 )
 
@@ -89,3 +90,14 @@ class TestPostTranslateRobustness:
 
     def test_plain_text_unchanged(self) -> None:
         assert apply_glossary_post_translate("plain text", self._hits) == "plain text"
+
+
+class TestContainsPlaceholderResidue:
+    def test_detects_exact_and_mangled_forms(self) -> None:
+        assert contains_placeholder_residue("name ⟪G:0⟫")
+        assert contains_placeholder_residue("name ⟨G:N⟩ x")
+        assert contains_placeholder_residue("a « G : 2 » b")
+
+    def test_clean_text_has_no_residue(self) -> None:
+        assert not contains_placeholder_residue("Seoul National University")
+        assert not contains_placeholder_residue("한양대학교")

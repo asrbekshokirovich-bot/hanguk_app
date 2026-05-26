@@ -49,6 +49,12 @@ _AUDIENCE_TO_TRACK: dict[str, str] = {
 _DEFAULT_TRACK = "foreign"
 _DEFAULT_CATEGORY = "외국인전형"
 _YEAR_RE = re.compile(r"(?<!\d)(20[2-3][0-9])(?!\d)")
+# Past-cycle staleness signal. `_ANY_YEAR_RE` reads years out of the payload
+# with a strict word boundary (so IDs / phone numbers don't read as years);
+# `_URL_YEAR_RE` is lenient for source filenames, where the cycle is often
+# concatenated with the term (cdu's '...guidebook_20171...' = 2017, term 1).
+_ANY_YEAR_RE = re.compile(r"(?<!\d)(20[0-3][0-9])(?!\d)")
+_URL_YEAR_RE = re.compile(r"(20[0-3][0-9])")
 _FALL_HINTS = ("후기", "9월", "가을", "fall", "9 월")
 
 
@@ -58,6 +64,7 @@ class PublishRun:
     published: int          # review items normalized into a public table
     rows_written: int       # individual rows inserted across all tables
     skipped: int            # empty/failed payloads, or unknown field group
+    held: int               # approved but withheld — source is a past cycle
     errors: int
 
 
@@ -110,6 +117,31 @@ def infer_year(payload: dict, *, default: int) -> int:
     return max(years) if years else default
 
 
+def _min_publishable_year() -> int:
+    """Cycle floor. Data whose newest detected admission year is below the
+    current calendar year is a past cycle and must not reach applicants as if
+    current (the audit found a 2017 guidebook and several 2022 cycles approved)."""
+    return datetime.now(tz=timezone.utc).year
+
+
+def detected_years(payload: dict, source_url: object) -> list[int]:
+    """Every plausible admission year mentioned in the payload or the source
+    document URL/filename (e.g. cdu's '...guidebook_20171...' → 2017)."""
+    years = [int(y) for y in _ANY_YEAR_RE.findall(json.dumps(payload, ensure_ascii=False))]
+    if isinstance(source_url, str):
+        years += [int(y) for y in _URL_YEAR_RE.findall(source_url)]
+    return years
+
+
+def is_stale_cycle(payload: dict, source_url: object, *, floor: int) -> bool:
+    """True only on a positive past-cycle signal: the newest year we can find is
+    below `floor`. Undated payloads (no year anywhere) are NOT stale — they fall
+    through to the normal unverified-cycle path for human year confirmation, so
+    genuinely-current data that simply omits a year still publishes."""
+    years = detected_years(payload, source_url)
+    return bool(years) and max(years) < floor
+
+
 def infer_term(payload: dict) -> str:
     blob = json.dumps(payload, ensure_ascii=False).lower()
     return "fall" if any(h in blob for h in _FALL_HINTS) else "spring"
@@ -157,7 +189,8 @@ select rq.id            as queue_id,
        ej.parsed_output,
        ej.accuracy_self_score,
        ej.guideline_document_id,
-       gd.institution_id
+       gd.institution_id,
+       gd.source_url_ko
   from public.review_queue rq
   join public.extraction_jobs ej     on ej.id = rq.entity_id
   join public.guideline_documents gd on gd.id = ej.guideline_document_id
@@ -218,10 +251,25 @@ async def _publish_tuition(conn, rec, payload) -> int:
     return n
 
 
+def _is_empty_scholarship(row: dict) -> bool:
+    """An 'other'-type row with no award value and no tier table carries nothing
+    actionable — it's how the extractor packages 'this guideline lists no
+    scholarships' (audit: hanseo's lone scholarship row). Don't publish an empty
+    card a user would tap into and find nothing."""
+    return (
+        row.get("award_type") == "other"
+        and row.get("award_value") in (None, 0)
+        and not row.get("topik_tier_table")
+        and not row.get("ielts_tier_table")
+    )
+
+
 async def _publish_scholarships(conn, rec, payload) -> int:
     n = 0
     for r in _rows(payload):
         if not (r.get("scope") and r.get("name_ko") and r.get("award_type")):
+            continue
+        if _is_empty_scholarship(r):
             continue
         await conn.execute(
             """insert into public.scholarships (institution_id, scope, name_ko, name_en,
@@ -353,8 +401,9 @@ async def publish_pending(conn: asyncpg.Connection, *, limit: int = 200) -> Publ
     """Normalize approved, not-yet-published review items into the public tables."""
     records = await conn.fetch(_FETCH_SQL, limit)
     log.info("publish_worker: %d approved item(s) to publish", len(records))
-    published = rows_written = skipped = errors = 0
+    published = rows_written = skipped = held = errors = 0
     default_year = datetime.now(tz=timezone.utc).year + 1
+    floor = _min_publishable_year()
     for rec in records:
         rec = dict(rec)
         payload = _payload(rec)
@@ -362,6 +411,13 @@ async def publish_pending(conn: asyncpg.Connection, *, limit: int = 200) -> Publ
         if publisher is None or _is_unpublishable(payload):
             skipped += 1
             await _mark_published(conn, rec["queue_id"])  # nothing to do, don't re-scan
+            continue
+        if is_stale_cycle(payload, rec.get("source_url_ko"), floor=floor):
+            held += 1
+            log.info("publish_worker: HOLD %s (%s) — past-cycle source (newest %d < %d)",
+                     str(rec["queue_id"])[:8], rec["field_group"],
+                     max(detected_years(payload, rec.get("source_url_ko"))), floor)
+            await _mark_published(conn, rec["queue_id"])  # processed; re-ingest brings a fresh cycle
             continue
         rec["_year"] = infer_year(payload, default=default_year)
         rec["_term"] = infer_term(payload)
@@ -380,7 +436,7 @@ async def publish_pending(conn: asyncpg.Connection, *, limit: int = 200) -> Publ
                  str(rec["queue_id"])[:8], rec["field_group"], n)
     return PublishRun(
         approved_seen=len(records), published=published,
-        rows_written=rows_written, skipped=skipped, errors=errors,
+        rows_written=rows_written, skipped=skipped, held=held, errors=errors,
     )
 
 

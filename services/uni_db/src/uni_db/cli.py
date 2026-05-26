@@ -394,7 +394,8 @@ async def _publish(*, limit: int) -> int:
 
     print(
         f"publish: approved_seen={run.approved_seen} published={run.published} "
-        f"rows_written={run.rows_written} skipped={run.skipped} errors={run.errors}"
+        f"rows_written={run.rows_written} skipped={run.skipped} held={run.held} "
+        f"errors={run.errors}"
     )
     return 0
 

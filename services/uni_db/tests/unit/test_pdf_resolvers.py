@@ -66,6 +66,18 @@ class TestGenericAttachmentLinkDetection:
         assert generic._extract_pdf_link(
             '<a href="/board/fileDown.do?id=1">첨부파일</a>', "https://x.ac.kr/") is None
 
+    def test_prefers_newest_cycle_year(self) -> None:
+        # A board listing two cycles side by side must yield the newest one, so
+        # ingest stops grabbing last year's 모집요강. Years are relative to today
+        # so the test stays evergreen.
+        from datetime import date
+
+        cy = date.today().year
+        html = (f'<a href="/files/{cy - 1}_guide.pdf">{cy - 1}학년도 모집요강</a>'
+                f'<a href="/files/{cy}_guide.pdf">{cy}학년도 모집요강</a>')
+        out = generic._extract_pdf_link(html, "https://x.ac.kr/")
+        assert out is not None and out[0].endswith(f"/files/{cy}_guide.pdf")
+
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
 
 KU_DETAIL_URL = (

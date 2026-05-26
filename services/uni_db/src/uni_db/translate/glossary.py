@@ -91,3 +91,9 @@ def apply_glossary_post_translate(
 # anything placeholder-shaped left over (e.g. a literal "N").
 _PLACEHOLDER_INDEXED = re.compile(r"[⟪⟨«]\s*[Gg]\s*[:：]?\s*(\d+)\s*[⟫⟩»]")
 _PLACEHOLDER_RESIDUAL = re.compile(r"[⟪⟨«]\s*[Gg]\s*[:：]?\s*[A-Za-z0-9]*\s*[⟫⟩»]")
+
+
+def contains_placeholder_residue(text: str) -> bool:
+    """True if any glossary-placeholder artefact (including the MT-mangled
+    bracket/space variants) survives in `text` — a post-translation safety net."""
+    return bool(_PLACEHOLDER_INDEXED.search(text) or _PLACEHOLDER_RESIDUAL.search(text))

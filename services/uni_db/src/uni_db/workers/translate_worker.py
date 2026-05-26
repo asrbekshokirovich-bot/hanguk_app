@@ -18,7 +18,7 @@ import asyncpg
 
 from ..translate.glossary import GlossaryCache
 from ..translate.models import TargetLang
-from ..translate.pipeline import translate
+from ..translate.pipeline import is_suspect_translation, translate
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ select 'institutions'              as entity_type,
    and t.entity_id   = i.id
    and t.field_name  = 'name_ko'
    and t.lang        = $1::text
- where t.id is null and i.name_ko is not null
+ where t.id is null and i.name_ko is not null and i.name_ko ~ '[가-힣]'
 
 union all
 
@@ -153,6 +153,13 @@ async def run_jobs(
             glossary=glossary,
             is_label=job.is_label,
         )
+        if is_suspect_translation(result.text_value, job.target_lang):
+            log.warning(
+                "translate: dropped suspect output for %s.%s [%s]: %r",
+                job.entity_type, job.field_name, job.target_lang,
+                result.text_value[:80],
+            )
+            continue
         await conn.execute(
             """
             insert into public.translations (

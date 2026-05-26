@@ -16,7 +16,11 @@ import pytest
 
 from uni_db.translate import pipeline
 from uni_db.translate.glossary import GlossaryHit
-from uni_db.translate.pipeline import LanguageNotEnabledError, translate
+from uni_db.translate.pipeline import (
+    LanguageNotEnabledError,
+    is_suspect_translation,
+    translate,
+)
 
 
 def _glossary() -> dict:
@@ -199,3 +203,42 @@ class TestPendingSqlCoverage:
             assert f"'{entity_type}'" in PENDING_SQL, entity_type
         for field in ("prose_ko", "name_ko", "document_type", "notes_ko"):
             assert field in PENDING_SQL, field
+
+    def test_pending_sql_skips_domain_placeholder_institution_names(self) -> None:
+        # Domain-string placeholder names (e.g. 'cdu.ac.kr') have no Hangul and
+        # must not be machine-translated into junk like 'cdu.ac.kr (EN)'.
+        from uni_db.workers.translate_worker import PENDING_SQL
+
+        assert "i.name_ko ~ '[가-힣]'" in PENDING_SQL
+
+
+class TestSuspectTranslationGuard:
+    """Audit: provider error strings and leaked model reasoning were stored as
+    translations (an English institution name became the model's
+    '...Wait — I need to reconsider...' deliberation). is_suspect_translation
+    drops these before they're persisted."""
+
+    def test_empty_is_suspect(self) -> None:
+        assert is_suspect_translation("", "en")
+        assert is_suspect_translation("   ", "uz")
+
+    def test_provider_error_marker_is_suspect(self) -> None:
+        assert is_suspect_translation(
+            "트러스트 토큰이 없는 일반 텍스트가 입력되었습니다.", "vi")
+
+    def test_model_reasoning_leak_is_suspect(self) -> None:
+        assert is_suspect_translation(
+            "Hallym University\n\nWait — I need to reconsider. 한라대학교 is Halla.", "en")
+
+    def test_surviving_glossary_placeholder_is_suspect(self) -> None:
+        assert is_suspect_translation("of ⟨G:N⟩ Gangwon University", "vi")
+
+    def test_korean_echo_for_latin_target_is_suspect(self) -> None:
+        # no-op: Korean returned unchanged for a non-Korean target
+        assert is_suspect_translation("한양대학교", "en")
+        assert is_suspect_translation("제주대학교", "uz")
+
+    def test_clean_translations_are_not_suspect(self) -> None:
+        assert not is_suspect_translation("Seoul National University", "en")
+        assert not is_suspect_translation("Seul Milliy Universiteti", "uz")
+        assert not is_suspect_translation("Đại học Yonsei", "vi")
