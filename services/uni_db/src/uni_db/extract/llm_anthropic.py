@@ -304,17 +304,22 @@ def _strip_fences(text: str) -> str:
     return text.strip()
 
 
-def _salvage_partial_json(text: str) -> dict[str, Any] | None:
+def _salvage_partial_json(text: str, field_group: str | None = None) -> dict[str, Any] | None:
     """Recover complete row/event objects from JSON truncated mid-array.
 
     When the model hits max_tokens it stops mid-object, so `json.loads` throws
     and the whole extraction was being discarded — even though the rows before
-    the cut are perfectly good. This walks the `rows`/`events` array with
-    brace+string matching, keeps every COMPLETE `{...}` object, and drops the
-    incomplete trailing one. Returns `{"rows": [...]}` / `{"events": [...]}`
-    or None if nothing usable is found.
+    the cut are perfectly good. This walks the array with brace+string matching,
+    keeps every COMPLETE `{...}` object, and drops the incomplete trailing one.
+    Also scans the field-group name as a key, since the model sometimes keys the
+    array by it (e.g. `{"documents_required": [...]}`). Returns the array under
+    its canonical wrapper (`{"rows": [...]}` / `{"events": [...]}`) or None.
     """
-    for key in ("rows", "events"):
+    keys = ["rows", "events"]
+    if field_group and field_group not in keys:
+        keys.append(field_group)
+    wrapper = ("events" if field_group == "calendar" else "rows") if field_group else None
+    for key in keys:
         marker = f'"{key}"'
         ki = text.find(marker)
         if ki == -1:
@@ -352,8 +357,28 @@ def _salvage_partial_json(text: str) -> dict[str, Any] | None:
             elif c == "]" and depth == 0:
                 break
         if objs:
-            return {key: objs}
+            return {wrapper or key: objs}
     return None
+
+
+def _normalize_wrapper(parsed: dict[str, Any], field_group: str) -> dict[str, Any]:
+    """The model sometimes keys the array by the field-group name
+    (`{"documents_required": [...]}`) instead of the schema's wrapper
+    (`{"rows": [...]}`). Remap so validation + downstream see the rows. Was
+    silently failing documents_required on ~most documents."""
+    wrapper = "events" if field_group == "calendar" else "rows"
+    if isinstance(parsed.get(wrapper), list):
+        return parsed
+    if isinstance(parsed.get(field_group), list):
+        out = dict(parsed)
+        out[wrapper] = out.pop(field_group)
+        return out
+    list_keys = [k for k, v in parsed.items() if isinstance(v, list)]
+    if len(list_keys) == 1 and list_keys[0] != wrapper:
+        out = dict(parsed)
+        out[wrapper] = out.pop(list_keys[0])
+        return out
+    return parsed
 
 
 def _compute_cost_usd(
@@ -463,7 +488,7 @@ def _call_anthropic(
         # the complete row/event objects instead of discarding the whole job
         # (this is what was losing real data — "Expecting ',' delimiter").
         if parsed is None:
-            salvaged = _salvage_partial_json(stripped)
+            salvaged = _salvage_partial_json(stripped, field_group)
             if salvaged is not None:
                 log.warning(
                     "extract: %s/%s response truncated; salvaged %d %s rows",
@@ -480,6 +505,7 @@ def _call_anthropic(
         raise AnthropicResponseError(
             f"Anthropic response parsed to {type(parsed).__name__}, expected dict"
         )
+    parsed = _normalize_wrapper(parsed, field_group)
 
     usage = response.usage
     input_tokens = int(getattr(usage, "input_tokens", 0) or 0)

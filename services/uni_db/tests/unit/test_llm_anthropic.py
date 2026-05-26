@@ -292,6 +292,24 @@ class TestLivePathParsing:
                 source_text_ko="…",
             )
 
+    def test_documents_required_keyed_by_field_group_name(
+        self,
+        live_settings,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        # The model labels the array `documents_required` instead of `rows`;
+        # _normalize_wrapper remaps it so it validates instead of being dropped
+        # (this was failing documents_required on ~most documents).
+        payload = {"documents_required": [
+            {"source_text_ko": "여권 사본 1부", "document_name_ko": "여권"}]}
+        client = _FakeClient(_ok_response(payload=payload))
+        monkeypatch.setattr(llm_anthropic, "_get_client", lambda: client)
+
+        result = llm_anthropic.extract_field_group(
+            field_group="documents_required", archetype="H", source_text_ko="x",
+        )
+        assert result.parsed_output["rows"][0]["document_name_ko"] == "여권"
+
 
 # ---------------------------------------------------------------------------
 # 5. Cost computation
@@ -449,6 +467,36 @@ class TestSalvagePartialJson:
 
     def test_none_when_no_array(self) -> None:
         assert llm_anthropic._salvage_partial_json("totally broken {oops") is None
+
+    def test_salvages_field_group_keyed_array(self) -> None:
+        # model keyed the array by the field-group name, then truncated
+        text = ('{"documents_required": [{"document_name_ko":"졸업증명서","source_text_ko":"x"},'
+                '{"document_name_ko":"불완전')
+        out = llm_anthropic._salvage_partial_json(text, "documents_required")
+        assert out == {"rows": [{"document_name_ko": "졸업증명서", "source_text_ko": "x"}]}
+
+
+class TestNormalizeWrapper:
+    def test_remaps_field_group_key_to_rows(self) -> None:
+        out = llm_anthropic._normalize_wrapper(
+            {"documents_required": [{"a": 1}]}, "documents_required")
+        assert out == {"rows": [{"a": 1}]}
+
+    def test_calendar_remaps_to_events(self) -> None:
+        assert llm_anthropic._normalize_wrapper(
+            {"calendar": [{"e": 1}]}, "calendar") == {"events": [{"e": 1}]}
+
+    def test_correct_wrapper_unchanged(self) -> None:
+        p = {"rows": [{"a": 1}], "is_correction_notice": False}
+        assert llm_anthropic._normalize_wrapper(p, "tuition") == p
+
+    def test_single_list_key_remapped(self) -> None:
+        assert llm_anthropic._normalize_wrapper(
+            {"items": [{"a": 1}]}, "scholarships") == {"rows": [{"a": 1}]}
+
+    def test_no_list_unchanged(self) -> None:
+        p = {"note": "nothing"}
+        assert llm_anthropic._normalize_wrapper(p, "requirements") == p
 
 
 class TestTruncatedResponseSalvaged:
