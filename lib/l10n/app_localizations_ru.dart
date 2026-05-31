@@ -142,6 +142,42 @@ class AppLocalizationsRu extends AppLocalizations {
   String get documentsTabTitle => 'Мои документы';
 
   @override
+  String get documentsInfoBanner => 'Загрузите корректные PDF или JPEG сканы оригиналов документов. Не более 10 МБ на файл.';
+
+  @override
+  String get documentsRequiredHeading => 'Необходимые документы';
+
+  @override
+  String get documentUploadFailed => 'Не удалось загрузить. Пожалуйста, попробуйте ещё раз.';
+
+  @override
+  String get documentUploadSuccess => 'Документ загружен.';
+
+  @override
+  String get documentPreviewFailed => 'Не удалось открыть предпросмотр документа. Пожалуйста, попробуйте ещё раз.';
+
+  @override
+  String get documentTooLarge => 'Этот файл слишком большой. Пожалуйста, выберите файл до 10 МБ.';
+
+  @override
+  String get documentInvalidType => 'Неподдерживаемый тип файла. Загрузите PDF, JPG или PNG.';
+
+  @override
+  String get somethingWentWrong => 'Что-то пошло не так. Пожалуйста, попробуйте ещё раз.';
+
+  @override
+  String get retry => 'Повторить';
+
+  @override
+  String get welcomeTagline => 'Платформа подачи заявок в университеты Южной Кореи';
+
+  @override
+  String get welcomeMagicCodeButton => 'У меня есть Magic-код';
+
+  @override
+  String get getCodeFromConsultant => 'Получите код у вашего консультанта';
+
+  @override
   String get accountTooltip => 'Аккаунт';
 
   @override

@@ -47,6 +47,19 @@
   "mapTabTitle": "Trường đại học",
   "documentsTabTitle": "Tài liệu của tôi",
 
+  "documentsInfoBanner": "Tải lên bản quét PDF hoặc JPEG hợp lệ của giấy tờ gốc của bạn. Tối đa 10MB mỗi tệp.",
+  "documentsRequiredHeading": "Giấy tờ bắt buộc",
+  "documentUploadFailed": "Tải lên thất bại. Vui lòng thử lại.",
+  "documentUploadSuccess": "Đã tải tài liệu lên.",
+  "documentPreviewFailed": "Không thể mở bản xem trước tài liệu. Vui lòng thử lại.",
+  "documentTooLarge": "Tệp này quá lớn. Vui lòng chọn tệp dưới 10MB.",
+  "documentInvalidType": "Loại tệp không được hỗ trợ. Hãy tải lên PDF, JPG hoặc PNG.",
+  "somethingWentWrong": "Đã xảy ra lỗi. Vui lòng thử lại.",
+  "retry": "Thử lại",
+  "welcomeTagline": "Nền tảng nộp đơn vào các trường đại học Hàn Quốc",
+  "welcomeMagicCodeButton": "Tôi có Mã Magic",
+  "getCodeFromConsultant": "Nhận mã từ chuyên viên tư vấn của bạn",
+
   "accountTooltip": "Tài khoản",
 
   "ok": "OK",

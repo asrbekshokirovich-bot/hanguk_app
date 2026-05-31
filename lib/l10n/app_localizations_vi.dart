@@ -142,6 +142,42 @@ class AppLocalizationsVi extends AppLocalizations {
   String get documentsTabTitle => 'Tài liệu của tôi';
 
   @override
+  String get documentsInfoBanner => 'Tải lên bản quét PDF hoặc JPEG hợp lệ của giấy tờ gốc của bạn. Tối đa 10MB mỗi tệp.';
+
+  @override
+  String get documentsRequiredHeading => 'Giấy tờ bắt buộc';
+
+  @override
+  String get documentUploadFailed => 'Tải lên thất bại. Vui lòng thử lại.';
+
+  @override
+  String get documentUploadSuccess => 'Đã tải tài liệu lên.';
+
+  @override
+  String get documentPreviewFailed => 'Không thể mở bản xem trước tài liệu. Vui lòng thử lại.';
+
+  @override
+  String get documentTooLarge => 'Tệp này quá lớn. Vui lòng chọn tệp dưới 10MB.';
+
+  @override
+  String get documentInvalidType => 'Loại tệp không được hỗ trợ. Hãy tải lên PDF, JPG hoặc PNG.';
+
+  @override
+  String get somethingWentWrong => 'Đã xảy ra lỗi. Vui lòng thử lại.';
+
+  @override
+  String get retry => 'Thử lại';
+
+  @override
+  String get welcomeTagline => 'Nền tảng nộp đơn vào các trường đại học Hàn Quốc';
+
+  @override
+  String get welcomeMagicCodeButton => 'Tôi có Mã Magic';
+
+  @override
+  String get getCodeFromConsultant => 'Nhận mã từ chuyên viên tư vấn của bạn';
+
+  @override
   String get accountTooltip => 'Tài khoản';
 
   @override

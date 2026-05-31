@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/feature_flags/phone_auth_flag.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../updater/data/updater_repository.dart';
 import '../../updater/presentation/update_dialog.dart';
 
@@ -36,6 +38,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -139,7 +142,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'South Korean University Application Platform',
+                      l10n.welcomeTagline,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.8),
@@ -148,7 +151,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     ),
                     const SizedBox(height: 48),
 
-                    // Actions
+                    // Actions — Magic Code is the single, confident primary
+                    // path. Phone auth is hidden behind a feature flag (off)
+                    // until it is real, so no "Coming Soon" button ships
+                    // (audit A2/S2).
                     SizedBox(
                       width: double.infinity,
                       height: 56,
@@ -159,14 +165,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           backgroundColor: AppColors.vibrantLime,
                           foregroundColor: AppColors.pureBlack,
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.workspace_premium, size: 20),
-                            SizedBox(width: 8),
+                            const Icon(Icons.workspace_premium, size: 20),
+                            const SizedBox(width: 8),
                             Text(
-                              'I have a Magic Code',
-                              style: TextStyle(
+                              l10n.welcomeMagicCodeButton,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -176,35 +182,41 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: OutlinedButton(
-                        onPressed: () {},
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.3),
+                    if (kPhoneAuthEnabled)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: () => context.push('/login'),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
+                            foregroundColor: Colors.white.withValues(alpha: 0.7),
                           ),
-                          foregroundColor: Colors.white.withValues(alpha: 0.7),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.phone, size: 20),
-                            SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                'Log In / Sign Up with Phone Number (Coming Soon)',
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.phone, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                'Log In / Sign Up with Phone Number',
                                 style: TextStyle(fontSize: 14),
                                 textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        l10n.getCodeFromConsultant,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 14,
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),

@@ -141,6 +141,42 @@ class AppLocalizationsUz extends AppLocalizations {
   String get documentsTabTitle => 'Hujjatlarim';
 
   @override
+  String get documentsInfoBanner => 'Asl hujjatlaringizning to‘g‘ri PDF yoki JPEG nusxalarini yuklang. Har bir fayl uchun eng ko‘pi 10MB.';
+
+  @override
+  String get documentsRequiredHeading => 'Kerakli hujjatlar';
+
+  @override
+  String get documentUploadFailed => 'Yuklash amalga oshmadi. Iltimos, qayta urinib ko‘ring.';
+
+  @override
+  String get documentUploadSuccess => 'Hujjat yuklandi.';
+
+  @override
+  String get documentPreviewFailed => 'Hujjatni ochib bo‘lmadi. Iltimos, qayta urinib ko‘ring.';
+
+  @override
+  String get documentTooLarge => 'Bu fayl juda katta. Iltimos, 10MB dan kichik fayl tanlang.';
+
+  @override
+  String get documentInvalidType => 'Qo‘llab-quvvatlanmaydigan fayl turi. PDF, JPG yoki PNG yuklang.';
+
+  @override
+  String get somethingWentWrong => 'Nimadir xato ketdi. Iltimos, qayta urinib ko‘ring.';
+
+  @override
+  String get retry => 'Qayta urinish';
+
+  @override
+  String get welcomeTagline => 'Janubiy Koreya universitetlariga hujjat topshirish platformasi';
+
+  @override
+  String get welcomeMagicCodeButton => 'Menda Sehrli Kod bor';
+
+  @override
+  String get getCodeFromConsultant => 'Kodni maslahatchingizdan oling';
+
+  @override
   String get accountTooltip => 'Hisob';
 
   @override

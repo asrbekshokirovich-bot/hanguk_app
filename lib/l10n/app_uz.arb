@@ -47,6 +47,19 @@
   "mapTabTitle": "Universitetlar",
   "documentsTabTitle": "Hujjatlarim",
 
+  "documentsInfoBanner": "Asl hujjatlaringizning to‘g‘ri PDF yoki JPEG nusxalarini yuklang. Har bir fayl uchun eng ko‘pi 10MB.",
+  "documentsRequiredHeading": "Kerakli hujjatlar",
+  "documentUploadFailed": "Yuklash amalga oshmadi. Iltimos, qayta urinib ko‘ring.",
+  "documentUploadSuccess": "Hujjat yuklandi.",
+  "documentPreviewFailed": "Hujjatni ochib bo‘lmadi. Iltimos, qayta urinib ko‘ring.",
+  "documentTooLarge": "Bu fayl juda katta. Iltimos, 10MB dan kichik fayl tanlang.",
+  "documentInvalidType": "Qo‘llab-quvvatlanmaydigan fayl turi. PDF, JPG yoki PNG yuklang.",
+  "somethingWentWrong": "Nimadir xato ketdi. Iltimos, qayta urinib ko‘ring.",
+  "retry": "Qayta urinish",
+  "welcomeTagline": "Janubiy Koreya universitetlariga hujjat topshirish platformasi",
+  "welcomeMagicCodeButton": "Menda Sehrli Kod bor",
+  "getCodeFromConsultant": "Kodni maslahatchingizdan oling",
+
   "accountTooltip": "Hisob",
 
   "ok": "OK",

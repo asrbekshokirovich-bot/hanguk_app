@@ -351,11 +351,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // A5/C2 — legal links use white-70 with an underline, not
+                  // lime. Lime is reserved for actions/active states and fails
+                  // AA contrast as a text/link color.
                   TextButton(
                     onPressed: () => _openLegal(AppConfig.privacyPolicyUrl),
                     child: Text(
                       l10n.accountPrivacyPolicy,
-                      style: const TextStyle(color: AppColors.vibrantLime),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                   const Text(' • ', style: TextStyle(color: Colors.white70)),
@@ -363,7 +369,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     onPressed: () => _openLegal(AppConfig.termsOfServiceUrl),
                     child: Text(
                       l10n.accountTermsOfService,
-                      style: const TextStyle(color: AppColors.vibrantLime),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ],

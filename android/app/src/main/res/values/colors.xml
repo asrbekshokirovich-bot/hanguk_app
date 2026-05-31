@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Hanguk brand Royal Blue (#1A3A6C) — adaptive launcher icon background. -->
+    <color name="ic_launcher_background">#1A3A6C</color>
+</resources>

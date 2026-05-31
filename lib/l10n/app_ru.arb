@@ -47,6 +47,19 @@
   "mapTabTitle": "Университеты",
   "documentsTabTitle": "Мои документы",
 
+  "documentsInfoBanner": "Загрузите корректные PDF или JPEG сканы оригиналов документов. Не более 10 МБ на файл.",
+  "documentsRequiredHeading": "Необходимые документы",
+  "documentUploadFailed": "Не удалось загрузить. Пожалуйста, попробуйте ещё раз.",
+  "documentUploadSuccess": "Документ загружен.",
+  "documentPreviewFailed": "Не удалось открыть предпросмотр документа. Пожалуйста, попробуйте ещё раз.",
+  "documentTooLarge": "Этот файл слишком большой. Пожалуйста, выберите файл до 10 МБ.",
+  "documentInvalidType": "Неподдерживаемый тип файла. Загрузите PDF, JPG или PNG.",
+  "somethingWentWrong": "Что-то пошло не так. Пожалуйста, попробуйте ещё раз.",
+  "retry": "Повторить",
+  "welcomeTagline": "Платформа подачи заявок в университеты Южной Кореи",
+  "welcomeMagicCodeButton": "У меня есть Magic-код",
+  "getCodeFromConsultant": "Получите код у вашего консультанта",
+
   "accountTooltip": "Аккаунт",
 
   "ok": "OK",

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,12 @@ import '../domain/document.dart';
 import '../../../../design_system/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'widgets/document_slot.dart';
+
+/// Client-side upload guard rails (audit A6). The "Max 10MB" rule was stated
+/// in the UI but never enforced, so an oversized pick only failed after a
+/// round-trip with a raw error. We reject early with a friendly message.
+const int _kMaxUploadBytes = 10 * 1024 * 1024; // 10MB
+const List<String> _kAllowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
 
 class DocumentsTab extends ConsumerStatefulWidget {
   const DocumentsTab({super.key});
@@ -21,30 +28,51 @@ class DocumentsTab extends ConsumerStatefulWidget {
 class _DocumentsTabState extends ConsumerState<DocumentsTab> {
   final Map<String, bool> _uploadingDocs = {};
 
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Future<void> _handleUpload(DocumentType type) async {
+    final l = AppLocalizations.of(context)!;
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        allowedExtensions: _kAllowedExtensions,
       );
 
-      if (result != null && result.files.single.path != null) {
-        setState(() => _uploadingDocs[type.id] = true);
+      if (result == null || result.files.single.path == null) return;
 
-        File file = File(result.files.single.path!);
-        final repo = ref.read(documentsRepositoryProvider);
+      final picked = result.files.single;
 
-        await repo.uploadDocument(file, type);
-
-        // Refresh provider
-        ref.invalidate(documentsProvider);
+      // A6 — enforce type + size client-side before the network round-trip.
+      final ext = (picked.extension ?? '').toLowerCase();
+      if (ext.isNotEmpty && !_kAllowedExtensions.contains(ext)) {
+        _showMessage(l.documentInvalidType);
+        return;
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+      if (picked.size > _kMaxUploadBytes) {
+        _showMessage(l.documentTooLarge);
+        return;
       }
+
+      setState(() => _uploadingDocs[type.id] = true);
+
+      File file = File(picked.path!);
+      final repo = ref.read(documentsRepositoryProvider);
+
+      await repo.uploadDocument(file, type);
+
+      // Refresh provider
+      ref.invalidate(documentsProvider);
+      _showMessage(l.documentUploadSuccess);
+    } catch (e, stack) {
+      // A4 — never surface raw exception text to the student; log it to
+      // Sentry and show a friendly, localized message instead.
+      await Sentry.captureException(e, stackTrace: stack);
+      _showMessage(l.documentUploadFailed);
     } finally {
       if (mounted) {
         setState(() => _uploadingDocs[type.id] = false);
@@ -53,6 +81,7 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
   }
 
   Future<void> _handlePreview(AppDocument doc) async {
+    final l = AppLocalizations.of(context)!;
     try {
       final signedUrl = await Supabase.instance.client.storage
           .from('student-documents')
@@ -62,18 +91,11 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open document preview.')),
-          );
-        }
+        _showMessage(l.documentPreviewFailed);
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Preview error: $e')));
-      }
+    } catch (e, stack) {
+      await Sentry.captureException(e, stackTrace: stack);
+      _showMessage(l.documentPreviewFailed);
     }
   }
 
@@ -106,23 +128,29 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
                       color: AppColors.vibrantLime.withValues(alpha: 0.2),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: AppColors.vibrantLime),
-                      SizedBox(width: 12),
+                      const Icon(
+                        Icons.info_outline,
+                        color: AppColors.vibrantLime,
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Upload valid PDF or JPEG scans of your original documents. Max 10MB per file.',
-                          style: TextStyle(fontSize: 13, color: Colors.white70),
+                          l.documentsInfoBanner,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.white70,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'Required Documents',
-                  style: TextStyle(
+                Text(
+                  l.documentsRequiredHeading,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -179,8 +207,37 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
           loading: () => const SliverFillRemaining(
             child: Center(child: CircularProgressIndicator.adaptive()),
           ),
-          error: (err, stack) =>
-              SliverFillRemaining(child: Center(child: Text('Error: \$err'))),
+          // A4 — was a literal `Error: $err` display bug. Now a friendly,
+          // localized error with a Retry action; the real error goes to Sentry.
+          error: (err, stack) {
+            Sentry.captureException(err, stackTrace: stack);
+            return SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l.somethingWentWrong,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: () => ref.invalidate(documentsProvider),
+                      icon: const Icon(
+                        Icons.refresh,
+                        color: AppColors.vibrantLime,
+                      ),
+                      label: Text(
+                        l.retry,
+                        style: const TextStyle(color: AppColors.vibrantLime),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
 
         const SliverPadding(padding: EdgeInsets.only(bottom: 60)),

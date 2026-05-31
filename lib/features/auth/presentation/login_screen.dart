@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/feature_flags/phone_auth_flag.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
 import '../../../../design_system/theme/app_colors.dart';
@@ -28,12 +29,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _codeCtrl = TextEditingController();
   late bool _isMagicCodeMode;
 
-  // Sign Up
-  final _signUpNameCtrl = TextEditingController();
-  final _signUpPhoneCtrl = TextEditingController();
-  final _signUpPasswordCtrl = TextEditingController();
-  final _signUpConfirmCtrl = TextEditingController();
-
   bool _loading = false;
   String? _error;
   String? _success;
@@ -60,10 +55,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _phoneCtrl.dispose();
     _passwordCtrl.dispose();
     _codeCtrl.dispose();
-    _signUpNameCtrl.dispose();
-    _signUpPhoneCtrl.dispose();
-    _signUpPasswordCtrl.dispose();
-    _signUpConfirmCtrl.dispose();
     super.dispose();
   }
 
@@ -132,69 +123,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     }
   }
 
-  // ─── Public Student Sign Up (Phone) ─────────────────────────────────────────
-
-  Future<void> _handleSignUp() async {
-    final l10n = AppLocalizations.of(context)!;
-    final name = _signUpNameCtrl.text.trim();
-    final phone = _signUpPhoneCtrl.text.trim();
-    final password = _signUpPasswordCtrl.text.trim();
-    final confirm = _signUpConfirmCtrl.text.trim();
-
-    if (name.isEmpty) {
-      _setError(l10n.signUpErrorNameRequired);
-      return;
-    }
-    if (phone.isEmpty || phone.length < 5) {
-      _setError(l10n.signUpErrorPhoneRequired);
-      return;
-    }
-    if (password.length < 6) {
-      _setError(l10n.loginErrorPasswordTooShort);
-      return;
-    }
-    if (password != confirm) {
-      _setError(l10n.signUpErrorPasswordMismatch);
-      return;
-    }
-
-    _setError(null);
-    _setLoading(true);
-    final result = await ref
-        .read(authRepositoryProvider)
-        .signUpStudent(phone, password, name);
-    _setLoading(false);
-
-    if (result.error != null) {
-      // Server-side error string passes through unchanged.
-      _setError(result.error);
-      if (result.isCrmAccount) {
-        // Automatically switch to Magic Code Mode
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) {
-            setState(() {
-              _isMagicCodeMode = true;
-            });
-          }
-        });
-      } else if (result.alreadyRegistered) {
-        // Pre-fill phone number in Sign In screen
-        _phoneCtrl.text = phone;
-        // Automatically switch to Sign In Tab
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) {
-            _tabController.animateTo(0);
-          }
-        });
-      }
-    } else {
-      _setSuccess(l10n.signUpSuccess);
-      _signUpPasswordCtrl.clear();
-      _signUpConfirmCtrl.clear();
-      _tabController.animateTo(0);
-    }
-  }
-
   // ─── Build ────────────────────────────────────────────────────────────────────
 
   @override
@@ -214,12 +142,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   _logo(size: 40, radius: 10),
                   const SizedBox(width: 12),
                   // Brand name — intentionally not localized.
+                  // A5 — wordmark is white on dark everywhere; lime is
+                  // reserved for actions/active states.
                   const Text(
                     'Hanguk',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.vibrantLime,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -240,7 +170,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.vibrantLime,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -259,16 +189,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
+                          color: AppColors.error.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.red.withValues(alpha: 0.3),
+                            color: AppColors.error.withValues(alpha: 0.4),
                           ),
                         ),
                         child: Text(
                           _error!,
                           style: const TextStyle(
-                            color: Colors.redAccent,
+                            color: Color(0xFFFCA5A5), // light-red, AA on dark
                             fontSize: 13,
                           ),
                           textAlign: TextAlign.center,
@@ -281,16 +211,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
+                          color: AppColors.success.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.green.withValues(alpha: 0.3),
+                            color: AppColors.success.withValues(alpha: 0.4),
                           ),
                         ),
                         child: Text(
                           _success!,
                           style: const TextStyle(
-                            color: Colors.greenAccent,
+                            color: Color(0xFF86EFAC), // light-green, AA on dark
                             fontSize: 13,
                           ),
                           textAlign: TextAlign.center,
@@ -300,10 +230,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     ],
 
                     // ── Forms ──────────────────────────────────────────────────────
-                    if (_isMagicCodeMode)
+                    // A2 — Magic Code is the finished primary path. Phone auth
+                    // is hidden behind a feature flag (off) until it is real, so
+                    // no "Coming Soon" UI is reachable in the normal flow.
+                    if (_isMagicCodeMode || !kPhoneAuthEnabled)
                       _buildMagicCodePortal(scheme)
                     else
-                      _buildPublicAuthPortal(scheme),
+                      _buildPublicAuthPortal(),
                   ],
                 ),
               ),
@@ -367,81 +300,77 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             onPressed: _handleStudentLogin,
           ),
           const SizedBox(height: 12),
-          TextButton(
-            onPressed: () {
-              // Optional fallback if user navigated wrong from Welcome Page
-              setState(() => _isMagicCodeMode = false);
-            },
-            child: Text(
-              l10n.loginSwitchToPhone,
+          // When phone auth is enabled, offer the fallback to it. Otherwise
+          // show a quiet helper telling students where to get their code
+          // (replaces the removed "Coming Soon" UI).
+          if (kPhoneAuthEnabled)
+            TextButton(
+              onPressed: () {
+                // Optional fallback if user navigated wrong from Welcome Page
+                setState(() => _isMagicCodeMode = false);
+              },
+              child: Text(
+                l10n.loginSwitchToPhone,
+                style: const TextStyle(color: Colors.white54, fontSize: 13),
+              ),
+            )
+          else
+            Text(
+              l10n.getCodeFromConsultant,
+              textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white54, fontSize: 13),
             ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildPublicAuthPortal(ColorScheme scheme) {
+  // Phone login form — only reachable when `kPhoneAuthEnabled` is true. The
+  // previous "Coming Soon / under construction" card was removed (audit A2):
+  // it tripped App Store review and read as a broken first impression.
+  Widget _buildPublicAuthPortal() {
     final l10n = AppLocalizations.of(context)!;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          child: Column(
-            children: [
-              const Icon(Icons.build_circle, size: 48, color: Colors.white54),
-              const SizedBox(height: 16),
-              Text(
-                l10n.loginComingSoonTitle,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n.loginComingSoonBody,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  height: 1.5,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 24),
-              TextButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _isMagicCodeMode = true;
-                  });
-                },
-                icon: const Icon(Icons.vpn_key, color: Colors.white, size: 18),
-                label: Text(
-                  l10n.loginSwitchToMagicCode,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: scheme.primary.withValues(alpha: 0.3),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ],
+        _HangukTextField(
+          controller: _phoneCtrl,
+          hint: '+998 90 123 45 67',
+          icon: Icons.phone,
+          keyboardType: TextInputType.phone,
+          autofillHints: const [AutofillHints.telephoneNumber],
+          textInputAction: TextInputAction.next,
+        ),
+        const SizedBox(height: 16),
+        _HangukTextField(
+          controller: _passwordCtrl,
+          hint: '••••••',
+          icon: Icons.lock,
+          obscureText: true,
+          autofillHints: const [AutofillHints.password],
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _handlePhoneLogin(),
+        ),
+        const SizedBox(height: 16),
+        _HangukButton(
+          label: l10n.loginAccessCodeButton,
+          loading: _loading,
+          onPressed: _handlePhoneLogin,
+        ),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: () {
+            setState(() {
+              _isMagicCodeMode = true;
+            });
+          },
+          icon: const Icon(Icons.vpn_key, color: Colors.white, size: 18),
+          label: Text(
+            l10n.loginSwitchToMagicCode,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
