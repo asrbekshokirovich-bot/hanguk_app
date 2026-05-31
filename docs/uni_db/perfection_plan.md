@@ -127,3 +127,11 @@ and surfaced follow-ups. Shipped since:
   override for a held item confirmed current. See `remediation_plan_2026-05-30.md`.
 - **Security (Track C / Phase 8):** anon EXECUTE locked on the uni_db
   `SECURITY DEFINER` review/flag functions; `search_path` pinned.
+- **Phase 5 — never stale (change-detection):** new `refresh_worker` rotates
+  through live current sources oldest-checked-first, sha-compares the upstream
+  PDF, and supersedes + re-parses the doc when content changes — so a school
+  swapping their perennial 모집요강 PDF in place is no longer invisible (the
+  failure mode the cdu audit exposed). Wired into `uni-db-sync` (8/run, 24 h
+  min age). `guideline_documents.last_checked_at` + a partial index drive the
+  rotation; `v_uni_db_health` now exposes `held_over_7d`, `gd_never_checked`,
+  `gd_oldest_check_age_days` as freshness signals.

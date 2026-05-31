@@ -74,6 +74,17 @@ def _build_parser() -> argparse.ArgumentParser:
                            help="Publish one review item by id, bypassing the "
                                 "past-cycle staleness hold (operator override)")
 
+    p_check = sub.add_parser(
+        "check-updates",
+        help="LIVE: re-fetch already-ingested live sources to catch upstream "
+             "changes (Phase 5 freshness). When the content sha changes, "
+             "supersedes the old doc and queues parse → review.",
+    )
+    p_check.add_argument("--limit", type=int, default=20,
+                         help="Max sources to re-check this run")
+    p_check.add_argument("--min-age-hours", type=int, default=24,
+                         help="Skip sources checked within this many hours")
+
     p_propose = sub.add_parser(
         "propose-sources",
         help="LIVE: Naver-discover unknown ac.kr admission boards → proposed_sources (HITL review)",
@@ -109,6 +120,8 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_ingest_direct(limit=args.limit))
     if args.cmd == "publish":
         return asyncio.run(_publish(limit=args.limit, force=args.force))
+    if args.cmd == "check-updates":
+        return asyncio.run(_check_updates(limit=args.limit, min_age_hours=args.min_age_hours))
     if args.cmd == "propose-sources":
         return asyncio.run(_propose_sources(days=args.days, mode=args.mode))
     if args.cmd == "schema-check":
@@ -451,6 +464,47 @@ async def _ingest_direct(*, limit: int) -> int:
         await conn.close()
 
     print(f"ingest-direct: ingested ok={ok} failed={fail}")
+    return 0
+
+
+async def _check_updates(*, limit: int, min_age_hours: int) -> int:
+    """LIVE: refresh already-ingested live sources to catch upstream changes
+    (Phase 5 freshness). Re-fetches each source through the same resolver chain
+    ingest uses, sha-compares with the stored content, and supersedes + re-runs
+    parse when changed. Cheap on the unchanged path (the common case); the
+    parse path is the same paid-LLM step a fresh ingest would take. Gated on
+    `UNI_DB_LIVE_CRAWL` + `UNI_DB_LIVE_APIS` + `SUPABASE_DB_URL`.
+    """
+    if not (settings.live_crawl and settings.live_apis):
+        print(
+            "check-updates needs UNI_DB_LIVE_CRAWL=true and UNI_DB_LIVE_APIS=true "
+            "(real ac.kr fetches + paid LLM on the change path). Refusing.",
+            file=sys.stderr,
+        )
+        return 2
+    if not settings.supabase_db_url:
+        print("SUPABASE_DB_URL is not set; cannot check-updates.", file=sys.stderr)
+        return 2
+
+    import asyncpg
+    import httpx
+
+    from .workers import refresh_worker
+
+    conn = await asyncpg.connect(settings.supabase_db_url)
+    try:
+        async with httpx.AsyncClient(
+            headers={"User-Agent": settings.http_user_agent},
+            follow_redirects=True,
+            timeout=settings.http_request_timeout_sec,
+        ) as http:
+            unchanged, updated, failed = await refresh_worker.refresh_pending(
+                conn, http, limit=limit, min_age_hours=min_age_hours,
+            )
+    finally:
+        await conn.close()
+
+    print(f"check-updates: unchanged={unchanged} updated={updated} failed={failed}")
     return 0
 
 

@@ -93,6 +93,17 @@ jobs:
         continue-on-error: true
         run: uni-db ingest-direct --limit 12
 
+      # 4a) Phase 5 freshness: re-fetch a small slice of already-ingested live
+      #     sources. Same-content hits just stamp last_checked_at; if the upstream
+      #     PDF changed (a perennial 모집요강 page swapped in place, a correction
+      #     notice posted), the worker supersedes the old doc and queues parse →
+      #     review → publish automatically. Small limit so the sync stays inside
+      #     its time budget; the oldest-first rotation works through the corpus
+      #     over successive runs. Best-effort.
+      - name: Refresh upstream sources (change-detection)
+        continue-on-error: true
+        run: uni-db check-updates --limit 8 --min-age-hours 24
+
       # 4) Fill EN/UZ translations for the review screen. Best-effort.
       - name: Translate
         continue-on-error: true
