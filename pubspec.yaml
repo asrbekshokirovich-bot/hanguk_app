@@ -141,11 +141,19 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
+  # Store blocker S1/A1: the source icon is a fully-OPAQUE 1024² (white 한
+  # mark + Hanguk wordmark on solid #1A3A6C). remove_alpha_ios strips any
+  # alpha channel from the generated iOS set so Apple does not reject it.
+  remove_alpha_ios: true
+  # Android adaptive icon: solid Royal-Blue background + the mark as a
+  # safe-zoned foreground layer.
+  adaptive_icon_background: "#1A3A6C"
+  adaptive_icon_foreground: "assets/app_icon_foreground.png"
   web:
     generate: true
     image_path: "assets/app_icon2.png"
-    background_color: "#ffffff"
-    theme_color: "#ffffff"
+    background_color: "#1A3A6C"
+    theme_color: "#1A3A6C"
   image_path: "assets/app_icon2.png"
   min_sdk_android: 21
 

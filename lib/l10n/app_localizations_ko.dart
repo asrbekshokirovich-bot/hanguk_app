@@ -134,6 +134,42 @@ class AppLocalizationsKo extends AppLocalizations {
   String get documentsTabTitle => '내 서류';
 
   @override
+  String get documentsInfoBanner => '원본 서류의 유효한 PDF 또는 JPEG 스캔본을 업로드하세요. 파일당 최대 10MB입니다.';
+
+  @override
+  String get documentsRequiredHeading => '필수 서류';
+
+  @override
+  String get documentUploadFailed => '업로드에 실패했습니다. 다시 시도해 주세요.';
+
+  @override
+  String get documentUploadSuccess => '서류가 업로드되었습니다.';
+
+  @override
+  String get documentPreviewFailed => '서류 미리보기를 열 수 없습니다. 다시 시도해 주세요.';
+
+  @override
+  String get documentTooLarge => '파일이 너무 큽니다. 10MB 미만의 파일을 선택해 주세요.';
+
+  @override
+  String get documentInvalidType => '지원되지 않는 파일 형식입니다. PDF, JPG 또는 PNG를 업로드하세요.';
+
+  @override
+  String get somethingWentWrong => '문제가 발생했습니다. 다시 시도해 주세요.';
+
+  @override
+  String get retry => '다시 시도';
+
+  @override
+  String get welcomeTagline => '대한민국 대학 지원 플랫폼';
+
+  @override
+  String get welcomeMagicCodeButton => '매직 코드가 있어요';
+
+  @override
+  String get getCodeFromConsultant => '상담사에게 코드를 받으세요';
+
+  @override
   String get accountTooltip => '계정';
 
   @override

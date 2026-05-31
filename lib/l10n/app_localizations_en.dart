@@ -142,6 +142,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentsTabTitle => 'My Documents';
 
   @override
+  String get documentsInfoBanner => 'Upload valid PDF or JPEG scans of your original documents. Max 10MB per file.';
+
+  @override
+  String get documentsRequiredHeading => 'Required Documents';
+
+  @override
+  String get documentUploadFailed => 'Upload failed. Please try again.';
+
+  @override
+  String get documentUploadSuccess => 'Document uploaded.';
+
+  @override
+  String get documentPreviewFailed => 'Couldn\'t open the document preview. Please try again.';
+
+  @override
+  String get documentTooLarge => 'This file is too large. Please choose a file under 10MB.';
+
+  @override
+  String get documentInvalidType => 'Unsupported file type. Upload a PDF, JPG, or PNG.';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong. Please try again.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get welcomeTagline => 'South Korean University Application Platform';
+
+  @override
+  String get welcomeMagicCodeButton => 'I have a Magic Code';
+
+  @override
+  String get getCodeFromConsultant => 'Get a code from your consultant';
+
+  @override
   String get accountTooltip => 'Account';
 
   @override

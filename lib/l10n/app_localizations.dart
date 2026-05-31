@@ -354,6 +354,78 @@ abstract class AppLocalizations {
   /// **'My Documents'**
   String get documentsTabTitle;
 
+  /// Info banner on the Documents tab explaining accepted file formats and the size limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload valid PDF or JPEG scans of your original documents. Max 10MB per file.'**
+  String get documentsInfoBanner;
+
+  /// Section heading above the list of required document slots on the Documents tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Required Documents'**
+  String get documentsRequiredHeading;
+
+  /// Friendly SnackBar shown when a document upload fails (raw error is sent to Sentry, not the user).
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed. Please try again.'**
+  String get documentUploadFailed;
+
+  /// Confirmation SnackBar shown after a document uploads successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Document uploaded.'**
+  String get documentUploadSuccess;
+
+  /// Friendly SnackBar shown when opening a document preview fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't open the document preview. Please try again.'**
+  String get documentPreviewFailed;
+
+  /// Shown when a user picks a document larger than the 10MB client-side limit.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is too large. Please choose a file under 10MB.'**
+  String get documentTooLarge;
+
+  /// Shown when a user picks a document whose type is not PDF/JPG/PNG.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported file type. Upload a PDF, JPG, or PNG.'**
+  String get documentInvalidType;
+
+  /// Generic friendly error used in place of raw exception text in list/error states.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get somethingWentWrong;
+
+  /// Label on the Retry button shown in error states.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// Tagline under the Hanguk Consulting headline on the Welcome screen.
+  ///
+  /// In en, this message translates to:
+  /// **'South Korean University Application Platform'**
+  String get welcomeTagline;
+
+  /// Primary action on the Welcome screen that opens the magic-code login.
+  ///
+  /// In en, this message translates to:
+  /// **'I have a Magic Code'**
+  String get welcomeMagicCodeButton;
+
+  /// Quiet helper telling students where to obtain their magic code (replaces the removed 'Coming Soon' phone-auth UI).
+  ///
+  /// In en, this message translates to:
+  /// **'Get a code from your consultant'**
+  String get getCodeFromConsultant;
+
   /// Tooltip for the account icon button in the Applications AppBar —
   /// opens the AccountScreen with sign-out, data export, and delete
   /// account.
