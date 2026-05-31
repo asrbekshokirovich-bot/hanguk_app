@@ -58,6 +58,11 @@ android/key.properties
 .claude/settings.local.json
 .claude/worktrees/
 
+# Deep Research skill — scratch output from the /research → /research-deep →
+# /research-report workflow (outline.yaml, fields.yaml, results/*.json, report.md).
+# Generated test/analysis artifacts, not source. Force-add a report to keep it.
+/kr-univ-apply-api-integrations/
+
 # services/uni_db — Python service layer
 services/uni_db/.venv/
 services/uni_db/.cache/
