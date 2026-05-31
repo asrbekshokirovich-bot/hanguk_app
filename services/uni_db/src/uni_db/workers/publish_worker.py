@@ -202,6 +202,27 @@ select rq.id            as queue_id,
  limit $1
 """
 
+# Single item by id, for the operator force-publish override. No status /
+# published_at filter (a held item has published_at set, but we want to re-emit
+# it) — `published_outcome` lets publish_one no-op an already-published item.
+_FETCH_ONE_SQL = """
+select rq.id            as queue_id,
+       rq.reviewer_decision,
+       rq.published_outcome,
+       ej.field_group,
+       ej.parsed_output,
+       ej.accuracy_self_score,
+       ej.guideline_document_id,
+       gd.institution_id,
+       gd.source_url_ko
+  from public.review_queue rq
+  join public.extraction_jobs ej     on ej.id = rq.entity_id
+  join public.guideline_documents gd on gd.id = ej.guideline_document_id
+ where rq.id = $1
+   and rq.entity_type = 'extraction_jobs'
+   and gd.institution_id is not null
+"""
+
 
 async def get_or_create_cycle(
     conn: asyncpg.Connection,
@@ -410,14 +431,14 @@ async def publish_pending(conn: asyncpg.Connection, *, limit: int = 200) -> Publ
         publisher = _PUBLISHERS.get(rec["field_group"])
         if publisher is None or _is_unpublishable(payload):
             skipped += 1
-            await _mark_published(conn, rec["queue_id"])  # nothing to do, don't re-scan
+            await _mark_processed(conn, rec["queue_id"], "skipped")  # nothing to do, don't re-scan
             continue
         if is_stale_cycle(payload, rec.get("source_url_ko"), floor=floor):
             held += 1
             log.info("publish_worker: HOLD %s (%s) — past-cycle source (newest %d < %d)",
                      str(rec["queue_id"])[:8], rec["field_group"],
                      max(detected_years(payload, rec.get("source_url_ko"))), floor)
-            await _mark_published(conn, rec["queue_id"])  # processed; re-ingest brings a fresh cycle
+            await _mark_processed(conn, rec["queue_id"], "held")  # re-ingest brings a fresh cycle
             continue
         rec["_year"] = infer_year(payload, default=default_year)
         rec["_term"] = infer_term(payload)
@@ -429,7 +450,7 @@ async def publish_pending(conn: asyncpg.Connection, *, limit: int = 200) -> Publ
                         str(rec["queue_id"])[:8], rec["field_group"],
                         type(exc).__name__, str(exc)[:160])
             continue
-        await _mark_published(conn, rec["queue_id"])
+        await _mark_processed(conn, rec["queue_id"], "published")
         published += 1
         rows_written += n
         log.info("publish_worker: %s %s → %d row(s)",
@@ -440,7 +461,53 @@ async def publish_pending(conn: asyncpg.Connection, *, limit: int = 200) -> Publ
     )
 
 
-async def _mark_published(conn: asyncpg.Connection, queue_id: UUID) -> None:
+async def publish_one(
+    conn: asyncpg.Connection, queue_id: UUID, *, force: bool = False
+) -> PublishRun:
+    """Publish a single review item by id. `force=True` bypasses the staleness
+    hold — the operator override for a held item whose source they've confirmed
+    is the current cycle. Idempotent: an already-published item is a no-op."""
+    rec = await conn.fetchrow(_FETCH_ONE_SQL, queue_id)
+    if rec is None:
+        log.warning("publish_worker: force-publish %s — not found / not eligible",
+                    str(queue_id)[:8])
+        return PublishRun(0, 0, 0, 0, 0, 0)
+    rec = dict(rec)
+    if rec.get("published_outcome") == "published":
+        return PublishRun(1, 0, 0, 1, 0, 0)  # already published — never duplicate rows
+    payload = _payload(rec)
+    publisher = _PUBLISHERS.get(rec["field_group"])
+    if publisher is None or _is_unpublishable(payload):
+        await _mark_processed(conn, rec["queue_id"], "skipped")
+        return PublishRun(1, 0, 0, 1, 0, 0)
+    if not force and is_stale_cycle(payload, rec.get("source_url_ko"),
+                                    floor=_min_publishable_year()):
+        await _mark_processed(conn, rec["queue_id"], "held")
+        return PublishRun(1, 0, 0, 0, 1, 0)
+    rec["_year"] = infer_year(payload, default=datetime.now(tz=timezone.utc).year + 1)
+    rec["_term"] = infer_term(payload)
+    try:
+        n = await publisher(conn, rec, payload)
+    except Exception as exc:  # mirror publish_pending's per-item isolation
+        log.warning("publish_worker: force-publish %s (%s) failed: %s: %s",
+                    str(rec["queue_id"])[:8], rec["field_group"],
+                    type(exc).__name__, str(exc)[:160])
+        return PublishRun(1, 0, 0, 0, 0, 1)
+    await _mark_processed(conn, rec["queue_id"], "published")
+    log.info("publish_worker: force-published %s %s → %d row(s)",
+             str(rec["queue_id"])[:8], rec["field_group"], n)
+    return PublishRun(1, 1, n, 0, 0, 0)
+
+
+async def _mark_processed(
+    conn: asyncpg.Connection, queue_id: UUID, outcome: str
+) -> None:
+    """Record that publish handled this item and how: 'published' (reached the
+    public tables), 'held' (past-cycle source, withheld), or 'skipped' (empty /
+    unknown field group). `published_at` stops it being re-scanned; the outcome
+    feeds v_uni_db_health so a hold is no longer invisible."""
     await conn.execute(
-        "update public.review_queue set published_at = now() where id = $1", queue_id
+        "update public.review_queue set published_at = now(), published_outcome = $2 "
+        "where id = $1",
+        queue_id, outcome,
     )

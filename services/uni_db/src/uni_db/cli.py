@@ -70,6 +70,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_publish.add_argument("--limit", type=int, default=200,
                            help="Max approved-unpublished review items this run")
+    p_publish.add_argument("--force", metavar="QUEUE_ID", default=None,
+                           help="Publish one review item by id, bypassing the "
+                                "past-cycle staleness hold (operator override)")
 
     p_propose = sub.add_parser(
         "propose-sources",
@@ -105,7 +108,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "ingest-direct":
         return asyncio.run(_ingest_direct(limit=args.limit))
     if args.cmd == "publish":
-        return asyncio.run(_publish(limit=args.limit))
+        return asyncio.run(_publish(limit=args.limit, force=args.force))
     if args.cmd == "propose-sources":
         return asyncio.run(_propose_sources(days=args.days, mode=args.mode))
     if args.cmd == "schema-check":
@@ -374,21 +377,34 @@ async def _reparse(*, limit: int, institution: str | None) -> int:
     return 0
 
 
-async def _publish(*, limit: int) -> int:
+async def _publish(*, limit: int, force: str | None = None) -> int:
     """Normalize approved review items into the public tables the app reads.
-    DB-only (no LLM/HTTP), so it just needs `SUPABASE_DB_URL`.
+    DB-only (no LLM/HTTP), so it just needs `SUPABASE_DB_URL`. With `force`,
+    publish a single item by id, overriding the past-cycle staleness hold.
     """
     if not settings.supabase_db_url:
         print("SUPABASE_DB_URL is not set; cannot publish.", file=sys.stderr)
         return 2
 
+    from uuid import UUID
+
     import asyncpg
 
     from .workers import publish_worker
 
+    if force is not None:
+        try:
+            queue_id = UUID(force)
+        except ValueError:
+            print(f"--force expects a review_queue UUID, got {force!r}", file=sys.stderr)
+            return 2
+
     conn = await asyncpg.connect(settings.supabase_db_url)
     try:
-        run = await publish_worker.publish_pending(conn, limit=limit)
+        if force is not None:
+            run = await publish_worker.publish_one(conn, queue_id, force=True)
+        else:
+            run = await publish_worker.publish_pending(conn, limit=limit)
     finally:
         await conn.close()
 
