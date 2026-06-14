@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/config/build_config.dart';
 import 'core/router/app_router.dart';
 import 'design_system/theme/app_theme.dart';
 import 'features/uni_db/data/push_token_bootstrap.dart';
@@ -94,10 +95,17 @@ class HangukApp extends ConsumerWidget {
       theme: AppTheme.materialTheme,
       routerConfig: goRouter,
       builder: (context, child) {
-        // Auto-update gate runs on launch + every foreground transition,
-        // so updates aren't gated behind the login screen anymore.
-        final wrapped = UpdateGate(child: child ?? const SizedBox.shrink());
-        return wrapped;
+        final content = child ?? const SizedBox.shrink();
+        // Store builds (Google Play / App Store) must NOT run the in-app
+        // APK self-updater: Play uses in-app updates and prohibits
+        // sideloading APKs. The 'store' Android flavor also ships without
+        // the REQUEST_INSTALL_PACKAGES permission, so the updater could
+        // never install anyway — bypass it entirely here.
+        if (kIsStoreBuild) return content;
+        // Direct-distribution build: the auto-update gate runs on launch +
+        // every foreground transition, so updates aren't gated behind the
+        // login screen.
+        return UpdateGate(child: content);
       },
       // Audit L1/L3 closure 2026-05-10: full flutter_localizations wiring.
       // Non-English ARB files seeded with English placeholders + a

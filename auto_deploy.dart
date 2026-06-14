@@ -3,10 +3,14 @@ import 'dart:io';
 Future<void> main() async {
   print('Starting full auto-deploy process...');
   
-  print('\n[1/3] Running flutter build apk --release...');
+  print('\n[1/3] Running flutter build apk --release --flavor direct...');
+  // The self-hosted auto-update channel is the "direct" flavor (it keeps
+  // REQUEST_INSTALL_PACKAGES). The Play "store" flavor must never be
+  // uploaded to Supabase for sideload-update. Output:
+  // build/app/outputs/flutter-apk/app-direct-release.apk
   final buildProcess = await Process.start(
-    'flutter.bat', 
-    ['build', 'apk', '--release'], 
+    'flutter.bat',
+    ['build', 'apk', '--release', '--flavor', 'direct'],
     runInShell: true,
   );
   

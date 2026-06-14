@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/build_config.dart';
 import 'app_version_info.dart';
 import 'version_compare.dart';
 
@@ -253,6 +254,17 @@ class UpdaterRepository {
       throw const _UpdaterException(
         UpdateErrorCode.unknown,
         'Download URL is empty',
+      );
+    }
+
+    // Store builds (Google Play / App Store) must never sideload an APK:
+    // Play prohibits it, and the 'store' flavor ships without the
+    // REQUEST_INSTALL_PACKAGES permission. Fail fast — UpdateGate is already
+    // bypassed for store builds, so this is defense in depth.
+    if (kIsStoreBuild) {
+      throw const _UpdaterException(
+        UpdateErrorCode.installDenied,
+        'In-app APK installation is disabled in store builds.',
       );
     }
 

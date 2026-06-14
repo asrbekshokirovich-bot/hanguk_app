@@ -187,7 +187,14 @@ String generateMapHtml(List<University> universities, {String locale = 'en'}) {
                 return;
             }
             try {
-                var map = L.map('map').setView([36.5, 127.8], 7);
+                // attributionControl:false drops Leaflet's default
+                // bottom-right credit ("Leaflet | ..." + flag). We then
+                // re-add a minimal control with prefix:false so only the
+                // OpenStreetMap copyright shows — that credit is required
+                // by the OSM tile usage policy and must stay.
+                var map = L.map('map', { attributionControl: false })
+                    .setView([36.5, 127.8], 7);
+                L.control.attribution({ prefix: false }).addTo(map);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap',

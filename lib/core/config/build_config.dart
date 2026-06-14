@@ -1,26 +1,29 @@
-/// Compile-time flags for distribution channel.
+/// Compile-time flag for the distribution channel.
 ///
 /// Set `STORE_BUILD=true` when building for Google Play or the Apple
-/// App Store:
+/// App Store. On Android, pair it with the `store` product flavor so the
+/// merged manifest drops `REQUEST_INSTALL_PACKAGES`:
 ///
-///   flutter build appbundle --release --dart-define=STORE_BUILD=true
+///   flutter build appbundle --release --flavor store \
+///       --dart-define=STORE_BUILD=true
 ///   flutter build ipa       --release --dart-define=STORE_BUILD=true
 ///
-/// Default (`false`) keeps the existing direct-APK self-distribution
-/// flow alive (the auto-updater downloads + installs APKs from
-/// Supabase Storage, which is incompatible with both store policies).
+/// Default (`false`) + the `direct` flavor keeps the self-distribution
+/// flow alive (the auto-updater downloads + installs APKs from Supabase
+/// Storage, which is incompatible with both store policies):
+///
+///   flutter build apk --release --flavor direct
 ///
 /// When [kIsStoreBuild] is true:
 ///   - The in-app auto-updater (`UpdateGate`) is bypassed at the
-///     `MaterialApp.builder` level.
-///   - Any attempt to call into the `install_plugin` install path
-///     throws `UnsupportedError` (the import stays alive so the
-///     non-store build still works).
+///     `MaterialApp.builder` level (see `main.dart`).
+///   - `UpdaterRepository.downloadAndInstall` fails fast instead of
+///     calling into the `install_plugin` install path (defense in depth;
+///     the `store` flavor's manifest lacks the install permission anyway).
 ///
-/// The `install_plugin` dependency is intentionally retained in
-/// `pubspec.yaml`. A future Play-specific build flavor may strip the
-/// `REQUEST_INSTALL_PACKAGES` permission from a flavored manifest; the
-/// compile-time flag remains the primary defense.
+/// Two defenses, by design: the Android `store` flavor guarantees Play
+/// compliance at the *manifest* level (the only thing Play statically
+/// scans), while this *runtime* flag neutralizes the updater behavior.
 const bool kIsStoreBuild = bool.fromEnvironment(
   'STORE_BUILD',
   defaultValue: false,

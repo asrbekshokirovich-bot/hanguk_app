@@ -10,11 +10,13 @@ Future<void> main() async {
   
   final client = SupabaseClient(supabaseUrl, supabaseKey);
   
-  // Verify the APK exists
-  final apkFile = File('build/app/outputs/flutter-apk/app-arm64-v8a-release.apk');
+  // Verify the APK exists. The self-hosted channel is the "direct" flavor
+  // (built by auto_deploy.dart without --split-per-abi), so the output is
+  // the universal app-direct-release.apk.
+  final apkFile = File('build/app/outputs/flutter-apk/app-direct-release.apk');
   if (!apkFile.existsSync()) {
     print('ERROR: APK file not found at ${apkFile.path}');
-    print('Make sure "flutter build apk --release" completed successfully.');
+    print('Make sure "flutter build apk --release --flavor direct" completed successfully.');
     exit(1);
   }
   

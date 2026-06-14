@@ -5,6 +5,24 @@ APKs. Lose this file and the keystore it points at, and you can never
 update the production app again — Android refuses to install an APK over
 an existing app if the signing certificate differs.
 
+## Distribution channels (Android flavors)
+
+The app ships through two channels with **incompatible update mechanisms**,
+implemented as Gradle product flavors. You must pass `--flavor` to every
+Android build:
+
+| Flavor   | Channel        | Self-update            | `REQUEST_INSTALL_PACKAGES` |
+| -------- | -------------- | ---------------------- | -------------------------- |
+| `direct` | Self-hosted APK | install_plugin (APK)   | **yes** (src/direct manifest) |
+| `store`  | Google Play    | Play in-app updates    | **no**                     |
+
+- **Play forbids sideloading APKs.** The `store` flavor's merged manifest
+  omits `REQUEST_INSTALL_PACKAGES`, and `--dart-define=STORE_BUILD=true`
+  disables the in-app APK updater at runtime. Always build the Play
+  artifact with **both** the flavor and the dart-define.
+- Flavored outputs are suffixed: `app-direct-release.apk`,
+  `app-store-release.aab`, etc.
+
 ## One-time setup: generate the upload keystore
 
 You only do this **once for the lifetime of the app**. After that, the same
@@ -52,15 +70,15 @@ cp android/key.properties.template android/key.properties
 ## Verify a signed release build
 
 ```bash
-flutter build apk --release
+flutter build apk --release --flavor direct
 
 # Inspect the signing certificate. It should NOT say "Android Debug" — it
 # should show your name / organisation from the keystore generation.
 %ANDROID_HOME%\build-tools\<latest>\apksigner.bat verify --print-certs \
-  build\app\outputs\flutter-apk\app-release.apk
+  build\app\outputs\flutter-apk\app-direct-release.apk
 # Linux/Mac:
 $ANDROID_HOME/build-tools/<latest>/apksigner verify --print-certs \
-  build/app/outputs/flutter-apk/app-release.apk
+  build/app/outputs/flutter-apk/app-direct-release.apk
 ```
 
 If you see `CN=Android Debug, O=Android, C=US`, you've fallen back to debug
@@ -99,19 +117,20 @@ hand to Play; Google re-signs with the real app key it owns. Recommended
 for projects on the Play Store. Not applicable to self-hosted-APK
 distribution.
 
-## Cutting a release
+## Cutting a release (direct / self-hosted APK)
 
 1. Bump `pubspec.yaml` — increment both the version (`x.y.z`) AND the
    build number after `+`. Build number must be monotonically increasing
    for Android to accept the update.
 2. Build:
    ```bash
-   flutter build apk --release --obfuscate \
+   flutter build apk --release --flavor direct --obfuscate \
      --split-debug-info=./debug-info/$(date +%Y%m%d-%H%M%S)/
    ```
    `--obfuscate` enables Dart obfuscation. Keep the `--split-debug-info`
    directory locally — don't commit it. You'll need it to symbolicate
-   crash reports against the obfuscated build.
+   crash reports against the obfuscated build. Output:
+   `build/app/outputs/flutter-apk/app-direct-release.apk`.
 3. Verify the signature (see "Verify a signed release build" above).
 4. Compute the SHA-256:
    ```bash
@@ -138,6 +157,37 @@ distribution.
      set rollout_percentage = 0
      where id = 'android' and channel = 'stable';
    ```
+
+## Cutting a release (Google Play / store flavor)
+
+Google Play builds use the **App Bundle** format and the `store` flavor.
+Play App Signing manages the production key, so the upload key in
+`android/key.properties` only needs to sign the bundle you upload.
+
+1. Bump `pubspec.yaml` (same rules as above — monotonically increasing
+   `versionCode`).
+2. Build the bundle:
+   ```bash
+   flutter build appbundle --release --flavor store \
+     --dart-define=STORE_BUILD=true --obfuscate \
+     --split-debug-info=./debug-info/$(date +%Y%m%d-%H%M%S)/
+   ```
+   Output: `build/app/outputs/bundle/storeRelease/app-store-release.aab`.
+3. Confirm the merged manifest has **no** `REQUEST_INSTALL_PACKAGES`:
+   ```bash
+   unzip -p build/app/outputs/bundle/storeRelease/app-store-release.aab \
+     base/manifest/AndroidManifest.xml | grep -c INSTALL_PACKAGES   # → 0
+   ```
+4. Upload the `.aab` in the Play Console (Internal testing → Production).
+   Updates reach users via **Play in-app updates** (`in_app_update`); the
+   self-hosted APK updater is compiled out of this flavor.
+5. Make sure the Play Console **Data safety** form and the Privacy Policy
+   URL (`AppConfig.privacyPolicyUrl`) are filled in — both are required
+   for review.
+
+> Do **not** ship the `store` flavor without `--dart-define=STORE_BUILD=true`.
+> The manifest is already Play-safe, but the flag is what disables the
+> in-app updater UI at runtime.
 
 ## Custody policy
 

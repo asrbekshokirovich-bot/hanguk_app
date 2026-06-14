@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../../../../core/config/app_config.dart';
 import '../../../../../design_system/theme/app_colors.dart';
 import '../../../domain/university.dart';
 import '../university_map_html.dart';
@@ -60,7 +61,7 @@ class _MobileMapWidgetState extends State<_MobileMapWidget> {
       )
       ..loadHtmlString(
         generateMapHtml(widget.universities, locale: widget.locale),
-        baseUrl: 'https://hanguk.uz',
+        baseUrl: AppConfig.webViewBaseUrl,
       );
   }
 
