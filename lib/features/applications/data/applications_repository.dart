@@ -120,9 +120,7 @@ final suggestedUniversitiesProvider = FutureProvider<List<University>>((
     }
 
     return fallbackData
-        .map<University>(
-          (u) => _universityFromInstitutionRow(u as Map<String, dynamic>),
-        )
+        .map<University>((u) => _universityFromInstitutionRow(u))
         .toList();
   } catch (e, st) {
     debugPrint('[Suggestions] Failed to fetch fallback suggestions: $e\n$st');
