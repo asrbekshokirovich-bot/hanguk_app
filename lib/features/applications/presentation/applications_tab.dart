@@ -8,6 +8,7 @@ import 'widgets/application_card.dart';
 import 'widgets/university_selection_view.dart';
 import 'widgets/university_room_modal.dart';
 import 'applications_view_model.dart';
+import '../data/applications_repository.dart';
 
 class ApplicationsTab extends ConsumerWidget {
   const ApplicationsTab({super.key});
@@ -19,9 +20,21 @@ class ApplicationsTab extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
+      body: RefreshIndicator(
+        // Pull-to-refresh so new approvals / suggestions show up without
+        // having to quit and relaunch the app. Re-fetch the underlying
+        // sources, then await the combined tab future.
+        onRefresh: () async {
+          ref.invalidate(applicationsProvider);
+          ref.invalidate(suggestedUniversitiesProvider);
+          await ref.read(applicationsTabProvider.future);
+        },
+        child: CustomScrollView(
+          // AlwaysScrollable so the pull gesture works even when the
+          // content is shorter than the viewport (e.g. empty state).
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverAppBar(
             title: Text(l.applicationsTabTitle),
             floating: true,
             snap: true,
@@ -94,7 +107,8 @@ class ApplicationsTab extends ConsumerWidget {
               child: Center(child: Text('Error loading applications: $err')),
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

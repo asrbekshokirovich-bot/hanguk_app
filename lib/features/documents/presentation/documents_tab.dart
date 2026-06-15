@@ -82,14 +82,22 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
     final docsAsync = ref.watch(documentsProvider);
     final l = AppLocalizations.of(context)!;
 
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          title: Text(l.documentsTabTitle),
-          backgroundColor: Colors.transparent,
-          floating: true,
-          snap: true,
-        ),
+    return RefreshIndicator(
+      // Pull-to-refresh so newly uploaded/approved documents appear without
+      // restarting the app.
+      onRefresh: () async {
+        ref.invalidate(documentsProvider);
+        await ref.read(documentsProvider.future);
+      },
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            title: Text(l.documentsTabTitle),
+            backgroundColor: Colors.transparent,
+            floating: true,
+            snap: true,
+          ),
 
         SliverToBoxAdapter(
           child: Padding(
@@ -183,8 +191,9 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
               SliverFillRemaining(child: Center(child: Text('Error: \$err'))),
         ),
 
-        const SliverPadding(padding: EdgeInsets.only(bottom: 60)),
-      ],
+          const SliverPadding(padding: EdgeInsets.only(bottom: 60)),
+        ],
+      ),
     );
   }
 }

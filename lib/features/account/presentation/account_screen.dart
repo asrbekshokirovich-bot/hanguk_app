@@ -184,11 +184,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     return HangukScaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: RefreshIndicator(
+          // Pull-to-refresh so an updated profile (name/phone) reflects
+          // without restarting the app.
+          onRefresh: () async {
+            ref.invalidate(studentProfileProvider);
+            await ref.read(studentProfileProvider.future);
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Top bar
               Row(
                 children: [
@@ -426,6 +434,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 ],
               ),
             ],
+          ),
           ),
         ),
       ),

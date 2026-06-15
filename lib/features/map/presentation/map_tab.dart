@@ -266,34 +266,53 @@ class _MapTabState extends ConsumerState<MapTab> {
     );
   }
 
+  /// Re-fetch the universities list (used by pull-to-refresh in list mode).
+  Future<void> _refreshUniversities() async {
+    ref.invalidate(universitiesProvider);
+    await ref.read(universitiesProvider.future);
+  }
+
   Widget _buildList(List<University> unis) {
     if (unis.isEmpty) {
-      return Center(
+      // Keep the empty state scrollable so pull-to-refresh still works.
+      return RefreshIndicator(
         key: const ValueKey('empty'),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        onRefresh: _refreshUniversities,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            const Icon(
-              Icons.search_off_rounded,
-              color: Colors.white24,
-              size: 64,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _searchQuery.isNotEmpty
-                  ? 'No results for "$_searchQuery"'
-                  : 'No universities match this filter',
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () {
-                _searchController.clear();
-                setState(() => _activeFilter = 'all');
-              },
-              child: const Text(
-                'Clear filters',
-                style: TextStyle(color: AppColors.vibrantLime),
+            const SizedBox(height: 120),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.search_off_rounded,
+                    color: Colors.white24,
+                    size: 64,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _searchQuery.isNotEmpty
+                        ? 'No results for "$_searchQuery"'
+                        : 'No universities match this filter',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _activeFilter = 'all');
+                    },
+                    child: const Text(
+                      'Clear filters',
+                      style: TextStyle(color: AppColors.vibrantLime),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -301,13 +320,17 @@ class _MapTabState extends ConsumerState<MapTab> {
       );
     }
 
-    return ListView.builder(
+    return RefreshIndicator(
       key: const ValueKey('list'),
-      padding: const EdgeInsets.only(top: 4, bottom: 80),
-      itemCount: unis.length,
-      itemBuilder: (ctx, i) => UniversityCard(
-        university: unis[i],
-        onTap: () => _showDetail(ctx, unis[i]),
+      onRefresh: _refreshUniversities,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: 4, bottom: 80),
+        itemCount: unis.length,
+        itemBuilder: (ctx, i) => UniversityCard(
+          university: unis[i],
+          onTap: () => _showDetail(ctx, unis[i]),
+        ),
       ),
     );
   }
