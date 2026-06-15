@@ -14,6 +14,7 @@ import '../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../design_system/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/data/auth_repository.dart';
+import '../data/profile_repository.dart';
 
 /// Account management screen — sign out and (irreversibly) delete the
 /// account. The deletion flow is required by both Apple App Store
@@ -165,8 +166,21 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(authStateProvider).value?.session?.user;
-    final email = user?.email;
-    final phone = user?.phone;
+    final authPhone = user?.phone;
+    final profile = ref.watch(studentProfileProvider).value;
+
+    // Students log in with a magic code, so user.email is a synthetic
+    // `student-<uuid>@hanguk.local`. Prefer real profile fields.
+    final displayName = profile?.hasName == true
+        ? profile!.fullName!
+        : (profile?.hasPhone == true
+              ? profile!.phone!
+              : ((authPhone?.isNotEmpty ?? false)
+                    ? authPhone!
+                    : l10n.accountUnknownAccount));
+    final displayPhone = profile?.hasPhone == true
+        ? profile!.phone!
+        : (authPhone ?? '');
 
     return HangukScaffold(
       body: SafeArea(
@@ -210,13 +224,56 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      email ?? phone ?? l10n.accountUnknownAccount,
+                      displayName,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    // Phone (shown as a secondary line when we also have a
+                    // name above it, so it isn't duplicated).
+                    if (displayPhone.isNotEmpty && profile?.hasName == true) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.phone_outlined,
+                            size: 14,
+                            color: Colors.white54,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            displayPhone,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    // Login / username, when present.
+                    if (profile?.hasUsername == true) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.badge_outlined,
+                            size: 14,
+                            color: Colors.white54,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            profile!.username!,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
