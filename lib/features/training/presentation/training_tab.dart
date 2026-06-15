@@ -7,6 +7,7 @@ import '../../home/presentation/home_tab_provider.dart';
 import '../data/interview_repository.dart';
 import 'study_plan_screen.dart';
 import 'interview_screen.dart';
+import 'widgets/interview_history_view.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -217,12 +218,35 @@ class TrainingTab extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(24),
                 side: const BorderSide(color: Colors.white10),
               ),
-              title: Text(
-                l.interviewCardTitle,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l.interviewCardTitle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  // Past interviews are reachable here too — this dialog is the
+                  // primary entry point, and otherwise the history (with audio
+                  // replay + AI feedback) would be unreachable because picking a
+                  // university auto-starts a session and skips the setup view.
+                  IconButton(
+                    icon: const Icon(
+                      Icons.history,
+                      color: AppColors.royalBlue,
+                    ),
+                    tooltip: l.a11yTooltipInterviewHistory,
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const InterviewHistoryView(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               content: SingleChildScrollView(
                 child: Column(
