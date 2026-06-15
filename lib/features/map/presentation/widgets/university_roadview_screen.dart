@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../../../core/config/app_config.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/university.dart';
 import 'roadview_html.dart';
@@ -73,7 +74,10 @@ class _UniversityRoadviewScreenState extends State<UniversityRoadviewScreen> {
         'HangukRoadviewChannel',
         onMessageReceived: _onChannelMessage,
       )
-      ..loadHtmlString(htmlContent);
+      // baseUrl must match the map WebView (and the Kakao console domain
+      // allowlist); without it the Kakao SDK referer check fails and the
+      // screen shows "Could not reach the map provider".
+      ..loadHtmlString(htmlContent, baseUrl: AppConfig.webViewBaseUrl);
   }
 
   void _onChannelMessage(JavaScriptMessage message) {

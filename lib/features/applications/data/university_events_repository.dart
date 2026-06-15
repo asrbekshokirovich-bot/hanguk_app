@@ -72,11 +72,12 @@ class UniversityEventsController extends ChangeNotifier {
     try {
       final client = Supabase.instance.client;
 
-      // 1. Fetch Room ID securely
+      // 1. Fetch Room ID securely.
+      // Phase 3R-B: `university_rooms` keys on `institution_id`.
       final roomData = await client
           .from('university_rooms')
           .select('id')
-          .eq('university_id', universityId)
+          .eq('institution_id', universityId)
           .maybeSingle();
 
       if (roomData == null) {

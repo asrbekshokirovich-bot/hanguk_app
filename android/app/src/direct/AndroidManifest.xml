@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Direct-distribution channel ONLY.
+         The in-app self-updater downloads and installs a new APK via
+         install_plugin (PackageInstaller), which requires this permission.
+         The Google Play "store" flavor intentionally omits it: Play
+         prohibits apps that sideload/install APKs outside the store. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+</manifest>

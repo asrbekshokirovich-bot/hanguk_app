@@ -414,18 +414,19 @@ share sheet.
 ### Direct-APK (self-host distribution) — *not for stores*
 
 ```
-flutter build apk --release
+flutter build apk --release --flavor direct
 ```
 
-Output: `build/app/outputs/flutter-apk/app-release.apk`. The bundled
-auto-updater (Supabase Storage + APK install) is active in this build.
+Output: `build/app/outputs/flutter-apk/app-direct-release.apk`. The
+bundled auto-updater (Supabase Storage + APK install) is active in this
+flavor — it keeps the `REQUEST_INSTALL_PACKAGES` permission.
 **Do not upload this APK to Play** — the auto-updater violates Play
 policy. Use the App Bundle path below for Play.
 
 ### Play Store (App Bundle)
 
 ```
-flutter build appbundle --release \
+flutter build appbundle --release --flavor store \
     --dart-define=STORE_BUILD=true \
     --dart-define=SENTRY_DSN=<sentry-dsn> \
     --dart-define=KAKAO_JS_KEY=<rotated-js-key> \
@@ -433,9 +434,10 @@ flutter build appbundle --release \
     --split-debug-info=build/symbols/android
 ```
 
-Output: `build/app/outputs/bundle/release/app-release.aab`. Keep the
-`build/symbols/android/` directory — without it, Sentry crash reports
-won't symbolicate.
+Output: `build/app/outputs/bundle/storeRelease/app-store-release.aab`.
+The `store` flavor drops `REQUEST_INSTALL_PACKAGES` and `STORE_BUILD=true`
+disables the in-app APK updater. Keep the `build/symbols/android/`
+directory — without it, Sentry crash reports won't symbolicate.
 
 ### App Store (.ipa)
 

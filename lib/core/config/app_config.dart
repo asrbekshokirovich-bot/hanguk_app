@@ -66,6 +66,18 @@ class AppConfig {
     defaultValue: 'c695b428933e192ca1d8582e3aab14a4',
   );
 
+  /// Origin used as the `baseUrl` when loading the map / roadview HTML into
+  /// a WebView. The Kakao Maps JS SDK validates the request referer against
+  /// the domain allowlist registered in the Kakao developer console, so the
+  /// WebView must present a real https origin (an empty `about:blank` origin
+  /// is rejected → "Could not reach the map provider"). Keep this value in
+  /// sync with the Web-platform domain registered for the Kakao app, and
+  /// override at build time with `--dart-define=WEBVIEW_BASE_URL=...`.
+  static const String webViewBaseUrl = String.fromEnvironment(
+    'WEBVIEW_BASE_URL',
+    defaultValue: 'https://hanguk.uz',
+  );
+
   // Legal URLs - Privacy Policy and Terms of Service.
   // Required for App Store + Play Store submissions
   // (P0 #3 from store_readiness_audit_2026-05-12.md).

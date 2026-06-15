@@ -54,6 +54,29 @@ android {
         }
     }
 
+    // Distribution channels.
+    //
+    // The app ships through two channels with conflicting update mechanisms:
+    //   - "direct": self-distributed APK that updates itself by downloading
+    //     and installing a new APK (install_plugin). Needs the
+    //     REQUEST_INSTALL_PACKAGES permission, which lives ONLY in
+    //     src/direct/AndroidManifest.xml.
+    //   - "store":  Google Play. Play prohibits sideloading APKs, so this
+    //     flavor must NOT carry REQUEST_INSTALL_PACKAGES; updates go through
+    //     Play in-app updates (in_app_update). Build with:
+    //       flutter build appbundle --flavor store --dart-define=STORE_BUILD=true
+    //
+    // Both flavors keep the same applicationId so Play sees one package.
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("direct") {
+            dimension = "distribution"
+        }
+        create("store") {
+            dimension = "distribution"
+        }
+    }
+
     buildTypes {
         release {
             // Use the real release signing config when keys are present;

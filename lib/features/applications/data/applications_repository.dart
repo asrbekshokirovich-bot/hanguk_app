@@ -5,6 +5,49 @@ import '../domain/application.dart';
 import '../../map/domain/university.dart';
 import '../../auth/data/auth_repository.dart';
 
+/// Phase 3R-B (2026-05-10): the legacy `universities` table was dropped
+/// and replaced by `institutions`. The FK column on `applications` and
+/// `student_suggestions` was renamed `university_id` → `institution_id`.
+/// All reads below embed `institution:institutions(...)` and resolve the
+/// display name in priority order: English → Korean (short) → Korean.
+/// The `institutions` table has no `name_uz`/`city_en` columns — the only
+/// location column is `city_ko`.
+University _universityFromInstitutionRow(Map<String, dynamic> u) {
+  final nameEn = u['name_en'] as String?;
+  final nameKoShort = u['name_ko_short'] as String?;
+  final nameKo = u['name_ko'] as String?;
+  final resolvedName = (nameEn?.isNotEmpty ?? false)
+      ? nameEn!
+      : (nameKoShort?.isNotEmpty ?? false)
+      ? nameKoShort!
+      : (nameKo?.isNotEmpty ?? false)
+      ? nameKo!
+      : 'Unknown University';
+
+  final cityKo = u['city_ko'] as String?;
+
+  return University(
+    id: u['id'] as String,
+    name: resolvedName,
+    location: (cityKo?.isNotEmpty ?? false) ? cityKo! : 'South Korea',
+    nameEn: nameEn,
+    nameKo: nameKo,
+    nameKoShort: nameKoShort,
+    isPartner: u['is_partner'] as bool? ?? false,
+    latitude: u['latitude'] != null ? (u['latitude'] as num).toDouble() : null,
+    longitude: u['longitude'] != null
+        ? (u['longitude'] as num).toDouble()
+        : null,
+    logoUrl: u['logo_url'] as String?,
+  );
+}
+
+// Columns selected from `institutions` for the lightweight cards/lists in
+// this feature. Kept in one place so the embedded and direct queries match.
+const String _institutionCols =
+    'id, name_en, name_ko, name_ko_short, city_ko, '
+    'is_partner, latitude, longitude, logo_url';
+
 // Provider to fetch suggested universities for the student
 final suggestedUniversitiesProvider = FutureProvider<List<University>>((
   ref,
@@ -22,10 +65,10 @@ final suggestedUniversitiesProvider = FutureProvider<List<University>>((
   final client = Supabase.instance.client;
 
   try {
-    // Attempt to fetch from CRM suggestions table directly with joining universities
+    // Attempt to fetch from CRM suggestions table, embedding the institution.
     final data = await client
         .from('student_suggestions')
-        .select('university_id, university:universities(*)')
+        .select('institution_id, institution:institutions($_institutionCols)')
         .eq('student_id', user.id);
 
     debugPrint(
@@ -33,24 +76,9 @@ final suggestedUniversitiesProvider = FutureProvider<List<University>>((
     );
     final List<University> suggestions = [];
     for (var row in data as List) {
-      if (row['university'] != null) {
-        final u = row['university'] as Map<String, dynamic>;
-        suggestions.add(
-          University(
-            id: u['id'] as String,
-            name:
-                u['name_en'] as String? ?? u['name_uz'] as String? ?? 'Unknown',
-            location: u['city_en'] as String? ?? '',
-            isPartner: u['is_partner'] as bool? ?? false,
-            latitude: u['latitude'] != null
-                ? (u['latitude'] as num).toDouble()
-                : null,
-            longitude: u['longitude'] != null
-                ? (u['longitude'] as num).toDouble()
-                : null,
-            logoUrl: u['logo_url'] as String?,
-          ),
-        );
+      final u = row['institution'] as Map<String, dynamic>?;
+      if (u != null) {
+        suggestions.add(_universityFromInstitutionRow(u));
       }
     }
 
@@ -72,42 +100,31 @@ final suggestedUniversitiesProvider = FutureProvider<List<University>>((
   }
 
   try {
-    // Fallback: If no explicit CRM suggestions exist yet, fetch partner universities directly
+    // Fallback: If no explicit CRM suggestions exist yet, fetch partner
+    // institutions directly. RLS already restricts reads to
+    // map-visible institutions for app users; the explicit
+    // `is_visible_on_map` filter keeps the intent obvious.
     final fallbackData = await client
-        .from('universities')
-        .select()
+        .from('institutions')
+        .select(_institutionCols)
         .eq('is_partner', true)
+        .eq('is_visible_on_map', true)
         .limit(5);
     debugPrint(
-      '[Suggestions] Fallback partner universities returned ${(fallbackData as List).length} rows',
+      '[Suggestions] Fallback partner institutions returned ${(fallbackData as List).length} rows',
     );
     if ((fallbackData as List).isEmpty) {
       debugPrint(
-        '[Suggestions] WARNING: Fallback returned 0 universities. Ensure is_partner=true is set for some universities.',
+        '[Suggestions] WARNING: Fallback returned 0 institutions. Ensure is_partner=true is set for some institutions.',
       );
     }
 
     return fallbackData
-        .map<University>(
-          (u) => University(
-            id: u['id'] as String,
-            name:
-                u['name_en'] as String? ?? u['name_uz'] as String? ?? 'Unknown',
-            location: u['city_en'] as String? ?? '',
-            isPartner: u['is_partner'] as bool? ?? false,
-            latitude: u['latitude'] != null
-                ? (u['latitude'] as num).toDouble()
-                : null,
-            longitude: u['longitude'] != null
-                ? (u['longitude'] as num).toDouble()
-                : null,
-            logoUrl: u['logo_url'] as String?,
-          ),
-        )
+        .map<University>((u) => _universityFromInstitutionRow(u))
         .toList();
   } catch (e, st) {
     debugPrint('[Suggestions] Failed to fetch fallback suggestions: $e\n$st');
-    throw e;
+    rethrow;
   }
 });
 
@@ -121,7 +138,7 @@ Future<void> submitSelectedUniversities(List<String> universityIds) async {
       .map(
         (uId) => {
           'student_id': user.id,
-          'university_id': uId,
+          'institution_id': uId,
           'status': 'pending_approval',
         },
       )
@@ -157,10 +174,10 @@ final applicationsProvider = FutureProvider<List<StudentApplication>>((
 
   final client = Supabase.instance.client;
   try {
-    // Join with universities table to get university name/location in one call
+    // Embed the institution to get its name/location in one call.
     final data = await client
         .from('applications')
-        .select('*, university:universities(id, name_en, city_en, is_partner)')
+        .select('*, institution:institutions($_institutionCols)')
         .eq('student_id', user.id)
         .order('created_at', ascending: false);
 
@@ -169,22 +186,18 @@ final applicationsProvider = FutureProvider<List<StudentApplication>>((
     );
 
     return (data as List).map((row) {
-      // Parse the joined university row (may be null if no join match)
+      // Parse the embedded institution row (may be null if RLS hides it
+      // or the FK is unset).
       University? university;
-      final uniRow = row['university'] as Map<String, dynamic>?;
+      final uniRow = row['institution'] as Map<String, dynamic>?;
       if (uniRow != null) {
-        university = University(
-          id: uniRow['id'] as String,
-          name: uniRow['name_en'] as String? ?? 'Unknown University',
-          location: uniRow['city_en'] as String? ?? 'South Korea',
-          isPartner: uniRow['is_partner'] as bool? ?? false,
-        );
+        university = _universityFromInstitutionRow(uniRow);
       }
 
       return StudentApplication(
         id: row['id'] as String,
         studentId: row['student_id'] as String,
-        universityId: row['university_id'] as String? ?? '',
+        universityId: row['institution_id'] as String? ?? '',
         program: row['program'] as String? ?? '',
         status: row['status'] as String? ?? 'pending',
         createdAt: DateTime.parse(row['created_at'] as String),
@@ -195,6 +208,6 @@ final applicationsProvider = FutureProvider<List<StudentApplication>>((
     debugPrint(
       '[ApplicationsRepository] Failed to fetch applications: $e\n$st',
     );
-    throw e;
+    rethrow;
   }
 });
