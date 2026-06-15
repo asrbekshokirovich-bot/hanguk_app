@@ -176,9 +176,15 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
               // user voice activity. Without this flag, Vapi treats the call as
               // user-initiated and the firstMessage is never delivered.
               'firstMessageMode': 'assistant-speaks-first',
+              // The AI always opens the conversation AND asks the first
+              // question itself, so the student never has to start. Keep it a
+              // concrete opening question (self-introduction) rather than a
+              // generic "are you ready?".
               'firstMessage': isKorean
-                  ? '안녕하세요! $targetUni 지원자님, 면접을 시작할 준비가 되셨나요?'
-                  : 'Hello! Are you ready to begin our interview for $targetUni?',
+                  ? '안녕하세요! $targetUni 지원자님, 지금부터 면접을 시작하겠습니다. '
+                        '먼저 간단하게 자기소개를 해 주시겠어요?'
+                  : 'Hello! Welcome to your interview for $targetUni. '
+                        'To begin, could you please introduce yourself briefly?',
             },
           )
           .timeout(

@@ -1,0 +1,59 @@
+name: Build test APK
+
+# On-demand installable APK for manual testing. Unlike ci.yml (analyze +
+# test only), this builds the `direct` flavor release APK and uploads it
+# as an artifact you can download from the run's "Artifacts" section and
+# sideload onto a test device.
+#
+# Runs automatically on any claude/** branch push so each round of fixes
+# produces a fresh installable build. No secrets required: AppConfig ships
+# working defaults, and without android/key.properties the release build
+# falls back to debug signing (still installable). NOT a Play artifact —
+# for Play use the `store` flavor app bundle (see docs/RELEASE.md).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+
+jobs:
+  build-apk:
+    name: Build direct flavor APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock', '**/pubspec.yaml') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: Build direct flavor APK (release)
+        run: flutter build apk --release --flavor direct
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hanguk-direct-release-apk
+          path: build/app/outputs/flutter-apk/app-direct-release.apk
+          if-no-files-found: error
