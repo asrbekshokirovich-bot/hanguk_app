@@ -441,118 +441,25 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
   // ── End session & feedback ───────────────────────────────────────────────
 
   Future<Map<String, dynamic>?> endSession({String language = 'ko'}) async {
-    final sessionId = state.sessionId;
-    if (sessionId == null) {
-      // No session row was created (e.g. the voice call never connected).
-      // Still leave the call view so the student is never trapped.
-      state = state.copyWith(
-        status: 'completed',
-        isVapiConnected: false,
-        isLoading: false,
-      );
-      return null;
-    }
-    // Audit D10: guard against double-fire. Tapping "End Session" twice
-    // (or the AppBar end + the auto-end timer triggering simultaneously)
-    // would otherwise hit `interview-feedback` twice and produce
-    // duplicate feedback rows.
-    if (state.isLoading || state.status == 'completed') return state.feedback;
-
-    state = state.copyWith(isLoading: true, clearError: true);
-
-    try {
-      final client = Supabase.instance.client;
-
-      final response = await client.functions
-          .invoke(
-            'interview-feedback',
-            body: {'sessionId': sessionId, 'language': language},
-          )
-          // Never hang on the spinner forever — feedback generation is an
-          // LLM call but should finish well within this window.
-          .timeout(const Duration(seconds: 30));
-
-      final data = response.data as Map<String, dynamic>?;
-      if (data == null || data['error'] != null) {
-        throw Exception(data?['error'] ?? 'Failed to get feedback');
-      }
-
-      // Audit F15: the `interview-feedback` Edge Function persists into
-      // public.interview_feedback (UNIQUE on session_id). We defensively
-      // verify the row landed; if it didn't, insert it ourselves so
-      // history-replay always has feedback to show.
-      final fbRaw = data['feedback'];
-      if (fbRaw is! Map) {
-        throw Exception('Unexpected feedback shape from server');
-      }
-      final fb = Map<String, dynamic>.from(fbRaw);
-
-      try {
-        final row = await client
-            .from('interview_feedback')
-            .select('session_id')
-            .eq('session_id', sessionId)
-            .maybeSingle();
-        if (row == null) {
-          await client.from('interview_feedback').insert({
-            'session_id': sessionId,
-            if (fb['overall_score'] is num)
-              'overall_score': (fb['overall_score'] as num).round().clamp(
-                1,
-                10,
-              ),
-            if (fb['communication_score'] is num)
-              'communication_score': (fb['communication_score'] as num)
-                  .round()
-                  .clamp(1, 10),
-            if (fb['confidence_score'] is num)
-              'confidence_score': (fb['confidence_score'] as num).round().clamp(
-                1,
-                10,
-              ),
-            if (fb['content_score'] is num)
-              'content_score': (fb['content_score'] as num).round().clamp(
-                1,
-                10,
-              ),
-            if (fb['language_score'] is num)
-              'language_score': (fb['language_score'] as num).round().clamp(
-                1,
-                10,
-              ),
-            if (fb['strengths'] is List) 'strengths': fb['strengths'],
-            if (fb['improvements'] is List) 'improvements': fb['improvements'],
-            if (fb['message_scores'] is List)
-              'message_scores': fb['message_scores'],
-            if (fb['detailed_feedback'] is String)
-              'detailed_feedback': fb['detailed_feedback'],
-          });
-        }
-      } on Exception catch (e) {
-        // Non-fatal — the in-memory feedback is still available.
-        debugPrint('Defensive interview_feedback insert failed: $e');
-      }
-
-      state = state.copyWith(
-        status: 'completed',
-        feedback: fb,
-        isVapiConnected: false, // Vapi call is over at this point
-      );
-
-      return fb;
-    } on Exception catch (e) {
-      // App-level failures (timeout, network, server) must NOT be shown to
-      // the student or trap them on the call screen. Move to the
-      // post-session view anyway: loadFeedback() there surfaces the real
-      // grammar/communication feedback if the server already persisted it,
-      // otherwise a neutral "no feedback yet" state. The app error is only
-      // logged for diagnostics.
-      debugPrint('endSession failed (hidden from UI): $e');
-      state = state.copyWith(status: 'completed', isVapiConnected: false);
-      return null;
-    } finally {
-      state = state.copyWith(isLoading: false);
-    }
+    // Ending an interview must be INSTANT and must never freeze the UI.
+    //
+    // Previously this awaited the (slow, up-to-30s) `interview-feedback`
+    // Edge Function while status stayed 'active', so the call screen sat on
+    // a spinner the whole time and felt frozen. We no longer block here:
+    // we immediately flip to the post-session view. InterviewAnalyticsView's
+    // initState() then calls loadFeedback(), which generates/fetches the
+    // grammar & communication feedback and shows its own "analyzing
+    // transcript" loading state. The Edge Function persists the feedback
+    // row itself (UNIQUE on session_id), so nothing is lost.
+    if (state.status == 'completed') return state.feedback;
+    state = state.copyWith(
+      status: 'completed',
+      isVapiConnected: false,
+      isLoading: false,
+      isProcessing: false,
+      clearError: true,
+    );
+    return state.feedback;
   }
 
   // ── TTS Audio (fallback for non-Vapi text mode) ──────────────────────────
