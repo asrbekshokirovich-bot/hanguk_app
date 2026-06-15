@@ -353,7 +353,12 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
     });
   }
 
-  Future<void> _fetchAudioUrl() async {
+  Future<void> _fetchAudioUrl({int attempt = 0}) async {
+    // Vapi finalizes and uploads the recording a short while AFTER the call
+    // ends, so a freshly-completed session usually returns null on the first
+    // try. Retry a few times with backoff before giving up; the user can also
+    // tap the error card to retry manually once Vapi has caught up.
+    const maxAttempts = 4;
     final url = await ref
         .read(interviewProvider.notifier)
         .fetchRecordingUrl(widget.callId);
@@ -363,15 +368,33 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
       setState(() {
         _recordingUrl = url;
         _isLoading = false;
+        _error = null;
       });
       await _audioPlayer.setSourceUrl(url);
-    } else {
-      setState(() {
-        // Sentinel — translated at render time in build().
-        _error = 'audio_recording_not_found';
-        _isLoading = false;
-      });
+      return;
     }
+
+    if (attempt < maxAttempts - 1) {
+      // Backoff: 3s, 6s, 9s — keep the spinner up while we wait.
+      await Future.delayed(Duration(seconds: 3 * (attempt + 1)));
+      if (!mounted) return;
+      return _fetchAudioUrl(attempt: attempt + 1);
+    }
+
+    setState(() {
+      // Sentinel — translated at render time in build().
+      _error = 'audio_recording_not_found';
+      _isLoading = false;
+    });
+  }
+
+  /// Re-run the fetch from scratch (used by the tap-to-retry error card).
+  void _retryFetch() {
+    setState(() {
+      _error = null;
+      _isLoading = true;
+    });
+    _fetchAudioUrl();
   }
 
   @override
@@ -417,6 +440,13 @@ class _AudioPlayerWidgetState extends ConsumerState<_AudioPlayerWidget> {
                   fontSize: 13,
                 ),
               ),
+            ),
+            // Tap-to-retry: the recording may simply not be ready yet on
+            // Vapi's side right after the call ended.
+            IconButton(
+              icon: const Icon(Icons.refresh, color: AppColors.vibrantLime),
+              tooltip: l.a11yTooltipPlayRecording,
+              onPressed: _retryFetch,
             ),
           ],
         ),
