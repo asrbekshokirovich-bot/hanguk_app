@@ -442,7 +442,16 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
   Future<Map<String, dynamic>?> endSession({String language = 'ko'}) async {
     final sessionId = state.sessionId;
-    if (sessionId == null) return null;
+    if (sessionId == null) {
+      // No session row was created (e.g. the voice call never connected).
+      // Still leave the call view so the student is never trapped.
+      state = state.copyWith(
+        status: 'completed',
+        isVapiConnected: false,
+        isLoading: false,
+      );
+      return null;
+    }
     // Audit D10: guard against double-fire. Tapping "End Session" twice
     // (or the AppBar end + the auto-end timer triggering simultaneously)
     // would otherwise hit `interview-feedback` twice and produce
@@ -454,10 +463,14 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
     try {
       final client = Supabase.instance.client;
 
-      final response = await client.functions.invoke(
-        'interview-feedback',
-        body: {'sessionId': sessionId, 'language': language},
-      );
+      final response = await client.functions
+          .invoke(
+            'interview-feedback',
+            body: {'sessionId': sessionId, 'language': language},
+          )
+          // Never hang on the spinner forever — feedback generation is an
+          // LLM call but should finish well within this window.
+          .timeout(const Duration(seconds: 30));
 
       final data = response.data as Map<String, dynamic>?;
       if (data == null || data['error'] != null) {
@@ -528,7 +541,14 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
 
       return fb;
     } on Exception catch (e) {
-      state = state.copyWith(error: 'Failed to end session: ${e.toString()}');
+      // App-level failures (timeout, network, server) must NOT be shown to
+      // the student or trap them on the call screen. Move to the
+      // post-session view anyway: loadFeedback() there surfaces the real
+      // grammar/communication feedback if the server already persisted it,
+      // otherwise a neutral "no feedback yet" state. The app error is only
+      // logged for diagnostics.
+      debugPrint('endSession failed (hidden from UI): $e');
+      state = state.copyWith(status: 'completed', isVapiConnected: false);
       return null;
     } finally {
       state = state.copyWith(isLoading: false);

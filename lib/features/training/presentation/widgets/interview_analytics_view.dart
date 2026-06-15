@@ -93,8 +93,11 @@ class _InterviewAnalyticsViewState
                     : state.feedback == null
                     ? Center(
                         child: Text(
-                          state.error ?? l.noFeedbackAvailable,
-                          style: const TextStyle(color: Colors.redAccent),
+                          // Never surface raw app errors here — only the
+                          // neutral empty-state. Real grammar/communication
+                          // feedback renders via _buildFeedbackContent below.
+                          l.noFeedbackAvailable,
+                          style: const TextStyle(color: Colors.white70),
                           textAlign: TextAlign.center,
                         ),
                       )
