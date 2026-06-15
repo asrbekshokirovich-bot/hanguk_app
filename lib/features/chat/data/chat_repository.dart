@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/chat_message.dart';
+import 'language_detector.dart';
 
 class ChatState {
   final List<ChatMessage> messages;
@@ -43,9 +44,10 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 
   /// [locale] is the user's current app language code (e.g. 'uz', 'en',
-  /// 'ru', 'ko'). Previously this was hard-coded to 'en', which made the
-  /// backend answer in English even for Uzbek questions. Passing the real
-  /// locale lets the AI reply in the user's language.
+  /// 'ru', 'ko'), used only as a fallback. The language the AI replies in is
+  /// detected per-message from [text] via [detectMessageLanguage], so a user
+  /// who switches languages mid-conversation gets answers in the language
+  /// they actually typed.
   Future<void> sendMessage(String text, {String locale = 'uz'}) async {
     if (text.trim().isEmpty) return;
 
@@ -65,9 +67,11 @@ class ChatNotifier extends Notifier<ChatState> {
           .toList();
 
       final user = client.auth.currentUser;
-      // Send the user's actual app language so the AI replies in it
-      // (the backend still auto-detects per message; this is the hint).
-      final language = locale;
+      // Reply in the language the user actually TYPED, not just the app UI
+      // locale. e.g. a Korean question while the app is in Uzbek should get a
+      // Korean answer. We detect the message's language and fall back to the
+      // app locale only when the text is too short/ambiguous to call.
+      final language = detectMessageLanguage(text, fallback: locale);
 
       final url = Uri.parse(
         'https://lysjdtyanhdfphqyijsr.supabase.co/functions/v1/hanguk-ai-chat',
