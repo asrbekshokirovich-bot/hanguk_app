@@ -194,6 +194,22 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
             ),
           );
 
+      // If the user exited during the connect/preparation phase, the
+      // teardown ran while `_call` was still null (start() hadn't returned
+      // yet, because waitUntilActive blocks until the call is live), so it
+      // couldn't hang up. Now that we finally hold the call, stop and
+      // dispose it immediately instead of leaking a live mic/WebRTC session.
+      if (!mounted || _isStopping) {
+        try {
+          await _call?.stop();
+        } catch (_) {
+          // already ended — nothing to hang up
+        }
+        _call?.dispose();
+        _client?.dispose();
+        return;
+      }
+
       // Notify the global provider that Vapi is now live
       ref.read(interviewProvider.notifier).setVapiConnected(true);
       if (_call != null) {
@@ -334,16 +350,25 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
 
   /// Centralized stop/cleanup for the Vapi call.
   /// Always call this instead of calling _call?.dispose() directly.
-  void _stopCall() {
+  Future<void> _stopCall() async {
     if (_isStopping) return;
     _isStopping = true;
 
     _silenceTimer?.cancel();
     _forceEndTimer?.cancel();
     _timeLimitTimer?.cancel();
-    _eventSub?.cancel();
-    _call
-        ?.stop(); // Explicit hang-up BEFORE dispose to prevent orphaned WebRTC connections
+    await _eventSub?.cancel();
+    // CRITICAL: the hang-up (`leave()`) must FULLY COMPLETE before we
+    // `dispose()` the underlying Daily client. Previously these were fired
+    // back-to-back without awaiting, so on exit during the connect phase the
+    // native client got torn down mid-`leave()` — a race that froze the UI
+    // thread ("app isn't responding"). Await the stop, swallow the
+    // already-ended case, then dispose.
+    try {
+      await _call?.stop();
+    } catch (_) {
+      // VapiCallEndedException (or any teardown error) — already gone.
+    }
     _call?.dispose();
     _client?.dispose();
     // Sync disconnected state to global provider safely
@@ -367,7 +392,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
   /// the active view out for the post-session view.
   Future<void> _completeAutoEnd() async {
     final lang = ref.read(interviewProvider).selectedLanguage;
-    _stopCall();
+    await _stopCall();
     if (!mounted) return;
     await ref.read(interviewProvider.notifier).endSession(language: lang);
   }
@@ -418,8 +443,10 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     // Delegate to _stopCall for centralized cleanup — ensures stop() is
-    // always called before dispose().
-    _stopCall();
+    // always awaited before dispose(). Fire-and-forget since a synchronous
+    // dispose() can't await; the sequencing inside _stopCall still
+    // guarantees leave()→dispose() ordering on the call objects.
+    unawaited(_stopCall());
     // Audit F14: if the user backs out without ever triggering
     // _completeAutoEnd (no AI-end, no manual end button, no time-limit
     // expiry), mark the row as 'abandoned' so history-replay isn't
@@ -437,11 +464,23 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     final l = AppLocalizations.of(context)!;
     final state = ref.watch(interviewProvider);
 
-    return Stack(
-      children: [
-        Column(
-          children: [
-            // University Indicator
+    return PopScope(
+      // While the call is live (or still connecting/preparing), the system
+      // back gesture must run the SAME clean end→feedback path as the
+      // on-screen button — never an abrupt route pop that tears down Vapi
+      // unsequenced and can freeze the UI. Once the session has ended we let
+      // the pop through.
+      canPop: _didEndSession,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop || _didEndSession) return;
+        _didEndSession = true;
+        unawaited(_completeAutoEnd());
+      },
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              // University Indicator
             if (state.targetUniversityName != null)
               Container(
                 margin: const EdgeInsets.only(top: 20),
@@ -728,11 +767,12 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
             ),
           ],
         ),
-        if (state.isProcessing || state.isLoading)
-          const Center(
-            child: CircularProgressIndicator(color: AppColors.vibrantLime),
-          ),
-      ],
+          if (state.isProcessing || state.isLoading)
+            const Center(
+              child: CircularProgressIndicator(color: AppColors.vibrantLime),
+            ),
+        ],
+      ),
     );
   }
 
