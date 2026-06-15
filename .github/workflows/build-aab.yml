@@ -1,0 +1,77 @@
+name: Build AAB
+
+# Google Play App Bundle (.aab) for the `store` flavor. Download it from the
+# run's "Artifacts" section and upload to the Play Console.
+#
+# Signing: if the Android upload-keystore secrets are configured on the repo
+# (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
+# ANDROID_KEY_PASSWORD) the bundle is signed with the real upload key and is
+# Play-uploadable. Without them the build still succeeds but falls back to
+# debug signing (fine for inspection, NOT accepted by Play).
+#
+# Runs on demand, and on any claude/** branch push so each round of fixes
+# also produces a fresh bundle.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+
+jobs:
+  build-aab:
+    name: Build store flavor app bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock', '**/pubspec.yaml') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+
+      - name: Restore release keystore (optional)
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storeFile=upload-keystore.jks
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          keyPassword=$ANDROID_KEY_PASSWORD
+          EOF
+          echo "Release keystore restored — bundle will be signed with the upload key."
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: Build store flavor app bundle (release)
+        run: flutter build appbundle --release --flavor store --dart-define=STORE_BUILD=true
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hanguk-store-release-aab
+          path: build/app/outputs/bundle/storeRelease/app-store-release.aab
+          if-no-files-found: error
