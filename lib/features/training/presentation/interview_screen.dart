@@ -69,22 +69,12 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          if (state.status == 'active')
-            TextButton(
-              onPressed: () async {
-                await ref
-                    .read(interviewProvider.notifier)
-                    .endSession(language: state.selectedLanguage);
-                // Note: Vapi call cleanup is handled by InterviewActiveView.dispose()
-                // via the centralized _stopCall() method.
-              },
-              child: Text(
-                l.endSession,
-                style: const TextStyle(color: AppColors.error),
-              ),
-            ),
-        ],
+        // During an active call there must be exactly ONE way to end the
+        // interview — the big "End interview" button inside the call view,
+        // which runs the proper end→feedback flow. So hide both the AppBar
+        // back arrow and the old "End Session" action while active. They
+        // return once the call is over (setup / analytics views).
+        automaticallyImplyLeading: state.status != 'active',
       ),
       body: SafeArea(child: _buildCurrentView(state)),
     );

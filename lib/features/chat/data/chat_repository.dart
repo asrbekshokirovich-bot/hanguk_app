@@ -42,7 +42,11 @@ class ChatNotifier extends Notifier<ChatState> {
     );
   }
 
-  Future<void> sendMessage(String text) async {
+  /// [locale] is the user's current app language code (e.g. 'uz', 'en',
+  /// 'ru', 'ko'). Previously this was hard-coded to 'en', which made the
+  /// backend answer in English even for Uzbek questions. Passing the real
+  /// locale lets the AI reply in the user's language.
+  Future<void> sendMessage(String text, {String locale = 'uz'}) async {
     if (text.trim().isEmpty) return;
 
     final userMsg = ChatMessage(role: 'user', content: text);
@@ -61,8 +65,9 @@ class ChatNotifier extends Notifier<ChatState> {
           .toList();
 
       final user = client.auth.currentUser;
-      final language =
-          'en'; // By default, but the backend detects Uzbek automatically
+      // Send the user's actual app language so the AI replies in it
+      // (the backend still auto-detects per message; this is the hint).
+      final language = locale;
 
       final url = Uri.parse(
         'https://lysjdtyanhdfphqyijsr.supabase.co/functions/v1/hanguk-ai-chat',

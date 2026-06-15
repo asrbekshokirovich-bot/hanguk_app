@@ -439,17 +439,9 @@ class TrainingTab extends ConsumerWidget {
                 ),
               ),
               actions: [
-                if (interviewState.error != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      interviewState.error!,
-                      style: const TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
+                // App-level interview errors are intentionally not shown to
+                // the student (hidden bug surface); only grammar/feedback
+                // content is surfaced, in the analytics view.
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: interviewState.isLoading

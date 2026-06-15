@@ -33,7 +33,10 @@ class _ChatTabState extends ConsumerState<ChatTab> {
     _textController.clear();
     FocusScope.of(context).unfocus();
 
-    ref.read(chatProvider.notifier).sendMessage(text);
+    // Pass the active UI locale so the AI answers in the user's language
+    // instead of always defaulting to English.
+    final locale = Localizations.localeOf(context).languageCode;
+    ref.read(chatProvider.notifier).sendMessage(text, locale: locale);
   }
 
   @override
