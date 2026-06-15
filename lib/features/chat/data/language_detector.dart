@@ -78,7 +78,6 @@ String detectMessageLanguage(String text, {required String fallback}) {
     'bilan',
     'qilish',
     'boladi',
-    'boladi',
     'yaxshi',
     'universitet',
     'hujjat',
