@@ -457,28 +457,6 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     await ref.read(interviewProvider.notifier).endSession(language: lang);
   }
 
-  /// Exit handler for the single X button / system back gesture.
-  ///
-  /// If an actual conversation happened (the interviewer spoke at least
-  /// once), run the normal end→feedback flow. If we never got past the
-  /// connecting phase (or the connection errored), there's nothing to score,
-  /// so tear down, mark the row abandoned, and pop back to the setup screen
-  /// instead of stranding the user on an empty "no feedback" screen.
-  Future<void> _endOrAbandon() async {
-    if (_firstMessageReceived) {
-      await _completeAutoEnd();
-      return;
-    }
-    // Capture the navigator before any await so we never touch `context`
-    // across an async gap (use_build_context_synchronously).
-    final navigator = Navigator.of(context);
-    await _stopCall();
-    if (!mounted) return;
-    await ref.read(interviewProvider.notifier).markAbandoned();
-    if (!mounted) return;
-    navigator.maybePop();
-  }
-
   void _resetSilenceTimer() {
     _silenceTimer?.cancel();
     _silenceTimer = Timer(const Duration(seconds: 8), () {
@@ -556,7 +534,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
       onPopInvokedWithResult: (didPop, result) {
         if (didPop || _didEndSession) return;
         _didEndSession = true;
-        unawaited(_endOrAbandon());
+        unawaited(_completeAutoEnd());
       },
       child: Stack(
         children: [
@@ -810,13 +788,13 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
                     const SizedBox(height: 32),
                     GestureDetector(
                       onTap: () {
-                        // Single exit button. If a conversation actually
-                        // happened, run the end→feedback flow; if we never got
-                        // past connecting, abandon cleanly instead of showing
-                        // an empty feedback screen. See _endOrAbandon.
+                        // Single exit button → ALWAYS go to the feedback screen
+                        // and let the AI generate feedback from the transcript.
+                        // (Even a short/early-ended session is marked completed
+                        // and openable from History, never silently abandoned.)
                         if (_didEndSession) return;
                         _didEndSession = true;
-                        unawaited(_endOrAbandon());
+                        unawaited(_completeAutoEnd());
                       },
                       child: Container(
                         height: 64,
