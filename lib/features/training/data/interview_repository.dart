@@ -443,15 +443,16 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
   Future<Map<String, dynamic>?> endSession({String language = 'ko'}) async {
     // Ending an interview must be INSTANT and must never freeze the UI.
     //
-    // Previously this awaited the (slow, up-to-30s) `interview-feedback`
-    // Edge Function while status stayed 'active', so the call screen sat on
-    // a spinner the whole time and felt frozen. We no longer block here:
-    // we immediately flip to the post-session view. InterviewAnalyticsView's
-    // initState() then calls loadFeedback(), which generates/fetches the
-    // grammar & communication feedback and shows its own "analyzing
-    // transcript" loading state. The Edge Function persists the feedback
-    // row itself (UNIQUE on session_id), so nothing is lost.
+    // We flip the in-memory status immediately (so the post-session view
+    // shows at once) AND persist the terminal status to the DB in the
+    // background. Persisting is essential: without it the `interview_sessions`
+    // row stayed `status = 'active'` forever, so History refused to open the
+    // session ("This session is still active") — replay + feedback re-view
+    // were impossible and the row showed only its name + time. The
+    // `interview-feedback` Edge Function writes the feedback row itself
+    // (UNIQUE on session_id) when InterviewAnalyticsView calls loadFeedback().
     if (state.status == 'completed') return state.feedback;
+    final sessionId = state.sessionId;
     state = state.copyWith(
       status: 'completed',
       isVapiConnected: false,
@@ -459,7 +460,28 @@ class InterviewNotifier extends Notifier<InterviewSessionState> {
       isProcessing: false,
       clearError: true,
     );
+    if (sessionId != null) {
+      // Fire-and-forget so the UI flips instantly; failure is non-fatal and
+      // just logged (the row stays active and can be retried next time).
+      unawaited(_markSessionEnded(sessionId));
+    }
     return state.feedback;
+  }
+
+  /// Persists the terminal `completed` status (+ ended_at) for [sessionId] so
+  /// the session is openable from History afterwards.
+  Future<void> _markSessionEnded(String sessionId) async {
+    try {
+      await Supabase.instance.client
+          .from('interview_sessions')
+          .update({
+            'status': 'completed',
+            'ended_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('id', sessionId);
+    } on Exception catch (e) {
+      debugPrint('Failed to mark interview session completed: $e');
+    }
   }
 
   // ── TTS Audio (fallback for non-Vapi text mode) ──────────────────────────
