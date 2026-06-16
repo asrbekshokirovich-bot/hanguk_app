@@ -21,6 +21,14 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
   VapiClient? _client;
   VapiCall? _call;
   StreamSubscription? _eventSub;
+  // Connection phase model:
+  //   _isConnecting  → handshake in flight, before the call goes live.
+  //   _isCallActive  → the call is LIVE (Vapi sent 'call-start'/'listening').
+  // Previously _isCallActive was set true the instant _startCall ran, which
+  // conflated "connecting" with "live" and — combined with waitUntilActive —
+  // left the UI stuck on "Connecting…" forever when the early call-start /
+  // speech-start events were emitted before the listener was attached.
+  bool _isConnecting = true;
   bool _isCallActive = false;
   bool _isAI_Speaking = false;
   bool _firstMessageReceived = false;
@@ -36,6 +44,10 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
   bool _didEndSession = false;
   Timer? _forceEndTimer;
   Timer? _timeLimitTimer;
+  // Fires if the call never goes live within the deadline, so a silently
+  // stuck handshake surfaces as an error instead of an endless spinner.
+  Timer? _connectTimer;
+  static const _connectTimeout = Duration(seconds: 30);
 
   @override
   void initState() {
@@ -58,7 +70,9 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      if (_isCallActive && !_didEndSession) {
+      // End on background whether the call is live OR still connecting, so we
+      // never leave an orphan WebRTC connection / permanently-active DB row.
+      if (!_didEndSession && (_isCallActive || _isConnecting)) {
         _didEndSession = true;
         unawaited(_completeAutoEnd());
       }
@@ -79,7 +93,8 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
   }
 
   Future<void> _startCall() async {
-    setState(() => _isCallActive = true);
+    // Stay in the "connecting" phase until Vapi actually reports the call is
+    // live (via the 'call-start' event). Do NOT mark the call active here.
     final interviewState = ref.read(interviewProvider);
 
     final targetUni =
@@ -148,12 +163,19 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     );
 
     try {
-      // Audit B5: wrap the Vapi handshake in a 30-second timeout so a
-      // stuck WebRTC negotiation surfaces as a real error instead of a
-      // spinner forever.
+      // CRITICAL FIX: waitUntilActive:false so start() returns as soon as the
+      // call object exists (right after the WebRTC join), BEFORE the assistant
+      // goes live. We then attach the event listener immediately, so the early
+      // 'call-start' / 'speech-start' events (which fire the instant the AI
+      // begins speaking) are not lost on the broadcast stream. With
+      // waitUntilActive:true those events were emitted during the await — before
+      // any listener existed — leaving the UI stuck on "Connecting…" forever.
+      // The 30s join timeout still guards a stuck negotiation; a separate
+      // _connectTimer (below) guards the case where the call joins but never
+      // goes live.
       _call = await _client
           ?.start(
-            waitUntilActive: true,
+            waitUntilActive: false,
             assistant: {
               'model': {
                 'provider': 'openai',
@@ -194,11 +216,8 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
             ),
           );
 
-      // If the user exited during the connect/preparation phase, the
-      // teardown ran while `_call` was still null (start() hadn't returned
-      // yet, because waitUntilActive blocks until the call is live), so it
-      // couldn't hang up. Now that we finally hold the call, stop and
-      // dispose it immediately instead of leaking a live mic/WebRTC session.
+      // If the user exited while we were still joining, tear the call down
+      // immediately instead of leaking a live mic/WebRTC session.
       if (!mounted || _isStopping) {
         try {
           await _call?.stop();
@@ -210,12 +229,24 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
         return;
       }
 
-      // Notify the global provider that Vapi is now live
-      ref.read(interviewProvider.notifier).setVapiConnected(true);
+      // Persist the Vapi call id now (we have it post-join); the global
+      // "connected" flag is flipped on the 'call-start' event below.
       if (_call != null) {
         ref.read(interviewProvider.notifier).setVapiCallId(_call!.id);
       }
-      debugPrint('[VAPI] Connected successfully.');
+      debugPrint('[VAPI] Joined call ${_call?.id}; awaiting call-start.');
+
+      // Guard: if the call joined but never goes live, surface an error and
+      // let the user retry/exit instead of spinning on "Connecting…".
+      _connectTimer?.cancel();
+      _connectTimer = Timer(_connectTimeout, () {
+        if (!mounted || _isCallActive || _didEndSession) return;
+        ref.read(interviewProvider.notifier).setVapiConnected(false);
+        setState(() {
+          _isConnecting = false;
+          _errorMessage = 'Connection timed out. Please try again.';
+        });
+      });
 
       _eventSub = _call?.onEvent.listen((event) {
         if (!mounted) return;
@@ -223,9 +254,27 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
         final eventLabel = event.label;
         final eventValue = event.value;
 
-        // Catch internal Vapi connection failures and surface them immediately
-        if (eventLabel == 'call-end') {
-          debugPrint('[VAPI] Call ended organically.');
+        // The call is now LIVE — leave the connecting phase. This is the
+        // event that previously got lost, stranding the UI on "Connecting…".
+        if (eventLabel == 'call-start') {
+          _connectTimer?.cancel();
+          ref.read(interviewProvider.notifier).setVapiConnected(true);
+          setState(() {
+            _isConnecting = false;
+            _isCallActive = true;
+          });
+        } else if (eventLabel == 'call-end') {
+          debugPrint('[VAPI] Call ended.');
+          _connectTimer?.cancel();
+          // Ended before ever going live → it failed to connect. Surface it
+          // instead of leaving a dead "Connecting…" screen.
+          if (!_didEndSession && !_isCallActive && _errorMessage == null) {
+            ref.read(interviewProvider.notifier).setVapiConnected(false);
+            setState(() {
+              _isConnecting = false;
+              _errorMessage = 'Could not connect the call. Please try again.';
+            });
+          }
         } else if (eventLabel == 'status-update' ||
             eventLabel == 'statusUpdate') {
           debugPrint('[VAPI STATUS UPDATE] $eventValue');
@@ -254,6 +303,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
                 extractedDetail = '${extractedDetail.substring(0, 240)}…';
               }
               setState(() {
+                _isConnecting = false;
                 _isCallActive = false;
                 _isAI_Speaking = false;
                 // Store raw detail; _buildStatusText wraps it with
@@ -269,7 +319,13 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
           final eventType = eventValue['type'];
 
           if (eventType == 'speech-start') {
+            _connectTimer?.cancel();
+            // Defensive: if 'call-start' was somehow missed, the AI speaking
+            // is unambiguous proof the call is live.
+            ref.read(interviewProvider.notifier).setVapiConnected(true);
             setState(() {
+              _isConnecting = false;
+              _isCallActive = true;
               _isAI_Speaking = true;
               _firstMessageReceived = true;
               _currentWords = '';
@@ -334,9 +390,11 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
       debugPrint('Vapi Start Error: $e');
       debugPrint('Vapi StackTrace: $st');
       // Notify provider of failed connection so UI can react globally
+      _connectTimer?.cancel();
       ref.read(interviewProvider.notifier).setVapiConnected(false);
       if (mounted) {
         setState(() {
+          _isConnecting = false;
           _isCallActive = false;
           // Expose explicit native parsing errors and connection timeouts dynamically to the UI!
           _errorMessage = e
@@ -357,6 +415,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     _silenceTimer?.cancel();
     _forceEndTimer?.cancel();
     _timeLimitTimer?.cancel();
+    _connectTimer?.cancel();
     await _eventSub?.cancel();
     // CRITICAL: the hang-up (`leave()`) must FULLY COMPLETE before we
     // `dispose()` the underlying Daily client. Previously these were fired
@@ -375,6 +434,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     if (mounted) {
       ref.read(interviewProvider.notifier).setVapiConnected(false);
       setState(() {
+        _isConnecting = false;
         _isCallActive = false;
         _isAI_Speaking = false;
       });
@@ -395,6 +455,28 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     await _stopCall();
     if (!mounted) return;
     await ref.read(interviewProvider.notifier).endSession(language: lang);
+  }
+
+  /// Exit handler for the single X button / system back gesture.
+  ///
+  /// If an actual conversation happened (the interviewer spoke at least
+  /// once), run the normal end→feedback flow. If we never got past the
+  /// connecting phase (or the connection errored), there's nothing to score,
+  /// so tear down, mark the row abandoned, and pop back to the setup screen
+  /// instead of stranding the user on an empty "no feedback" screen.
+  Future<void> _endOrAbandon() async {
+    if (_firstMessageReceived) {
+      await _completeAutoEnd();
+      return;
+    }
+    // Capture the navigator before any await so we never touch `context`
+    // across an async gap (use_build_context_synchronously).
+    final navigator = Navigator.of(context);
+    await _stopCall();
+    if (!mounted) return;
+    await ref.read(interviewProvider.notifier).markAbandoned();
+    if (!mounted) return;
+    navigator.maybePop();
   }
 
   void _resetSilenceTimer() {
@@ -474,7 +556,7 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
       onPopInvokedWithResult: (didPop, result) {
         if (didPop || _didEndSession) return;
         _didEndSession = true;
-        unawaited(_completeAutoEnd());
+        unawaited(_endOrAbandon());
       },
       child: Stack(
         children: [
@@ -728,14 +810,13 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
                     const SizedBox(height: 32),
                     GestureDetector(
                       onTap: () {
-                        // Manual end — converge on the same _completeAutoEnd
-                        // path the AI-driven end uses, so feedback is
-                        // generated and the row transitions to 'completed'.
-                        // Previously this just called _stopCall + pop, which
-                        // left status='active' forever and skipped feedback.
+                        // Single exit button. If a conversation actually
+                        // happened, run the end→feedback flow; if we never got
+                        // past connecting, abandon cleanly instead of showing
+                        // an empty feedback screen. See _endOrAbandon.
                         if (_didEndSession) return;
                         _didEndSession = true;
-                        unawaited(_completeAutoEnd());
+                        unawaited(_endOrAbandon());
                       },
                       child: Container(
                         height: 64,
@@ -795,6 +876,8 @@ class _InterviewActiveViewState extends ConsumerState<InterviewActiveView>
     if (_errorMessage != null) return l.connectionInterrupted(_errorMessage!);
     if (_aiRequestedEnd) return l.wrappingUp;
     if (_isAI_Speaking) return l.aiSpeaking;
+    // Still establishing the call / waiting for the interviewer to greet.
+    if (_isConnecting) return l.greetWait;
     if (_isCallActive && !_firstMessageReceived) {
       return l.greetWait;
     }
