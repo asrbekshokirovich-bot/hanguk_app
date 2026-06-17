@@ -8,4 +8,17 @@
     <uses-permission
         android:name="android.permission.REQUEST_INSTALL_PACKAGES"
         tools:node="remove" />
+
+    <!-- A transitive plugin re-injects the broad media-read permissions into
+         the merged manifest. Document/photo uploads use file_picker, which
+         relies on the Storage Access Framework (system document picker) and
+         returns only the user-selected file, so the app needs neither of
+         these. Strip them from the store bundle so Google Play does not
+         require the Photo and video permissions declaration. -->
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:node="remove" />
 </manifest>
