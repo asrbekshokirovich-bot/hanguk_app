@@ -105,3 +105,33 @@ keep it current, clean, and safe.
   risk the live reviewer mid-use).
 - **Deferred:** Phase 2 golden eval set (ongoing QA); Phase 3 OCR/HWP text
   extraction (heavy `torch`/HWP deps — decide before adding).
+
+## Build progress — 2026-05-30 (post-merge audit remediation)
+
+After PR #36 (staleness hold + translation guard + prefer-newest ingest) merged
+and ran for 4 days, an audit confirmed it worked (3 published, 5 correctly held)
+and surfaced follow-ups. Shipped since:
+
+- **Approved-data audit + cleanup:** the 8 approved items traced end-to-end; 2017/
+  2022/2025 stale items held, current ones published. Removed 252 junk translation
+  rows (218 disabled-lang + 34 broken en/uz) and the cju QA marker; 0 leaks remain.
+- **Institution metadata (Phase 6):** all 22 placeholder institutions backfilled
+  with authoritative KO+EN names (pulled from each school's own discovery titles);
+  kept hidden from the map pending human reveal.
+- **Source freshness ops:** approved + promoted the current-cycle 2026 모집요강 for
+  the held universities where already discovered (hanseo, knsu, hanyang Seoul +
+  ERICA); cdu/gnu need a targeted discovery run (operator).
+- **Observability (Track B):** `review_queue.published_outcome`
+  (published/held/skipped) + honest `v_uni_db_health` (the publish/hold split was
+  reporting 0) + `cycles_unverified`; `uni-db publish --force <id>` operator
+  override for a held item confirmed current. See `remediation_plan_2026-05-30.md`.
+- **Security (Track C / Phase 8):** anon EXECUTE locked on the uni_db
+  `SECURITY DEFINER` review/flag functions; `search_path` pinned.
+- **Phase 5 — never stale (change-detection):** new `refresh_worker` rotates
+  through live current sources oldest-checked-first, sha-compares the upstream
+  PDF, and supersedes + re-parses the doc when content changes — so a school
+  swapping their perennial 모집요강 PDF in place is no longer invisible (the
+  failure mode the cdu audit exposed). Wired into `uni-db-sync` (8/run, 24 h
+  min age). `guideline_documents.last_checked_at` + a partial index drive the
+  rotation; `v_uni_db_health` now exposes `held_over_7d`, `gd_never_checked`,
+  `gd_oldest_check_age_days` as freshness signals.

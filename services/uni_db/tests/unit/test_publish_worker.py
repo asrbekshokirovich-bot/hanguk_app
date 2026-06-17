@@ -45,6 +45,14 @@ class _Conn:
         return sum(1 for sql, _ in self.executes
                    if "update public.review_queue set published_at" in sql)
 
+    async def fetchrow(self, sql: str, *args: object):
+        return self._records[0] if self._records else None
+
+    @property
+    def outcomes(self) -> list[str]:
+        # _mark_processed(queue_id, outcome) → args = (queue_id, outcome)
+        return [args[1] for sql, args in self.executes if "published_outcome" in sql]
+
 
 def _rec(field_group: str, parsed_output: dict, reviewer_decision=None,
          source_url_ko=None) -> dict:
@@ -305,3 +313,63 @@ async def test_skips_empty_scholarship_card() -> None:
     run = await pw.publish_pending(conn)
     assert run.rows_written == 1                     # only the real scholarship
     assert len(conn.inserts_into("scholarships")) == 1
+
+
+# --------------------------------------------------------------------------- #
+# publish outcome recording + force override (Track B)
+
+
+class TestPublishOutcome:
+    async def test_records_published(self) -> None:
+        rec = _rec("scholarships", {"rows": [{"scope": "university", "name_ko": "S",
+                                              "award_type": "airfare", "source_text_ko": "x"}]})
+        conn = _Conn([rec])
+        await pw.publish_pending(conn)
+        assert conn.outcomes == ["published"]
+
+    async def test_records_held_for_stale(self) -> None:
+        rec = _rec("requirements", {"rows": [{"applicant_category": "외국인전형",
+                                              "source_text_ko": "2017학년도 모집"}]})
+        conn = _Conn([rec])
+        await pw.publish_pending(conn)
+        assert conn.outcomes == ["held"]
+
+    async def test_records_skipped_for_empty(self) -> None:
+        rec = _rec("tuition", {"rows": []})
+        conn = _Conn([rec])
+        await pw.publish_pending(conn)
+        assert conn.outcomes == ["skipped"]
+
+
+class TestForcePublish:
+    async def test_force_bypasses_staleness_hold(self) -> None:
+        rec = _rec("requirements", {"rows": [{"applicant_category": "외국인전형",
+                                              "source_text_ko": "2017학년도 모집"}]})
+        conn = _Conn([rec])
+        run = await pw.publish_one(conn, rec["queue_id"], force=True)
+        assert run.published == 1 and run.held == 0
+        assert len(conn.inserts_into("requirements")) == 1
+        assert conn.outcomes == ["published"]
+
+    async def test_without_force_still_holds_stale(self) -> None:
+        rec = _rec("requirements", {"rows": [{"applicant_category": "외국인전형",
+                                              "source_text_ko": "2017학년도 모집"}]})
+        conn = _Conn([rec])
+        run = await pw.publish_one(conn, rec["queue_id"])
+        assert run.held == 1 and run.published == 0
+        assert conn.inserts_into("requirements") == []
+        assert conn.outcomes == ["held"]
+
+    async def test_already_published_is_noop(self) -> None:
+        rec = _rec("requirements", {"rows": [{"applicant_category": "외국인전형",
+                                              "source_text_ko": "x"}]})
+        rec["published_outcome"] = "published"
+        conn = _Conn([rec])
+        run = await pw.publish_one(conn, rec["queue_id"], force=True)
+        assert run.published == 0 and run.skipped == 1
+        assert conn.inserts_into("requirements") == []
+
+    async def test_not_found_returns_empty(self) -> None:
+        conn = _Conn([])
+        run = await pw.publish_one(conn, uuid4(), force=True)
+        assert run == pw.PublishRun(0, 0, 0, 0, 0, 0)
