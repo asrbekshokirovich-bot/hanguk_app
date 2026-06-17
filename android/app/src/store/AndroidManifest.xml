@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- The install_plugin dependency declares REQUEST_INSTALL_PACKAGES in its
+         own library manifest, which the manifest merger would otherwise pull
+         into every flavor. Google Play prohibits sideloading APK installs, so
+         strip the permission from the "store" flavor. Store builds update
+         through Play in-app updates (in_app_update), not the APK installer. -->
+    <uses-permission
+        android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:node="remove" />
+</manifest>
