@@ -77,3 +77,8 @@ jobs:
           name: hanguk-store-release-aab
           path: build/app/outputs/bundle/storeRelease/app-store-release.aab
           if-no-files-found: error
+          # Keep the 90 MB AAB only a few days. The default 90-day retention
+          # let hundreds of builds pile up and exhaust the account-wide
+          # artifact storage quota (uploads then fail). Short retention keeps
+          # storage bounded; download the artifact promptly if you need it.
+          retention-days: 5

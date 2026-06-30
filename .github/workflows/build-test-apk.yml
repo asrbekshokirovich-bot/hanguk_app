@@ -57,3 +57,7 @@ jobs:
           name: hanguk-direct-release-apk
           path: build/app/outputs/flutter-apk/app-direct-release.apk
           if-no-files-found: error
+          # Short retention so test APKs don't accumulate and exhaust the
+          # account-wide artifact storage quota (see build-aab.yml). Download
+          # promptly if you need the build.
+          retention-days: 5
