@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../design_system/adaptive/ink_dock.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
+import '../../../../design_system/theme/hanguk_ink.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../applications/presentation/applications_tab.dart';
 import '../../map/presentation/map_tab.dart';
@@ -58,7 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (_) => Container(
         height: MediaQuery.of(context).size.height * 0.9,
         decoration: const BoxDecoration(
-          color: Color(0xFF071221),
+          color: HangukInk.hanji,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: ClipRRect(
