@@ -22,6 +22,10 @@ jobs:
     name: Build store flavor app bundle
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # contents: write is needed to publish the bundle as a GitHub Release
+    # asset (see the "Publish AAB to a GitHub Release" step below).
+    permissions:
+      contents: write
     # Surface the keystore secrets as job-level env so step `if:` can test
     # them — the `secrets` context is not allowed directly in `if:`.
     env:
@@ -71,14 +75,34 @@ jobs:
       - name: Build store flavor app bundle (release)
         run: flutter build appbundle --release --flavor store --dart-define=STORE_BUILD=true
 
-      - name: Upload AAB artifact
+      # Primary delivery: publish the .aab as a GitHub Release asset. Release
+      # assets are NOT counted against the Actions artifact-storage quota (the
+      # quota that was blocking uploads), and by reusing a single rolling tag
+      # the previous asset is replaced each run so storage never accumulates.
+      # Download from the repo's Releases → "Latest store AAB".
+      - name: Publish AAB to a GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="store-aab-latest"
+          # Remove the prior rolling release + tag so only the newest asset is kept.
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" \
+            build/app/outputs/bundle/storeRelease/app-store-release.aab \
+            --title "Latest store AAB" \
+            --notes "Automated store app bundle from ${GITHUB_SHA} on ${GITHUB_REF_NAME}. Bump the Play Console version code before uploading." \
+            --prerelease \
+            --target "$GITHUB_SHA"
+
+      # Secondary (best-effort) copy as a normal Actions artifact for PR
+      # reviewers. continue-on-error so a full artifact-storage quota can no
+      # longer fail the whole build — the Release above is the reliable path.
+      - name: Upload AAB artifact (best-effort)
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: hanguk-store-release-aab
           path: build/app/outputs/bundle/storeRelease/app-store-release.aab
           if-no-files-found: error
-          # Keep the 90 MB AAB only a few days. The default 90-day retention
-          # let hundreds of builds pile up and exhaust the account-wide
-          # artifact storage quota (uploads then fail). Short retention keeps
-          # storage bounded; download the artifact promptly if you need it.
           retention-days: 5
