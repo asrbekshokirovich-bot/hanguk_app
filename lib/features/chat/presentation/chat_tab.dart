@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/chat_repository.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../design_system/theme/theme_x.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'widgets/chat_message_bubble.dart';
 
@@ -122,9 +123,9 @@ class _ChatTabState extends ConsumerState<ChatTab> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F213D),
+                color: context.isDark ? const Color(0xFF0F213D) : Colors.white,
                 border: Border(
-                  top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+                  top: BorderSide(color: context.onS(0.1)),
                 ),
               ),
               child: Row(
@@ -132,10 +133,10 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                   Expanded(
                     child: TextField(
                       controller: _textController,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: context.ink),
                       decoration: InputDecoration(
                         hintText: 'Ask anything about South Korea...',
-                        hintStyle: const TextStyle(color: Colors.white70),
+                        hintStyle: TextStyle(color: context.onS(0.6)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(28),
                           borderSide: BorderSide.none,
@@ -149,7 +150,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        fillColor: context.glassFill,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 14,
