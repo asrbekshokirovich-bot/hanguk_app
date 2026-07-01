@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../design_system/adaptive/theme_toggle_button.dart';
+import '../../../../design_system/theme/theme_x.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../uni_db/presentation/widgets/home_recent_changes_banner.dart';
 import '../../uni_db/presentation/widgets/verified_deadlines_overlay.dart';
@@ -66,11 +67,11 @@ class ApplicationsTab extends ConsumerWidget {
           tabStateAsync.when(
             data: (state) {
               if (state.isEmpty) {
-                return const SliverFillRemaining(
+                return SliverFillRemaining(
                   child: Center(
                     child: Text(
                       'You have no active applications yet.',
-                      style: TextStyle(color: Colors.white54),
+                      style: TextStyle(color: context.onS(0.54)),
                     ),
                   ),
                 );
@@ -121,12 +122,13 @@ class ApplicationsTab extends ConsumerWidget {
       const SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+          // No explicit colour → inherits the theme's onSurface (adapts to
+          // light/dark automatically).
           child: Text(
             'Pending Applications',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
             ),
           ),
         ),
@@ -155,7 +157,6 @@ class ApplicationsTab extends ConsumerWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
             ),
           ),
         ),

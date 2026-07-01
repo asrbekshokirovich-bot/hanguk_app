@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/application.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../design_system/theme/theme_x.dart';
 import 'process_tracker.dart';
 import 'university_room_modal.dart';
 
@@ -83,10 +84,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
                         children: [
                           Text(
                             university?.name ?? 'Unknown University',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: Colors.white,
+                              color: context.ink,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -94,8 +95,8 @@ class _ApplicationCardState extends State<ApplicationCard> {
                             children: [
                               Text(
                                 university?.location ?? '',
-                                style: const TextStyle(
-                                  color: Colors.white54,
+                                style: TextStyle(
+                                  color: context.onS(0.54),
                                   fontSize: 13,
                                 ),
                               ),
@@ -112,11 +113,11 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'Partner',
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: AppColors.vibrantLime,
+                                      color: context.accentText,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -129,7 +130,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                     ),
                     Icon(
                       _isExpanded ? Icons.expand_less : Icons.expand_more,
-                      color: Colors.white54,
+                      color: context.onS(0.54),
                     ),
                   ],
                 ),
@@ -163,19 +164,19 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                     ),
                                   ),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   children: [
                                     Icon(
                                       Icons.hourglass_empty_rounded,
-                                      color: AppColors.vibrantLime,
+                                      color: context.accentText,
                                       size: 20,
                                     ),
-                                    SizedBox(width: 12),
+                                    const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
                                         'Awaiting Counselor Approval.\nWe will notify you once reviewed.',
                                         style: TextStyle(
-                                          color: AppColors.vibrantLime,
+                                          color: context.accentText,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -188,7 +189,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                               ProcessTracker(status: application.status),
 
                             const SizedBox(height: 16),
-                            const Divider(color: AppColors.borderGlass),
+                            Divider(color: context.hairline),
 
                             // Actions
                             Row(
@@ -200,10 +201,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                       application,
                                       initialTabIndex: 1,
                                     ),
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.forum_outlined,
                                       size: 16,
-                                      color: AppColors.vibrantLime,
+                                      color: context.accentText,
                                     ),
                                     label: const Text('Discussion'),
                                   ),
@@ -216,10 +217,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                       application,
                                       initialTabIndex: 3,
                                     ),
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.event_note_outlined,
                                       size: 16,
-                                      color: AppColors.vibrantLime,
+                                      color: context.accentText,
                                     ),
                                     label: const Text('Calendar'),
                                   ),
