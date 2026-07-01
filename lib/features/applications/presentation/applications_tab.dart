@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../design_system/adaptive/theme_toggle_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../uni_db/presentation/widgets/home_recent_changes_banner.dart';
 import '../../uni_db/presentation/widgets/verified_deadlines_overlay.dart';
@@ -39,6 +40,8 @@ class ApplicationsTab extends ConsumerWidget {
             floating: true,
             snap: true,
             actions: [
+              // Day / dark mode switch — persisted across launches.
+              const ThemeToggleButton(),
               // UI/UX audit P0 N1/N2 (2026-05-12): the bare sign-out
               // icon previously dropped users to /welcome with no
               // confirmation, and the account-deletion + data-export
