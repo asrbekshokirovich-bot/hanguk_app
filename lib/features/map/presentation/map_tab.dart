@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
+import '../../../../design_system/theme/theme_x.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../data/map_analytics.dart';
 import '../data/map_repository.dart';
@@ -123,8 +124,8 @@ class _MapTabState extends ConsumerState<MapTab> {
                     padding: const EdgeInsets.only(right: 12),
                     child: Text(
                       l.mapTabTitle,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.ink,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -134,20 +135,20 @@ class _MapTabState extends ConsumerState<MapTab> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      style: TextStyle(color: context.ink, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Search...',
-                        hintStyle: const TextStyle(
-                          color: Colors.white70,
+                        hintStyle: TextStyle(
+                          color: context.onS(0.6),
                           fontSize: 14,
                         ),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search_rounded,
-                          color: Colors.white70,
+                          color: context.onS(0.6),
                           size: 20,
                         ),
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.07),
+                        fillColor: context.glassFill,
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 10,
                         ),
@@ -161,9 +162,9 @@ class _MapTabState extends ConsumerState<MapTab> {
                                 button: true,
                                 child: GestureDetector(
                                   onTap: () => _searchController.clear(),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.close,
-                                    color: Colors.white70,
+                                    color: context.onS(0.6),
                                     size: 18,
                                   ),
                                 ),
@@ -286,9 +287,9 @@ class _MapTabState extends ConsumerState<MapTab> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.search_off_rounded,
-                    color: Colors.white24,
+                    color: context.onS(0.24),
                     size: 64,
                   ),
                   const SizedBox(height: 16),
@@ -296,8 +297,8 @@ class _MapTabState extends ConsumerState<MapTab> {
                     _searchQuery.isNotEmpty
                         ? 'No results for "$_searchQuery"'
                         : 'No universities match this filter',
-                    style: const TextStyle(
-                      color: Colors.white70,
+                    style: TextStyle(
+                      color: context.onS(0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -307,9 +308,9 @@ class _MapTabState extends ConsumerState<MapTab> {
                       _searchController.clear();
                       setState(() => _activeFilter = 'all');
                     },
-                    child: const Text(
+                    child: Text(
                       'Clear filters',
-                      style: TextStyle(color: AppColors.vibrantLime),
+                      style: TextStyle(color: context.accentText),
                     ),
                   ),
                 ],
@@ -346,37 +347,37 @@ class _MapTabState extends ConsumerState<MapTab> {
               color: Colors.red.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.wifi_off_rounded,
-              color: Colors.white70,
+              color: context.onS(0.7),
               size: 40,
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Could not load universities',
             style: TextStyle(
-              color: Colors.white,
+              color: context.ink,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Check your connection and try again',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+            style: TextStyle(color: context.onS(0.7), fontSize: 13),
           ),
           const SizedBox(height: 20),
           OutlinedButton.icon(
             onPressed: () => ref.refresh(universitiesProvider),
-            icon: const Icon(
+            icon: Icon(
               Icons.refresh_rounded,
               size: 18,
-              color: AppColors.vibrantLime,
+              color: context.accentText,
             ),
-            label: const Text(
+            label: Text(
               'Retry',
-              style: TextStyle(color: AppColors.vibrantLime),
+              style: TextStyle(color: context.accentText),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(
@@ -418,17 +419,17 @@ class _ToggleButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isMapMode
                 ? AppColors.vibrantLime.withValues(alpha: 0.15)
-                : Colors.white.withValues(alpha: 0.07),
+                : context.glassFill,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isMapMode
                   ? AppColors.vibrantLime.withValues(alpha: 0.4)
-                  : Colors.white.withValues(alpha: 0.08),
+                  : context.hairline,
             ),
           ),
           child: Icon(
             isMapMode ? Icons.list_rounded : Icons.map_outlined,
-            color: isMapMode ? AppColors.vibrantLime : Colors.white60,
+            color: isMapMode ? context.accentText : context.onS(0.6),
             size: 20,
           ),
         ),
@@ -468,12 +469,12 @@ class _FilterChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected
                 ? AppColors.vibrantLime.withValues(alpha: 0.15)
-                : Colors.white.withValues(alpha: 0.05),
+                : context.glassFill,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: selected
                   ? AppColors.vibrantLime.withValues(alpha: 0.5)
-                  : Colors.white.withValues(alpha: 0.08),
+                  : context.hairline,
             ),
           ),
           child: Row(
@@ -482,7 +483,7 @@ class _FilterChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: selected ? AppColors.vibrantLime : Colors.white70,
+                color: selected ? context.accentText : context.onS(0.7),
               ),
               const SizedBox(width: 5),
               Text(
@@ -490,7 +491,7 @@ class _FilterChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  color: selected ? AppColors.vibrantLime : Colors.white54,
+                  color: selected ? context.accentText : context.onS(0.54),
                 ),
               ),
             ],
