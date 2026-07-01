@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/chat_message.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
+import '../../../../design_system/theme/app_colors.dart';
+import '../../../../design_system/adaptive/hanguk_card.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -24,13 +25,13 @@ class ChatMessageBubble extends StatelessWidget {
               height: 32,
               width: 32,
               decoration: const BoxDecoration(
-                color: HangukInk.ink,
+                color: AppColors.vibrantLime,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.auto_awesome,
                 size: 16,
-                color: HangukInk.gold,
+                color: AppColors.pureBlack,
               ),
             ),
             const SizedBox(width: 12),
@@ -40,14 +41,9 @@ class ChatMessageBubble extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                gradient: isUser
-                    ? const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF46B0A0), HangukInk.jadeDeep],
-                      )
-                    : null,
-                color: isUser ? null : HangukInk.paper.withValues(alpha: 0.9),
+                color: isUser
+                    ? AppColors.vibrantLime
+                    : AppColors.surfaceGlass.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20).copyWith(
                   bottomRight: isUser
                       ? const Radius.circular(4)
@@ -58,18 +54,14 @@ class ChatMessageBubble extends StatelessWidget {
                 ),
                 border: isUser
                     ? null
-                    : Border.all(
-                        color: HangukInk.ink.withValues(alpha: 0.10),
-                        width: 1,
-                      ),
+                    : Border.all(color: AppColors.borderGlass, width: 0.5),
               ),
               child: Text(
                 message.content,
                 style: TextStyle(
                   fontSize: 15,
-                  color: isUser ? Colors.white : HangukInk.ink,
-                  height: 1.45,
-                  fontWeight: isUser ? FontWeight.w500 : FontWeight.w400,
+                  color: isUser ? AppColors.pureBlack : Colors.white,
+                  height: 1.4,
                 ),
               ),
             ),
@@ -81,13 +73,13 @@ class ChatMessageBubble extends StatelessWidget {
               height: 32,
               width: 32,
               decoration: BoxDecoration(
-                color: HangukInk.ink.withValues(alpha: 0.08),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.person_outline,
                 size: 16,
-                color: HangukInk.ink2,
+                color: Colors.white70,
               ),
             ),
           ],

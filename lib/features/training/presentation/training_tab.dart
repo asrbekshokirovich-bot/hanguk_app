@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../design_system/adaptive/ink_ambient_background.dart';
 import '../../../../design_system/theme/app_colors.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../applications/data/applications_repository.dart';
 import '../../home/presentation/home_tab_provider.dart';
@@ -21,38 +19,25 @@ class TrainingTab extends ConsumerWidget {
     final l = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          const InkAmbientBackground(tabIndex: 3),
-          SafeArea(
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Text(
                 l.trainingTabTitle,
-                style: HangukInk.display,
-              ),
-              const SizedBox(height: 10),
-              Container(
-                width: 38,
-                height: 2,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [HangukInk.jade, Color(0x003FA796)],
-                  ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 8),
               Text(
                 l.trainingTabSubtitle,
-                style: const TextStyle(
-                  color: HangukInk.ink2,
-                  fontSize: 14,
-                  height: 1.5,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -64,7 +49,7 @@ class TrainingTab extends ConsumerWidget {
                       title: l.studyPlanCardTitle,
                       description: l.studyPlanCardDesc,
                       icon: Icons.edit_document,
-                      color: HangukInk.jade,
+                      color: Colors.white,
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -79,7 +64,7 @@ class TrainingTab extends ConsumerWidget {
                       title: l.personalStatementCardTitle,
                       description: l.personalStatementCardDesc,
                       icon: Icons.person_search_rounded,
-                      color: HangukInk.plum,
+                      color: Colors.white,
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -95,8 +80,8 @@ class TrainingTab extends ConsumerWidget {
                       title: l.interviewCardTitle,
                       description: l.interviewCardDesc,
                       icon: Icons.mic_rounded,
-                      color: HangukInk.jade,
-                      highlighted: true,
+                      color: AppColors.vibrantLime,
+                      isDarkIcon: true,
                       onTap: () => _showInterviewSetupDialog(context, ref),
                     ),
                     const SizedBox(height: 100), // padding for global FAB
@@ -107,8 +92,6 @@ class TrainingTab extends ConsumerWidget {
           ),
         ),
       ),
-        ],
-      ),
     );
   }
 
@@ -118,28 +101,23 @@ class TrainingTab extends ConsumerWidget {
     required String description,
     required IconData icon,
     required Color color,
-    bool highlighted = false,
+    bool isDarkIcon = false,
     VoidCallback? onTap,
   }) {
-    final Color accentDeep = Color.lerp(color, HangukInk.ink, 0.35)!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: highlighted
-              ? color.withValues(alpha: 0.14)
-              : HangukInk.paper.withValues(alpha: 0.72),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: highlighted
-                ? color.withValues(alpha: 0.40)
-                : HangukInk.ink.withValues(alpha: 0.10),
-          ),
+          color: const Color(
+            0xFF0F213D,
+          ).withValues(alpha: 0.6), // deep glassmorphism
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: HangukInk.ink.withValues(alpha: 0.06),
-              blurRadius: 26,
+              color: color.withValues(alpha: 0.15),
+              blurRadius: 24,
               offset: const Offset(0, 8),
             ),
           ],
@@ -147,74 +125,66 @@ class TrainingTab extends ConsumerWidget {
         child: Row(
           children: [
             Container(
-              height: 54,
-              width: 54,
+              height: 64,
+              width: 64,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: highlighted ? 0.22 : 0.16),
-                borderRadius: BorderRadius.circular(16),
-                border: highlighted
-                    ? Border.all(color: color.withValues(alpha: 0.40))
-                    : null,
+                gradient: LinearGradient(
+                  colors: [
+                    color.withValues(alpha: 0.4),
+                    color.withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: color.withValues(alpha: 0.5)),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              child: Icon(icon, color: accentDeep, size: 26),
+              child: Icon(icon, color: color, size: 32),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 20),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          title,
-                          style: const TextStyle(
-                            color: HangukInk.ink,
-                            fontSize: 16.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      if (highlighted) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: HangukInk.jade,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: const Text(
-                            'VOICE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     description,
-                    style: const TextStyle(
-                      color: HangukInk.ink2,
-                      fontSize: 12.5,
-                      height: 1.45,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 14,
+                      height: 1.3,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: highlighted ? accentDeep : HangukInk.ink3,
-              size: 16,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: color.withValues(alpha: 0.8),
+                size: 16,
+              ),
             ),
           ],
         ),

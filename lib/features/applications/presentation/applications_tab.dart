@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../design_system/adaptive/ink_ambient_background.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../uni_db/presentation/widgets/home_recent_changes_banner.dart';
 import '../../uni_db/presentation/widgets/verified_deadlines_overlay.dart';
@@ -22,12 +20,7 @@ class ApplicationsTab extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          const InkAmbientBackground(tabIndex: 0),
-          RefreshIndicator(
-        color: HangukInk.jadeDeep,
-        backgroundColor: HangukInk.paper,
+      body: RefreshIndicator(
         // Pull-to-refresh so new approvals / suggestions show up without
         // having to quit and relaunch the app. Re-fetch the underlying
         // sources, then await the combined tab future.
@@ -42,14 +35,7 @@ class ApplicationsTab extends ConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverAppBar(
-            backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            foregroundColor: HangukInk.ink,
-            elevation: 0,
-            title: Text(
-              l.applicationsTabTitle,
-              style: HangukInk.display.copyWith(fontSize: 24),
-            ),
+            title: Text(l.applicationsTabTitle),
             floating: true,
             snap: true,
             actions: [
@@ -62,7 +48,6 @@ class ApplicationsTab extends ConsumerWidget {
               // hosts Sign out, Download my data, and Delete account.
               IconButton(
                 icon: const Icon(Icons.account_circle_outlined),
-                color: HangukInk.ink,
                 tooltip: l.accountTooltip,
                 onPressed: () => context.push('/account'),
               ),
@@ -82,7 +67,7 @@ class ApplicationsTab extends ConsumerWidget {
                   child: Center(
                     child: Text(
                       'You have no active applications yet.',
-                      style: TextStyle(color: HangukInk.ink2),
+                      style: TextStyle(color: Colors.white54),
                     ),
                   ),
                 );
@@ -119,18 +104,11 @@ class ApplicationsTab extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator.adaptive()),
             ),
             error: (err, stack) => SliverFillRemaining(
-              child: Center(
-                child: Text(
-                  'Error loading applications: $err',
-                  style: const TextStyle(color: HangukInk.ink2),
-                ),
-              ),
+              child: Center(child: Text('Error loading applications: $err')),
             ),
           ),
           ],
         ),
-      ),
-        ],
       ),
     );
   }
@@ -139,8 +117,15 @@ class ApplicationsTab extends ConsumerWidget {
     return [
       const SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(18, 24, 16, 10),
-          child: Text('PENDING', style: HangukInk.overline),
+          padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+          child: Text(
+            'Pending Applications',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
       SliverList(
@@ -161,8 +146,15 @@ class ApplicationsTab extends ConsumerWidget {
     return [
       const SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(18, 24, 16, 10),
-          child: Text('ACTIVE', style: HangukInk.overline),
+          padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+          child: Text(
+            'Active Applications',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
       SliverList(

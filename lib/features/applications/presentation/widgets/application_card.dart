@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/application.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
+import '../../../../design_system/adaptive/hanguk_card.dart';
+import '../../../../design_system/theme/app_colors.dart';
 import 'process_tracker.dart';
 import 'university_room_modal.dart';
 
@@ -32,31 +33,16 @@ class _ApplicationCardState extends State<ApplicationCard> {
     final application = widget.application;
     final university = application.university;
 
-    final isPending = application.status == 'pending_approval';
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-      decoration: BoxDecoration(
-        color: HangukInk.paper.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isPending
-              ? HangukInk.gold.withValues(alpha: 0.32)
-              : HangukInk.ink.withValues(alpha: 0.10),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: HangukInk.ink.withValues(alpha: 0.07),
-            blurRadius: 26,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+    return HangukCard(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets
+          .zero, // We remove padding from HangukCard internally if supported, but typically we handle it in children.
+      // Actually HangukCard usually takes `child` directly without overriding internal paddings unless we use it. We'll wrap in Material to give InkWell effect properly.
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           onTap: _toggleExpanded,
           child: Padding(
             padding: const EdgeInsets.all(
@@ -100,7 +86,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: HangukInk.ink,
+                              color: Colors.white,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -109,7 +95,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                               Text(
                                 university?.location ?? '',
                                 style: const TextStyle(
-                                  color: HangukInk.ink2,
+                                  color: Colors.white54,
                                   fontSize: 13,
                                 ),
                               ),
@@ -121,8 +107,8 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: HangukInk.jade.withValues(
-                                      alpha: 0.12,
+                                    color: AppColors.vibrantLime.withValues(
+                                      alpha: 0.1,
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -130,7 +116,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                     'Partner',
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: HangukInk.jadeDeep,
+                                      color: AppColors.vibrantLime,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -143,7 +129,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                     ),
                     Icon(
                       _isExpanded ? Icons.expand_less : Icons.expand_more,
-                      color: HangukInk.ink3,
+                      color: Colors.white54,
                     ),
                   ],
                 ),
@@ -160,21 +146,20 @@ class _ApplicationCardState extends State<ApplicationCard> {
                             const SizedBox(height: 16),
 
                             // Status Tracker or Pending Banner
-                            if (isPending)
+                            if (application.status == 'pending_approval')
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: HangukInk.gold.withValues(
-                                    alpha: 0.10,
+                                  color: AppColors.vibrantLime.withValues(
+                                    alpha: 0.1,
                                   ),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: const Border(
-                                    left: BorderSide(
-                                      color: HangukInk.gold,
-                                      width: 3,
+                                  border: Border.all(
+                                    color: AppColors.vibrantLime.withValues(
+                                      alpha: 0.3,
                                     ),
                                   ),
                                 ),
@@ -182,7 +167,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                   children: [
                                     Icon(
                                       Icons.hourglass_empty_rounded,
-                                      color: HangukInk.goldDeep,
+                                      color: AppColors.vibrantLime,
                                       size: 20,
                                     ),
                                     SizedBox(width: 12),
@@ -190,9 +175,9 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                       child: Text(
                                         'Awaiting Counselor Approval.\nWe will notify you once reviewed.',
                                         style: TextStyle(
-                                          color: HangukInk.goldDeep,
+                                          color: AppColors.vibrantLime,
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ),
@@ -203,9 +188,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                               ProcessTracker(status: application.status),
 
                             const SizedBox(height: 16),
-                            Divider(
-                              color: HangukInk.ink.withValues(alpha: 0.10),
-                            ),
+                            const Divider(color: AppColors.borderGlass),
 
                             // Actions
                             Row(
@@ -217,11 +200,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                       application,
                                       initialTabIndex: 1,
                                     ),
-                                    style: _actionButtonStyle,
                                     icon: const Icon(
                                       Icons.forum_outlined,
                                       size: 16,
-                                      color: HangukInk.jadeDeep,
+                                      color: AppColors.vibrantLime,
                                     ),
                                     label: const Text('Discussion'),
                                   ),
@@ -234,11 +216,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                       application,
                                       initialTabIndex: 3,
                                     ),
-                                    style: _actionButtonStyle,
                                     icon: const Icon(
                                       Icons.event_note_outlined,
                                       size: 16,
-                                      color: HangukInk.jadeDeep,
+                                      color: AppColors.vibrantLime,
                                     ),
                                     label: const Text('Calendar'),
                                   ),
@@ -257,21 +238,15 @@ class _ApplicationCardState extends State<ApplicationCard> {
     );
   }
 
-  static final ButtonStyle _actionButtonStyle = OutlinedButton.styleFrom(
-    foregroundColor: HangukInk.ink,
-    side: BorderSide(color: HangukInk.ink.withValues(alpha: 0.16)),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
-  );
-
   Widget _fallbackLogo() {
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: HangukInk.gold.withValues(alpha: 0.14),
+        color: AppColors.vibrantLime.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Icon(Icons.school_outlined, color: HangukInk.goldDeep),
+      child: const Icon(Icons.school_outlined, color: AppColors.vibrantLime),
     );
   }
 
@@ -282,16 +257,16 @@ class _ApplicationCardState extends State<ApplicationCard> {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: HangukInk.ink.withValues(alpha: 0.05),
+        color: Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Center(
+      child: const Center(
         child: SizedBox(
           width: 18,
           height: 18,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: HangukInk.ink.withValues(alpha: 0.25),
+            color: Colors.white24,
           ),
         ),
       ),

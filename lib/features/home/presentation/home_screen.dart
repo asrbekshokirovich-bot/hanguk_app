@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../design_system/adaptive/ink_dock.dart';
+import '../../../../design_system/adaptive/adaptive_bottom_navigation.dart';
 import '../../../../design_system/adaptive/hanguk_scaffold.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
+import '../../../../design_system/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../applications/presentation/applications_tab.dart';
 import '../../map/presentation/map_tab.dart';
@@ -59,7 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (_) => Container(
         height: MediaQuery.of(context).size.height * 0.9,
         decoration: const BoxDecoration(
-          color: HangukInk.hanji,
+          color: Color(0xFF071221),
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: ClipRRect(
@@ -70,27 +70,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// The AI entry point now lives in the [InkDock]'s centre pill, so the only
-  /// remaining floating action is the staff-only review queue. Hidden for
-  /// students; gated server-side by fn_can_review_uni_db so the button only
-  /// ever appears for non-student staff.
-  Widget? _buildFloatingActions(BuildContext context) {
+  Widget _buildFloatingActions(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final aiChatFab = FloatingActionButton(
+      heroTag: 'ai_chat_fab',
+      onPressed: () => _openAIChat(context),
+      backgroundColor: AppColors.vibrantLime,
+      elevation: 6,
+      tooltip: l.a11yTooltipAskAi,
+      child: const Icon(Icons.smart_toy, color: Colors.black, size: 28),
+    );
+
+    // Staff-only entry to the university-data review queue. Hidden for
+    // students; gated server-side by fn_can_review_uni_db so the button
+    // only ever appears for non-student staff.
     final canReview = ref.watch(canReviewUniDbProvider).value ?? false;
-    if (!canReview) return null;
+    if (!canReview) return aiChatFab;
 
     final pending = ref.watch(reviewQueueCountProvider).value ?? 0;
-    return FloatingActionButton.extended(
-      heroTag: 'staff_review_fab',
-      onPressed: () => context.push('/admin/review'),
-      backgroundColor: Colors.white,
-      icon: const Icon(Icons.fact_check_outlined, color: Colors.black),
-      label: Text(
-        pending > 0 ? 'Review ($pending)' : 'Review',
-        style: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w600,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        FloatingActionButton.extended(
+          heroTag: 'staff_review_fab',
+          onPressed: () => context.push('/admin/review'),
+          backgroundColor: Colors.white,
+          icon: const Icon(Icons.fact_check_outlined, color: Colors.black),
+          label: Text(
+            pending > 0 ? 'Review ($pending)' : 'Review',
+            style: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-      ),
+        const SizedBox(height: 12),
+        aiChatFab,
+      ],
     );
   }
 
@@ -101,20 +118,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return HangukScaffold(
       body: _tabs[currentIndex],
       floatingActionButton: _buildFloatingActions(context),
-      bottomNavigationBar: InkDock(
+      bottomNavigationBar: AdaptiveBottomNavigation(
         currentIndex: currentIndex,
         onTap: (index) {
           ref.read(homeTabProvider.notifier).setTab(index);
         },
-        onAskAi: () => _openAIChat(context),
-        askAiLabel: l.a11yTooltipAskAi,
         items: [
-          InkDockItem(label: l.navApplications, icon: Icons.school_rounded),
-          InkDockItem(label: l.navMap, icon: Icons.location_on_rounded),
-          InkDockItem(label: l.navDocs, icon: Icons.description_rounded),
-          InkDockItem(
+          AdaptiveNavigationItem(label: l.navApplications, icon: Icons.school),
+          AdaptiveNavigationItem(label: l.navMap, icon: Icons.map),
+          AdaptiveNavigationItem(label: l.navDocs, icon: Icons.description),
+          AdaptiveNavigationItem(
             label: l.navTraining,
-            icon: Icons.self_improvement_rounded,
+            icon: Icons.model_training_outlined,
           ),
         ],
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../design_system/adaptive/ink_ambient_background.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
+import '../../../../design_system/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../data/map_analytics.dart';
 import '../data/map_repository.dart';
@@ -110,10 +109,7 @@ class _MapTabState extends ConsumerState<MapTab> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          const InkAmbientBackground(tabIndex: 1),
-          SafeArea(
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -127,30 +123,31 @@ class _MapTabState extends ConsumerState<MapTab> {
                     padding: const EdgeInsets.only(right: 12),
                     child: Text(
                       l.mapTabTitle,
-                      style: HangukInk.display.copyWith(fontSize: 22),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   // Search field
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(
-                        color: HangukInk.ink,
-                        fontSize: 14,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Search...',
                         hintStyle: const TextStyle(
-                          color: HangukInk.ink3,
+                          color: Colors.white70,
                           fontSize: 14,
                         ),
                         prefixIcon: const Icon(
                           Icons.search_rounded,
-                          color: HangukInk.ink3,
+                          color: Colors.white70,
                           size: 20,
                         ),
                         filled: true,
-                        fillColor: HangukInk.paper.withValues(alpha: 0.8),
+                        fillColor: Colors.white.withValues(alpha: 0.07),
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 10,
                         ),
@@ -166,7 +163,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                                   onTap: () => _searchController.clear(),
                                   child: const Icon(
                                     Icons.close,
-                                    color: HangukInk.ink3,
+                                    color: Colors.white70,
                                     size: 18,
                                   ),
                                 ),
@@ -266,8 +263,6 @@ class _MapTabState extends ConsumerState<MapTab> {
           ],
         ),
       ),
-        ],
-      ),
     );
   }
 
@@ -291,9 +286,9 @@ class _MapTabState extends ConsumerState<MapTab> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.search_off_rounded,
-                    color: HangukInk.ink.withValues(alpha: 0.25),
+                    color: Colors.white24,
                     size: 64,
                   ),
                   const SizedBox(height: 16),
@@ -302,7 +297,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                         ? 'No results for "$_searchQuery"'
                         : 'No universities match this filter',
                     style: const TextStyle(
-                      color: HangukInk.ink2,
+                      color: Colors.white70,
                       fontSize: 14,
                     ),
                   ),
@@ -314,7 +309,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                     },
                     child: const Text(
                       'Clear filters',
-                      style: TextStyle(color: HangukInk.jadeDeep),
+                      style: TextStyle(color: AppColors.vibrantLime),
                     ),
                   ),
                 ],
@@ -348,12 +343,12 @@ class _MapTabState extends ConsumerState<MapTab> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: HangukInk.persimmon.withValues(alpha: 0.10),
+              color: Colors.red.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.wifi_off_rounded,
-              color: HangukInk.ink2,
+              color: Colors.white70,
               size: 40,
             ),
           ),
@@ -361,15 +356,15 @@ class _MapTabState extends ConsumerState<MapTab> {
           const Text(
             'Could not load universities',
             style: TextStyle(
-              color: HangukInk.ink,
+              color: Colors.white,
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 6),
           const Text(
             'Check your connection and try again',
-            style: TextStyle(color: HangukInk.ink2, fontSize: 13),
+            style: TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 20),
           OutlinedButton.icon(
@@ -377,15 +372,15 @@ class _MapTabState extends ConsumerState<MapTab> {
             icon: const Icon(
               Icons.refresh_rounded,
               size: 18,
-              color: HangukInk.jadeDeep,
+              color: AppColors.vibrantLime,
             ),
             label: const Text(
               'Retry',
-              style: TextStyle(color: HangukInk.jadeDeep),
+              style: TextStyle(color: AppColors.vibrantLime),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(
-                color: HangukInk.jade.withValues(alpha: 0.4),
+                color: AppColors.vibrantLime.withValues(alpha: 0.4),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -422,18 +417,18 @@ class _ToggleButton extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isMapMode
-                ? HangukInk.jade.withValues(alpha: 0.16)
-                : HangukInk.paper.withValues(alpha: 0.8),
+                ? AppColors.vibrantLime.withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.07),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isMapMode
-                  ? HangukInk.jade.withValues(alpha: 0.4)
-                  : HangukInk.ink.withValues(alpha: 0.10),
+                  ? AppColors.vibrantLime.withValues(alpha: 0.4)
+                  : Colors.white.withValues(alpha: 0.08),
             ),
           ),
           child: Icon(
             isMapMode ? Icons.list_rounded : Icons.map_outlined,
-            color: isMapMode ? HangukInk.jadeDeep : HangukInk.ink2,
+            color: isMapMode ? AppColors.vibrantLime : Colors.white60,
             size: 20,
           ),
         ),
@@ -471,12 +466,14 @@ class _FilterChip extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color: selected ? HangukInk.ink : HangukInk.paper.withValues(alpha: 0.7),
+            color: selected
+                ? AppColors.vibrantLime.withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: selected
-                  ? HangukInk.ink
-                  : HangukInk.ink.withValues(alpha: 0.10),
+                  ? AppColors.vibrantLime.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.08),
             ),
           ),
           child: Row(
@@ -485,15 +482,15 @@ class _FilterChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: selected ? HangukInk.gold : HangukInk.ink2,
+                color: selected ? AppColors.vibrantLime : Colors.white70,
               ),
               const SizedBox(width: 5),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-                  color: selected ? HangukInk.hanji : HangukInk.ink2,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  color: selected ? AppColors.vibrantLime : Colors.white54,
                 ),
               ),
             ],
@@ -521,35 +518,28 @@ class _FilterEmptyBadge extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: HangukInk.paper.withValues(alpha: 0.92),
+            color: Colors.black.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: HangukInk.ink.withValues(alpha: 0.12)),
-            boxShadow: [
-              BoxShadow(
-                color: HangukInk.ink.withValues(alpha: 0.14),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            border: Border.all(color: Colors.white24),
           ),
           child: Row(
             children: [
               const Icon(
                 Icons.filter_list_off,
-                color: HangukInk.jadeDeep,
+                color: AppColors.vibrantLime,
                 size: 18,
               ),
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
                   'No universities match — adjust your filter or search.',
-                  style: TextStyle(color: HangukInk.ink, fontSize: 13),
+                  style: TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ),
               TextButton(
                 onPressed: onClear,
                 style: TextButton.styleFrom(
-                  foregroundColor: HangukInk.jadeDeep,
+                  foregroundColor: AppColors.vibrantLime,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                 ),
                 child: const Text('Clear'),

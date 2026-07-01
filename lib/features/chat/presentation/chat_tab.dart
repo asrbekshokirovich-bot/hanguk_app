@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/chat_repository.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
+import '../../../../design_system/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'widgets/chat_message_bubble.dart';
 
@@ -61,18 +61,11 @@ class _ChatTabState extends ConsumerState<ChatTab> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text(
-          'Hanguk AI',
-          style: HangukInk.display.copyWith(fontSize: 18),
-        ),
+        title: const Text('Hanguk AI'),
         backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        foregroundColor: HangukInk.ink,
-        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
-            color: HangukInk.ink2,
             tooltip: l.a11yTooltipClearChat,
             onPressed: () {
               ref.read(chatProvider.notifier).clearChat();
@@ -129,9 +122,9 @@ class _ChatTabState extends ConsumerState<ChatTab> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: HangukInk.hanji,
+                color: const Color(0xFF0F213D),
                 border: Border(
-                  top: BorderSide(color: HangukInk.ink.withValues(alpha: 0.10)),
+                  top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
                 ),
               ),
               child: Row(
@@ -139,10 +132,10 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                   Expanded(
                     child: TextField(
                       controller: _textController,
-                      style: const TextStyle(color: HangukInk.ink),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: 'Ask anything about South Korea...',
-                        hintStyle: const TextStyle(color: HangukInk.ink3),
+                        hintStyle: const TextStyle(color: Colors.white70),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(28),
                           borderSide: BorderSide.none,
@@ -156,7 +149,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: HangukInk.paper.withValues(alpha: 0.9),
+                        fillColor: Colors.white.withValues(alpha: 0.05),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 14,
@@ -168,12 +161,12 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                   ),
                   const SizedBox(width: 12),
                   CircleAvatar(
-                    backgroundColor: HangukInk.jadeDeep,
+                    backgroundColor: AppColors.vibrantLime,
                     radius: 24,
                     child: IconButton(
                       icon: const Icon(
                         Icons.send_rounded,
-                        color: Colors.white,
+                        color: AppColors.pureBlack,
                       ),
                       tooltip: l.a11yTooltipSendMessage,
                       onPressed: chatState.isLoading ? null : _handleSend,

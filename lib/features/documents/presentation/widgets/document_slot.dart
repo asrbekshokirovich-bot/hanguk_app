@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../domain/document_type.dart';
 import '../../domain/document.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
+import '../../../../design_system/adaptive/hanguk_card.dart';
+import '../../../../design_system/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class DocumentSlot extends StatelessWidget {
@@ -31,31 +32,26 @@ class DocumentSlot extends StatelessWidget {
     final bool isUploaded = uploadedDoc != null;
 
     final Color bgColor = isApproved
-        ? HangukInk.jade.withValues(alpha: 0.10)
+        ? Colors.green.withValues(alpha: 0.1)
         : isUploaded
-        ? HangukInk.plum.withValues(alpha: 0.08)
-        : HangukInk.paper.withValues(alpha: 0.70);
+        ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+        : Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3);
 
     final Color borderColor = isApproved
-        ? HangukInk.jade.withValues(alpha: 0.32)
+        ? Colors.green.withValues(alpha: 0.3)
         : isUploaded
-        ? HangukInk.plum.withValues(alpha: 0.32)
-        : HangukInk.ink.withValues(alpha: 0.10);
+        ? Theme.of(context).colorScheme.primaryContainer
+        : Theme.of(context).dividerColor;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 11),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: HangukInk.ink.withValues(alpha: 0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 5),
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -63,29 +59,25 @@ class DocumentSlot extends StatelessWidget {
           SizedBox(
             width: 32,
             child: isApproved
-                ? const Icon(Icons.check_circle, color: HangukInk.jadeDeep)
+                ? const Icon(Icons.check_circle, color: Colors.green)
                 : isUploaded
                 ? const Icon(
                     Icons.check_circle_outline,
-                    color: HangukInk.plumDeep,
+                    color: AppColors.vibrantLime,
                   )
                 : Container(
-                    width: 26,
-                    height: 26,
+                    width: 24,
+                    height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: HangukInk.ink.withValues(alpha: 0.2),
-                        width: 2,
-                      ),
+                      border: Border.all(color: Colors.grey.shade400),
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '${index + 1}',
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: HangukInk.ink3,
+                        fontSize: 10,
+                        color: Colors.white70,
                       ),
                     ),
                   ),
@@ -100,21 +92,23 @@ class DocumentSlot extends StatelessWidget {
                 Text(
                   type.nameEn,
                   style: TextStyle(
-                    fontSize: 14.5,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    height: 1.25,
-                    color: isApproved ? HangukInk.jadeDeep : HangukInk.ink,
+                    color: isApproved ? Colors.green : Colors.white,
                   ),
                 ),
                 if (isUploaded && !isApproved)
-                  const Text(
+                  Text(
                     'Pending Review',
-                    style: TextStyle(fontSize: 12, color: HangukInk.plumDeep),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 if (isApproved)
                   const Text(
                     'Approved',
-                    style: TextStyle(fontSize: 12, color: HangukInk.jadeDeep),
+                    style: TextStyle(fontSize: 12, color: Colors.green),
                   ),
               ],
             ),
@@ -127,7 +121,7 @@ class DocumentSlot extends StatelessWidget {
               if (isUploaded || isApproved) ...[
                 IconButton(
                   icon: const Icon(Icons.visibility_outlined, size: 20),
-                  color: HangukInk.jadeDeep,
+                  color: AppColors.vibrantLime,
                   tooltip: l.a11yTooltipPreviewDocument,
                   onPressed: onPreviewTap,
                 ),
@@ -147,23 +141,14 @@ class DocumentSlot extends StatelessWidget {
                           height: 14,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.pureBlack,
                           ),
                         )
                       : const Icon(Icons.cloud_upload_outlined, size: 14),
                   label: const Text('Upload'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: HangukInk.plum,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    textStyle: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    textStyle: const TextStyle(fontSize: 12),
                     // WCAG 2.2 target-size minimum is 48dp on the height
                     // axis; previous 36dp height failed AA.
                     minimumSize: const Size(80, 48),

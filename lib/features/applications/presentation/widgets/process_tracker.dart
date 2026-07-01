@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../design_system/theme/hanguk_ink.dart';
 
 class ProcessTracker extends StatelessWidget {
   final String status;
@@ -62,8 +61,10 @@ class ProcessTracker extends StatelessWidget {
         final isLast = index == steps.length - 1;
         final isRejectedNode = isStatusRejected && index == activeIndex;
         final nodeColor = isActive
-            ? (isRejectedNode ? HangukInk.persimmon : HangukInk.jade)
-            : HangukInk.ink.withValues(alpha: 0.18);
+            ? (isRejectedNode
+                  ? Colors.redAccent
+                  : Theme.of(context).colorScheme.primary)
+            : Colors.grey.withValues(alpha: 0.3);
 
         return IntrinsicHeight(
           child: Row(
@@ -79,9 +80,7 @@ class ProcessTracker extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: nodeColor,
                       border: Border.all(
-                        color: isActive
-                            ? Colors.transparent
-                            : HangukInk.ink.withValues(alpha: 0.12),
+                        color: isActive ? Colors.transparent : Colors.white12,
                         width: 2,
                       ),
                     ),
@@ -98,8 +97,8 @@ class ProcessTracker extends StatelessWidget {
                       child: Container(
                         width: 2,
                         color: (index < activeIndex)
-                            ? HangukInk.jade
-                            : HangukInk.ink.withValues(alpha: 0.12),
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey.withValues(alpha: 0.2),
                       ),
                     ),
                 ],
@@ -116,7 +115,7 @@ class ProcessTracker extends StatelessWidget {
                       fontWeight: isActive
                           ? FontWeight.bold
                           : FontWeight.normal,
-                      color: isActive ? HangukInk.ink : HangukInk.ink3,
+                      color: isActive ? Colors.white : Colors.white54,
                     ),
                   ),
                 ),
