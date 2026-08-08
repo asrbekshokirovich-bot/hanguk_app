@@ -14,6 +14,7 @@ import '../../features/map/presentation/map_deeplink_provider.dart';
 import '../../features/map/presentation/widgets/university_roadview_screen.dart';
 import '../../features/uni_db/presentation/admin_review_screen.dart';
 import '../../features/uni_db/presentation/application_tracker_screen.dart';
+import '../../features/uni_db/presentation/confirmed_universities_screen.dart';
 import '../../features/uni_db/presentation/institution_compare_screen.dart';
 import '../../features/uni_db/presentation/institution_detail_screen.dart';
 import '../../features/uni_db/presentation/notification_settings_screen.dart';
@@ -41,6 +42,15 @@ part 'app_router.g.dart';
 // deletion flow — see `account_screen.dart`.
 List<RouteBase> _accountRoutes() => [
   GoRoute(path: '/account', builder: (context, state) => const AccountScreen()),
+];
+
+// Read-only list of universities with approved 2026 / 2027 admission data.
+// Plain GoRoute (same pattern as the others) so it needs no build_runner run.
+List<RouteBase> _confirmedUniversitiesRoutes() => [
+  GoRoute(
+    path: '/confirmed-universities',
+    builder: (context, state) => const ConfirmedUniversitiesScreen(),
+  ),
 ];
 
 List<RouteBase> _mapRoutes() => [
@@ -205,6 +215,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: <RouteBase>[
       ...$appRoutes,
       ..._accountRoutes(),
+      ..._confirmedUniversitiesRoutes(),
       ..._mapRoutes(),
       if (kUniDbEnabled) ..._uniDbRoutes(),
     ],

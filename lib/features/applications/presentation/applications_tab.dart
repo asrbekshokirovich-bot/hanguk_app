@@ -41,6 +41,12 @@ class ApplicationsTab extends ConsumerWidget {
             floating: true,
             snap: true,
             actions: [
+              // Confirmed 2026/2027 universities list.
+              IconButton(
+                icon: const Icon(Icons.verified_outlined),
+                tooltip: 'Confirmed universities',
+                onPressed: () => context.push('/confirmed-universities'),
+              ),
               // Day / dark mode switch — persisted across launches.
               const ThemeToggleButton(),
               // UI/UX audit P0 N1/N2 (2026-05-12): the bare sign-out
