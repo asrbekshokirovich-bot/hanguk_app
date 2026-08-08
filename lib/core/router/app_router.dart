@@ -8,6 +8,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/home/presentation/home_tab_provider.dart';
 import '../../features/home/presentation/welcome_screen.dart';
+import '../../features/guest/presentation/guest_explore_screen.dart';
 import '../../features/map/data/map_repository.dart';
 import '../../features/map/domain/university.dart';
 import '../../features/map/presentation/map_deeplink_provider.dart';
@@ -41,6 +42,15 @@ part 'app_router.g.dart';
 // deletion flow — see `account_screen.dart`.
 List<RouteBase> _accountRoutes() => [
   GoRoute(path: '/account', builder: (context, state) => const AccountScreen()),
+];
+
+// Guest Explorer ("Kashf etish") — browse universities without a Magic Code.
+// Allowed for unauthenticated users (see the redirect allowlist below).
+List<RouteBase> _guestRoutes() => [
+  GoRoute(
+    path: '/guest',
+    builder: (context, state) => const GuestExploreScreen(),
+  ),
 ];
 
 List<RouteBase> _mapRoutes() => [
@@ -205,6 +215,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: <RouteBase>[
       ...$appRoutes,
       ..._accountRoutes(),
+      ..._guestRoutes(),
       ..._mapRoutes(),
       if (kUniDbEnabled) ..._uniDbRoutes(),
     ],
@@ -215,10 +226,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final loc = state.uri.toString();
       final isGoingToLogin = loc == '/login';
       final isGoingToWelcome = loc == '/welcome';
+      // Guest Explorer is browsable without a session.
+      final isGoingToGuest = loc == '/guest';
 
       if (isLoading) return null;
 
-      if (!isAuthenticated && !isGoingToLogin && !isGoingToWelcome) {
+      if (!isAuthenticated &&
+          !isGoingToLogin &&
+          !isGoingToWelcome &&
+          !isGoingToGuest) {
         return '/welcome';
       }
 
