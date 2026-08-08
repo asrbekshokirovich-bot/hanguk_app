@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../map/data/map_repository.dart';
 import '../../map/domain/university.dart';
 import '../domain/approved_uni_details.dart';
@@ -167,12 +168,15 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text(
-                    '${_compare.length}/2 · Solishtirish',
-                    style: const TextStyle(
-                      color: _lime,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                  GestureDetector(
+                    onTap: () => _openCompare(unis),
+                    child: Text(
+                      '${_compare.length}/2 · Solishtirish',
+                      style: const TextStyle(
+                        color: _lime,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -253,7 +257,7 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
             ),
           ),
           GestureDetector(
-            onTap: () => context.push('/login', extra: {'magic_code': true}),
+            onTap: _showContact,
             child: Container(
               height: 36,
               padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -603,4 +607,312 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
       ),
     );
   }
+
+  // ─────────────────────── Compare ───────────────────────
+  void _openCompare(List<University> unis) {
+    final sel = unis.where((u) => _compare.contains(u.id)).toList();
+    if (sel.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Solishtirish uchun 2 ta universitet tanlang'),
+        ),
+      );
+      return;
+    }
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CompareSheet(a: sel[0], b: sel[1]),
+    );
+  }
+
+  // ─────────────────────── Contact ───────────────────────
+  void _showContact() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF0F213D),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Bog'lanish",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            _contactRow(Icons.send_rounded, 'Telegram',
+                '@hangukuz_consulting', 'https://t.me/hangukuz_consulting'),
+            _contactRow(Icons.campaign_rounded, 'Telegram kanal',
+                't.me/hanguk_consulting', 'https://t.me/hanguk_consulting'),
+            _contactRow(Icons.phone_rounded, 'Telefon',
+                '+998 50 590 15 30', 'tel:+998505901530'),
+            _contactRow(Icons.camera_alt_rounded, 'Instagram',
+                '@hanguk_consulting',
+                'https://www.instagram.com/hanguk_consulting'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _contactRow(IconData icon, String title, String subtitle, String url) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () async {
+          Navigator.of(context).pop();
+          await _launch(url);
+        },
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: _lime.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _lime.withValues(alpha: 0.3)),
+              ),
+              alignment: Alignment.center,
+              child: Icon(icon, color: _lime, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                color: Colors.white.withValues(alpha: 0.3)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launch(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ochib bo‘lmadi: $url')),
+      );
+    }
+  }
+}
+
+/// Side-by-side comparison of two universities (approved data only).
+class _CompareSheet extends StatelessWidget {
+  final University a;
+  final University b;
+  const _CompareSheet({required this.a, required this.b});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      builder: (context, scroll) => Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF132A4D), Color(0xFF0A0A1A)],
+          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: ListView(
+          controller: scroll,
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const Text(
+              'Solishtirish',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '대학 비교',
+              style: TextStyle(
+                color: Color(0xFFD4E94C),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const SizedBox(width: 108),
+                Expanded(child: _head(a.name)),
+                const SizedBox(width: 10),
+                Expanded(child: _head(b.name)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _row('Shahar', a.location, b.location),
+            _row('Reyting', a.ranking != null ? '#${a.ranking}' : '—',
+                b.ranking != null ? '#${b.ranking}' : '—'),
+            _row('Kontrakt narxi', _tuition(a), _tuition(b)),
+            _row('Ariza', _appDates(a), _appDates(b)),
+            _row('Hujjat muddati', _docDeadline(a), _docDeadline(b)),
+            _row('TOPIK', _topik(a), _topik(b)),
+            _row('Suhbat', _interview(a), _interview(b)),
+            _row('Ingliz tili', _english(a), _english(b)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _head(String name) => Text(
+        name,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+        ),
+      );
+
+  Widget _row(String label, String va, String vb) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 96,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: const Color(0xFFD4E94C).withValues(alpha: 0.85),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Expanded(child: _val(va)),
+          const SizedBox(width: 10),
+          Expanded(child: _val(vb)),
+        ],
+      ),
+    );
+  }
+
+  Widget _val(String v) => Text(
+        v,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+
+  String _tuition(University u) {
+    final d = approvedUniDetails[u.id];
+    if (d?.tuitionMinKrw == null) return '—';
+    final min = _fmtKrw(d!.tuitionMinKrw!);
+    if (d.tuitionMaxKrw != null && d.tuitionMaxKrw != d.tuitionMinKrw) {
+      return '$min–${_fmtKrw(d.tuitionMaxKrw!)} ₩';
+    }
+    return '$min ₩';
+  }
+
+  String _appDates(University u) {
+    final d = approvedUniDetails[u.id];
+    if (d == null || (d.appStart == null && d.appEnd == null)) return '—';
+    return '${d.appStart ?? '—'} → ${d.appEnd ?? '—'}';
+  }
+
+  String _docDeadline(University u) =>
+      approvedUniDetails[u.id]?.docDeadline ?? '—';
+
+  String _topik(University u) {
+    final t = approvedUniDetails[u.id]?.topikMin;
+    return t != null ? '≥ $t' : '—';
+  }
+
+  String _interview(University u) {
+    final v = approvedUniDetails[u.id]?.interviewRequired;
+    if (v == null) return '—';
+    return v ? 'Bor' : 'Yo‘q';
+  }
+
+  String _english(University u) {
+    final v = approvedUniDetails[u.id]?.englishAccepted;
+    if (v == null) return '—';
+    return v ? 'Qabul qilinadi' : '—';
+  }
+}
+
+String _fmtKrw(int v) {
+  final s = v.toString();
+  final b = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
+    b.write(s[i]);
+  }
+  return b.toString();
 }
