@@ -419,9 +419,9 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
         const SizedBox(width: 8),
         chip('Barchasi', null),
         const SizedBox(width: 8),
-        chip('2026 · 7', 2026),
+        chip('2026 · 15', 2026),
         const SizedBox(width: 8),
-        chip('2027 · 41', 2027),
+        chip('2027 · 42', 2027),
       ],
     );
   }
