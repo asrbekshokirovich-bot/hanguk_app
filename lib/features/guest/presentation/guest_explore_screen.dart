@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../map/data/map_repository.dart';
 import '../../map/domain/university.dart';
+import '../domain/approved_uni_details.dart';
 
 /// Guest Explorer ("Kashf etish") — browse Korean universities without a Magic
 /// Code. Seoul Night theme: dark navy→black gradient, glass cards, lime accents.
@@ -22,6 +23,7 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
   String _query = '';
   String _city = 'Hammasi';
   final Set<String> _compare = {}; // university ids, max 2
+  final Set<String> _expanded = {}; // ids showing approved details
 
   @override
   void dispose() {
@@ -374,6 +376,9 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
   Widget _card(University u) {
     final selected = _compare.contains(u.id);
     final glyph = (u.nameKoShort ?? u.nameKo ?? u.name).characters.first;
+    final detail = approvedUniDetails[u.id];
+    final hasDetail = detail != null && detail.hasAny;
+    final expanded = _expanded.contains(u.id);
     final metaParts = <String>[
       if (u.location.isNotEmpty) u.location,
       if (u.ranking != null) '#${u.ranking}',
@@ -386,7 +391,16 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+      GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: hasDetail
+            ? () => setState(() =>
+                expanded ? _expanded.remove(u.id) : _expanded.add(u.id))
+            : null,
+        child: Row(
         children: [
           Container(
             width: 46,
@@ -445,7 +459,110 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
           _compareToggle(u.id, selected),
         ],
       ),
+      ),
+      if (hasDetail && !expanded)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(
+            children: [
+              Icon(Icons.expand_more_rounded,
+                  size: 16, color: Colors.white.withValues(alpha: 0.4)),
+              const SizedBox(width: 4),
+              Text(
+                "Kontrakt, muddat, talablar",
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      if (hasDetail && expanded) _details(detail),
+        ],
+      ),
     );
+  }
+
+  Widget _details(ApprovedUniDetail d) {
+    final rows = <Widget>[];
+    if (d.tuitionMinKrw != null) {
+      final v = d.tuitionMaxKrw != null && d.tuitionMaxKrw != d.tuitionMinKrw
+          ? '${_krw(d.tuitionMinKrw!)}–${_krw(d.tuitionMaxKrw!)} ₩'
+          : '${_krw(d.tuitionMinKrw!)} ₩';
+      rows.add(_detailRow('Kontrakt narxi', '$v / semestr'));
+    }
+    if (d.appStart != null || d.appEnd != null) {
+      rows.add(_detailRow(
+        'Ariza topshirish',
+        '${d.appStart ?? '—'} → ${d.appEnd ?? '—'}',
+      ));
+    }
+    if (d.docDeadline != null) {
+      rows.add(_detailRow('Hujjat muddati', d.docDeadline!));
+    }
+    final req = <String>[];
+    if (d.topikMin != null) req.add('TOPIK ≥ ${d.topikMin}');
+    if (d.englishAccepted == true) req.add('Ingliz tili qabul qilinadi');
+    if (d.interviewRequired == true) req.add('Suhbat bor');
+    if (d.interviewRequired == false) req.add('Suhbatsiz');
+    if (req.isNotEmpty) {
+      rows.add(_detailRow('Qabul talablari', req.join(' · ')));
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(children: rows),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: const Color(0xFFD4E94C).withValues(alpha: 0.85),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _krw(int v) {
+    final s = v.toString();
+    final b = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
+      b.write(s[i]);
+    }
+    return b.toString();
   }
 
   Widget _tag(String label) => Container(
