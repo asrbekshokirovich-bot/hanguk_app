@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
-import '../../../../design_system/theme/theme_x.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../applications/data/applications_repository.dart';
 import '../../home/presentation/home_tab_provider.dart';
@@ -29,8 +28,8 @@ class TrainingTab extends ConsumerWidget {
               const SizedBox(height: 12),
               Text(
                 l.trainingTabTitle,
-                style: TextStyle(
-                  color: context.ink,
+                style: const TextStyle(
+                  color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
@@ -38,7 +37,7 @@ class TrainingTab extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 l.trainingTabSubtitle,
-                style: TextStyle(color: context.onS(0.7), fontSize: 14),
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -50,7 +49,7 @@ class TrainingTab extends ConsumerWidget {
                       title: l.studyPlanCardTitle,
                       description: l.studyPlanCardDesc,
                       icon: Icons.edit_document,
-                      color: context.ink,
+                      color: Colors.white,
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -65,7 +64,7 @@ class TrainingTab extends ConsumerWidget {
                       title: l.personalStatementCardTitle,
                       description: l.personalStatementCardDesc,
                       icon: Icons.person_search_rounded,
-                      color: context.ink,
+                      color: Colors.white,
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -110,10 +109,9 @@ class TrainingTab extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          // Glass card that adapts to light/dark.
-          color: context.isDark
-              ? const Color(0xFF0F213D).withValues(alpha: 0.6)
-              : Colors.white.withValues(alpha: 0.85),
+          color: const Color(
+            0xFF0F213D,
+          ).withValues(alpha: 0.6), // deep glassmorphism
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
           boxShadow: [
@@ -157,8 +155,8 @@ class TrainingTab extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      color: context.ink,
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,
@@ -168,7 +166,7 @@ class TrainingTab extends ConsumerWidget {
                   Text(
                     description,
                     style: TextStyle(
-                      color: context.onS(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                       height: 1.3,
                     ),
@@ -179,7 +177,7 @@ class TrainingTab extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: context.glassFill,
+                color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
               child: Icon(

@@ -8,7 +8,6 @@ import '../data/documents_repository.dart';
 import '../domain/document_type.dart';
 import '../domain/document.dart';
 import '../../../../design_system/theme/app_colors.dart';
-import '../../../../design_system/theme/theme_x.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'widgets/document_slot.dart';
 
@@ -115,14 +114,14 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
                       color: AppColors.vibrantLime.withValues(alpha: 0.2),
                     ),
                   ),
-                  child: Row(
+                  child: const Row(
                     children: [
-                      Icon(Icons.info_outline, color: context.accentText),
-                      const SizedBox(width: 12),
+                      Icon(Icons.info_outline, color: AppColors.vibrantLime),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Upload valid PDF or JPEG scans of your original documents. Max 10MB per file.',
-                          style: TextStyle(fontSize: 13, color: context.onS(0.7)),
+                          style: TextStyle(fontSize: 13, color: Colors.white70),
                         ),
                       ),
                     ],
@@ -134,6 +133,7 @@ class _DocumentsTabState extends ConsumerState<DocumentsTab> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),

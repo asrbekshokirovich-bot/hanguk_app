@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
 import '../../../../design_system/theme/app_colors.dart';
-import '../../../../design_system/theme/theme_x.dart';
 import '../../domain/university.dart';
 
 class UniversityCard extends StatelessWidget {
@@ -25,10 +24,10 @@ class UniversityCard extends StatelessWidget {
               children: [
                 Text(
                   university.name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
-                    color: context.ink,
+                    color: Colors.white,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -36,21 +35,21 @@ class UniversityCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   university.location,
-                  style: TextStyle(color: context.onS(0.54), fontSize: 13),
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 8),
-          _buildTierBadge(context),
+          _buildTierBadge(),
           if (university.isPartner) ...[
             const SizedBox(width: 6),
-            _buildPartnerChip(context),
+            _buildPartnerChip(),
           ],
           const SizedBox(width: 4),
-          Icon(
+          const Icon(
             Icons.chevron_right_rounded,
-            color: context.onS(0.24),
+            color: Colors.white24,
             size: 20,
           ),
         ],
@@ -126,7 +125,7 @@ class UniversityCard extends StatelessWidget {
   /// a tier-based "Top" pill: tier 0 (flagship) and tier 1 (top-ranked)
   /// get highlighted treatment; tier 2–4 show a dimmer "Tier N" label.
   /// Unclassified institutions (tier == null) render no badge.
-  Widget _buildTierBadge(BuildContext context) {
+  Widget _buildTierBadge() {
     final tier = university.tier;
     if (tier == null) return const SizedBox.shrink();
 
@@ -138,12 +137,12 @@ class UniversityCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isTop
             ? AppColors.vibrantLime.withValues(alpha: 0.15)
-            : context.glassFill,
+            : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isTop
               ? AppColors.vibrantLime.withValues(alpha: 0.4)
-              : context.hairline,
+              : Colors.white.withValues(alpha: 0.08),
         ),
       ),
       child: Text(
@@ -151,24 +150,24 @@ class UniversityCard extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: isTop ? context.accentText : context.onS(0.7),
+          color: isTop ? AppColors.vibrantLime : Colors.white70,
         ),
       ),
     );
   }
 
-  Widget _buildPartnerChip(BuildContext context) {
+  Widget _buildPartnerChip() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: AppColors.vibrantLime.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
+      child: const Text(
         'Partner',
         style: TextStyle(
           fontSize: 10,
-          color: context.accentText,
+          color: AppColors.vibrantLime,
           fontWeight: FontWeight.bold,
         ),
       ),

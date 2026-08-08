@@ -6,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/build_config.dart';
 import 'core/router/app_router.dart';
 import 'design_system/theme/app_theme.dart';
-import 'design_system/theme/theme_mode_provider.dart';
 import 'features/uni_db/data/push_token_bootstrap.dart';
 import 'features/updater/presentation/update_gate.dart';
 import 'l10n/app_localizations.dart';
@@ -83,7 +82,6 @@ class HangukApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(appRouterProvider);
-    final themeMode = ref.watch(themeModeProvider);
 
     // Read once so the bootstrap subscribes to auth-state changes.
     // Without this, the provider stays cold and tokens never register.
@@ -94,9 +92,7 @@ class HangukApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Hanguk Student App',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+      theme: AppTheme.materialTheme,
       routerConfig: goRouter,
       builder: (context, child) {
         final content = child ?? const SizedBox.shrink();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../design_system/theme/theme_x.dart';
 
 class ProcessTracker extends StatelessWidget {
   final String status;
@@ -65,7 +64,7 @@ class ProcessTracker extends StatelessWidget {
             ? (isRejectedNode
                   ? Colors.redAccent
                   : Theme.of(context).colorScheme.primary)
-            : context.onS(0.25);
+            : Colors.grey.withValues(alpha: 0.3);
 
         return IntrinsicHeight(
           child: Row(
@@ -81,7 +80,7 @@ class ProcessTracker extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: nodeColor,
                       border: Border.all(
-                        color: isActive ? Colors.transparent : context.onS(0.12),
+                        color: isActive ? Colors.transparent : Colors.white12,
                         width: 2,
                       ),
                     ),
@@ -99,7 +98,7 @@ class ProcessTracker extends StatelessWidget {
                         width: 2,
                         color: (index < activeIndex)
                             ? Theme.of(context).colorScheme.primary
-                            : context.onS(0.12),
+                            : Colors.grey.withValues(alpha: 0.2),
                       ),
                     ),
                 ],
@@ -116,7 +115,7 @@ class ProcessTracker extends StatelessWidget {
                       fontWeight: isActive
                           ? FontWeight.bold
                           : FontWeight.normal,
-                      color: isActive ? context.ink : context.onS(0.5),
+                      color: isActive ? Colors.white : Colors.white54,
                     ),
                   ),
                 ),

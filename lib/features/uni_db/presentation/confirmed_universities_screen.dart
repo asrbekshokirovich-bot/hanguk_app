@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../design_system/adaptive/hanguk_scaffold.dart';
 import '../../../design_system/theme/app_colors.dart';
-import '../../../design_system/theme/theme_x.dart';
 import '../domain/confirmed_universities.dart';
 
 /// Read-only list of universities with approved admission data for the 2026
@@ -16,8 +15,6 @@ class ConfirmedUniversitiesScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Confirmed Universities'),
         backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        foregroundColor: context.ink,
         elevation: 0,
       ),
       body: ListView(
@@ -69,8 +66,8 @@ class _YearSection extends StatelessWidget {
               ),
               child: Text(
                 year,
-                style: TextStyle(
-                  color: context.accentText,
+                style: const TextStyle(
+                  color: AppColors.vibrantLime,
                   fontWeight: FontWeight.w800,
                   fontSize: 14,
                 ),
@@ -79,22 +76,26 @@ class _YearSection extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               subtitle,
-              style: TextStyle(color: context.onS(0.6), fontSize: 13),
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
           ],
         ),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: context.glassFill,
+            color: AppColors.surfaceGlass.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: context.hairline),
+            border: Border.all(color: AppColors.borderGlass),
           ),
           child: Column(
             children: [
               for (var i = 0; i < items.length; i++) ...[
                 if (i > 0)
-                  Divider(height: 1, color: context.hairline, indent: 54),
+                  const Divider(
+                    height: 1,
+                    color: AppColors.borderGlass,
+                    indent: 54,
+                  ),
                 _UniRow(index: i + 1, uni: items[i]),
               ],
             ],
@@ -121,8 +122,8 @@ class _UniRow extends StatelessWidget {
             width: 28,
             child: Text(
               '$index',
-              style: TextStyle(
-                color: context.onS(0.4),
+              style: const TextStyle(
+                color: Colors.white38,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
@@ -134,8 +135,8 @@ class _UniRow extends StatelessWidget {
               children: [
                 Text(
                   uni.nameEn,
-                  style: TextStyle(
-                    color: context.ink,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -143,12 +144,16 @@ class _UniRow extends StatelessWidget {
                 const SizedBox(height: 1),
                 Text(
                   uni.nameKo,
-                  style: TextStyle(color: context.onS(0.55), fontSize: 12.5),
+                  style: const TextStyle(color: Colors.white54, fontSize: 12.5),
                 ),
               ],
             ),
           ),
-          Icon(Icons.verified_rounded, size: 18, color: context.accentText),
+          const Icon(
+            Icons.verified_rounded,
+            size: 18,
+            color: AppColors.vibrantLime,
+          ),
         ],
       ),
     );

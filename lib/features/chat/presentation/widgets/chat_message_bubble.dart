@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/chat_message.dart';
 import '../../../../design_system/theme/app_colors.dart';
-import '../../../../design_system/theme/theme_x.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
 
 class ChatMessageBubble extends StatelessWidget {
@@ -44,7 +43,7 @@ class ChatMessageBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isUser
                     ? AppColors.vibrantLime
-                    : context.glassFill,
+                    : AppColors.surfaceGlass.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20).copyWith(
                   bottomRight: isUser
                       ? const Radius.circular(4)
@@ -55,13 +54,13 @@ class ChatMessageBubble extends StatelessWidget {
                 ),
                 border: isUser
                     ? null
-                    : Border.all(color: context.hairline, width: 0.5),
+                    : Border.all(color: AppColors.borderGlass, width: 0.5),
               ),
               child: Text(
                 message.content,
                 style: TextStyle(
                   fontSize: 15,
-                  color: isUser ? AppColors.pureBlack : context.ink,
+                  color: isUser ? AppColors.pureBlack : Colors.white,
                   height: 1.4,
                 ),
               ),
@@ -74,13 +73,13 @@ class ChatMessageBubble extends StatelessWidget {
               height: 32,
               width: 32,
               decoration: BoxDecoration(
-                color: context.onS(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.person_outline,
                 size: 16,
-                color: context.onS(0.7),
+                color: Colors.white70,
               ),
             ),
           ],
