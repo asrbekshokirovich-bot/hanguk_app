@@ -3,7 +3,6 @@ import '../../domain/document_type.dart';
 import '../../domain/document.dart';
 import '../../../../design_system/adaptive/hanguk_card.dart';
 import '../../../../design_system/theme/app_colors.dart';
-import '../../../../design_system/theme/theme_x.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class DocumentSlot extends StatelessWidget {
@@ -62,23 +61,23 @@ class DocumentSlot extends StatelessWidget {
             child: isApproved
                 ? const Icon(Icons.check_circle, color: Colors.green)
                 : isUploaded
-                ? Icon(
+                ? const Icon(
                     Icons.check_circle_outline,
-                    color: context.accentText,
+                    color: AppColors.vibrantLime,
                   )
                 : Container(
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: context.onS(0.3)),
+                      border: Border.all(color: Colors.grey.shade400),
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '${index + 1}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 10,
-                        color: context.onS(0.6),
+                        color: Colors.white70,
                       ),
                     ),
                   ),
@@ -95,7 +94,7 @@ class DocumentSlot extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isApproved ? Colors.green : context.ink,
+                    color: isApproved ? Colors.green : Colors.white,
                   ),
                 ),
                 if (isUploaded && !isApproved)
@@ -122,7 +121,7 @@ class DocumentSlot extends StatelessWidget {
               if (isUploaded || isApproved) ...[
                 IconButton(
                   icon: const Icon(Icons.visibility_outlined, size: 20),
-                  color: context.accentText,
+                  color: AppColors.vibrantLime,
                   tooltip: l.a11yTooltipPreviewDocument,
                   onPressed: onPreviewTap,
                 ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/theme/app_colors.dart';
-import '../../../../design_system/theme/theme_x.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../data/map_analytics.dart';
 import '../data/map_repository.dart';
@@ -124,8 +123,8 @@ class _MapTabState extends ConsumerState<MapTab> {
                     padding: const EdgeInsets.only(right: 12),
                     child: Text(
                       l.mapTabTitle,
-                      style: TextStyle(
-                        color: context.ink,
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -135,20 +134,20 @@ class _MapTabState extends ConsumerState<MapTab> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      style: TextStyle(color: context.ink, fontSize: 14),
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Search...',
-                        hintStyle: TextStyle(
-                          color: context.onS(0.6),
+                        hintStyle: const TextStyle(
+                          color: Colors.white70,
                           fontSize: 14,
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.search_rounded,
-                          color: context.onS(0.6),
+                          color: Colors.white70,
                           size: 20,
                         ),
                         filled: true,
-                        fillColor: context.glassFill,
+                        fillColor: Colors.white.withValues(alpha: 0.07),
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 10,
                         ),
@@ -162,9 +161,9 @@ class _MapTabState extends ConsumerState<MapTab> {
                                 button: true,
                                 child: GestureDetector(
                                   onTap: () => _searchController.clear(),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.close,
-                                    color: context.onS(0.6),
+                                    color: Colors.white70,
                                     size: 18,
                                   ),
                                 ),
@@ -287,9 +286,9 @@ class _MapTabState extends ConsumerState<MapTab> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.search_off_rounded,
-                    color: context.onS(0.24),
+                    color: Colors.white24,
                     size: 64,
                   ),
                   const SizedBox(height: 16),
@@ -297,8 +296,8 @@ class _MapTabState extends ConsumerState<MapTab> {
                     _searchQuery.isNotEmpty
                         ? 'No results for "$_searchQuery"'
                         : 'No universities match this filter',
-                    style: TextStyle(
-                      color: context.onS(0.7),
+                    style: const TextStyle(
+                      color: Colors.white70,
                       fontSize: 14,
                     ),
                   ),
@@ -308,9 +307,9 @@ class _MapTabState extends ConsumerState<MapTab> {
                       _searchController.clear();
                       setState(() => _activeFilter = 'all');
                     },
-                    child: Text(
+                    child: const Text(
                       'Clear filters',
-                      style: TextStyle(color: context.accentText),
+                      style: TextStyle(color: AppColors.vibrantLime),
                     ),
                   ),
                 ],
@@ -347,37 +346,37 @@ class _MapTabState extends ConsumerState<MapTab> {
               color: Colors.red.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.wifi_off_rounded,
-              color: context.onS(0.7),
+              color: Colors.white70,
               size: 40,
             ),
           ),
           const SizedBox(height: 20),
-          Text(
+          const Text(
             'Could not load universities',
             style: TextStyle(
-              color: context.ink,
+              color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          const Text(
             'Check your connection and try again',
-            style: TextStyle(color: context.onS(0.7), fontSize: 13),
+            style: TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 20),
           OutlinedButton.icon(
             onPressed: () => ref.refresh(universitiesProvider),
-            icon: Icon(
+            icon: const Icon(
               Icons.refresh_rounded,
               size: 18,
-              color: context.accentText,
+              color: AppColors.vibrantLime,
             ),
-            label: Text(
+            label: const Text(
               'Retry',
-              style: TextStyle(color: context.accentText),
+              style: TextStyle(color: AppColors.vibrantLime),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(
@@ -419,17 +418,17 @@ class _ToggleButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isMapMode
                 ? AppColors.vibrantLime.withValues(alpha: 0.15)
-                : context.glassFill,
+                : Colors.white.withValues(alpha: 0.07),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isMapMode
                   ? AppColors.vibrantLime.withValues(alpha: 0.4)
-                  : context.hairline,
+                  : Colors.white.withValues(alpha: 0.08),
             ),
           ),
           child: Icon(
             isMapMode ? Icons.list_rounded : Icons.map_outlined,
-            color: isMapMode ? context.accentText : context.onS(0.6),
+            color: isMapMode ? AppColors.vibrantLime : Colors.white60,
             size: 20,
           ),
         ),
@@ -469,12 +468,12 @@ class _FilterChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected
                 ? AppColors.vibrantLime.withValues(alpha: 0.15)
-                : context.glassFill,
+                : Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: selected
                   ? AppColors.vibrantLime.withValues(alpha: 0.5)
-                  : context.hairline,
+                  : Colors.white.withValues(alpha: 0.08),
             ),
           ),
           child: Row(
@@ -483,7 +482,7 @@ class _FilterChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: selected ? context.accentText : context.onS(0.7),
+                color: selected ? AppColors.vibrantLime : Colors.white70,
               ),
               const SizedBox(width: 5),
               Text(
@@ -491,7 +490,7 @@ class _FilterChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  color: selected ? context.accentText : context.onS(0.54),
+                  color: selected ? AppColors.vibrantLime : Colors.white54,
                 ),
               ),
             ],

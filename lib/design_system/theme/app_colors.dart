@@ -26,28 +26,11 @@ class AppColors {
   static const Color borderGlass = Color(0x1AFFFFFF); // 10% white
   static const Color backgroundNavy = Color(0xFF0A0A1A);
 
-  // Gradients — dark mode (default app background)
+  // Gradients
   static const List<Color> mainGradient = [
     royalBlue,
     Color(0xFF132A4D),
     Color(0xFF0F213D),
     backgroundNavy,
   ];
-
-  // Gradients — light (day) mode. Soft blue-grey wash matching the day-mode
-  // mockups; keeps the royal-blue brand feel without the heavy navy.
-  static const List<Color> lightGradient = [
-    Color(0xFFF4F8FD),
-    Color(0xFFEDF3FA),
-    Color(0xFFE6EEF7),
-    Color(0xFFDDE9F5),
-  ];
-
-  // Light-mode ink (text) colours — navy on light surfaces.
-  static const Color inkNavy = Color(0xFF14213B); // primary text (light)
-  static const Color inkNavy60 = Color(0x9914213B); // secondary text (light)
-  static const Color lightSurface = Color(0xFFFFFFFF);
-  // Darker olive-lime that stays legible as *text/icon* on light surfaces
-  // (pure vibrantLime fails contrast on white).
-  static const Color limeInk = Color(0xFF566B0E);
 }
