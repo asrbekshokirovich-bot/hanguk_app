@@ -23,6 +23,7 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
   final _searchCtrl = TextEditingController();
   String _query = '';
   String _city = 'Hammasi';
+  int? _year; // null = all, 2026, or 2027 (approved-year filter)
   final Set<String> _compare = {}; // university ids, max 2
   final Set<String> _expanded = {}; // ids showing approved details
 
@@ -45,6 +46,9 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
 
   List<University> _filter(List<University> all) {
     return all.where((u) {
+      if (_year != null && !(approvedYears[u.id]?.contains(_year) ?? false)) {
+        return false;
+      }
       if (_city != 'Hammasi' && u.location != _city) return false;
       if (_query.isEmpty) return true;
       final q = _query.toLowerCase();
@@ -156,6 +160,8 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
               _searchField(),
               const SizedBox(height: 12),
               _cityChips(cities),
+              const SizedBox(height: 10),
+              _yearChips(),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -377,8 +383,52 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
     );
   }
 
+  Widget _yearChips() {
+    Widget chip(String label, int? year) {
+      final sel = _year == year;
+      return GestureDetector(
+        onTap: () => setState(() => _year = year),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: sel ? _lime : Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: sel ? _lime : Colors.white.withValues(alpha: 0.12),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: sel ? _ink : Colors.white.withValues(alpha: 0.75),
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        const Text('Tasdiqlangan',
+            style: TextStyle(
+                color: Color(0xB3D4E94C),
+                fontSize: 10,
+                fontWeight: FontWeight.w700)),
+        const SizedBox(width: 8),
+        chip('Barchasi', null),
+        const SizedBox(width: 8),
+        chip('2026 · 7', 2026),
+        const SizedBox(width: 8),
+        chip('2027 · 41', 2027),
+      ],
+    );
+  }
+
   Widget _card(University u) {
     final selected = _compare.contains(u.id);
+    final years = approvedYears[u.id];
     final glyph = (u.nameKoShort ?? u.nameKo ?? u.name).characters.first;
     final detail = approvedUniDetails[u.id];
     final hasDetail = detail != null && detail.hasAny;
@@ -458,8 +508,15 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          if (u.isTopTier) _tag('outstanding'),
-          const SizedBox(width: 8),
+          if (years != null)
+            for (final y in years) ...[
+              _yearBadge(y),
+              const SizedBox(width: 6),
+            ]
+          else if (u.isTopTier) ...[
+            _tag('outstanding'),
+            const SizedBox(width: 8),
+          ],
           _compareToggle(u.id, selected),
         ],
       ),
@@ -568,6 +625,23 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
     }
     return b.toString();
   }
+
+  Widget _yearBadge(int year) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: _lime.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: _lime.withValues(alpha: 0.4)),
+        ),
+        child: Text(
+          '$year',
+          style: const TextStyle(
+            color: _lime,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      );
 
   Widget _tag(String label) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
