@@ -3,6 +3,125 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTheme {
+  /// Dark theme is the app's original look; [materialTheme] is kept as an
+  /// alias so existing references (e.g. the splash screen) keep working.
+  static ThemeData get darkTheme => materialTheme;
+
+  /// Light (day) theme — Royal Blue brand on soft blue-grey surfaces, with
+  /// the lime accent kept for CTAs. Navy ink for text so it stays legible.
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.lightGradient.first,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.royalBlue,
+        onPrimary: Colors.white,
+        secondary: AppColors.vibrantLime,
+        onSecondary: AppColors.inkNavy,
+        surface: AppColors.lightSurface,
+        onSurface: AppColors.inkNavy,
+        error: AppColors.error,
+        onError: Colors.white,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+        elevation: 0,
+        titleTextStyle: TextStyle(
+          color: AppColors.inkNavy,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        iconTheme: IconThemeData(color: AppColors.royalBlue),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.vibrantLime,
+          foregroundColor: AppColors.inkNavy,
+          textStyle: const TextStyle(fontWeight: FontWeight.bold),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.royalBlue,
+          side: BorderSide(color: AppColors.royalBlue.withValues(alpha: 0.25)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.75),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: AppColors.royalBlue.withValues(alpha: 0.18),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: AppColors.royalBlue.withValues(alpha: 0.18),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.royalBlue),
+        ),
+        hintStyle: const TextStyle(color: AppColors.inkNavy60),
+        prefixIconColor: AppColors.inkNavy60,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.white.withValues(alpha: 0.92),
+        indicatorColor: AppColors.royalBlue.withValues(alpha: 0.14),
+        elevation: 0,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppColors.royalBlue,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return const TextStyle(color: AppColors.inkNavy60, fontSize: 12);
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: AppColors.royalBlue);
+          }
+          return const IconThemeData(color: AppColors.inkNavy60);
+        }),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: Colors.white,
+        unselectedLabelColor: AppColors.inkNavy60,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        indicator: BoxDecoration(
+          color: AppColors.royalBlue,
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: Colors.white.withValues(alpha: 0.85),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: AppColors.royalBlue.withValues(alpha: 0.10),
+            width: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+
   // Material 3 Theme for Android
   static ThemeData get materialTheme {
     return ThemeData(

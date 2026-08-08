@@ -21,13 +21,14 @@ class HangukScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: AppColors.mainGradient,
-          stops: [0.0, 0.3, 0.6, 1.0],
+          colors: isDark ? AppColors.mainGradient : AppColors.lightGradient,
+          stops: const [0.0, 0.3, 0.6, 1.0],
         ),
       ),
       child: Scaffold(
