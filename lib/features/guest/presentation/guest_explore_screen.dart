@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../map/data/map_repository.dart';
 import '../../map/domain/university.dart';
 import '../data/approved_admissions_provider.dart';
 
@@ -53,9 +52,11 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
 
   List<University> _filter(List<University> all) {
     return all.where((u) {
-      if (_year != null && !(_approved.years[u.id]?.contains(_year) ?? false)) {
-        return false;
-      }
+      // Approval is required at every setting, not only when a year chip is
+      // active. `_year == null` means "any approved year" — it used to skip
+      // this check altogether, which listed all 204 map-visible institutions
+      // as though each were researched.
+      if (!_approved.isApprovedFor(u.id, _year)) return false;
       if (_city != 'Hammasi' && u.location != _city) return false;
       if (_query.isEmpty) return true;
       final q = _query.toLowerCase();
@@ -67,9 +68,11 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final uniAsync = ref.watch(universitiesProvider);
-    _approved =
-        ref.watch(approvedAdmissionsProvider).value ?? ApprovedAdmissions.empty;
+    // The list comes from the approved-admissions view, not from
+    // `v_institutions_for_map`: that one is gated on `is_visible_on_map`,
+    // false for 10 institutions that do have published data.
+    final approvedAsync = ref.watch(approvedAdmissionsProvider);
+    _approved = approvedAsync.value ?? ApprovedAdmissions.empty;
     return Scaffold(
       body: DecoratedBox(
         decoration: const BoxDecoration(
@@ -86,12 +89,12 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
           ),
         ),
         child: SafeArea(
-          child: uniAsync.when(
+          child: approvedAsync.when(
             loading: () => const Center(
               child: CircularProgressIndicator(color: _lime),
             ),
             error: (e, _) => _error(),
-            data: (unis) => _content(unis),
+            data: (a) => _content(a.universities),
           ),
         ),
       ),
@@ -110,7 +113,7 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
             ),
             const SizedBox(height: 14),
             TextButton(
-              onPressed: () => ref.refresh(universitiesProvider),
+              onPressed: () => ref.refresh(approvedAdmissionsProvider),
               child: const Text('Qayta urinish',
                   style: TextStyle(color: _lime)),
             ),

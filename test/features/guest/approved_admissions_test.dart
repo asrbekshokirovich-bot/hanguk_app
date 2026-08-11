@@ -129,12 +129,15 @@ void main() {
   });
 
   group('ApprovedAdmissions', () {
-    test('a null year filter matches every institution', () {
-      expect(ApprovedAdmissions.empty.isApprovedFor('anything', null), isTrue);
+    test('a null year means ANY approved year, not "no filter"', () {
+      // Nothing is approved in `empty`, so nothing is listed — even with no
+      // year chip active.
+      expect(ApprovedAdmissions.empty.isApprovedFor('anything', null), isFalse);
     });
 
     test('an unknown institution matches no specific year', () {
       const a = ApprovedAdmissions(
+        universities: [],
         years: {'inst-1': [2027]},
         details: {},
         detailYear: {},
@@ -144,7 +147,22 @@ void main() {
       expect(a.isApprovedFor('inst-2', 2027), isFalse);
     });
 
+    test('an institution with no approved year never passes the filter', () {
+      // The bug this replaced: `_year == null` ("Hammasi") skipped the check
+      // entirely, so every map-visible institution was listed as researched.
+      // A null year now means "any approved year", not "no filter".
+      const a = ApprovedAdmissions(
+        universities: [],
+        years: {'approved': [2027]},
+        details: {},
+        detailYear: {},
+      );
+      expect(a.isApprovedFor('approved', null), isTrue);
+      expect(a.isApprovedFor('never-approved', null), isFalse);
+    });
+
     test('empty is safe to render before the first fetch lands', () {
+      expect(ApprovedAdmissions.empty.universities, isEmpty);
       expect(ApprovedAdmissions.empty.years, isEmpty);
       expect(ApprovedAdmissions.empty.details, isEmpty);
       expect(ApprovedAdmissions.empty.detailYear, isEmpty);
