@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../map/data/map_repository.dart';
 import '../../map/domain/university.dart';
-import '../domain/approved_uni_details.dart';
+import '../data/approved_admissions_provider.dart';
 
 /// Guest Explorer ("Kashf etish") — browse Korean universities without a Magic
 /// Code. Seoul Night theme: dark navy→black gradient, glass cards, lime accents.
@@ -27,6 +27,13 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
   final Set<String> _compare = {}; // university ids, max 2
   final Set<String> _expanded = {}; // ids showing approved details
 
+  /// Approved-admission rows, read live from `v_guest_approved_admissions`.
+  /// Assigned from the watched provider at the top of `build` so the render
+  /// helpers below can read it without threading it through every signature.
+  /// Empty until the first fetch lands — the year filter then matches nothing
+  /// and cards show dashes, which is the honest state while loading.
+  ApprovedAdmissions _approved = ApprovedAdmissions.empty;
+
   @override
   void dispose() {
     _searchCtrl.dispose();
@@ -46,7 +53,7 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
 
   List<University> _filter(List<University> all) {
     return all.where((u) {
-      if (_year != null && !(approvedYears[u.id]?.contains(_year) ?? false)) {
+      if (_year != null && !(_approved.years[u.id]?.contains(_year) ?? false)) {
         return false;
       }
       if (_city != 'Hammasi' && u.location != _city) return false;
@@ -61,6 +68,8 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final uniAsync = ref.watch(universitiesProvider);
+    _approved =
+        ref.watch(approvedAdmissionsProvider).value ?? ApprovedAdmissions.empty;
     return Scaffold(
       body: DecoratedBox(
         decoration: const BoxDecoration(
@@ -428,9 +437,9 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
 
   Widget _card(University u) {
     final selected = _compare.contains(u.id);
-    final years = approvedYears[u.id];
+    final years = _approved.years[u.id];
     final glyph = (u.nameKoShort ?? u.nameKo ?? u.name).characters.first;
-    final detail = approvedUniDetails[u.id];
+    final detail = _approved.details[u.id];
     final hasDetail = detail != null && detail.hasAny;
     final expanded = _expanded.contains(u.id);
     final metaParts = <String>[
@@ -540,19 +549,29 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
             ],
           ),
         ),
-      if (hasDetail && expanded) _details(detail),
+      if (hasDetail && expanded) _details(detail, _approved.detailYear[u.id]),
         ],
       ),
     );
   }
 
-  Widget _details(ApprovedUniDetail d) {
+  Widget _details(ApprovedUniDetail d, int? intakeYear) {
     final rows = <Widget>[];
     if (d.tuitionMinKrw != null) {
       final v = d.tuitionMaxKrw != null && d.tuitionMaxKrw != d.tuitionMinKrw
           ? '${_krw(d.tuitionMinKrw!)}–${_krw(d.tuitionMaxKrw!)} ₩'
           : '${_krw(d.tuitionMinKrw!)} ₩';
-      rows.add(_detailRow('Kontrakt narxi', '$v / semestr'));
+      // Korean guidelines quote the current year's fees, so a 2027 모집요강
+      // carries a table stamped 2026 — every fee in the catalogue today is
+      // 2026 while most intakes are 2027. Name the year rather than letting
+      // last year's figure pass as the one the student will be charged.
+      final other = intakeYear != null && d.tuitionIsFromAnotherYear(intakeYear);
+      rows.add(_detailRow(
+        'Kontrakt narxi',
+        other
+            ? '$v / semestr · ${d.tuitionAcademicYear} yil ma’lumoti'
+            : '$v / semestr',
+      ));
     }
     if (d.appStart != null || d.appEnd != null) {
       rows.add(_detailRow(
@@ -697,7 +716,11 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CompareSheet(a: sel[0], b: sel[1]),
+      builder: (_) => _CompareSheet(
+        a: sel[0],
+        b: sel[1],
+        details: _approved.details,
+      ),
     );
   }
 
@@ -820,7 +843,16 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
 class _CompareSheet extends StatelessWidget {
   final University a;
   final University b;
-  const _CompareSheet({required this.a, required this.b});
+
+  /// Passed in rather than read from a top-level map: the rows come from
+  /// `v_guest_approved_admissions` now, and a sheet cannot watch a provider.
+  final Map<String, ApprovedUniDetail> details;
+
+  const _CompareSheet({
+    required this.a,
+    required this.b,
+    required this.details,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -945,7 +977,7 @@ class _CompareSheet extends StatelessWidget {
       );
 
   String _tuition(University u) {
-    final d = approvedUniDetails[u.id];
+    final d = details[u.id];
     if (d?.tuitionMinKrw == null) return '—';
     final min = _fmtKrw(d!.tuitionMinKrw!);
     if (d.tuitionMaxKrw != null && d.tuitionMaxKrw != d.tuitionMinKrw) {
@@ -955,27 +987,27 @@ class _CompareSheet extends StatelessWidget {
   }
 
   String _appDates(University u) {
-    final d = approvedUniDetails[u.id];
+    final d = details[u.id];
     if (d == null || (d.appStart == null && d.appEnd == null)) return '—';
     return '${d.appStart ?? '—'} → ${d.appEnd ?? '—'}';
   }
 
   String _docDeadline(University u) =>
-      approvedUniDetails[u.id]?.docDeadline ?? '—';
+      details[u.id]?.docDeadline ?? '—';
 
   String _topik(University u) {
-    final t = approvedUniDetails[u.id]?.topikMin;
+    final t = details[u.id]?.topikMin;
     return t != null ? '≥ $t' : '—';
   }
 
   String _interview(University u) {
-    final v = approvedUniDetails[u.id]?.interviewRequired;
+    final v = details[u.id]?.interviewRequired;
     if (v == null) return '—';
     return v ? 'Bor' : 'Yo‘q';
   }
 
   String _english(University u) {
-    final v = approvedUniDetails[u.id]?.englishAccepted;
+    final v = details[u.id]?.englishAccepted;
     if (v == null) return '—';
     return v ? 'Qabul qilinadi' : '—';
   }
