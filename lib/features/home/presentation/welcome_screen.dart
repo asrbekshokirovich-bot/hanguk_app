@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../updater/data/updater_repository.dart';
-import '../../updater/presentation/update_dialog.dart';
 
 /// "Seoul Night" welcome screen — dark navy→black gradient, glass, and a lime
 /// action colour, with a guest-mode entry that needs no Magic Code.
@@ -14,26 +12,17 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkForUpdates();
-    });
-  }
-
-  Future<void> _checkForUpdates() async {
-    final repo = ref.read(updaterRepositoryProvider);
-    final versionInfo = await repo.checkForUpdate();
-    if (!mounted) return;
-    if (versionInfo is UpdateAvailable) {
-      showDialog(
-        context: context,
-        barrierDismissible: !versionInfo.effectivelyForced,
-        builder: (context) => const UpdateDialog(),
-      );
-    }
-  }
+  // No update check here. This screen used to run the APK self-updater on
+  // first frame — read `app_versions`, then open UpdateDialog to download a
+  // build from Supabase Storage and hand it to the OS installer.
+  //
+  // That install path cannot succeed in any build: `REQUEST_INSTALL_PACKAGES`
+  // was stripped from the manifest after Play blocked version 2041 over it.
+  // So the check could only ever end in the failure dialog — and it fired on
+  // the very first screen a student sees, before they had touched anything.
+  //
+  // Updates come from Play. home_screen carried its own copy of the same
+  // check and loses it in the same change.
 
   @override
   Widget build(BuildContext context) {
