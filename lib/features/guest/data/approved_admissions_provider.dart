@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../map/domain/university.dart';
+
 /// Approved admission details for one institution, read from
 /// `v_guest_approved_admissions`.
 ///
@@ -89,10 +91,20 @@ class ApprovedUniDetail {
   }
 }
 
-/// What Guest Explore needs about approved admissions, in the two shapes the
-/// screen already reads: which intake years each institution is approved for,
-/// and the detail block to show on its card.
+/// What Guest Explore needs about approved admissions: the universities to
+/// list, which intake years each is approved for, and the detail block for its
+/// card.
 class ApprovedAdmissions {
+  /// The universities to list, built from this view rather than from
+  /// `v_institutions_for_map`.
+  ///
+  /// That view is gated on `is_visible_on_map`, which is false for 10
+  /// institutions that do have published admission data — Dong Seoul alone has
+  /// 14 cycles. On a screen whose whole promise is "the universities we have
+  /// researched", a map-visibility flag is the wrong gate, and it silently
+  /// withheld schools a student could apply to.
+  final List<University> universities;
+
   /// institution id → approved intake years, ascending.
   final Map<String, List<int>> years;
 
@@ -108,19 +120,31 @@ class ApprovedAdmissions {
   final Map<String, int> detailYear;
 
   const ApprovedAdmissions({
+    required this.universities,
     required this.years,
     required this.details,
     required this.detailYear,
   });
 
   static const empty = ApprovedAdmissions(
+    universities: [],
     years: {},
     details: {},
     detailYear: {},
   );
 
-  bool isApprovedFor(String id, int? year) =>
-      year == null || (years[id]?.contains(year) ?? false);
+  /// Whether this institution belongs in the list at the given year setting.
+  ///
+  /// A null `year` is the "Hammasi" chip and means **any approved year**, not
+  /// "no filter": an institution with no approved year is never listed. The
+  /// old reading — skip the check entirely when no year was chosen — is what
+  /// put all 204 map-visible institutions on a screen that promises researched
+  /// ones.
+  bool isApprovedFor(String id, int? year) {
+    final ys = years[id];
+    if (ys == null || ys.isEmpty) return false;
+    return year == null || ys.contains(year);
+  }
 }
 
 /// Live read of `v_guest_approved_admissions`.
@@ -133,7 +157,10 @@ final approvedAdmissionsProvider = FutureProvider<ApprovedAdmissions>((
   final rows = await Supabase.instance.client
       .from('v_guest_approved_admissions')
       .select(
-        'institution_id, intake_year, tuition_academic_year, '
+        'institution_id, intake_year, '
+        'name_ko, name_ko_short, name_en, name_uz, city_ko, tier, '
+        'ieqas_status, is_partner, logo_url, '
+        'tuition_academic_year, '
         'tuition_min_krw, tuition_max_krw, admission_fee_krw, '
         'application_start, application_end, document_deadline, '
         'topik_min_level, interview_required, english_accepted',
@@ -143,6 +170,7 @@ final approvedAdmissionsProvider = FutureProvider<ApprovedAdmissions>((
   final years = <String, List<int>>{};
   final details = <String, ApprovedUniDetail>{};
   final detailYear = <String, int>{};
+  final unis = <String, University>{};
 
   for (final row in rows as List) {
     final r = row as Map<String, dynamic>;
@@ -155,11 +183,59 @@ final approvedAdmissionsProvider = FutureProvider<ApprovedAdmissions>((
     // the earlier one, leaving the newest year's detail.
     details[id] = ApprovedUniDetail.fromRow(r);
     detailYear[id] = year;
+    unis[id] ??= _university(id, r);
   }
 
+  // Top tier first, then by name, so the list opens on the schools a student
+  // is most likely to be weighing.
+  final list = unis.values.toList()
+    ..sort((a, b) {
+      final at = a.tier ?? 99;
+      final bt = b.tier ?? 99;
+      return at != bt ? at.compareTo(bt) : a.name.compareTo(b.name);
+    });
+
   return ApprovedAdmissions(
+    universities: list,
     years: years,
     details: details,
     detailYear: detailYear,
   );
 });
+
+/// Build the catalogue entry from a view row.
+///
+/// Name resolution mirrors `map_repository`: English, then Uzbek, then the
+/// short Korean, then Korean, with its 'South Korea' placeholder when the
+/// catalogue has no `city_ko` — so a card reads the same whichever view built
+/// it.
+University _university(String id, Map<String, dynamic> r) {
+  final nameEn = r['name_en'] as String?;
+  final nameUz = r['name_uz'] as String?;
+  final nameKo = r['name_ko'] as String?;
+  final nameKoShort = r['name_ko_short'] as String?;
+  final cityKo = r['city_ko'] as String?;
+
+  return University(
+    id: id,
+    name: (nameEn?.isNotEmpty ?? false)
+        ? nameEn!
+        : (nameUz?.isNotEmpty ?? false)
+            ? nameUz!
+            : (nameKoShort?.isNotEmpty ?? false)
+                ? nameKoShort!
+                : nameKo ?? 'Unknown Institution',
+    // 'South Korea' is the literal map_repository substitutes when `city_ko`
+    // is null; matched here so a card built from this view reads the same as
+    // one built from the map view.
+    location: (cityKo?.isNotEmpty ?? false) ? cityKo! : 'South Korea',
+    nameKo: nameKo,
+    nameKoShort: nameKoShort,
+    nameEn: nameEn,
+    nameUz: nameUz,
+    logoUrl: r['logo_url'] as String?,
+    tier: r['tier'] as int?,
+    ieqasStatus: r['ieqas_status'] as String?,
+    isPartner: (r['is_partner'] as bool?) ?? false,
+  );
+}
