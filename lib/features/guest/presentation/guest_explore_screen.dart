@@ -542,7 +542,7 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
                   size: 16, color: Colors.white.withValues(alpha: 0.4)),
               const SizedBox(width: 4),
               Text(
-                "Kontrakt, muddat, talablar",
+                _detailHint(detail),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.4),
                   fontSize: 11,
@@ -556,6 +556,28 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
         ],
       ),
     );
+  }
+
+  /// What the collapsed card promises is behind the expander.
+  ///
+  /// It used to read "Kontrakt, muddat, talablar" on every card, whatever the
+  /// card held. Extraction covers the fields unevenly — most rows carry a
+  /// couple, only 10 of 70 carry a fee — so the fixed line promised a contract
+  /// price the card could not show. Name only what is actually there.
+  static String _detailHint(ApprovedUniDetail d) {
+    final parts = <String>[];
+    if (d.tuitionMinKrw != null) parts.add('Kontrakt');
+    if (d.appStart != null || d.appEnd != null || d.docDeadline != null) {
+      parts.add('muddat');
+    }
+    if (d.requiredDocumentCount > 0) parts.add('hujjatlar');
+    if (d.topikMin != null ||
+        d.interviewRequired != null ||
+        d.englishAccepted != null) {
+      parts.add('talablar');
+    }
+    if (parts.isEmpty) return "Ma'lumot";
+    return parts.join(', ');
   }
 
   Widget _details(ApprovedUniDetail d, int? intakeYear) {
@@ -593,6 +615,14 @@ class _GuestExploreScreenState extends ConsumerState<GuestExploreScreen> {
     if (req.isNotEmpty) {
       rows.add(_detailRow('Qabul talablari', req.join(' · ')));
     }
+    // The most widely held field in the catalogue — 43 of 70 (institution,
+    // year) pairs carry it, against 10 for tuition — and for seven
+    // universities it is the only one. The count is of distinct document
+    // types, not rows: the source stores one row per (applicant category,
+    // document), so a raw count would read as a longer list than a student
+    // actually assembles.
+    final docs = d.documentsLabel;
+    if (docs != null) rows.add(_detailRow('Kerakli hujjatlar', docs));
 
     return Container(
       margin: const EdgeInsets.only(top: 12),
@@ -923,6 +953,7 @@ class _CompareSheet extends StatelessWidget {
             _row('TOPIK', _topik(a), _topik(b)),
             _row('Suhbat', _interview(a), _interview(b)),
             _row('Ingliz tili', _english(a), _english(b)),
+            _row('Hujjatlar', _docs(a), _docs(b)),
           ],
         ),
       ),
@@ -1002,6 +1033,10 @@ class _CompareSheet extends StatelessWidget {
     final t = details[u.id]?.topikMin;
     return t != null ? '≥ $t' : '—';
   }
+
+  /// Distinct document types, and whether any needs an apostille — often the
+  /// only row on this table with something on both sides.
+  String _docs(University u) => details[u.id]?.documentsLabel ?? '—';
 
   String _interview(University u) {
     final v = details[u.id]?.interviewRequired;

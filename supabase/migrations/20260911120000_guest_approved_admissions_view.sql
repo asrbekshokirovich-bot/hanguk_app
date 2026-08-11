@@ -48,7 +48,8 @@ create view public.v_guest_approved_admissions
              where t.institution_id = cy.institution_id
                and t.academic_year <= cy.intake_year) as ty
       from cyc cy
-  )
+  ),
+  admissions as (
   select cy.institution_id,
          cy.intake_year,
          cy.intake_term,
@@ -128,7 +129,27 @@ create view public.v_guest_approved_admissions
       on ty.institution_id = cy.institution_id
      and ty.intake_year = cy.intake_year
     join public.institutions i
-      on i.id = cy.institution_id;
+      on i.id = cy.institution_id
+  )
+  -- Drop the hollow rows: an approved cycle with not one extracted field.
+  -- 14 of 72 were like this, and they are worse than absent — a university on
+  -- a screen that promises researched ones, opening onto a card of dashes.
+  --
+  -- Most are cycles whose content sits on a SUPERSEDED predecessor: an empty
+  -- re-extraction created a fresh cycle and superseded the one that held the
+  -- data, so the requirements survive but hang off a cycle nothing reads.
+  -- ACTS has 11 superseded cycles carrying a requirement each and 3 live ones
+  -- carrying none. Filtering here hides the symptom; the supersede rule is
+  -- what actually needs fixing.
+  select *
+    from admissions
+   where tuition_min_krw is not null
+      or application_start is not null
+      or application_end is not null
+      or document_deadline is not null
+      or topik_min_level is not null
+      or interview_required is not null
+      or english_accepted is not null;
 
 comment on view public.v_guest_approved_admissions is
   'Guest Explorer''s list AND its per-card detail, one row per (institution, '

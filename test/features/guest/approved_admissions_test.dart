@@ -18,8 +18,12 @@ Map<String, dynamic> _row({
   int? topik,
   bool? interview,
   bool? english,
+  int? docs,
+  bool? apostille,
 }) {
   return <String, dynamic>{
+    'required_document_count': docs,
+    'apostille_required': apostille,
     'institution_id': 'inst-1',
     'intake_year': 2027,
     'tuition_academic_year': tuitionYear,
@@ -100,6 +104,53 @@ void main() {
         ApprovedUniDetail.fromRow(_row(docDeadline: '2027-01-21')).hasAny,
         isTrue,
       );
+    });
+
+    test('a document list alone is content', () {
+      // For seven universities — Yonsei among them — it is the only field
+      // extracted. Before the view read documents_required they were dropped
+      // from Explore as hollow.
+      expect(ApprovedUniDetail.fromRow(_row(docs: 2)).hasAny, isTrue);
+    });
+
+    test('a zero document count is not content', () {
+      expect(ApprovedUniDetail.fromRow(_row(docs: 0)).hasAny, isFalse);
+    });
+  });
+
+  group('documentsLabel', () {
+    test('counts document types', () {
+      expect(ApprovedUniDetail.fromRow(_row(docs: 13)).documentsLabel,
+          '13 xil');
+    });
+
+    test('calls out apostille, which decides how long the file takes', () {
+      expect(
+        ApprovedUniDetail.fromRow(_row(docs: 13, apostille: true))
+            .documentsLabel,
+        '13 xil · apostil kerak',
+      );
+    });
+
+    test('nothing extracted means no line at all, not "0 xil"', () {
+      expect(ApprovedUniDetail.fromRow(_row()).documentsLabel, isNull);
+      expect(
+        ApprovedUniDetail.fromRow(_row(docs: 0, apostille: true))
+            .documentsLabel,
+        isNull,
+      );
+    });
+
+    test('a missing column reads as zero rather than throwing', () {
+      // The provider ships before the migration in a rollback, or a stale
+      // PostgREST schema cache omits the column; the card must degrade to no
+      // documents line rather than crashing the whole list.
+      final d = ApprovedUniDetail.fromRow(<String, dynamic>{
+        'institution_id': 'inst-1',
+        'intake_year': 2027,
+      });
+      expect(d.requiredDocumentCount, 0);
+      expect(d.documentsLabel, isNull);
     });
   });
 
