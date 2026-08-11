@@ -11,8 +11,6 @@ import '../../documents/presentation/documents_tab.dart';
 import '../../chat/presentation/chat_tab.dart';
 import '../../training/presentation/training_tab.dart';
 import '../../uni_db/data/admin_review_providers.dart';
-import '../../updater/data/updater_repository.dart';
-import '../../updater/presentation/update_dialog.dart';
 import 'home_tab_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -30,26 +28,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const TrainingTab(),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkForUpdates();
-    });
-  }
-
-  Future<void> _checkForUpdates() async {
-    final repo = ref.read(updaterRepositoryProvider);
-    final versionInfo = await repo.checkForUpdate();
-    if (!mounted) return;
-    if (versionInfo is UpdateAvailable) {
-      showDialog(
-        context: context,
-        barrierDismissible: !versionInfo.effectivelyForced,
-        builder: (context) => const UpdateDialog(),
-      );
-    }
-  }
+  // No _checkForUpdates here — see welcome_screen. It read `app_versions` and
+  // opened UpdateDialog to download a build from Supabase Storage, an install
+  // path the manifest can no longer perform, so it could only ever end in the
+  // failure dialog. Updates come from Play.
 
   void _openAIChat(BuildContext context) {
     showModalBottomSheet(

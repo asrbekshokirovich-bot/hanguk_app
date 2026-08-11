@@ -21,6 +21,9 @@ jobs:
     name: Build direct flavor APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # contents: write is needed to publish the APK as a GitHub Release asset.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -51,9 +54,31 @@ jobs:
       - name: Build direct flavor APK (release)
         run: flutter build apk --release --flavor direct
 
-      - name: Upload APK artifact
+      # Primary delivery: publish the .apk as a GitHub Release asset. Release
+      # assets are NOT counted against the Actions artifact-storage quota, and
+      # reusing a single rolling tag replaces the previous asset each run so
+      # storage never accumulates. Download from Releases → "Latest direct APK".
+      - name: Publish APK to a GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="direct-apk-latest"
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" \
+            build/app/outputs/flutter-apk/app-direct-release.apk \
+            --title "Latest direct APK" \
+            --notes "Automated direct-flavor test APK from ${GITHUB_SHA} on ${GITHUB_REF_NAME}." \
+            --prerelease \
+            --target "$GITHUB_SHA"
+
+      # Secondary (best-effort) Actions artifact; continue-on-error so a full
+      # artifact-storage quota can no longer fail the build.
+      - name: Upload APK artifact (best-effort)
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: hanguk-direct-release-apk
           path: build/app/outputs/flutter-apk/app-direct-release.apk
           if-no-files-found: error
+          retention-days: 5
