@@ -35,6 +35,19 @@ class ApprovedUniDetail {
   final bool? interviewRequired;
   final bool? englishAccepted; // an English test is named in the requirements
 
+  /// How many DISTINCT kinds of document the applicant has to file.
+  ///
+  /// The catalogue stores one row per (applicant category, document), so
+  /// SeoulTech's 12 rows are a handful of papers repeated across categories;
+  /// the view counts distinct types so this reads as the list a student
+  /// actually assembles. It is the most widely held field we have — 43 of the
+  /// 70 (institution, year) pairs carry it, more than tuition (10).
+  final int requiredDocumentCount;
+
+  /// Whether any required document needs an apostille — the step that decides
+  /// whether preparing the file takes a week or a month.
+  final bool? apostilleRequired;
+
   const ApprovedUniDetail({
     this.tuitionMinKrw,
     this.tuitionMaxKrw,
@@ -46,7 +59,18 @@ class ApprovedUniDetail {
     this.topikMin,
     this.interviewRequired,
     this.englishAccepted,
+    this.requiredDocumentCount = 0,
+    this.apostilleRequired,
   });
+
+  /// The documents line as both the card and the compare table show it, or
+  /// null when nothing was extracted. Apostille is called out because it is
+  /// what decides whether assembling the file takes a week or a month.
+  String? get documentsLabel {
+    if (requiredDocumentCount == 0) return null;
+    final n = '$requiredDocumentCount xil';
+    return apostilleRequired == true ? '$n · apostil kerak' : n;
+  }
 
   /// True when the fee on show is not the intake year's own.
   bool tuitionIsFromAnotherYear(int intakeYear) =>
@@ -65,7 +89,8 @@ class ApprovedUniDetail {
       docDeadline != null ||
       topikMin != null ||
       interviewRequired != null ||
-      englishAccepted != null;
+      englishAccepted != null ||
+      requiredDocumentCount > 0;
 
   static String? _date(Object? v) {
     final s = v as String?;
@@ -87,6 +112,8 @@ class ApprovedUniDetail {
       topikMin: r['topik_min_level'] as int?,
       interviewRequired: r['interview_required'] as bool?,
       englishAccepted: r['english_accepted'] as bool?,
+      requiredDocumentCount: (r['required_document_count'] as num?)?.toInt() ?? 0,
+      apostilleRequired: r['apostille_required'] as bool?,
     );
   }
 }
@@ -163,7 +190,8 @@ final approvedAdmissionsProvider = FutureProvider<ApprovedAdmissions>((
         'tuition_academic_year, '
         'tuition_min_krw, tuition_max_krw, admission_fee_krw, '
         'application_start, application_end, document_deadline, '
-        'topik_min_level, interview_required, english_accepted',
+        'topik_min_level, interview_required, english_accepted, '
+        'required_document_count, apostille_required',
       )
       .order('intake_year', ascending: true);
 
